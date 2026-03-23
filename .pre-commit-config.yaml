@@ -1,0 +1,37 @@
+# Pre-commit конфигурация для CubiVeil
+# https://pre-commit.com/
+
+repos:
+  # Shellcheck - статический анализ Bash-скриптов
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+        args: [
+          '--exclude=SC1091,SC2086',  # source не существует, намеренное отсутствие кавычек
+          '--severity=warning'
+        ]
+        files: \.sh$
+
+  # shfmt - форматирование Bash-скриптов
+  - repo: https://github.com/shfmt/shfmt
+    rev: v3.10.0
+    hooks:
+      - id: shfmt
+        args: [
+          '-i', '2',      # отступ 2 пробела
+          '-ci',          # case indent
+          '-sr',          # space after redirect
+          '-d'            # diff mode (fail if changes needed)
+        ]
+        files: \.sh$
+
+  # Проверка синтаксиса Bash
+  - repo: local
+    hooks:
+      - id: bash-n
+        name: Bash syntax check
+        entry: bash -n
+        language: system
+        types: [shell]
+        files: \.sh$
