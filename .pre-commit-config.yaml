@@ -14,7 +14,7 @@ repos:
         files: \.sh$
 
   # shfmt - форматирование Bash-скриптов
-  - repo: https://github.com/shfmt/shfmt
+  - repo: https://github.com/mvdan/sh
     rev: v3.10.0
     hooks:
       - id: shfmt
