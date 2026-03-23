@@ -7,6 +7,8 @@
 [![myPy](https://img.shields.io/badge/type%20checked-mypy-blue)](https://mypy.readthedocs.io/)
 [![Security: Bandit](https://img.shields.io/badge/security-bandit-green)](https://github.com/PyCQA/bandit)
 
+[🇬🇧 English version](#english-version)
+
 > Установка приватного прокси-сервера: **Marzban + Sing-box**, 5 протоколов,
 > SSL-сертификат, защита сервера, Telegram-бот с мониторингом и бэкапами.
 
@@ -352,6 +354,7 @@ MIT — используй свободно, ссылка на репозито�
 
 ---
 
+<a id="english-version"></a>
 # English Version
 
 > 🇬🇧 **CubiVeil** — Personal proxy server installer: **Marzban + Sing-box**, 5 protocols,
