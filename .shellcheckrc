@@ -1,0 +1,10 @@
+# Shellcheck конфигурация
+# https://github.com/koalaman/shellcheck/blob/master/shellcheck.1.md#rc-files
+
+# Игнорируемые правила (при необходимости):
+# SC1091 - не проверять source файлов которые не существуют в репозитории
+# SC2086 - намеренное отсутствие кавычек (разрешено в проекте)
+exclude=SC1091,SC2086
+
+# Минимальная версия bash
+shell=bash

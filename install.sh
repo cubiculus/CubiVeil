@@ -1,9 +1,9 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║                        CubiVeil                          ║
-# ║         github.com/cubiculus/cubiveil                    ║
-# ║                                                          ║
-# ║  Marzban + Sing-box | 5 профилей | Telegram-бот         ║
+# ║                        CubiVeil                           ║
+# ║         github.com/cubiculus/cubiveil                     ║
+# ║                                                           ║
+# ║  Marzban + Sing-box | 5 профилей | Telegram-бот           ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 set -euo pipefail
@@ -37,7 +37,7 @@ unique_port() {
     local p
     while true; do
         p=$(gen_port)
-        if [[ ! " ${USED_PORTS[*]} " =~ " ${p} " ]]; then
+        if [[ ! " ${USED_PORTS[*]} " =~ ${p} ]]; then
             USED_PORTS+=("$p")
             echo "$p"
             return
@@ -127,9 +127,11 @@ prompt_inputs() {
     echo ""
     ok "Домен:   $DOMAIN"
     ok "Email:   $LE_EMAIL"
-    [[ -n "$TG_TOKEN" ]] \
-        && ok "Telegram: настроен (отчёт в ${REPORT_TIME} UTC)" \
-        || warn "Telegram: пропущен (можно добавить позже)"
+    if [[ -n "$TG_TOKEN" ]]; then
+        ok "Telegram: настроен (отчёт в ${REPORT_TIME} UTC)"
+    else
+        warn "Telegram: пропущен (можно добавить позже)"
+    fi
 }
 
 # ══════════════════════════════════════════════════════════════
@@ -151,7 +153,7 @@ step_check_ip_neighborhood() {
     SUBNET=$(echo "$SERVER_IP" | cut -d. -f1-3)
     LAST_OCTET=$(echo "$SERVER_IP" | cut -d. -f4)
     CHECK_START=$(( LAST_OCTET - 20 <   1 ?   1 : LAST_OCTET - 20 ))
-    CHECK_END=$(  ( LAST_OCTET + 20 > 254 ? 254 : LAST_OCTET + 20 ))
+    CHECK_END=$(( LAST_OCTET + 20 > 254 ? 254 : LAST_OCTET + 20 ))
 
     local VPN_COUNT=0 CHECKED=0 STEP=3
 
@@ -345,7 +347,8 @@ step_install_singbox() {
     [[ -z "$SB_TAG" ]] && err "Не удалось получить версию Sing-box с GitHub"
 
     local SB_VER="${SB_TAG#v}"
-    local SB_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz"
+    local SB_URL
+    SB_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz"
 
     info "Скачиваю Sing-box ${SB_TAG}..."
     curl -fLo /tmp/sing-box.tar.gz "$SB_URL"
@@ -382,10 +385,14 @@ step_generate_keys_and_ports() {
     )
     REALITY_SNI="${CDN_LIST[$((RANDOM % ${#CDN_LIST[@]}))]}"
 
-    # UUID для каждого профиля
+    # UUID для каждого профиля (используются в sing-box шаблоне)
+    export UUID_VLESS_TCP
     UUID_VLESS_TCP=$(sing-box  generate uuid)
+    export UUID_VLESS_GRPC
     UUID_VLESS_GRPC=$(sing-box generate uuid)
+    export UUID_HY2
     UUID_HY2=$(sing-box        generate uuid)
+    export UUID_TROJAN
     UUID_TROJAN=$(sing-box     generate uuid)
     SS_PASSWORD=$(gen_random 32)
 

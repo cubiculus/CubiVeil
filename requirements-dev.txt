@@ -1,0 +1,11 @@
+# Development dependencies for CubiVeil
+# Используется для проверки Python-кода Telegram-бота
+
+# Static type checker
+mypy>=1.8.0
+
+# Security linter
+bandit>=1.7.5
+
+# Type stubs для стандартной библиотеки и популярных пакетов
+types-requests>=2.31.0
