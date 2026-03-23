@@ -1,0 +1,45 @@
+# Credentials и чувствительные данные
+*.credentials.txt
+.env
+**/.env
+
+# Логи
+*.log
+logs/
+
+# Бэкапы БД
+*.sqlite3
+*.sqlite
+backups/
+
+# Временные файлы
+*.tmp
+*.bak
+*.swp
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# acme.sh
+.acme.sh
+
+# Sing-box
+sing-box*
