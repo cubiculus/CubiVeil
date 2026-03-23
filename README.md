@@ -12,7 +12,7 @@
 [![Security: Bandit](https://img.shields.io/badge/security-bandit-green)](https://github.com/PyCQA/bandit)
 
 
-<h1>[🇬🇧 English version](#english-version)</h1>
+[🇬🇧 English version](#english-version)
 
 > Установка приватного прокси-сервера: **Marzban + Sing-box**, 5 протоколов,
 > SSL-сертификат, защита сервера, Telegram-бот с мониторингом и бэкапами.
