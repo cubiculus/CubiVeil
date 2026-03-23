@@ -1,5 +1,9 @@
 # CubiVeil
 
+<div align="center">
+  <img src="logo.png" alt="CubiVeil Logo">
+</div>
+
 [![CI](https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml/badge.svg)](https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/platform-Ubuntu%2022.04%20%7C%2024.04-orange)](https://ubuntu.com/)
