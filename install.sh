@@ -43,8 +43,8 @@ command -v curl &>/dev/null || apt-get install -y -qq curl
 
 # ── Вспомогательные функции ────────────────────────────────────
 gen_random() { LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w "$1" | head -n 1; }
-gen_hex()    { LC_ALL=C tr -dc 'a-f0-9'    </dev/urandom | fold -w "$1" | head -n 1; }
-gen_port()   { shuf -i 30000-62000 -n 1; }
+gen_hex() { LC_ALL=C tr -dc 'a-f0-9' </dev/urandom | fold -w "$1" | head -n 1; }
+gen_port() { shuf -i 30000-62000 -n 1; }
 
 USED_PORTS=(443)
 unique_port() {
