@@ -35,14 +35,20 @@ gen_port()   { shuf -i 30000-62000 -n 1; }
 USED_PORTS=(443)
 unique_port() {
     local p
-    while true; do
+    local max_attempts=50
+    local attempts=0
+    while [[ $attempts -lt $max_attempts ]]; do
         p=$(gen_port)
-        if [[ ! " ${USED_PORTS[*]} " =~ ${p} ]]; then
+        # Проверка: не используется ли порт в списке и не занят ли процессом
+        if [[ ! " ${USED_PORTS[*]} " =~ ${p} ]] && \
+           ! ss -tlnp 2>/dev/null | grep -q ":${p} "; then
             USED_PORTS+=("$p")
             echo "$p"
             return
         fi
+        ((attempts++))
     done
+    err "Не удалось найти свободный порт после ${max_attempts} попыток"
 }
 
 arch() {
@@ -63,7 +69,15 @@ get_server_ip() {
 }
 
 open_port() {
-    ufw allow "${1}/${2:-tcp}" comment "${3:-cubiveil}" >/dev/null 2>&1
+    local port="$1"
+    local proto="${2:-tcp}"
+    local comment="${3:-cubiveil}"
+    if ! ufw allow "${port}/${proto}" comment "${comment}" >/dev/null 2>&1; then
+        # Пробуем без comment (некоторые версии ufw не поддерживают)
+        if ! ufw allow "${port}/${proto}" >/dev/null 2>&1; then
+            err "Не удалось открыть порт ${port}/${proto} в файрволе"
+        fi
+    fi
 }
 
 # ── Баннер ─────────────────────────────────────────────────────
@@ -91,8 +105,44 @@ prompt_inputs() {
     while true; do
         read -rp "  Домен для панели и подписок (например panel.example.com): " DOMAIN
         DOMAIN="${DOMAIN// /}"
-        [[ -n "$DOMAIN" && "$DOMAIN" =~ ^[a-zA-Z0-9._-]+\.[a-zA-Z]{2,}$ ]] && break
-        warn "Некорректный домен, попробуй ещё раз"
+
+        # Более строгая валидация домена
+        if [[ -z "$DOMAIN" ]]; then
+            warn "Домен не может быть пустым"
+            continue
+        fi
+
+        # Проверка формата: только буквы, цифры, дефис, точка; хотя бы одна точка; TLD 2+ символов
+        if [[ ! "$DOMAIN" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$ ]]; then
+            warn "Некорректный формат домена. Пример: panel.example.com"
+            continue
+        fi
+
+        # Проверка на внутренние IP/домены (защита от SSRF)
+        if [[ "$DOMAIN" =~ ^localhost$ ]] || \
+           [[ "$DOMAIN" =~ \.local$ ]] || \
+           [[ "$DOMAIN" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            warn "Домен не должен быть внутренним (localhost, .local, IP-адрес)"
+            continue
+        fi
+
+        # Проверка DNS A-записи
+        if ! command -v dig &>/dev/null; then
+            apt-get install -y -qq dnsutils >/dev/null 2>&1
+        fi
+        local resolved_ip
+        resolved_ip=$(dig +short "$DOMAIN" A 2>/dev/null | head -1)
+        if [[ -z "$resolved_ip" ]]; then
+            warn "Не удалось разрешить домен $DOMAIN. Проверь A-запись."
+            read -rp "  Продолжить несмотря на ошибку? (y/n): " cont
+            [[ "$cont" == "y" || "$cont" == "Y" ]] || continue
+        elif [[ "$resolved_ip" != "$SERVER_IP" ]] && [[ -n "$SERVER_IP" ]]; then
+            warn "A-запись $DOMAIN → $resolved_ip, но IP сервера: $SERVER_IP"
+            read -rp "  Продолжить несмотря на несоответствие? (y/n): " cont
+            [[ "$cont" == "y" || "$cont" == "Y" ]] || continue
+        fi
+
+        break
     done
 
     read -rp "  Email для Let's Encrypt [admin@${DOMAIN}]: " LE_EMAIL
@@ -104,9 +154,24 @@ prompt_inputs() {
     read -rp "  Telegram Bot Token (Enter — пропустить): " TG_TOKEN
     TG_TOKEN="${TG_TOKEN// /}"
 
+    # Валидация формата токена Telegram
     if [[ -n "$TG_TOKEN" ]]; then
+        if [[ ! "$TG_TOKEN" =~ ^[0-9]+:[A-Za-z0-9_-]{35}$ ]]; then
+            err "Некорректный формат токена Telegram. Ожидается: 123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+        fi
+        # Проверка валидности токена через API
+        if ! curl -sf --max-time 5 "https://api.telegram.org/bot${TG_TOKEN}/getMe" >/dev/null 2>&1; then
+            err "Токен Telegram недействителен. Проверь токен от @BotFather"
+        fi
+        ok "Токен Telegram проверен ✓"
+
         read -rp "  Telegram Chat ID: " TG_CHAT_ID
         TG_CHAT_ID="${TG_CHAT_ID// /}"
+
+        # Валидация Chat ID (число, может быть отрицательным для групп)
+        if [[ ! "$TG_CHAT_ID" =~ ^-?[0-9]+$ ]]; then
+            err "Некорректный Chat ID. Ожидается число (например: 123456789)"
+        fi
 
         read -rp "  Время ежедневного отчёта UTC [09:00]: " REPORT_TIME
         REPORT_TIME="${REPORT_TIME// /}"
@@ -314,7 +379,12 @@ step_firewall() {
 step_fail2ban() {
     step "Шаг 6/12 — Fail2ban"
 
-    cat > /etc/fail2ban/jail.d/cubiveil.conf <<'EOF'
+    # Получаем текущий SSH порт из конфига
+    local SSH_PORT
+    SSH_PORT=$(grep -E "^Port " /etc/ssh/sshd_config 2>/dev/null | head -1 | awk '{print $2}')
+    SSH_PORT="${SSH_PORT:-22}"  # По умолчанию 22 если не задан
+
+    cat > /etc/fail2ban/jail.d/cubiveil.conf <<EOF
 [DEFAULT]
 bantime  = 1h
 findtime = 10m
@@ -323,7 +393,7 @@ backend  = systemd
 
 [sshd]
 enabled  = true
-port     = ssh
+port     = ${SSH_PORT}
 logpath  = %(sshd_log)s
 maxretry = 3
 bantime  = 24h
@@ -331,7 +401,7 @@ EOF
 
     systemctl enable fail2ban --now >/dev/null 2>&1
     systemctl restart fail2ban       >/dev/null 2>&1
-    ok "Fail2ban: SSH защита (3 попытки → бан 24ч)"
+    ok "Fail2ban: SSH защита на порту ${SSH_PORT} (3 попытки → бан 24ч)"
 }
 
 # ══════════════════════════════════════════════════════════════
@@ -419,8 +489,15 @@ step_install_marzban() {
     step "Шаг 9/12 — Marzban"
 
     info "Устанавливаю Marzban..."
-    curl -fsSL https://github.com/Gozargah/Marzban/raw/master/script.sh \
-        | bash -s -- install >/dev/null 2>&1
+    if ! curl -fsSL https://github.com/Gozargah/Marzban/raw/master/script.sh \
+        | bash -s -- install; then
+        err "Установка Marzban не удалась. Лог: journalctl -u marzban -n 50"
+    fi
+
+    # Проверка что скрипт установки существует
+    if [[ ! -f /opt/marzban/script.sh ]]; then
+        err "Скрипт установки Marzban не найден"
+    fi
 
     ok "Marzban установлен"
 }
@@ -667,8 +744,9 @@ import os, json, time, subprocess, sqlite3, shutil
 from datetime import datetime
 import urllib.request, urllib.parse, urllib.error
 
-TOKEN     = "${TG_TOKEN}"
-CHAT_ID   = "${TG_CHAT_ID}"
+# Чувствительные данные из переменных окружения (systemd Environment)
+TOKEN     = os.environ.get("TG_TOKEN")
+CHAT_ID   = os.environ.get("TG_CHAT_ID")
 DB_PATH   = "/var/lib/marzban/db.sqlite3"
 BAK_DIR   = "/opt/cubiveil-bot/backups"
 STATE_FILE = "/opt/cubiveil-bot/alert_state.json"
@@ -676,6 +754,10 @@ STATE_FILE = "/opt/cubiveil-bot/alert_state.json"
 ALERT_CPU  = ${ALERT_CPU}
 ALERT_RAM  = ${ALERT_RAM}
 ALERT_DISK = ${ALERT_DISK}
+
+if not TOKEN or not CHAT_ID:
+    print("[bot] ОШИБКА: TG_TOKEN и TG_CHAT_ID должны быть заданы в переменных окружения")
+    exit(1)
 
 os.makedirs(BAK_DIR, exist_ok=True)
 
@@ -717,75 +799,105 @@ def tg_send_file(path, caption=""):
 
 # ── Метрики ───────────────────────────────────────────────────
 def get_cpu():
+    """Получает загрузку CPU из /proc/stat — быстрее и надёжнее top"""
     try:
-        r = subprocess.run(["top", "-bn2", "-d0.5"],
-            capture_output=True, text=True, timeout=5)
-        for line in reversed(r.stdout.split("\n")):
-            if "Cpu(s)" in line or "%Cpu" in line:
-                idle = float(line.split("id")[0].split(",")[-1]
-                    .strip().replace(",","."))
-                return round(100 - idle, 1)
-    except:
-        pass
-    return 0.0
+        def read_cpu_stats():
+            with open("/proc/stat") as f:
+                line = f.readline()
+            parts = line.split()[1:8]  # cpu user nice system idle iowait irq softirq
+            return [int(x) for x in parts]
+
+        cpu1 = read_cpu_stats()
+        time.sleep(0.5)
+        cpu2 = read_cpu_stats()
+
+        # Вычисляем разницу
+        delta = [cpu2[i] - cpu1[i] for i in range(len(cpu1))]
+        total = sum(delta)
+        idle = delta[3]  # idle
+
+        if total == 0:
+            return 0.0
+        return round((1 - idle / total) * 100, 1)
+    except Exception as e:
+        print(f"[bot] Ошибка получения CPU: {e}")
+        return 0.0
 
 def get_ram():
+    """Получает использование RAM из /proc/meminfo"""
     try:
-        r = subprocess.run(["free", "-m"], capture_output=True, text=True)
-        for line in r.stdout.split("\n"):
-            if line.startswith("Mem:"):
-                p = line.split()
-                total, used = int(p[1]), int(p[2])
-                return used, total, round(used / total * 100, 1)
-    except:
-        pass
-    return 0, 0, 0.0
+        meminfo = {}
+        with open("/proc/meminfo") as f:
+            for line in f:
+                parts = line.split()
+                meminfo[parts[0].rstrip(":")] = int(parts[1]) // 1024  # kB → MB
+
+        total = meminfo.get("MemTotal", 0)
+        available = meminfo.get("MemAvailable", meminfo.get("MemFree", 0))
+        used = total - available
+        pct = round(used / total * 100, 1) if total > 0 else 0.0
+        return used, total, pct
+    except Exception as e:
+        print(f"[bot] Ошибка получения RAM: {e}")
+        return 0, 0, 0.0
 
 def get_disk():
+    """Получает использование диска из /proc/diskinfo или df"""
     try:
-        r = subprocess.run(["df", "-BG", "/"], capture_output=True, text=True)
-        p = r.stdout.strip().split("\n")[1].split()
-        total = int(p[1].replace("G",""))
-        used  = int(p[2].replace("G",""))
-        pct   = int(p[4].replace("%",""))
+        r = subprocess.run(["df", "-BG", "/"], capture_output=True, text=True, timeout=5)
+        lines = r.stdout.strip().split("\n")
+        if len(lines) < 2:
+            return 0, 0, 0
+        p = lines[1].split()
+        total = int(p[1].replace("G", ""))
+        used = int(p[2].replace("G", ""))
+        pct = int(p[4].replace("%", ""))
         return used, total, pct
-    except:
+    except Exception as e:
+        print(f"[bot] Ошибка получения диска: {e}")
         return 0, 0, 0
 
 def get_uptime():
+    """Получает uptime из /proc/uptime"""
     try:
         with open("/proc/uptime") as f:
             secs = int(float(f.read().split()[0]))
         d = secs // 86400
         h = (secs % 86400) // 3600
-        m = (secs % 3600)  // 60
+        m = (secs % 3600) // 60
         return f"{d}д {h}ч {m}м"
-    except:
+    except Exception as e:
+        print(f"[bot] Ошибка получения uptime: {e}")
         return "?"
 
 def get_active_users():
+    """Получает количество активных пользователей из БД Marzban"""
     if not os.path.exists(DB_PATH):
         return "?"
     try:
-        conn = sqlite3.connect(DB_PATH)
-        cur  = conn.cursor()
+        conn = sqlite3.connect(DB_PATH, timeout=5)
+        cur = conn.cursor()
         cur.execute("SELECT COUNT(*) FROM users WHERE status='active'")
         count = cur.fetchone()[0]
         conn.close()
         return count
-    except:
+    except Exception as e:
+        print(f"[bot] Ошибка получения пользователей: {e}")
         return "?"
 
 def make_backup():
-    ts  = datetime.now().strftime("%Y%m%d_%H%M")
+    """Создаёт бэкап БД и удаляет старые бэкапы (>7 дней)"""
+    ts = datetime.now().strftime("%Y%m%d_%H%M")
     dst = f"{BAK_DIR}/marzban_{ts}.sqlite3"
     try:
         shutil.copy2(DB_PATH, dst)
         # Удаляем бэкапы старше 7 дней
+        now = time.time()
         for fn in os.listdir(BAK_DIR):
             fp = os.path.join(BAK_DIR, fn)
-            if os.path.isfile(fp) and time.time() - os.path.getmtime(fp) > 7*86400:
+            if os.path.isfile(fp) and now - os.path.getmtime(fp) > 7 * 86400:
                 os.remove(fp)
+                print(f"[bot] Удалён старый бэкап: {fn}")
         return dst
     except Exception as e:
         print(f"[bot] Ошибка бэкапа: {e}")
@@ -964,7 +1076,7 @@ PYEOF
 
     chmod +x /opt/cubiveil-bot/bot.py
 
-    # ── Systemd сервис ────────────────────────────────────────
+    # ── Systemd сервис с безопасными переменными окружения ───
     cat > /etc/systemd/system/cubiveil-bot.service <<EOF
 [Unit]
 Description=CubiVeil Telegram Bot
@@ -972,15 +1084,64 @@ After=network.target marzban.service
 
 [Service]
 Type=simple
+# Чувствительные данные через Environment — не хранятся в файле скрипта
+Environment="TG_TOKEN=${TG_TOKEN}"
+Environment="TG_CHAT_ID=${TG_CHAT_ID}"
 ExecStart=/usr/bin/python3 /opt/cubiveil-bot/bot.py poll
 Restart=always
 RestartSec=10s
 StandardOutput=journal
 StandardError=journal
+# Защита от утечек через дампы
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/opt/cubiveil-bot/backups /var/lib/marzban
+NoNewPrivileges=true
+# Ограничение частоты логов
+LogRateLimitInterval=30s
+LogRateLimitBurst=1000
 
 [Install]
 WantedBy=multi-user.target
 EOF
+
+    # ── Ротация логов через journald ─────────────────────────
+    # Создаём конфиг для ограничения размера логов
+    mkdir -p /etc/systemd/journald.d
+    cat > /etc/systemd/journald.d/cubiveil-limit.conf <<EOF
+# Ограничение размера логов для CubiVeil
+[Journal]
+# Максимум 1ГБ на все логи системы
+SystemMaxUse=1G
+# Хранить логи 14 дней
+MaxFileSec=2week
+EOF
+
+    # Для самого бота — отдельный лимит через systemd
+    # Перезапускаем journald чтобы применились настройки
+    systemctl kill -s SIGHUP systemd-journald 2>/dev/null || true
+
+    # ── Ротация логов через logrotate ────────────────────────
+    # Дополнительная ротация для логов сервисов
+    if command -v logrotate &>/dev/null; then
+        cat > /etc/logrotate.d/cubiveil-services <<EOF
+# Ротация логов CubiVeil сервисов
+/var/log/journal/*/marzban.service.log
+/var/log/journal/*/cubiveil-bot.service.log
+/var/log/journal/*/marzban-health.service.log
+/var/log/journal/*/sing-box.service.log {
+    weekly
+    rotate 4
+    compress
+    delaycompress
+    missingok
+    notifempty
+    size=50M
+    maxage 30
+}
+EOF
+        ok "Ротация логов настроена (logrotate: 4 недели, 50МБ)"
+    fi
 
     # ── Cron: ежедневный отчёт + проверка алертов ────────────
     (crontab -l 2>/dev/null || true
@@ -1011,8 +1172,153 @@ step_finish() {
     [[ "$STATUS" != "active" ]] && \
         err "Marzban не запустился. Лог: journalctl -u marzban -n 50"
 
-    # Сохраняем все данные
-    cat > /root/cubiveil-credentials.txt <<EOF
+    # ── Health-check эндпоинт для мониторинга ─────────────────
+    info "Настраиваю health-check эндпоинт..."
+    local HC_PORT
+    HC_PORT=$(unique_port)
+    open_port "$HC_PORT" tcp "Marzban Health Check"
+
+    # Добавляем переменную окружения для health check
+    cat >> /opt/marzban/.env <<EOF
+
+# Health check endpoint (внутренний)
+HEALTH_CHECK_PORT = "${HC_PORT}"
+EOF
+
+    # Создаём простой HTTP сервер для health check
+    cat > /opt/marzban/health_check.py <<'PYEOF'
+#!/usr/bin/env python3
+"""Health-check эндпоинт для мониторинга доступности Marzban"""
+import http.server, socketserver, subprocess, json, os
+from datetime import datetime
+
+PORT = int(os.environ.get("HEALTH_CHECK_PORT", 8080))
+
+class HealthHandler(http.server.BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        pass  # Отключаем логирование
+
+    def do_GET(self):
+        if self.path == "/health":
+            status = {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
+            # Проверка Marzban
+            try:
+                result = subprocess.run(
+                    ["systemctl", "is-active", "marzban"],
+                    capture_output=True, text=True, timeout=5
+                )
+                status["marzban"] = result.stdout.strip()
+            except Exception as e:
+                status["marzban"] = f"error: {str(e)}"
+                status["status"] = "unhealthy"
+
+            # Проверка Sing-box
+            try:
+                result = subprocess.run(
+                    ["systemctl", "is-active", "sing-box"],
+                    capture_output=True, text=True, timeout=5
+                )
+                status["singbox"] = result.stdout.strip()
+            except Exception as e:
+                status["singbox"] = f"error: {str(e)}"
+
+            # Проверка бота
+            try:
+                result = subprocess.run(
+                    ["systemctl", "is-active", "cubiveil-bot"],
+                    capture_output=True, text=True, timeout=5
+                )
+                status["bot"] = result.stdout.strip()
+            except Exception:
+                status["bot"] = "inactive"
+
+            self.send_response(200 if status["status"] == "healthy" else 503)
+            self.send_header("Content-type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(status, indent=2).encode())
+
+        elif self.path == "/ready":
+            # Проверка готовности (все сервисы активны)
+            services = ["marzban", "sing-box"]
+            ready = all(
+                subprocess.run(["systemctl", "is-active", s],
+                    capture_output=True, text=True, timeout=3
+                ).stdout.strip() == "active"
+                for s in services
+            )
+            self.send_response(200 if ready else 503)
+            self.send_header("Content-type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b"ready" if ready else b"not ready")
+
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+with socketserver.TCPServer(("", PORT), HealthHandler) as httpd:
+    httpd.serve_forever()
+PYEOF
+
+    chmod +x /opt/marzban/health_check.py
+
+    # Systemd сервис для health check
+    cat > /etc/systemd/system/marzban-health.service <<EOF
+[Unit]
+Description=Marzban Health Check Endpoint
+After=marzban.service
+Wants=marzban.service
+
+[Service]
+Type=simple
+Environment="HEALTH_CHECK_PORT=${HC_PORT}"
+ExecStart=/usr/bin/python3 /opt/marzban/health_check.py
+Restart=always
+RestartSec=5s
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    systemctl daemon-reload
+    systemctl enable marzban-health --now >/dev/null 2>&1
+    ok "Health-check эндпоинт: http://${SERVER_IP}:${HC_PORT}/health"
+
+    # ── Шифрование credentials через age ──────────────────────
+    info "Шифрую учётные данные..."
+
+    # Установка age если не установлен
+    if ! command -v age &>/dev/null; then
+        info "Устанавливаю age..."
+        local ARCH
+        ARCH=$(arch)
+        curl -fsSL "https://github.com/FiloSottile/age/releases/download/v1.2.0/age-v1.2.0-linux-${ARCH}.tar.gz" \
+            -o /tmp/age.tar.gz
+        tar -xzf /tmp/age.tar.gz -C /tmp
+        mv /tmp/age/age /usr/local/bin/age
+        mv /tmp/age/age-keygen /usr/local/bin/age-keygen
+        chmod +x /usr/local/bin/age /usr/local/bin/age-keygen
+        rm -rf /tmp/age*
+        ok "age установлен"
+    fi
+
+    # Генерация ключа
+    local AGE_KEYRING="/root/.cubiveil-age-key.txt"
+    local AGE_PUBLIC_KEY
+    if [[ ! -f "$AGE_KEYRING" ]]; then
+        age-keygen -o "$AGE_KEYRING" 2>/dev/null
+        chmod 600 "$AGE_KEYRING"
+        AGE_PUBLIC_KEY=$(grep "public key:" "$AGE_KEYRING" | awk '{print $4}')
+        ok "Ключ age сгенерирован: ${AGE_KEYRING}"
+    else
+        AGE_PUBLIC_KEY=$(grep "public key:" "$AGE_KEYRING" | awk '{print $4}')
+    fi
+
+    # Создаём зашифрованный файл
+    local CREDPlain="/root/cubiveil-credentials.txt"
+    local CREDEnc="/root/cubiveil-credentials.age"
+
+    cat > "$CREDPlain" <<EOF
 CubiVeil — данные установки
 Дата:    $(date)
 Сервер:  ${SERVER_IP}
@@ -1041,9 +1347,38 @@ Short ID:    ${REALITY_SHORT_ID}
 
 ━━━ SHADOWSOCKS 2022 ━━━━━━━━━━━━━━━━━━━━━
 Пароль: ${SS_PASSWORD}
-EOF
-    chmod 600 /root/cubiveil-credentials.txt
 
+━━━ HEALTH CHECK ━━━━━━━━━━━━━━━━━━━━━━━━━━
+URL: http://${SERVER_IP}:${HC_PORT}/health
+EOF
+
+    # Шифрование
+    age -r "$AGE_PUBLIC_KEY" -o "$CREDEnc" "$CREDPlain"
+    chmod 600 "$CREDEnc"
+    rm -f "$CREDPlain"
+
+    ok "Учётные данные зашифрованы: ${CREDEnc}"
+
+    # Инструкция по расшифровке
+    cat > /root/DECRYPT_INSTRUCTIONS.txt <<EOF
+══ Расшифровка учётных данных CubiVeil ══
+
+Зашифрованный файл: /root/cubiveil-credentials.age
+Ключ расшифровки:   /root/.cubiveil-age-key.txt
+
+Для расшифровки:
+    age -d -i /root/.cubiveil-age-key.txt /root/cubiveil-credentials.age
+
+Или просто:
+    cat /root/cubiveil-credentials.age | age -d -i /root/.cubiveil-age-key.txt
+
+══ Health Check ══
+    curl http://${SERVER_IP}:${HC_PORT}/health
+    curl http://${SERVER_IP}:${HC_PORT}/ready
+EOF
+    chmod 600 /root/DECRYPT_INSTRUCTIONS.txt
+
+    # Вывод на экран (нешифрованные основные данные)
     echo ""
     echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${PLAIN}"
     echo -e "${GREEN}║          CubiVeil установлен успешно! 🎉             ║${PLAIN}"
@@ -1064,17 +1399,21 @@ EOF
     echo -e "  4. Trojan WS TLS       ${GREEN}${TROJAN_PORT}/tcp${PLAIN}"
     echo -e "  5. Shadowsocks 2022    ${GREEN}${SS_PORT}/tcp${PLAIN}"
     echo ""
-    echo -e "${CYAN}  REALITY${PLAIN}"
-    echo -e "  Camouflage: ${GREEN}${REALITY_SNI}${PLAIN}"
-    echo -e "  Public key: ${GREEN}${REALITY_PUBLIC_KEY}${PLAIN}"
+    echo -e "${CYAN}  HEALTH CHECK${PLAIN}"
+    echo -e "  http://${SERVER_IP}:${HC_PORT}/health"
+    echo -e "  http://${SERVER_IP}:${HC_PORT}/ready"
     echo ""
-    echo -e "${YELLOW}  ⚠  Все данные сохранены: /root/cubiveil-credentials.txt${PLAIN}"
+    echo -e "${GREEN}  Учётные данные: ${YELLOW}/root/cubiveil-credentials.age${PLAIN}"
+    echo -e "${GREEN}  Ключ:           ${YELLOW}/root/.cubiveil-age-key.txt${PLAIN}"
+    echo -e "${GREEN}  Инструкция:     ${YELLOW}/root/DECRYPT_INSTRUCTIONS.txt${PLAIN}"
+    echo ""
     echo -e "${YELLOW}  ⚠  Смени порт SSH и закрой 22 (инструкция в README)${PLAIN}"
     echo ""
     echo -e "${GREEN}  Следующие шаги:${PLAIN}"
     echo -e "  1. Зайди в панель → создай пользователей"
     echo -e "  2. Subscription URL скопируй в Mihomo на роутере"
     echo -e "  3. Смени порт SSH, закрой 22 в ufw"
+    echo -e "  4. Сохрани ключ age в безопасном месте!"
     echo ""
     echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${PLAIN}"
 }

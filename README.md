@@ -123,6 +123,54 @@ XXXXX/tcp → Subscription link       (рандом 30000+)
 
 ## После установки
 
+### Health Check — мониторинг доступности
+
+CubiVeil предоставляет endpoints для мониторинга:
+
+```bash
+# Полная информация о сервисах
+curl http://IP_СЕРВЕРА:PORT/health
+
+# Пример ответа:
+{
+  "status": "healthy",
+  "timestamp": "2026-03-23T12:00:00.000000",
+  "marzban": "active",
+  "singbox": "active",
+  "bot": "active"
+}
+
+# Проверка готовности (только marzban + sing-box)
+curl http://IP_СЕРВЕРА:PORT/ready
+# Ответ: "ready" (200) или "not ready" (503)
+```
+
+**Интеграция с системами мониторинга:**
+- Uptime Kuma: HTTP-проверка на `/health`
+- Prometheus Blackbox: `/ready`
+- Cron + webhook: `curl -sf IP/ready || отправить_алерт`
+
+Порт health-check отображается при установке и сохраняется в `/root/cubiveil-credentials.age`.
+
+---
+
+### Шифрование учётных данных
+
+Все чувствительные данные шифруются через [age](https://age-encryption.org/):
+
+```bash
+# Расшифровка
+age -d -i /root/.cubiveil-age-key.txt /root/cubiveil-credentials.age
+
+# Или
+cat /root/cubiveil-credentials.age | age -d -i /root/.cubiveil-age-key.txt
+```
+
+**Важно:** Сохрани ключ `/root/.cubiveil-age-key.txt` в надёжном месте!
+Без него невозможно расшифровать учётные данные.
+
+---
+
 ### Subscription URL для Mihomo на MikroTik
 
 ```yaml
@@ -167,12 +215,24 @@ ufw delete allow 22/tcp
 ```bash
 systemctl status marzban          # статус панели
 systemctl status cubiveil-bot     # статус бота
+systemctl status marzban-health   # статус health-check
 journalctl -u marzban -f          # логи панели
 journalctl -u cubiveil-bot -f     # логи бота
 systemctl restart marzban         # перезапуск
 ufw status numbered               # состояние файрвола
 crontab -l                        # cron задачи
-cat /root/cubiveil-credentials.txt  # данные установки
+
+# Health check
+curl http://localhost:PORT/health  # полная информация
+curl http://localhost:PORT/ready   # проверка готовности
+
+# Расшифровка учётных данных
+age -d -i /root/.cubiveil-age-key.txt /root/cubiveil-credentials.age
+
+# Управление логами
+journalctl --disk-usage           # размер логов
+journalctl --vacuum-size=100M     # очистить до 100МБ
+journalctl --vacuum-time=7d       # удалить логи старше 7 дней
 ```
 
 ---
@@ -187,6 +247,35 @@ cat /root/cubiveil-credentials.txt  # данные установки
 ---
 
 ## Разработка
+
+### Интеграционные тесты
+
+CubiVeil включает набор интеграционных тестов для проверки корректности установки.
+
+```bash
+# Запуск тестов (требуются права root)
+sudo ./run-tests.sh
+
+# Или напрямую
+sudo bash tests/integration-tests.sh
+```
+
+**Что проверяют тесты:**
+- ✅ Все сервисы активны (Marzban, Sing-box, бот, health-check)
+- ✅ Порты открыты (443/tcp, 443/udp, health-check)
+- ✅ SSL сертификат валиден
+- ✅ Credentials зашифрованы через age
+- ✅ Конфигурация корректна (5 профилей, все переменные)
+- ✅ UFW и Fail2ban активны
+- ✅ Ротация логов настроена
+
+**Интерпретация:**
+- `✅ Все тесты пройдены` — установка корректна
+- `❌ Тесты провалены` — см. логи для деталей
+
+📖 [Полная документация по тестам →](tests/README.md)
+
+---
 
 ### Статическая типизация (mypy)
 
