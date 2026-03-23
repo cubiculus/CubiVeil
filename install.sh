@@ -16,16 +16,23 @@ if [[ -f "${SCRIPT_DIR}/lang.sh" ]]; then
   source "${SCRIPT_DIR}/lang.sh"
 else
   # Fallback если файл локализации отсутствует
-  RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'
-  BLUE='\033[0;34m'; CYAN='\033[0;36m'; PLAIN='\033[0m'
-  ok()   { echo -e "${GREEN}[✓]${PLAIN} $1"; }
+  RED='\033[0;31m'
+  GREEN='\033[0;32m'
+  YELLOW='\033[0;33m'
+  BLUE='\033[0;34m'
+  CYAN='\033[0;36m'
+  PLAIN='\033[0m'
+  ok() { echo -e "${GREEN}[✓]${PLAIN} $1"; }
   warn() { echo -e "${YELLOW}[!]${PLAIN} $1"; }
-  err()  { echo -e "${RED}[✗]${PLAIN} $1"; exit 1; }
+  err() {
+    echo -e "${RED}[✗]${PLAIN} $1"
+    exit 1
+  }
   info() { echo -e "${CYAN}[→]${PLAIN} $1"; }
   step() {
-      echo -e "\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
-      echo -e "${BLUE}  $1${PLAIN}"
-      echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
+    echo -e "\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
+    echo -e "${BLUE}  $1${PLAIN}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
   }
 fi
 

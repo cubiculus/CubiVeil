@@ -33,9 +33,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SHFMT_OPTS: -i 2 -d  # 2 spaces indent, diff mode
       with:
-        sh_checker_shfmt_disable: false
         sh_checker_shellcheck_disable: true
-        sh_checker_shfmt_enable: true
 
   bash-n:
     runs-on: ubuntu-latest
