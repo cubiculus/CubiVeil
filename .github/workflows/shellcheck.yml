@@ -33,6 +33,4 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SHFMT_OPTS: -d  # diff mode (fail if changes needed)
       with:
-        sh_checker_shfmt_disable: false
         sh_checker_shellcheck_disable: true
-        sh_checker_shfmt_enable: true

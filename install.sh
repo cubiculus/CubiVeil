@@ -3,29 +3,36 @@
 # ║                        CubiVeil                           ║
 # ║         github.com/cubiculus/cubiveil                     ║
 # ║                                                           ║
-# ║  Marzban + Sing-box | 5 профилей | Telegram-бот           ║
+# ║  Marzban + Sing-box | 5 profiles | Telegram bot           ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 set -euo pipefail
 
-# ── Цвета ──────────────────────────────────────────────────────
-RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'
-BLUE='\033[0;34m'; CYAN='\033[0;36m'; PLAIN='\033[0m'
-
-ok()   { echo -e "${GREEN}[✓]${PLAIN} $1"; }
-warn() { echo -e "${YELLOW}[!]${PLAIN} $1"; }
-err()  { echo -e "${RED}[✗]${PLAIN} $1"; exit 1; }
-info() { echo -e "${CYAN}[→]${PLAIN} $1"; }
-step() {
-    echo -e "\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
-    echo -e "${BLUE}  $1${PLAIN}"
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
-}
+# ── Подключение локализации ───────────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "${SCRIPT_DIR}/lang.sh" ]]; then
+    # Временная установка языка по умолчанию (будет изменено после выбора)
+    LANG_NAME="Русский"
+    source "${SCRIPT_DIR}/lang.sh"
+else
+    # Fallback если файл локализации отсутствует
+    RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'
+    BLUE='\033[0;34m'; CYAN='\033[0;36m'; PLAIN='\033[0m'
+    ok()   { echo -e "${GREEN}[✓]${PLAIN} $1"; }
+    warn() { echo -e "${YELLOW}[!]${PLAIN} $1"; }
+    err()  { echo -e "${RED}[✗]${PLAIN} $1"; exit 1; }
+    info() { echo -e "${CYAN}[→]${PLAIN} $1"; }
+    step() {
+        echo -e "\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
+        echo -e "${BLUE}  $1${PLAIN}"
+        echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
+    }
+fi
 
 # ── Проверки ───────────────────────────────────────────────────
-[[ $EUID -ne 0 ]]                  && err "Запускай от root"
-grep -qi "ubuntu" /etc/os-release || err "Скрипт только для Ubuntu"
-command -v curl &>/dev/null        || apt-get install -y -qq curl
+check_root
+check_ubuntu
+command -v curl &>/dev/null || apt-get install -y -qq curl
 
 # ── Вспомогательные функции ────────────────────────────────────
 gen_random() { LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w "$1" | head -n 1; }
@@ -93,28 +100,53 @@ print_banner() {
 }
 
 # ══════════════════════════════════════════════════════════════
-# ШАГ 0: Ввод данных
+# ШАГ 0: Ввод данных / Input data
 # ══════════════════════════════════════════════════════════════
 prompt_inputs() {
-    step "Настройка перед установкой"
+    local step_title
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+        step_title="Настройка перед установкой"
+    else
+        step_title="Pre-installation setup"
+    fi
+    step "$step_title"
 
-    warn "Убедись что A-запись домена уже указывает на этот сервер."
-    warn "Let's Encrypt проверит DNS — установка упадёт если запись не прописана."
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+        warn "Убедись что A-запись домена уже указывает на этот сервер."
+        warn "Let's Encrypt проверит DNS — установка упадёт если запись не прописана."
+    else
+        warn "$WARN_DNS_RECORD"
+        warn "$WARN_LETS_ENCRYPT"
+    fi
     echo ""
 
     while true; do
-        read -rp "  Домен для панели и подписок (например panel.example.com): " DOMAIN
+        local prompt_domain
+        if [[ "$LANG_NAME" == "Русский" ]]; then
+            prompt_domain="  Домен для панели и подписок (например panel.example.com): "
+        else
+            prompt_domain="  $PROMPT_DOMAIN "
+        fi
+        read -rp "$prompt_domain" DOMAIN
         DOMAIN="${DOMAIN// /}"
 
         # Более строгая валидация домена
         if [[ -z "$DOMAIN" ]]; then
-            warn "Домен не может быть пустым"
+            if [[ "$LANG_NAME" == "Русский" ]]; then
+                warn "Домен не может быть пустым"
+            else
+                warn "$WARN_DOMAIN_EMPTY"
+            fi
             continue
         fi
 
         # Проверка формата: только буквы, цифры, дефис, точка; хотя бы одна точка; TLD 2+ символов
         if [[ ! "$DOMAIN" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$ ]]; then
-            warn "Некорректный формат домена. Пример: panel.example.com"
+            if [[ "$LANG_NAME" == "Русский" ]]; then
+                warn "Некорректный формат домена. Пример: panel.example.com"
+            else
+                warn "$WARN_DOMAIN_FORMAT"
+            fi
             continue
         fi
 
@@ -122,7 +154,11 @@ prompt_inputs() {
         if [[ "$DOMAIN" =~ ^localhost$ ]] || \
            [[ "$DOMAIN" =~ \.local$ ]] || \
            [[ "$DOMAIN" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            warn "Домен не должен быть внутренним (localhost, .local, IP-адрес)"
+            if [[ "$LANG_NAME" == "Русский" ]]; then
+                warn "Домен не должен быть внутренним (localhost, .local, IP-адрес)"
+            else
+                warn "$WARN_DOMAIN_INTERNAL"
+            fi
             continue
         fi
 
@@ -133,86 +169,176 @@ prompt_inputs() {
         local resolved_ip
         resolved_ip=$(dig +short "$DOMAIN" A 2>/dev/null | head -1)
         if [[ -z "$resolved_ip" ]]; then
-            warn "Не удалось разрешить домен $DOMAIN. Проверь A-запись."
-            read -rp "  Продолжить несмотря на ошибку? (y/n): " cont
+            if [[ "$LANG_NAME" == "Русский" ]]; then
+                warn "Не удалось разрешить домен $DOMAIN. Проверь A-запись."
+                read -rp "  Продолжить несмотря на ошибку? (y/n): " cont
+            else
+                warn "$WARN_DNS_RESOLVE"
+                read -rp "  $WARN_CONTINUE_ERROR " cont
+            fi
             [[ "$cont" == "y" || "$cont" == "Y" ]] || continue
         elif [[ "$resolved_ip" != "$SERVER_IP" ]] && [[ -n "$SERVER_IP" ]]; then
-            warn "A-запись $DOMAIN → $resolved_ip, но IP сервера: $SERVER_IP"
-            read -rp "  Продолжить несмотря на несоответствие? (y/n): " cont
+            if [[ "$LANG_NAME" == "Русский" ]]; then
+                warn "A-запись $DOMAIN → $resolved_ip, но IP сервера: $SERVER_IP"
+                read -rp "  Продолжить несмотря на несоответствие? (y/n): " cont
+            else
+                warn "$WARN_DNS_MISMATCH"
+                read -rp "  $WARN_CONTINUE_MISMATCH " cont
+            fi
             [[ "$cont" == "y" || "$cont" == "Y" ]] || continue
         fi
 
         break
     done
 
-    read -rp "  Email для Let's Encrypt [admin@${DOMAIN}]: " LE_EMAIL
+    local prompt_email
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+        prompt_email="  Email для Let's Encrypt [admin@${DOMAIN}]: "
+    else
+        prompt_email="  $PROMPT_EMAIL "
+    fi
+    read -rp "$prompt_email" LE_EMAIL
     LE_EMAIL="${LE_EMAIL// /}"
     [[ -z "$LE_EMAIL" ]] && LE_EMAIL="admin@${DOMAIN}"
 
     echo ""
-    info "Telegram-бот: нужен токен от @BotFather и твой chat_id (узнать: @userinfobot)."
-    read -rp "  Telegram Bot Token (Enter — пропустить): " TG_TOKEN
+    
+    local info_tg prompt_token
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+        info_tg="Telegram-бот: нужен токен от @BotFather и твой chat_id (узнать: @userinfobot)."
+        prompt_token="  Telegram Bot Token (Enter — пропустить): "
+    else
+        info_tg="$INFO_TG_BOT"
+        prompt_token="  $PROMPT_TG_TOKEN "
+    fi
+    info "$info_tg"
+    read -rp "$prompt_token" TG_TOKEN
     TG_TOKEN="${TG_TOKEN// /}"
 
     # Валидация формата токена Telegram
     if [[ -n "$TG_TOKEN" ]]; then
         if [[ ! "$TG_TOKEN" =~ ^[0-9]+:[A-Za-z0-9_-]{35}$ ]]; then
-            err "Некорректный формат токена Telegram. Ожидается: 123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+            if [[ "$LANG_NAME" == "Русский" ]]; then
+                err "Некорректный формат токена Telegram. Ожидается: 123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+            else
+                err "$ERR_TG_TOKEN_FORMAT"
+            fi
         fi
         # Проверка валидности токена через API
         if ! curl -sf --max-time 5 "https://api.telegram.org/bot${TG_TOKEN}/getMe" >/dev/null 2>&1; then
-            err "Токен Telegram недействителен. Проверь токен от @BotFather"
+            if [[ "$LANG_NAME" == "Русский" ]]; then
+                err "Токен Telegram недействителен. Проверь токен от @BotFather"
+            else
+                err "$ERR_TG_TOKEN_INVALID"
+            fi
         fi
-        ok "Токен Telegram проверен ✓"
+        if [[ "$LANG_NAME" == "Русский" ]]; then
+            ok "Токен Telegram проверен ✓"
+        else
+            ok "$OK_TG_TOKEN_VERIFIED"
+        fi
 
-        read -rp "  Telegram Chat ID: " TG_CHAT_ID
+        local prompt_chat_id
+        if [[ "$LANG_NAME" == "Русский" ]]; then
+            prompt_chat_id="  Telegram Chat ID: "
+        else
+            prompt_chat_id="  $PROMPT_TG_CHAT_ID "
+        fi
+        read -rp "$prompt_chat_id" TG_CHAT_ID
         TG_CHAT_ID="${TG_CHAT_ID// /}"
 
         # Валидация Chat ID (число, может быть отрицательным для групп)
         if [[ ! "$TG_CHAT_ID" =~ ^-?[0-9]+$ ]]; then
-            err "Некорректный Chat ID. Ожидается число (например: 123456789)"
+            if [[ "$LANG_NAME" == "Русский" ]]; then
+                err "Некорректный Chat ID. Ожидается число (например: 123456789)"
+            else
+                err "$ERR_CHAT_ID_FORMAT"
+            fi
         fi
 
-        read -rp "  Время ежедневного отчёта UTC [09:00]: " REPORT_TIME
+        local prompt_report
+        if [[ "$LANG_NAME" == "Русский" ]]; then
+            prompt_report="  Время ежедневного отчёта UTC [09:00]: "
+        else
+            prompt_report="  $PROMPT_REPORT_TIME "
+        fi
+        read -rp "$prompt_report" REPORT_TIME
         REPORT_TIME="${REPORT_TIME// /}"
         [[ -z "$REPORT_TIME" ]] && REPORT_TIME="09:00"
         REPORT_HOUR=$(echo "$REPORT_TIME" | cut -d: -f1)
         REPORT_MIN=$(echo  "$REPORT_TIME" | cut -d: -f2)
 
         echo ""
-        info "Пороги алертов (в %, Enter = по умолчанию):"
-        read -rp "  CPU  > ? % [80]: " ALERT_CPU
+        local info_alerts prompt_cpu prompt_ram prompt_disk
+        if [[ "$LANG_NAME" == "Русский" ]]; then
+            info_alerts="Пороги алертов (в %, Enter = по умолчанию):"
+            prompt_cpu="  CPU  > ? % [80]: "
+            prompt_ram="  RAM  > ? % [85]: "
+            prompt_disk="  Диск > ? % [90]: "
+        else
+            info_alerts="$INFO_ALERT_THRESHOLDS"
+            prompt_cpu="  $PROMPT_ALERT_CPU "
+            prompt_ram="  $PROMPT_ALERT_RAM "
+            prompt_disk="  $PROMPT_ALERT_DISK "
+        fi
+        info "$info_alerts"
+        read -rp "$prompt_cpu" ALERT_CPU
         ALERT_CPU="${ALERT_CPU// /}";   [[ -z "$ALERT_CPU"  ]] && ALERT_CPU=80
-        read -rp "  RAM  > ? % [85]: " ALERT_RAM
+        read -rp "$prompt_ram" ALERT_RAM
         ALERT_RAM="${ALERT_RAM// /}";   [[ -z "$ALERT_RAM"  ]] && ALERT_RAM=85
-        read -rp "  Диск > ? % [90]: " ALERT_DISK
+        read -rp "$prompt_disk" ALERT_DISK
         ALERT_DISK="${ALERT_DISK// /}"; [[ -z "$ALERT_DISK" ]] && ALERT_DISK=90
     fi
 
     echo ""
-    ok "Домен:   $DOMAIN"
-    ok "Email:   $LE_EMAIL"
-    if [[ -n "$TG_TOKEN" ]]; then
-        ok "Telegram: настроен (отчёт в ${REPORT_TIME} UTC)"
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+        ok "Домен:   $DOMAIN"
+        ok "Email:   $LE_EMAIL"
+        if [[ -n "$TG_TOKEN" ]]; then
+            ok "Telegram: настроен (отчёт в ${REPORT_TIME} UTC)"
+        else
+            warn "Telegram: пропущен (можно добавить позже)"
+        fi
     else
-        warn "Telegram: пропущен (можно добавить позже)"
+        ok "$OK_DOMAIN   $DOMAIN"
+        ok "$OK_EMAIL   $LE_EMAIL"
+        if [[ -n "$TG_TOKEN" ]]; then
+            ok "$OK_TG_CONFIGURED"
+        else
+            warn "$WARN_TG_SKIPPED"
+        fi
     fi
 }
 
 # ══════════════════════════════════════════════════════════════
-# ШАГ 1: Проверка окружения IP
+# ШАГ 1: Проверка окружения IP / IP neighborhood check
 # ══════════════════════════════════════════════════════════════
 step_check_ip_neighborhood() {
-    step "Шаг 1/12 — Проверка репутации подсети"
+    local step_title
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+        step_title="Шаг 1/12 — Проверка репутации подсети"
+    else
+        step_title="$STEP_CHECK_SUBNET"
+    fi
+    step "$step_title"
 
     SERVER_IP=$(get_server_ip)
     if [[ -z "$SERVER_IP" ]]; then
-        warn "Не удалось определить IP сервера — пропускаю проверку"
+        if [[ "$LANG_NAME" == "Русский" ]]; then
+            warn "Не удалось определить IP сервера — пропускаю проверку"
+        else
+            warn "Failed to determine server IP — skipping check"
+        fi
         return
     fi
 
-    info "IP сервера: ${SERVER_IP}"
-    info "Проверяю соседние адреса в диапазоне /24..."
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+        info "IP сервера: ${SERVER_IP}"
+        info "Проверяю соседние адреса в диапазоне /24..."
+    else
+        info "$INFO_SERVER_IP"
+        info "$INFO_CHECKING_NEIGHBORS"
+    fi
 
     local SUBNET LAST_OCTET CHECK_START CHECK_END
     SUBNET=$(echo "$SERVER_IP" | cut -d. -f1-3)
@@ -240,27 +366,48 @@ step_check_ip_neighborhood() {
 
     echo ""
     if [[ $VPN_COUNT -eq 0 ]]; then
-        ok "В ${CHECKED} проверенных соседних IP — 0 VPN/хостинг серверов. Подсеть чистая ✓"
+        if [[ "$LANG_NAME" == "Русский" ]]; then
+            ok "В ${CHECKED} проверенных соседних IP — 0 VPN/хостинг серверов. Подсеть чистая ✓"
+        else
+            ok "$OK_SUBNET_CLEAN"
+        fi
     elif [[ $VPN_COUNT -le 3 ]]; then
-        warn "Обнаружено ${VPN_COUNT} VPN/хостинг серверов в ${CHECKED} проверенных IP — риск умеренный"
-        warn "Совет: следи за стабильностью, при проблемах смени провайдера"
+        if [[ "$LANG_NAME" == "Русский" ]]; then
+            warn "Обнаружено ${VPN_COUNT} VPN/хостинг серверов в ${CHECKED} проверенных IP — риск умеренный"
+            warn "Совет: следи за стабильностью, при проблемах смени провайдера"
+        else
+            warn "$WARN_SUBNET_MODERATE"
+            warn "$WARN_SUBNET_ADVICE"
+        fi
     else
-        warn "Обнаружено ${VPN_COUNT} VPN/хостинг серверов в ${CHECKED} проверенных IP — риск ВЫСОКИЙ"
-        warn "Подсеть скорее всего хорошо известна системам блокировок."
-        warn "Рекомендуется сменить провайдера или запросить IP из другого диапазона."
+        if [[ "$LANG_NAME" == "Русский" ]]; then
+            warn "Обнаружено ${VPN_COUNT} VPN/хостинг серверов в ${CHECKED} проверенных IP — риск ВЫСОКИЙ"
+            warn "Подсеть скорее всего хорошо известна системам блокировок."
+            warn "Рекомендуется сменить провайдера или запросить IP из другого диапазона."
+        else
+            warn "$WARN_SUBNET_HIGH"
+            warn "$WARN_SUBNET_LIKELY_BLOCKED"
+            warn "$WARN_SUBNET_RECOMMEND"
+        fi
         echo ""
-        read -rp "  Продолжить установку несмотря на предупреждение? (y/n): " CONTINUE_ANYWAY
+        local prompt_continue
+        if [[ "$LANG_NAME" == "Русский" ]]; then
+            prompt_continue="  Продолжить установку несмотря на предупреждение? (y/n): "
+        else
+            prompt_continue="  $WARN_CONTINUE_ANYWAY "
+        fi
+        read -rp "$prompt_continue" CONTINUE_ANYWAY
         [[ "$CONTINUE_ANYWAY" != "y" && "$CONTINUE_ANYWAY" != "Y" ]] \
-            && err "Установка прервана пользователем"
+            && { if [[ "$LANG_NAME" == "Русский" ]]; then err "$ERR_USER_ABORTED_RU"; else err "$ERR_USER_ABORTED"; fi; }
     fi
     echo ""
 }
 
 # ══════════════════════════════════════════════════════════════
-# ШАГ 2: Обновление системы
+# ШАГ 2: Обновление системы / System update
 # ══════════════════════════════════════════════════════════════
 step_system_update() {
-    step "Шаг 2/12 — Обновление системы"
+    step_title "2" "Обновление системы" "System update"
 
     # Отключаем все интерактивные диалоги dpkg/debconf/needrestart
     export DEBIAN_FRONTEND=noninteractive
@@ -289,10 +436,10 @@ step_system_update() {
 }
 
 # ══════════════════════════════════════════════════════════════
-# ШАГ 3: Автообновления безопасности
+# ШАГ 3: Автообновления безопасности / Auto security updates
 # ══════════════════════════════════════════════════════════════
 step_auto_updates() {
-    step "Шаг 3/12 — Автообновления безопасности"
+    step_title "3" "Автообновления безопасности" "Security auto-updates"
 
     cat > /etc/apt/apt.conf.d/20auto-upgrades <<'EOF'
 APT::Periodic::Update-Package-Lists "1";
@@ -320,10 +467,10 @@ EOF
 }
 
 # ══════════════════════════════════════════════════════════════
-# ШАГ 4: BBR
+# ШАГ 4: BBR / BBR optimization
 # ══════════════════════════════════════════════════════════════
 step_bbr() {
-    step "Шаг 4/12 — BBR и оптимизация сети"
+    step_title "4" "BBR и оптимизация сети" "BBR and network optimization"
 
     modprobe tcp_bbr 2>/dev/null || true
 
@@ -355,10 +502,10 @@ EOF
 }
 
 # ══════════════════════════════════════════════════════════════
-# ШАГ 5: Файрвол
+# ШАГ 5: Файрвол / Firewall
 # ══════════════════════════════════════════════════════════════
 step_firewall() {
-    step "Шаг 5/12 — Файрвол (ufw)"
+    step_title "5" "Файрвол (ufw)" "Firewall (ufw)"
 
     ufw --force reset         >/dev/null 2>&1
     ufw default deny incoming >/dev/null 2>&1
@@ -377,7 +524,7 @@ step_firewall() {
 # ШАГ 6: Fail2ban
 # ══════════════════════════════════════════════════════════════
 step_fail2ban() {
-    step "Шаг 6/12 — Fail2ban"
+    step_title "6" "Fail2ban" "Fail2ban"
 
     # Получаем текущий SSH порт из конфига
     local SSH_PORT
@@ -408,7 +555,7 @@ EOF
 # ШАГ 7: Sing-box
 # ══════════════════════════════════════════════════════════════
 step_install_singbox() {
-    step "Шаг 7/12 — Sing-box"
+    step_title "7" "Sing-box" "Sing-box"
 
     info "Получаю последнюю версию с GitHub..."
     local SB_TAG
@@ -431,10 +578,10 @@ step_install_singbox() {
 }
 
 # ══════════════════════════════════════════════════════════════
-# ШАГ 8: Генерация ключей и портов
+# ШАГ 8: Генерация ключей и портов / Generate keys and ports
 # ══════════════════════════════════════════════════════════════
 step_generate_keys_and_ports() {
-    step "Шаг 8/12 — Ключи Reality и порты"
+    step_title "8" "Ключи Reality и порты" "Reality keypair and ports"
 
     # Reality keypair
     local KEYPAIR
@@ -486,7 +633,7 @@ step_generate_keys_and_ports() {
 # ШАГ 9: Marzban
 # ══════════════════════════════════════════════════════════════
 step_install_marzban() {
-    step "Шаг 9/12 — Marzban"
+    step_title "9" "Marzban" "Marzban"
 
     info "Устанавливаю Marzban..."
     if ! curl -fsSL https://github.com/Gozargah/Marzban/raw/master/script.sh \
@@ -503,10 +650,10 @@ step_install_marzban() {
 }
 
 # ══════════════════════════════════════════════════════════════
-# ШАГ 10: SSL сертификат
+# ШАГ 10: SSL сертификат / SSL certificate
 # ══════════════════════════════════════════════════════════════
 step_ssl() {
-    step "Шаг 10/12 — SSL сертификат (Let's Encrypt)"
+    step_title "10" "SSL сертификат (Let's Encrypt)" "SSL certificate (Let's Encrypt)"
 
     if [[ ! -f "$HOME/.acme.sh/acme.sh" ]]; then
         info "Устанавливаю acme.sh..."
@@ -545,7 +692,7 @@ step_ssl() {
 # ШАГ 11: Конфигурация Marzban + Sing-box
 # ══════════════════════════════════════════════════════════════
 step_configure() {
-    step "Шаг 11/12 — Конфигурация Marzban и 5 профилей Sing-box"
+    step_title "11" "Конфигурация Marzban и 5 профилей Sing-box" "Marzban and 5-profile Sing-box configuration"
 
     SUDO_USERNAME=$(gen_random 10)
     SUDO_PASSWORD=$(gen_random 16)
@@ -718,10 +865,10 @@ EOF
 }
 
 # ══════════════════════════════════════════════════════════════
-# ШАГ 12: Telegram-бот
+# ШАГ 12: Telegram-бот / Telegram bot
 # ══════════════════════════════════════════════════════════════
 step_telegram_bot() {
-    step "Шаг 12/12 — Telegram-бот"
+    step_title "12" "Telegram-бот" "Telegram bot"
 
     if [[ -z "${TG_TOKEN:-}" || -z "${TG_CHAT_ID:-}" ]]; then
         warn "Telegram пропущен. Добавить позже: повторно запусти скрипт"
@@ -1380,48 +1527,88 @@ EOF
 
     # Вывод на экран (нешифрованные основные данные)
     echo ""
-    echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${PLAIN}"
-    echo -e "${GREEN}║          CubiVeil установлен успешно! 🎉             ║${PLAIN}"
-    echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${PLAIN}"
-    echo ""
-    echo -e "${CYAN}  ПАНЕЛЬ${PLAIN}"
-    echo -e "  https://${DOMAIN}:${PANEL_PORT}/${PANEL_PATH}"
-    echo -e "  Логин:  ${GREEN}${SUDO_USERNAME}${PLAIN}"
-    echo -e "  Пароль: ${GREEN}${SUDO_PASSWORD}${PLAIN}"
-    echo ""
-    echo -e "${CYAN}  ПОДПИСКИ${PLAIN}"
-    echo -e "  https://${DOMAIN}:${SUB_PORT}/${SUB_PATH}/{username}"
-    echo ""
-    echo -e "${CYAN}  ПРОФИЛИ И ПОРТЫ${PLAIN}"
-    echo -e "  1. VLESS Reality TCP   ${GREEN}443/tcp${PLAIN}"
-    echo -e "  2. VLESS Reality gRPC  ${GREEN}443/tcp${PLAIN}"
-    echo -e "  3. Hysteria2           ${GREEN}443/udp${PLAIN}"
-    echo -e "  4. Trojan WS TLS       ${GREEN}${TROJAN_PORT}/tcp${PLAIN}"
-    echo -e "  5. Shadowsocks 2022    ${GREEN}${SS_PORT}/tcp${PLAIN}"
-    echo ""
-    echo -e "${CYAN}  HEALTH CHECK${PLAIN}"
-    echo -e "  http://${SERVER_IP}:${HC_PORT}/health"
-    echo -e "  http://${SERVER_IP}:${HC_PORT}/ready"
-    echo ""
-    echo -e "${GREEN}  Учётные данные: ${YELLOW}/root/cubiveil-credentials.age${PLAIN}"
-    echo -e "${GREEN}  Ключ:           ${YELLOW}/root/.cubiveil-age-key.txt${PLAIN}"
-    echo -e "${GREEN}  Инструкция:     ${YELLOW}/root/DECRYPT_INSTRUCTIONS.txt${PLAIN}"
-    echo ""
-    echo -e "${YELLOW}  ⚠  Смени порт SSH и закрой 22 (инструкция в README)${PLAIN}"
-    echo ""
-    echo -e "${GREEN}  Следующие шаги:${PLAIN}"
-    echo -e "  1. Зайди в панель → создай пользователей"
-    echo -e "  2. Subscription URL скопируй в Mihomo на роутере"
-    echo -e "  3. Смени порт SSH, закрой 22 в ufw"
-    echo -e "  4. Сохрани ключ age в безопасном месте!"
-    echo ""
-    echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${PLAIN}"
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+        echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${PLAIN}"
+        echo -e "${GREEN}║          CubiVeil установлен успешно! 🎉             ║${PLAIN}"
+        echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${PLAIN}"
+        echo ""
+        echo -e "${CYAN}  ПАНЕЛЬ${PLAIN}"
+        echo -e "  https://${DOMAIN}:${PANEL_PORT}/${PANEL_PATH}"
+        echo -e "  Логин:  ${GREEN}${SUDO_USERNAME}${PLAIN}"
+        echo -e "  Пароль: ${GREEN}${SUDO_PASSWORD}${PLAIN}"
+        echo ""
+        echo -e "${CYAN}  ПОДПИСКИ${PLAIN}"
+        echo -e "  https://${DOMAIN}:${SUB_PORT}/${SUB_PATH}/{username}"
+        echo ""
+        echo -e "${CYAN}  ПРОФИЛИ И ПОРТЫ${PLAIN}"
+        echo -e "  1. VLESS Reality TCP   ${GREEN}443/tcp${PLAIN}"
+        echo -e "  2. VLESS Reality gRPC  ${GREEN}443/tcp${PLAIN}"
+        echo -e "  3. Hysteria2           ${GREEN}443/udp${PLAIN}"
+        echo -e "  4. Trojan WS TLS       ${GREEN}${TROJAN_PORT}/tcp${PLAIN}"
+        echo -e "  5. Shadowsocks 2022    ${GREEN}${SS_PORT}/tcp${PLAIN}"
+        echo ""
+        echo -e "${CYAN}  HEALTH CHECK${PLAIN}"
+        echo -e "  http://${SERVER_IP}:${HC_PORT}/health"
+        echo -e "  http://${SERVER_IP}:${HC_PORT}/ready"
+        echo ""
+        echo -e "${GREEN}  Учётные данные: ${YELLOW}/root/cubiveil-credentials.age${PLAIN}"
+        echo -e "${GREEN}  Ключ:           ${YELLOW}/root/.cubiveil-age-key.txt${PLAIN}"
+        echo -e "${GREEN}  Инструкция:     ${YELLOW}/root/DECRYPT_INSTRUCTIONS.txt${PLAIN}"
+        echo ""
+        echo -e "${YELLOW}  ⚠  Смени порт SSH и закрой 22 (инструкция в README)${PLAIN}"
+        echo ""
+        echo -e "${GREEN}  Следующие шаги:${PLAIN}"
+        echo -e "  1. Зайди в панель → создай пользователей"
+        echo -e "  2. Subscription URL скопируй в Mihomo на роутере"
+        echo -e "  3. Смени порт SSH, закрой 22 в ufw"
+        echo -e "  4. Сохрани ключ age в безопасном месте!"
+        echo ""
+        echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${PLAIN}"
+    else
+        echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${PLAIN}"
+        echo -e "${GREEN}║          CubiVeil installed successfully! 🎉         ║${PLAIN}"
+        echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${PLAIN}"
+        echo ""
+        echo -e "${CYAN}  PANEL${PLAIN}"
+        echo -e "  https://${DOMAIN}:${PANEL_PORT}/${PANEL_PATH}"
+        echo -e "  Username:  ${GREEN}${SUDO_USERNAME}${PLAIN}"
+        echo -e "  Password:  ${GREEN}${SUDO_PASSWORD}${PLAIN}"
+        echo ""
+        echo -e "${CYAN}  SUBSCRIPTION${PLAIN}"
+        echo -e "  https://${DOMAIN}:${SUB_PORT}/${SUB_PATH}/{username}"
+        echo ""
+        echo -e "${CYAN}  PROFILES & PORTS${PLAIN}"
+        echo -e "  1. VLESS Reality TCP   ${GREEN}443/tcp${PLAIN}"
+        echo -e "  2. VLESS Reality gRPC  ${GREEN}443/tcp${PLAIN}"
+        echo -e "  3. Hysteria2           ${GREEN}443/udp${PLAIN}"
+        echo -e "  4. Trojan WS TLS       ${GREEN}${TROJAN_PORT}/tcp${PLAIN}"
+        echo -e "  5. Shadowsocks 2022    ${GREEN}${SS_PORT}/tcp${PLAIN}"
+        echo ""
+        echo -e "${CYAN}  HEALTH CHECK${PLAIN}"
+        echo -e "  http://${SERVER_IP}:${HC_PORT}/health"
+        echo -e "  http://${SERVER_IP}:${HC_PORT}/ready"
+        echo ""
+        echo -e "${GREEN}  Credentials: ${YELLOW}/root/cubiveil-credentials.age${PLAIN}"
+        echo -e "${GREEN}  Key:         ${YELLOW}/root/.cubiveil-age-key.txt${PLAIN}"
+        echo -e "${GREEN}  Instructions:${YELLOW}/root/DECRYPT_INSTRUCTIONS.txt${PLAIN}"
+        echo ""
+        echo -e "${YELLOW}  ⚠  Change SSH port and close 22 (see README)${PLAIN}"
+        echo ""
+        echo -e "${GREEN}  Next steps:${PLAIN}"
+        echo -e "  1. Log in to panel → create users"
+        echo -e "  2. Copy Subscription URL to Mihomo on router"
+        echo -e "  3. Change SSH port, close 22 in ufw"
+        echo -e "  4. Save age key in a secure location!"
+        echo ""
+        echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${PLAIN}"
+    fi
 }
 
 # ══════════════════════════════════════════════════════════════
-# Точка входа
+# Точка входа / Entry point
 # ══════════════════════════════════════════════════════════════
 main() {
+    select_language
     print_banner
     prompt_inputs
     step_check_ip_neighborhood

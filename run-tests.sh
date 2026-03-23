@@ -7,7 +7,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TESTS_DIR="$(dirname "$SCRIPT_DIR")/tests"
+TESTS_DIR="$SCRIPT_DIR/tests"
 
 echo "CubiVeil Test Runner"
 echo "===================="
