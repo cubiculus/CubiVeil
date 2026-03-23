@@ -1,7 +1,6 @@
 # CubiVeil
 
-[![Shellcheck](https://github.com/cubiculus/CubiVeil/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/cubiculus/CubiVeil/actions/workflows/shellcheck.yml)
-[![Integration Tests](https://github.com/cubiculus/CubiVeil/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/cubiculus/CubiVeil/actions/workflows/integration-tests.yml)
+[![CI](https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml/badge.svg)](https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/platform-Ubuntu%2022.04%20%7C%2024.04-orange)](https://ubuntu.com/)
 [![Python](https://img.shields.io/badge/python-3.10-blue)](https://www.python.org/)
