@@ -52,24 +52,24 @@ unique_port() {
   local max_attempts=50
   local attempts=0
   while [[ $attempts -lt $max_attempts ]]; do
-      p=$(gen_port)
-      # Проверка: не используется ли порт в списке и не занят ли процессом
-      if [[ ! " ${USED_PORTS[*]} " =~ ${p} ]] && \
-         ! ss -tlnp 2>/dev/null | grep -q ":${p} "; then
-          USED_PORTS+=("$p")
-          echo "$p"
-          return
-      fi
-      ((attempts++))
+    p=$(gen_port)
+    # Проверка: не используется ли порт в списке и не занят ли процессом
+    if [[ ! " ${USED_PORTS[*]} " =~ ${p} ]] &&
+      ! ss -tlnp 2>/dev/null | grep -q ":${p} "; then
+      USED_PORTS+=("$p")
+      echo "$p"
+      return
+    fi
+    ((attempts++))
   done
   err "Не удалось найти свободный порт после ${max_attempts} попыток"
 }
 
 arch() {
   case "$(uname -m)" in
-      x86_64|amd64)  echo 'amd64' ;;
-      aarch64|arm64) echo 'arm64' ;;
-      *) err "Неизвестная архитектура: $(uname -m)" ;;
+    x86_64 | amd64) echo 'amd64' ;;
+    aarch64 | arm64) echo 'arm64' ;;
+    *) err "Неизвестная архитектура: $(uname -m)" ;;
   esac
 }
 
