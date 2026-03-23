@@ -15,17 +15,17 @@ echo ""
 
 # Проверка что запускаем от root
 if [[ $EUID -ne 0 ]]; then
-    echo "❌ Требуется запуск от root (sudo)"
-    echo ""
-    echo "Использование:"
-    echo "  sudo ./run-tests.sh"
-    exit 1
+  echo "❌ Требуется запуск от root (sudo)"
+  echo ""
+  echo "Использование:"
+  echo "  sudo ./run-tests.sh"
+  exit 1
 fi
 
 # Проверка что тесты существуют
 if [[ ! -f "$TESTS_DIR/integration-tests.sh" ]]; then
-    echo "❌ Файл тестов не найден: $TESTS_DIR/integration-tests.sh"
-    exit 1
+  echo "❌ Файл тестов не найден: $TESTS_DIR/integration-tests.sh"
+  exit 1
 fi
 
 # Запуск тестов
