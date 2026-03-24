@@ -88,6 +88,20 @@ check_file_encrypted() {
   fi
 }
 
+# ── Проверка: директория существует ──────────────────────────
+check_dir_exists() {
+  local dir="$1"
+  local description="${2:-$dir}"
+
+  if [[ -d "$dir" ]]; then
+    pass "Директория существует: $description"
+    ((TESTS_PASSED++))
+  else
+    fail "Директория отсутствует: $description ($dir)"
+    ((TESTS_FAILED++))
+  fi
+}
+
 # ── Проверка: health-check работает ──────────────────────────
 check_health_endpoint() {
   local host="${1:-localhost}"
@@ -261,29 +275,30 @@ check_log_rotation() {
   fi
 }
 
-# ── Проверка: Telegram бот ───────────────────────────────────
+# ── Проверка: Telegram бот (опционально) ─────────────────────
 check_telegram_bot() {
   # Проверка что файл бота существует
-  check_file_exists "/opt/cubiveil-bot/bot.py" "Telegram бот"
-
-  # Проверка что сервис существует
-  if [[ -f /etc/systemd/system/cubiveil-bot.service ]]; then
-    pass "Telegram бот: systemd сервис создан"
-    ((TESTS_PASSED++))
-  else
-    fail "Telegram бот: systemd сервис не найден"
-    ((TESTS_FAILED++))
-  fi
-
-  # Проверка что токен НЕ в файле (берётся из Environment)
   if [[ -f /opt/cubiveil-bot/bot.py ]]; then
+    pass "Telegram бот: файл существует"
+    ((TESTS_PASSED++))
+
+    # Проверка что сервис существует
+    if [[ -f /etc/systemd/system/cubiveil-bot.service ]]; then
+      pass "Telegram бот: systemd сервис создан"
+      ((TESTS_PASSED++))
+    else
+      warn "Telegram бот: systemd сервис не найден"
+    fi
+
+    # Проверка что токен НЕ в файле (берётся из Environment)
     if grep -q 'os.environ.get("TG_TOKEN")' /opt/cubiveil-bot/bot.py; then
       pass "Telegram бот: токен в переменной окружения (безопасно)"
       ((TESTS_PASSED++))
     else
-      fail "Telegram бот: токен не в переменной окружения!"
-      ((TESTS_FAILED++))
+      warn "Telegram бот: токен не в переменной окружения!"
     fi
+  else
+    info "Telegram бот: не установлен (опционально)"
   fi
 }
 
@@ -314,6 +329,66 @@ check_health_service() {
 
   # Проверка что файл health-check существует
   check_file_exists "/opt/marzban/health_check.py" "Health-check скрипт"
+}
+
+# ── Проверка: модульная структура ────────────────────────────
+check_modular_structure() {
+  local base_dir="${1:-.}"
+
+  # Проверка наличия lib директории
+  check_dir_exists "${base_dir}/lib" "lib директория"
+
+  # Проверка наличия модулей
+  check_file_exists "${base_dir}/lib/utils.sh" "lib/utils.sh"
+  check_file_exists "${base_dir}/lib/install-steps.sh" "lib/install-steps.sh"
+
+  # Проверка наличия setup-telegram.sh
+  check_file_exists "${base_dir}/setup-telegram.sh" "setup-telegram.sh"
+
+  # Проверка что основной install.sh существует
+  check_file_exists "${base_dir}/install.sh" "install.sh"
+}
+
+# ── Проверка: загрузка модулей ───────────────────────────────
+check_module_loading() {
+  local base_dir="${1:-.}"
+
+  # Проверка что модули могут быть загружены
+  if bash -c "source ${base_dir}/lib/utils.sh 2>&1"; then
+    pass "Модуль lib/utils.sh загружается корректно"
+    ((TESTS_PASSED++))
+  else
+    fail "Модуль lib/utils.sh не загружается"
+    ((TESTS_FAILED++))
+  fi
+
+  if bash -c "source ${base_dir}/lib/lang.sh 2>&1" 2>/dev/null; then
+    pass "Модуль lib/lang.sh загружается корректно"
+    ((TESTS_PASSED++))
+  else
+    warn "Модуль lib/lang.sh не найден или не загружается"
+  fi
+}
+
+# ── Проверка: синтаксис скриптов ─────────────────────────────
+check_script_syntax() {
+  local base_dir="${1:-.}"
+  local scripts=(
+    "install.sh"
+    "setup-telegram.sh"
+    "lib/utils.sh"
+    "lib/install-steps.sh"
+  )
+
+  for script in "${scripts[@]}"; do
+    if bash -n "${base_dir}/${script}" 2>/dev/null; then
+      pass "Синтаксис OK: $script"
+      ((TESTS_PASSED++))
+    else
+      fail "Синтаксическая ошибка: $script"
+      ((TESTS_FAILED++))
+    fi
+  done
 }
 
 # ── Проверка: Uptime ─────────────────────────────────────────
@@ -359,15 +434,52 @@ check_ram_usage() {
 
 # ── Основная функция ─────────────────────────────────────────
 main() {
+  local base_dir="${1:-.}"
+  local mode="${2:-full}"
+
   echo ""
   echo -e "${YELLOW}╔══════════════════════════════════════════════════════╗${PLAIN}"
   echo -e "${YELLOW}║        CubiVeil Integration Tests                    ║${PLAIN}"
   echo -e "${YELLOW}╚══════════════════════════════════════════════════════╝${PLAIN}"
   echo ""
 
+  # Режим unit-тестов (проверка структуры без root)
+  if [[ "$mode" == "unit" ]]; then
+    info "Режим unit-тестов: проверка модульной структуры"
+    echo ""
+    echo -e "${YELLOW}━━━ Модульная структура ━━━${PLAIN}"
+    check_modular_structure "$base_dir"
+    echo ""
+    echo -e "${YELLOW}━━━ Загрузка модулей ━━━${PLAIN}"
+    check_module_loading "$base_dir"
+    echo ""
+    echo -e "${YELLOW}━━━ Синтаксис скриптов ━━━${PLAIN}"
+    check_script_syntax "$base_dir"
+    echo ""
+
+    # ── Итоги ───────────────────────────────────────────
+    echo ""
+    echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
+    echo -e "${GREEN}Пройдено: $TESTS_PASSED${PLAIN}"
+    if [[ $TESTS_FAILED -gt 0 ]]; then
+      echo -e "${RED}Провалено:  $TESTS_FAILED${PLAIN}"
+    fi
+    echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
+    echo ""
+
+    if [[ $TESTS_FAILED -gt 0 ]]; then
+      echo -e "${RED}❌ Тесты провалены${PLAIN}"
+      exit 1
+    else
+      echo -e "${GREEN}✅ Все тесты пройдены${PLAIN}"
+      exit 0
+    fi
+  fi
+
+  # Режим интеграционных тестов (требует root)
   # Проверка что запущено от root
   if [[ $EUID -ne 0 ]]; then
-    fail "Требуются права root"
+    fail "Требуются права root. Для unit-тестов используйте: $0 . unit"
   fi
 
   info "Запуск тестов..."

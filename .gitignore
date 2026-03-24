@@ -1,5 +1,7 @@
 # Credentials и чувствительные данные
 *.credentials.txt
+*.credentials.age
+*.cubiveil-age-key.txt
 .env
 **/.env
 
@@ -11,12 +13,15 @@ logs/
 *.sqlite3
 *.sqlite
 backups/
+/opt/cubiveil-bot/backups/
 
 # Временные файлы
 *.tmp
 *.bak
 *.swp
 *~
+*.tar.gz
+*.zip
 
 # Python
 __pycache__/
@@ -29,7 +34,7 @@ ENV/
 env/
 .pytest_cache/
 
-# pre-commit
+# Pre-commit
 .pre-commit-cache/
 
 # IDE
@@ -47,10 +52,32 @@ Thumbs.db
 
 # Sing-box
 sing-box*
+/opt/sing-box/
 
-# Age encrypted
+# Age encrypted (кроме .example файлов)
 *.age
+!*.age.example
 
 # Test artifacts
 tests/*.log
 tests/coverage/
+*.coverage
+
+# Docker
+.dockerignore
+
+# Node modules (если есть)
+node_modules/
+
+# Build artifacts
+*.o
+*.a
+*.exe
+
+# Системные файлы на сервере
+/root/cubiveil-credentials.*
+/opt/marzban/.env
+/etc/systemd/system/cubiveil-bot.service
+/etc/fail2ban/jail.d/cubiveil.conf
+/etc/systemd/journald.d/cubiveil-limit.conf
+/etc/logrotate.d/cubiveil-services

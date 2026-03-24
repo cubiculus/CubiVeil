@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh:*)",
+      "Bash(cd:*)",
+      "Bash(echo:*)",
+      "Bash(cat:*)",
+      "Write",
+      "Edit",
+      "Read(C:\\Users\\Cubiculus\\Downloads\\feature_ideas_japlancubi.md)",
+      "Bash(tree:*)",
+      "Bash(mkdir:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(git add:*)"
+    ]
+  },
+  "enabledPlugins": {
+    "github@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true
+  },
+  "autoUpdatesChannel": "latest"
+}
