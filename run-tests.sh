@@ -1,7 +1,7 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
 # ║        CubiVeil Test Runner                               ║
-# ║        Запуск всех тестов                                   ║
+# ║        Запуск всех тестов                                 ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 set -euo pipefail
@@ -20,11 +20,23 @@ TESTS_DIR="$SCRIPT_DIR/tests"
 TOTAL_PASSED=0
 TOTAL_FAILED=0
 
+# ── Подключение тестовых утилит ───────────────────────────────
+source "${SCRIPT_DIR}/lib/test-utils.sh"
+
 # ── Функции ─────────────────────────────────────────────────────
 print_header() {
+  local raw_title="  $1"
+  local width=54
+  local title_len=${#raw_title}
+  local padding=$((width - title_len - 2))
+  local spaces=""
+  for ((i = 0; i < padding; i++)); do
+    spaces+=" "
+  done
+
   echo ""
   echo -e "${BLUE}╔══════════════════════════════════════════════════════╗${PLAIN}"
-  echo -e "${BLUE}║  $1${PLAIN}                                          ║"
+  echo -e "${BLUE}║${raw_title}${spaces}║${PLAIN}"
   echo -e "${BLUE}╚══════════════════════════════════════════════════════╝${PLAIN}"
   echo ""
 }
@@ -42,7 +54,11 @@ run_unit_tests() {
   local unit_tests=(
     "modular-structure.sh:Модульная структура"
     "unit-utils.sh:lib/utils.sh"
+    "unit-install-steps.sh:lib/install-steps.sh"
+    "unit-lang.sh:lang.sh"
+    "unit-install.sh:install.sh"
     "unit-telegram.sh:setup-telegram.sh"
+    "unit-utilities.sh:Новые утилиты"
   )
 
   for test_info in "${unit_tests[@]}"; do
@@ -165,6 +181,9 @@ main() {
 
   print_header "CubiVeil Test Runner"
 
+  # Инициализация счётчиков тестов
+  init_test_counters
+
   # Запуск тестов в зависимости от режима
   case "$mode" in
   unit)
@@ -181,18 +200,7 @@ main() {
 
   # ── Итоги ─────────────────────────────────────────────────
   print_section "Итоги"
-
-  echo -e "Всего пройдено: ${GREEN}$TOTAL_PASSED${PLAIN}"
-  echo -e "Всего провалено: ${RED}$TOTAL_FAILED${PLAIN}"
-  echo ""
-
-  if [[ $TOTAL_FAILED -gt 0 ]]; then
-    echo -e "${RED}❌ Некоторые тесты провалены${PLAIN}"
-    exit 1
-  else
-    echo -e "${GREEN}✅ Все тесты пройдены!${PLAIN}"
-    exit 0
-  fi
+  print_test_summary
 }
 
 main "$@"

@@ -84,3 +84,8 @@ node_modules/
 /etc/fail2ban/jail.d/cubiveil.conf
 /etc/systemd/journald.d/cubiveil-limit.conf
 /etc/logrotate.d/cubiveil-services
+  
+"# Utility backups and exports"  
+"/root/cubiveil-backups/"  
+"/root/cubiveil-export/"  
+"/root/cubiveil-diagnose/" 

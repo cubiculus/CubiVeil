@@ -1,29 +1,15 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║        CubiVeil Integration Tests                         ║
-# ║        Проверка корректности установки                    ║
+# ║        CubiVeil Integration Tests                        ║
+# ║        Проверка корректности установки                   ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 set -euo pipefail
 
 # shellcheck disable=SC2317
-# ── Цвета ──────────────────────────────────────────────────────
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-PLAIN='\033[0m'
-
-pass() { echo -e "${GREEN}[PASS]${PLAIN} $1"; }
-fail() {
-  echo -e "${RED}[FAIL]${PLAIN} $1"
-  exit 1
-}
-warn() { echo -e "${YELLOW}[WARN]${PLAIN} $1"; }
-info() { echo -e "[INFO] $1"; }
-
-# ── Счётчик тестов ────────────────────────────────────────────
-TESTS_PASSED=0
-TESTS_FAILED=0
+# ── Подключение тестовых утилит ───────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "${SCRIPT_DIR}/lib/test-utils.sh"
 
 # ── Проверка: сервис активен ─────────────────────────────────
 check_service_active() {
@@ -38,6 +24,7 @@ check_service_active() {
     status=$(systemctl is-active "$service" 2>/dev/null || echo "not-found")
     fail "Сервис $service: $status (ожидался: $expected)"
     ((TESTS_FAILED++))
+    [[ "${FORCE_EXIT:-}" == "true" ]] && exit 1
   fi
 }
 
@@ -458,22 +445,8 @@ main() {
     echo ""
 
     # ── Итоги ───────────────────────────────────────────
-    echo ""
-    echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
-    echo -e "${GREEN}Пройдено: $TESTS_PASSED${PLAIN}"
-    if [[ $TESTS_FAILED -gt 0 ]]; then
-      echo -e "${RED}Провалено:  $TESTS_FAILED${PLAIN}"
-    fi
-    echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
-    echo ""
-
-    if [[ $TESTS_FAILED -gt 0 ]]; then
-      echo -e "${RED}❌ Тесты провалены${PLAIN}"
-      exit 1
-    else
-      echo -e "${GREEN}✅ Все тесты пройдены${PLAIN}"
-      exit 0
-    fi
+    print_test_summary
+    exit $?
   fi
 
   # Режим интеграционных тестов (требует root)
@@ -540,22 +513,8 @@ main() {
   echo ""
 
   # ── Итоги ───────────────────────────────────────────────
-  echo ""
-  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
-  echo -e "${GREEN}Пройдено: $TESTS_PASSED${PLAIN}"
-  if [[ $TESTS_FAILED -gt 0 ]]; then
-    echo -e "${RED}Провалено:  $TESTS_FAILED${PLAIN}"
-  fi
-  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
-  echo ""
-
-  if [[ $TESTS_FAILED -gt 0 ]]; then
-    echo -e "${RED}❌ Тесты провалены${PLAIN}"
-    exit 1
-  else
-    echo -e "${GREEN}✅ Все тесты пройдены${PLAIN}"
-    exit 0
-  fi
+  print_test_summary
+  exit $?
 }
 
 main "$@"

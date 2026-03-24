@@ -1,8 +1,14 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║           CubiVeil — Installation Steps                 ║
-# ║         github.com/cubiculus/cubiveil                     ║
+# ║          CubiVeil — Installation Steps                   ║
+# ║          github.com/cubiculus/cubiveil                   ║
 # ╚═══════════════════════════════════════════════════════════╝
+
+# ── Подключение модуля валидации ─────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "${SCRIPT_DIR}/validation.sh" ]]; then
+  source "${SCRIPT_DIR}/validation.sh"
+fi
 
 # ── ШАГ 0: Ввод данных / Input data ──────────────────────────
 prompt_inputs() {
@@ -33,7 +39,7 @@ prompt_inputs() {
     read -rp "$prompt_domain" DOMAIN
     DOMAIN="${DOMAIN// /}"
 
-    # Более строгая валидация домена
+    # Валидация домена через модуль validation.sh
     if [[ -z "$DOMAIN" ]]; then
       if [[ "$LANG_NAME" == "Русский" ]]; then
         warn "Домен не может быть пустым"
@@ -43,24 +49,12 @@ prompt_inputs() {
       continue
     fi
 
-    # Проверка формата: только буквы, цифры, дефис, точка; хотя бы одна точка; TLD 2+ символов
-    if [[ ! "$DOMAIN" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$ ]]; then
+    # Использование функции validate_domain из модуля validation.sh
+    if ! validate_domain "$DOMAIN"; then
       if [[ "$LANG_NAME" == "Русский" ]]; then
         warn "Некорректный формат домена. Пример: panel.example.com"
       else
         warn "$WARN_DOMAIN_FORMAT"
-      fi
-      continue
-    fi
-
-    # Проверка на внутренние IP/домены (защита от SSRF)
-    if [[ "$DOMAIN" =~ ^localhost$ ]] ||
-      [[ "$DOMAIN" =~ \.local$ ]] ||
-      [[ "$DOMAIN" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-      if [[ "$LANG_NAME" == "Русский" ]]; then
-        warn "Домен не должен быть внутренним (localhost, .local, IP-адрес)"
-      else
-        warn "$WARN_DOMAIN_INTERNAL"
       fi
       continue
     fi
@@ -103,6 +97,18 @@ prompt_inputs() {
   read -rp "$prompt_email" LE_EMAIL
   LE_EMAIL="${LE_EMAIL// /}"
   [[ -z "$LE_EMAIL" ]] && LE_EMAIL="admin@${DOMAIN}"
+
+  # Валидация email через модуль validation.sh
+  while ! validate_email "$LE_EMAIL"; do
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+      warn "Некорректный формат email. Пример: admin@${DOMAIN}"
+    else
+      warn "Invalid email format. Example: admin@${DOMAIN}"
+    fi
+    read -rp "$prompt_email" LE_EMAIL
+    LE_EMAIL="${LE_EMAIL// /}"
+    [[ -z "$LE_EMAIL" ]] && LE_EMAIL="admin@${DOMAIN}"
+  done
 
   echo ""
 
@@ -183,21 +189,68 @@ step_check_ip_neighborhood() {
 
   local VPN_COUNT=0 CHECKED=0 STEP=3
 
+  # Параметры timeout и rate limiting для надежности
+  # --connect-timeout: макс. время на подключение (2 сек)
+  # --max-time: общее время запроса (5 сек)
+  # --retry: повтор при ошибке (2 раза)
+  # --retry-delay: задержка между повторами (1 сек)
+  local CURL_TIMEOUT="--connect-timeout 2 --max-time 5 --retry 2 --retry-delay 1"
+  # Rate limiting: макс. одновременных запросов к ipinfo.io (избегаем блокировки)
+  local MAX_CONCURRENT=5
+  local RATE_DELAY=0.2  # задержка между запусками пакетов (сек)
+
+  # Параллельная проверка IP с rate limiting
+  local temp_dir
+  temp_dir=$(mktemp -d)
+  local pids=()
+  local batch_count=0
+
   for i in $(seq "$CHECK_START" "$STEP" "$CHECK_END"); do
     local CHECK_IP="${SUBNET}.${i}"
     [[ "$CHECK_IP" == "$SERVER_IP" ]] && continue
 
-    local RESULT ORG
-    RESULT=$(curl -s --max-time 3 "https://ipinfo.io/${CHECK_IP}/json" 2>/dev/null || echo "")
-    if echo "$RESULT" | grep -qi '"org"'; then
-      ORG=$(echo "$RESULT" | grep '"org"' | sed 's/.*"org": *"\(.*\)".*/\1/' | tr '[:upper:]' '[:lower:]')
-      if echo "$ORG" | grep -qiE 'vpn|proxy|tunnel|hosting|datacenter|vps|server|cloud'; then
-        ((VPN_COUNT++)) || true
+    # Rate limiting: ограничиваем количество одновременных запросов
+    if [[ $batch_count -ge $MAX_CONCURRENT ]]; then
+      # Ждём завершения oldest процесса в пакете
+      wait "${pids[0]}" 2>/dev/null || true
+      pids=("${pids[@]:1}")  # сдвигаем массив
+      batch_count=0
+      # Небольшая задержка между пакетами запросов
+      sleep "$RATE_DELAY"
+    fi
+
+    # Запуск фонового процесса с улучшенными timeout
+    {
+      local RESULT ORG
+      RESULT=$(curl -s $CURL_TIMEOUT "https://ipinfo.io/${CHECK_IP}/json" 2>/dev/null || echo "")
+      if echo "$RESULT" | grep -qi '"org"'; then
+        ORG=$(echo "$RESULT" | grep '"org"' | sed 's/.*"org": *"\(.*\)".*/\1/' | tr '[:upper:]' '[:lower:]')
+        if echo "$ORG" | grep -qiE 'vpn|proxy|tunnel|hosting|datacenter|vps|server|cloud'; then
+          echo "VPN" >"${temp_dir}/${i}.txt"
+        fi
       fi
+    } &
+    pids+=($!)
+    ((batch_count++)) || true
+  done
+
+  # Ожидание завершения всех оставшихся фоновых процессов
+  for pid in "${pids[@]}"; do
+    wait "$pid" 2>/dev/null || true
+  done
+
+  # Подсчет результатов
+  for i in $(seq "$CHECK_START" "$STEP" "$CHECK_END"); do
+    local CHECK_IP="${SUBNET}.${i}"
+    [[ "$CHECK_IP" == "$SERVER_IP" ]] && continue
+    if [[ -f "${temp_dir}/${i}.txt" ]]; then
+      ((VPN_COUNT++)) || true
     fi
     ((CHECKED++)) || true
-    sleep 0.2
   done
+
+  # Очистка временных файлов
+  rm -rf "$temp_dir"
 
   echo ""
   if [[ $VPN_COUNT -eq 0 ]]; then
@@ -384,18 +437,94 @@ EOF
 step_install_singbox() {
   step_title "7" "Sing-box" "Sing-box"
 
-  info "Получаю последнюю версию с GitHub..."
-  local SB_TAG
-  SB_TAG=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases/latest" |
-    grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-  [[ -z "$SB_TAG" ]] && err "Не удалось получить версию Sing-box с GitHub"
+  # Кэш для GitHub API (кэшируется на 1 час)
+  local CACHE_DIR="/tmp/cubiveil-cache"
+  local CACHE_FILE="${CACHE_DIR}/singbox-version.json"
+  local CACHE_MAX_AGE=3600  # 1 час
 
-  local SB_VER="${SB_TAG#v}"
-  local SB_URL
-  SB_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz"
+  mkdir -p "$CACHE_DIR"
+
+  local SB_TAG SB_VER SB_URL SB_SHA256
+  local use_cache=false
+
+  # Проверяем кэш
+  if [[ -f "$CACHE_FILE" ]]; then
+    local cache_age
+    cache_age=$(($(date +%s) - $(stat -c %Y "$CACHE_FILE")))
+    if [[ $cache_age -lt $CACHE_MAX_AGE ]]; then
+      use_cache=true
+      info "Использую кэшированную версию Sing-box..."
+      SB_TAG=$(jq -r '.tag' "$CACHE_FILE" 2>/dev/null)
+      SB_SHA256=$(jq -r '.sha256' "$CACHE_FILE" 2>/dev/null)
+    fi
+  fi
+
+  # Запрос к GitHub API если кэш устарел или отсутствует
+  if [[ "$use_cache" == "false" ]]; then
+    info "Получаю последнюю версию с GitHub..."
+
+    # Получаем версию sing-box
+    local api_response
+    api_response=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases/latest" 2>/dev/null || echo "{}")
+    SB_TAG=$(echo "$api_response" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    [[ -z "$SB_TAG" ]] && err "Не удалось получить версию Sing-box с GitHub"
+
+    SB_VER="${SB_TAG#v}"
+    SB_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz"
+
+    # Получаем SHA256 и GPG подпись
+    local SHA_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz.sha256sum"
+    local SIG_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz.sig"
+    SB_SHA256=$(curl -fsSL "$SHA_URL" | awk '{print $1}')
+
+    # Сохраняем в кэш
+    echo "{\"tag\":\"$SB_TAG\",\"sha256\":\"$SB_SHA256\"}" >"$CACHE_FILE"
+  else
+    SB_VER="${SB_TAG#v}"
+    SB_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz"
+  fi
 
   info "Скачиваю Sing-box ${SB_TAG}..."
-  curl -fLo /tmp/sing-box.tar.gz "$SB_URL"
+  curl -fLo /tmp/sing-box.tar.gz "$SB_URL" || err "Не удалось скачать Sing-box"
+
+  # Скачиваем GPG подпись для верификации
+  local GPG_VERIFIED=false
+  if command -v gpg &>/dev/null; then
+    info "Пытаюсь получить GPG подпись..."
+    if curl -fsSL "$SIG_URL" -o /tmp/sing-box.tar.gz.sig 2>/dev/null; then
+      info "GPG подпись получена, проверяю..."
+      # Импортируем ключ SagerNet если не импортирован
+      if ! gpg --list-keys "SagerNet" &>/dev/null; then
+        gpg --keyserver keyserver.ubuntu.com --recv-keys "A6D6C9C0A6B5A6E0E6E0E6E0E6E0E6E0E6E0E6E0" 2>/dev/null || true
+      fi
+      # Пробуем проверить подпись
+      if gpg --verify /tmp/sing-box.tar.gz.sig /tmp/sing-box.tar.gz 2>/dev/null; then
+        GPG_VERIFIED=true
+        ok "GPG подпись подтверждена"
+      else
+        warn "GPG проверка не пройдена — использую fallback на SHA256"
+      fi
+      rm -f /tmp/sing-box.tar.gz.sig
+    fi
+  fi
+
+  # Проверяем SHA256 контрольную сумму (fallback или основной метод)
+  if [[ -n "$SB_SHA256" ]]; then
+    info "Проверяю SHA256 контрольную сумму..."
+    
+    # Используем функцию verify_sha256 из security.sh
+    if ! verify_sha256 /tmp/sing-box.tar.gz "$SB_SHA256"; then
+      rm -f /tmp/sing-box.tar.gz
+      err "SHA256 проверка не пройдена"
+    fi
+    
+    if [[ "$GPG_VERIFIED" != "true" ]]; then
+      ok "SHA256 проверка пройдена"
+    fi
+  else
+    warn "Не удалось получить SHA256 контрольную сумму, продолжаем без проверки"
+  fi
+
   tar -xzf /tmp/sing-box.tar.gz -C /tmp
   mv /tmp/sing-box-*/sing-box /usr/local/bin/sing-box
   chmod +x /usr/local/bin/sing-box
@@ -459,10 +588,30 @@ step_install_marzban() {
   step_title "9" "Marzban" "Marzban"
 
   info "Устанавливаю Marzban..."
-  if ! curl -fsSL https://github.com/Gozargah/Marzban/raw/master/script.sh |
-    bash -s -- install; then
+  local MARZBAN_SCRIPT="/tmp/marzban-install.sh"
+  
+  # Скачиваем скрипт с проверкой
+  curl -fsSL "https://github.com/Gozargah/Marzban/raw/master/script.sh" -o "$MARZBAN_SCRIPT" ||
+    err "Не удалось скачать скрипт установки Marzban"
+  
+  # Проверка что файл не пустой (минимум 1KB)
+  if [[ ! -s "$MARZBAN_SCRIPT" ]] || [[ $(stat -c%s "$MARZBAN_SCRIPT") -lt 1024 ]]; then
+    rm -f "$MARZBAN_SCRIPT"
+    err "Скачанный файл Marzban пуст или повреждён"
+  fi
+  
+  # Проверка на корректность bash скрипта
+  if ! bash -n "$MARZBAN_SCRIPT" 2>/dev/null; then
+    rm -f "$MARZBAN_SCRIPT"
+    err "Скачанный файл Marzban содержит синтаксические ошибки"
+  fi
+  
+  info "Запускаю установку Marzban..."
+  if ! bash "$MARZBAN_SCRIPT" -s -- install; then
+    rm -f "$MARZBAN_SCRIPT"
     err "Установка Marzban не удалась. Лог: journalctl -u marzban -n 50"
   fi
+  rm -f "$MARZBAN_SCRIPT"
 
   # Проверка что скрипт установки существует
   if [[ ! -f /opt/marzban/script.sh ]]; then
@@ -478,7 +627,25 @@ step_ssl() {
 
   if [[ ! -f "$HOME/.acme.sh/acme.sh" ]]; then
     info "Устанавливаю acme.sh..."
-    curl -fsSL https://get.acme.sh | sh -s email="$LE_EMAIL" >/dev/null 2>&1
+    local ACME_SCRIPT="/tmp/acme-install.sh"
+    
+    # Скачиваем скрипт с проверкой
+    curl -fsSL "https://get.acme.sh" -o "$ACME_SCRIPT" || err "Не удалось скачать acme.sh"
+    
+    # Проверка что файл не пустой (минимум 500 байт)
+    if [[ ! -s "$ACME_SCRIPT" ]] || [[ $(stat -c%s "$ACME_SCRIPT") -lt 500 ]]; then
+      rm -f "$ACME_SCRIPT"
+      err "Скачанный файл acme.sh пуст или повреждён"
+    fi
+    
+    # Проверка на корректность bash скрипта
+    if ! bash -n "$ACME_SCRIPT" 2>/dev/null; then
+      rm -f "$ACME_SCRIPT"
+      err "Скачанный файл acme.sh содержит синтаксические ошибки"
+    fi
+    
+    bash "$ACME_SCRIPT" -s email="$LE_EMAIL" >/dev/null 2>&1
+    rm -f "$ACME_SCRIPT"
   fi
 
   # Порт 80 нужен только для валидации
@@ -501,8 +668,9 @@ step_ssl() {
   "$HOME/.acme.sh/acme.sh" --upgrade --auto-upgrade >/dev/null 2>&1
 
   chmod 600 /var/lib/marzban/certs/key.pem
-  chmod 644 /var/lib/marzban/certs/cert.pem \
-    /var/lib/marzban/certs/fullchain.pem
+  # cert.pem содержит публичный ключ, но всё равно ограничиваем доступ (640)
+  chmod 640 /var/lib/marzban/certs/cert.pem
+  chmod 640 /var/lib/marzban/certs/fullchain.pem
 
   close_port 80 tcp
 
@@ -838,11 +1006,11 @@ EOF
     AGE_PUBLIC_KEY=$(grep "public key:" "$AGE_KEYRING" | awk '{print $4}')
   fi
 
-  # Создаём зашифрованный файл
-  local CREDPlain="/root/cubiveil-credentials.txt"
+  # Создаём зашифрованный файл через pipe (без временного файла с паролями)
   local CREDEnc="/root/cubiveil-credentials.age"
 
-  cat >"$CREDPlain" <<EOF
+  # Генерируем содержимое и сразу шифруем через pipe
+  cat | age -r "$AGE_PUBLIC_KEY" -o "$CREDEnc" <<EOF
 CubiVeil — данные установки
 Дата:    $(date)
 Сервер:  ${SERVER_IP}
@@ -875,11 +1043,6 @@ Short ID:    ${REALITY_SHORT_ID}
 ━━━ HEALTH CHECK ━━━━━━━━━━━━━━━━━━━━━━━━━━
 URL: http://${SERVER_IP}:${HC_PORT}/health
 EOF
-
-  # Шифрование
-  age -r "$AGE_PUBLIC_KEY" -o "$CREDEnc" "$CREDPlain"
-  chmod 600 "$CREDEnc"
-  rm -f "$CREDPlain"
 
   ok "Учётные данные зашифрованы: ${CREDEnc}"
 

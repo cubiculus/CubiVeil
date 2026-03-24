@@ -1,6 +1,6 @@
 <div align="center">
 
-![CubiVeil](logo.png)
+![CubiVeil](assets/logo.png)
 
 # CubiVeil
 
@@ -202,6 +202,9 @@ XXXXX/tcp → Health Check endpoint   (рандом 30000+)
 /backup  — получить бэкап прямо сейчас
 /users   — активные пользователи
 /restart — перезапустить Marzban
+/health  — полный отчёт о здоровье сервисов
+/speedtest — проверка скорости соединения
+/profiles — статус всех профилей
 /help    — список команд
 ```
 
@@ -325,6 +328,198 @@ journalctl --disk-usage           # размер логов
 journalctl --vacuum-size=100M     # очистить до 100МБ
 journalctl --vacuum-time=7d       # удалить логи старше 7 дней
 ```
+
+---
+
+## Утилиты
+
+CubiVeil включает набор утилит для управления и обслуживания сервера.
+
+### Запуск утилит
+
+**Через единый CLI (рекомендуется):**
+
+```bash
+# Показать справку
+sudo bash utils/cubiveil.sh --help
+
+# Список доступных утилит
+sudo bash utils/cubiveil.sh --list
+
+# Обновить систему
+sudo bash utils/cubiveil.sh update
+
+# Запустить мониторинг
+sudo bash utils/cubiveil.sh monitor
+
+# Создать бэкап
+sudo bash utils/cubiveil.sh backup create
+
+# Управление профилями
+sudo bash utils/cubiveil.sh profiles list
+
+# Диагностика
+sudo bash utils/cubiveil.sh diagnose
+```
+
+**Установка алиасов для коротких команд:**
+
+```bash
+# Установить алиасы
+sudo bash utils/install-aliases.sh
+
+# После этого можно запускать так:
+cv              # показать справку
+cv monitor      # мониторинг
+cv backup create  # создать бэкап
+cv profiles list  # список профилей
+cv diagnose     # диагностика
+```
+
+**Прямой запуск:**
+
+```bash
+sudo bash utils/update.sh
+sudo bash utils/backup.sh create
+sudo bash utils/manage-profiles.sh list
+```
+
+### 🔄 Update — обновление системы
+
+```bash
+# Обновление до последней версии
+sudo bash update.sh
+```
+
+**Возможности:**
+- Проверка версии на GitHub
+- Скачивание новых файлов
+- Автоматический бэкап перед обновлением
+- Восстановление конфигов после обновления
+- Откат к предыдущей версии при проблемах
+
+### ↩️ Rollback — откат к предыдущей версии
+
+```bash
+# Список доступных бэкапов
+sudo bash rollback.sh
+
+# Откат к конкретному бэкапу
+sudo bash rollback.sh /root/cubiveil-backup/20260324_120000
+```
+
+**Возможности:**
+- Использование бэкапов для отката
+- Восстановление конфигов Marzban и Sing-box
+- Восстановление ключей и сертификатов
+- Автоматический перезапуск сервисов
+
+### 📦 Export Config — экспорт настроек
+
+```bash
+# Экспорт конфигурации
+sudo bash export-config.sh
+```
+
+**Возможности:**
+- Экспорт всех конфигов Marzban и Sing-box
+- Сохранение ключей и SSL сертификатов
+- Шифрование чувствительных данных через age
+- Создание манифеста экспорта
+- Подготовка к переезду на другой сервер
+
+### 📊 Monitor — мониторинг сервера
+
+```bash
+# Непрерывный мониторинг
+sudo bash monitor.sh
+
+# Однократный снимок состояния
+sudo bash monitor.sh --snapshot
+
+# С интервалом обновления 10 секунд
+sudo bash monitor.sh --interval 10
+```
+
+**Возможности:**
+- CPU, RAM, диск в реальном времени
+- Статус сервисов (Marzban, Sing-box, бот)
+- Сетевая информация и подключения
+- Активные пользователи
+- Последние события из логов
+
+### 🩺 Diagnose — диагностика проблем
+
+```bash
+# Полная диагностика
+sudo bash diagnose.sh
+```
+
+**Возможности:**
+- Проверка DNS и разрешения имён
+- Проверка SSL сертификата (срок действия)
+- Проверка сетевых соединений
+- Статус сервисов и портов
+- Анализ логов на ошибки
+- Проверка ресурсов (диск, RAM)
+- Рекомендации по исправлению
+- Сбор отчёта для поддержки
+
+### 👥 Manage Profiles — управление профилями
+
+```bash
+# Список всех профилей
+sudo bash manage-profiles.sh list
+
+# Добавить новый профиль
+sudo bash manage-profiles.sh add
+
+# Удалить профиль
+sudo bash manage-profiles.sh remove
+
+# Включить/выключить профиль
+sudo bash manage-profiles.sh enable
+sudo bash manage-profiles.sh disable
+
+# Сгенерировать QR-код
+sudo bash manage-profiles.sh qr
+
+# Статистика использования
+sudo bash manage-profiles.sh stats
+
+# Информация о профиле
+sudo bash manage-profiles.sh info
+```
+
+**Возможности:**
+- Добавление/удаление профилей через Marzban API
+- Включение и отключение профилей
+- Генерация QR-кодов (требуется qrencode)
+- Статистика трафика и срока действия
+- Информация о всех профилях
+
+### 💾 Backup — полное резервное копирование
+
+```bash
+# Создать бэкап
+sudo bash backup.sh create
+
+# Список бэкапов
+sudo bash backup.sh list
+
+# Восстановить из бэкапа
+sudo bash backup.sh restore /root/cubiveil-backups/cubiveil-backup-20260324_030000.tar.gz
+
+# Очистить старые бэкапы
+sudo bash backup.sh cleanup
+```
+
+**Возможности:**
+- Полный бэкап Marzban, Sing-box, SSL, ключей
+- Шифрование бэкапов через age
+- Автоматическая очистка старых бэкапов (30 дней)
+- Настройка автобэкапа по расписанию (cron)
+- Восстановление из зашифрованного бэкапа
 
 ---
 

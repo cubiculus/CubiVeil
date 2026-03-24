@@ -1,35 +1,66 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║        CubiVeil Unit Tests - setup-telegram.sh              ║
-# ║        Тестирование скрипта установки Telegram бота        ║
+# ║        CubiVeil Unit Tests - setup-telegram.sh           ║
+# ║        Тестирование скрипта установки Telegram бота       ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 set -euo pipefail
 
-# ── Цвета ──────────────────────────────────────────────────────
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-PLAIN='\033[0m'
-
-pass() { echo -e "${GREEN}[PASS]${PLAIN} $1"; }
-fail() {
-  echo -e "${RED}[FAIL]${PLAIN} $1"
-  ((TESTS_FAILED++))
-}
-warn() { echo -e "${YELLOW}[WARN]${PLAIN} $1"; }
-info() { echo -e "[INFO] $1"; }
-
-# ── Счётчик тестов ────────────────────────────────────────────
-TESTS_PASSED=0
-TESTS_FAILED=0
+# ── Подключение тестовых утилит ───────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "${SCRIPT_DIR}/lib/test-utils.sh"
 
 # ── Загрузка тестируемого скрипта ───────────────────────────────
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 if [[ ! -f "${SCRIPT_DIR}/setup-telegram.sh" ]]; then
   echo "Ошибка: setup-telegram.sh не найден"
   exit 1
 fi
+
+# ── Вспомогательная функция для проверки Python функций ────────
+# Usage: check_python_functions "category" "func1" "func2" ...
+check_python_functions() {
+  local category="$1"
+  shift
+  local functions=("$@")
+  local found=0
+  
+  for func in "${functions[@]}"; do
+    if grep -q "def ${func}" "${SCRIPT_DIR}/setup-telegram.sh"; then
+      pass "Python $category: $func"
+      ((TESTS_PASSED++))
+      ((found++))
+    else
+      warn "Python $category: $func не найдена"
+    fi
+  done
+  
+  if [[ $found -eq ${#functions[@]} ]]; then
+    pass "Python $category: все функции найдены ($found/${#functions[@]})"
+    ((TESTS_PASSED++))
+  fi
+}
+
+# ── Вспомогательная функция для проверки systemd директив ─────
+# Usage: check_systemd_directives "directive1" "directive2" ...
+check_systemd_directives() {
+  local directives=("$@")
+  local found=0
+  
+  for directive in "${directives[@]}"; do
+    if grep -q "$directive" "${SCRIPT_DIR}/setup-telegram.sh"; then
+      pass "Systemd: $directive"
+      ((TESTS_PASSED++))
+      ((found++))
+    else
+      warn "Systemd: $directive не найдена"
+    fi
+  done
+  
+  if [[ $found -eq ${#directives[@]} ]]; then
+    pass "Systemd: все директивы найдены ($found/${#directives[@]})"
+    ((TESTS_PASSED++))
+  fi
+}
 
 # ── Тест: файл существует ───────────────────────────────────────
 test_file_exists() {
@@ -302,6 +333,204 @@ test_chat_id_validation() {
   fi
 }
 
+# ── Тест: Python бот — функции метрик ────────────────────────
+test_python_bot_metrics() {
+  info "Тестирование Python функций метрик..."
+  check_python_functions "метрика" "get_cpu" "get_ram" "get_disk" "get_uptime" "get_active_users"
+}
+
+# ── Тест: Python бот — функции отправки ───────────────────────
+test_python_bot_send_functions() {
+  info "Тестирование Python функций отправки..."
+  check_python_functions "отправки" "tg_send" "tg_send_file"
+}
+
+# ── Тест: Python бот — команды ────────────────────────────────
+test_python_bot_commands() {
+  info "Тестирование Python команд бота..."
+  
+  check_python_functions "команд" "handle_command"
+  
+  # Проверка наличия команд
+  local commands=("/start" "/status" "/backup" "/users" "/restart" "/help")
+  local found=0
+  for cmd in "${commands[@]}"; do
+    if grep -q "\"${cmd}\"" "${SCRIPT_DIR}/setup-telegram.sh" || \
+       grep -q "'${cmd}'" "${SCRIPT_DIR}/setup-telegram.sh"; then
+      ((found++))
+    fi
+  done
+  if [[ $found -eq ${#commands[@]} ]]; then
+    pass "Python команды: все найдены ($found/${#commands[@]})"
+    ((TESTS_PASSED++))
+  else
+    warn "Python команды: найдено $found/${#commands[@]}"
+  fi
+}
+
+# ── Тест: Python бот — polling ────────────────────────────────
+test_python_bot_polling() {
+  info "Тестирование Python polling..."
+  
+  check_python_functions "" "poll"
+  
+  # Проверка что используется getUpdates API
+  if grep -q "getUpdates" "${SCRIPT_DIR}/setup-telegram.sh"; then
+    pass "Python: используется getUpdates API"
+    ((TESTS_PASSED++))
+  else
+    warn "Python: getUpdates API не найден"
+  fi
+  
+  # Проверка авторизации по chat_id (комплексная)
+  if grep -q "CHAT_ID" "${SCRIPT_DIR}/setup-telegram.sh" && \
+     grep -q "msg.get.*chat.*id" "${SCRIPT_DIR}/setup-telegram.sh"; then
+    pass "Python: авторизация по chat_id"
+    ((TESTS_PASSED++))
+  else
+    warn "Python: авторизация по chat_id не найдена"
+  fi
+}
+
+# ── Тест: Python бот — алерты ─────────────────────────────────
+test_python_bot_alerts() {
+  info "Тестирование Python системы алертов..."
+  
+  check_python_functions "алертов" "check_alerts"
+  
+  # Проверка что используется state файл для предотвращения спама
+  if grep -q "load_state\|save_state" "${SCRIPT_DIR}/setup-telegram.sh"; then
+    pass "Python: состояние алертов сохраняется"
+    ((TESTS_PASSED++))
+  else
+    warn "Python: состояние алертов не сохраняется"
+  fi
+  
+  # Проверка пороговых значений (все сразу)
+  if grep -q "ALERT_CPU" "${SCRIPT_DIR}/setup-telegram.sh" && \
+     grep -q "ALERT_RAM" "${SCRIPT_DIR}/setup-telegram.sh" && \
+     grep -q "ALERT_DISK" "${SCRIPT_DIR}/setup-telegram.sh"; then
+    pass "Python: все пороговые значения найдены"
+    ((TESTS_PASSED++))
+  else
+    warn "Python: не все пороговые значения найдены"
+  fi
+}
+
+# ── Тест: Python бот — бэкапы ─────────────────────────────────
+test_python_bot_backups() {
+  info "Тестирование Python системы бэкапов..."
+  
+  check_python_functions "бэкапов" "make_backup"
+
+  # Проверка что используется правильный путь к БД
+  if grep -q "/var/lib/marzban/db.sqlite3" "${SCRIPT_DIR}/setup-telegram.sh"; then
+    pass "Python: путь к БД Marzban"
+    ((TESTS_PASSED++))
+  else
+    fail "Python: путь к БД не найден"
+  fi
+
+  # Проверка что старые бэкапы удаляются
+  if grep -q "7.*86400\|7.*days\|old.*backup" "${SCRIPT_DIR}/setup-telegram.sh"; then
+    pass "Python: старые бэкапы удаляются"
+    ((TESTS_PASSED++))
+  else
+    warn "Python: удаление старых бэкапов не найдено"
+  fi
+}
+
+# ── Тест: Python бот — точка входа ────────────────────────────
+test_python_bot_entry_point() {
+  info "Тестирование Python точки входа..."
+
+  # Проверка наличия if __name__ == "__main__"
+  if grep -q 'if __name__ == "__main__":' "${SCRIPT_DIR}/setup-telegram.sh"; then
+    pass "Python: точка входа существует"
+    ((TESTS_PASSED++))
+  else
+    fail "Python: точка входа не найдена"
+  fi
+
+  # Проверка что поддерживаются режимы report, alert, poll
+  local modes=("report" "alert" "poll")
+  for mode in "${modes[@]}"; do
+    if grep -q "cmd == \"$mode\"\|cmd == '$mode'" "${SCRIPT_DIR}/setup-telegram.sh"; then
+      pass "Python: режим $mode"
+      ((TESTS_PASSED++))
+    else
+      warn "Python: режим $mode не найден"
+    fi
+  done
+}
+
+# ── Тест: Python бот — обработка ошибок ───────────────────────
+test_python_bot_error_handling() {
+  info "Тестирование Python обработки ошибок..."
+
+  # Проверка наличия try/except блоков
+  if grep -q "try:\|except" "${SCRIPT_DIR}/setup-telegram.sh"; then
+    pass "Python: обработка ошибок существует"
+    ((TESTS_PASSED++))
+  else
+    fail "Python: обработка ошибок не найдена"
+  fi
+
+  # Проверка что URLError обрабатывается
+  if grep -q "URLError\|urllib.error" "${SCRIPT_DIR}/setup-telegram.sh"; then
+    pass "Python: обработка сетевых ошибок"
+    ((TESTS_PASSED++))
+  else
+    warn "Python: обработка сетевых ошибок не найдена"
+  fi
+
+  # Проверка что Exception обрабатывается
+  if grep -q "except Exception" "${SCRIPT_DIR}/setup-telegram.sh"; then
+    pass "Python: обработка общих исключений"
+    ((TESTS_PASSED++))
+  else
+    warn "Python: обработка общих исключений не найдена"
+  fi
+}
+
+# ── Тест: Python бот — визуализация ───────────────────────────
+test_python_bot_visualization() {
+  info "Тестирование Python визуализации..."
+  check_python_functions "визуализации" "bar"
+  
+  # Проверка использования emoji (все сразу)
+  if grep -q "🔴" "${SCRIPT_DIR}/setup-telegram.sh" && \
+     grep -q "🟢" "${SCRIPT_DIR}/setup-telegram.sh" && \
+     grep -q "⚠️" "${SCRIPT_DIR}/setup-telegram.sh"; then
+    pass "Python: emoji используются"
+    ((TESTS_PASSED++))
+  else
+    warn "Python: emoji не используются"
+  fi
+}
+
+# ── Тест: systemd сервис — безопасность ───────────────────────
+test_systemd_security() {
+  info "Тестирование безопасности systemd сервиса..."
+
+  check_systemd_directives "ProtectHome=true" "ProtectSystem=strict" "NoNewPrivileges=true"
+
+  # Проверка что переменные окружения используются для токенов
+  if grep -q 'Environment="TG_TOKEN=' "${SCRIPT_DIR}/setup-telegram.sh"; then
+    pass "Systemd: токен в Environment"
+    ((TESTS_PASSED++))
+  else
+    fail "Systemd: токен не в Environment"
+  fi
+
+  if grep -q 'Environment="TG_CHAT_ID=' "${SCRIPT_DIR}/setup-telegram.sh"; then
+    pass "Systemd: chat_id в Environment"
+    ((TESTS_PASSED++))
+  else
+    warn "Systemd: chat_id не в Environment"
+  fi
+}
+
 # ── Основная функция ─────────────────────────────────────────
 main() {
   echo ""
@@ -348,6 +577,36 @@ main() {
   echo ""
 
   test_chat_id_validation
+  echo ""
+
+  test_python_bot_metrics
+  echo ""
+
+  test_python_bot_send_functions
+  echo ""
+
+  test_python_bot_commands
+  echo ""
+
+  test_python_bot_polling
+  echo ""
+
+  test_python_bot_alerts
+  echo ""
+
+  test_python_bot_backups
+  echo ""
+
+  test_python_bot_entry_point
+  echo ""
+
+  test_python_bot_error_handling
+  echo ""
+
+  test_python_bot_visualization
+  echo ""
+
+  test_systemd_security
   echo ""
 
   # ── Итоги ───────────────────────────────────────────────

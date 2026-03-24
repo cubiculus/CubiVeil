@@ -1,31 +1,14 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║        CubiVeil Unit Tests - Modular Structure              ║
-# ║        Тестирование модульной архитектуры                  ║
+# ║        CubiVeil Unit Tests - Modular Structure           ║
+# ║        Тестирование модульной архитектуры                ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 set -euo pipefail
 
-# ── Цвета ──────────────────────────────────────────────────────
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-PLAIN='\033[0m'
-
-pass() { echo -e "${GREEN}[PASS]${PLAIN} $1"; }
-fail() {
-  echo -e "${RED}[FAIL]${PLAIN} $1"
-  ((TESTS_FAILED++))
-}
-warn() { echo -e "${YELLOW}[WARN]${PLAIN} $1"; }
-info() { echo -e "[INFO] $1"; }
-
-# ── Счётчик тестов ────────────────────────────────────────────
-TESTS_PASSED=0
-TESTS_FAILED=0
-
-# ── Путь к проекту ───────────────────────────────────────────
+# ── Подключение тестовых утилит ───────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "${SCRIPT_DIR}/lib/test-utils.sh"
 
 # ── Тест: структура директорий ───────────────────────────────
 test_directory_structure() {
