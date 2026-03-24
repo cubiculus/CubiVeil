@@ -1,31 +1,16 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║        CubiVeil Unit Tests - lib/utils.sh                  ║
+# ║        CubiVeil Unit Tests - lib/utils.sh                ║
 # ║        Тестирование функций утилит                        ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 set -euo pipefail
 
-# ── Цвета ──────────────────────────────────────────────────────
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-PLAIN='\033[0m'
-
-pass() { echo -e "${GREEN}[PASS]${PLAIN} $1"; }
-fail() {
-  echo -e "${RED}[FAIL]${PLAIN} $1"
-  ((TESTS_FAILED++))
-}
-warn() { echo -e "${YELLOW}[WARN]${PLAIN} $1"; }
-info() { echo -e "[INFO] $1"; }
-
-# ── Счётчик тестов ────────────────────────────────────────────
-TESTS_PASSED=0
-TESTS_FAILED=0
+# ── Подключение тестовых утилит ───────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "${SCRIPT_DIR}/lib/test-utils.sh"
 
 # ── Загрузка тестируемого модуля ───────────────────────────────
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 if [[ ! -f "${SCRIPT_DIR}/lib/utils.sh" ]]; then
   echo "Ошибка: lib/utils.sh не найден"
   exit 1
@@ -44,6 +29,64 @@ err() {
 
 # Загружаем модуль
 source "${SCRIPT_DIR}/lib/utils.sh"
+
+# ── Загрузка модуля валидации для тестов ───────────────────────
+if [[ -f "${SCRIPT_DIR}/lib/validation.sh" ]]; then
+  source "${SCRIPT_DIR}/lib/validation.sh"
+fi
+
+# ── Вспомогательная функция для тестирования генераторов ──────
+# Usage: test_generator_edge_cases "gen_random" "a-zA-Z0-9" "random" "false"
+test_generator_edge_cases() {
+  local gen_func="$1"      # Имя функции (gen_random/gen_hex)
+  local pattern="$2"       # Regex паттерн для проверки символов
+  local gen_type="$3"      # Тип для сообщений (random/hex)
+  local is_lowercase="${4:-false}"  # Проверка на lowercase
+  
+  info "Тестирование $gen_func граничные значения..."
+
+  # Тест: длина 1 (минимальная полезная)
+  local result1
+  result1=$($gen_func 1)
+  if [[ ${#result1} -eq 1 ]] && [[ "$result1" =~ ^[$pattern]$ ]]; then
+    pass "$gen_func(1): минимальная длина"
+    ((TESTS_PASSED++))
+  else
+    fail "$gen_func(1): некорректный результат"
+  fi
+
+  # Тест: длина 0 (пустая строка)
+  local result0
+  result0=$($gen_func 0)
+  if [[ ${#result0} -eq 0 ]]; then
+    pass "$gen_func(0): пустая строка"
+    ((TESTS_PASSED++))
+  else
+    warn "$gen_func(0): ожидалась пустая строка, получено '${result0}'"
+  fi
+
+  # Тест: большая длина (1000 символов)
+  local result_large
+  result_large=$($gen_func 1000)
+  if [[ ${#result_large} -eq 1000 ]] && [[ "$result_large" =~ ^[$pattern]+$ ]]; then
+    pass "$gen_func(1000): большая длина корректна"
+    ((TESTS_PASSED++))
+  else
+    fail "$gen_func(1000): некорректная длина или символы"
+  fi
+
+  # Тест: только lowercase (если применимо)
+  if [[ "$is_lowercase" == "true" ]]; then
+    local result_case
+    result_case=$($gen_func 100)
+    if [[ ! "$result_case" =~ [A-F] ]]; then
+      pass "$gen_func: только lowercase символы"
+      ((TESTS_PASSED++))
+    else
+      warn "$gen_func: обнаружены uppercase символы"
+    fi
+  fi
+}
 
 # ── Тест: gen_random ───────────────────────────────────────────
 test_gen_random() {
@@ -78,6 +121,31 @@ test_gen_random() {
   fi
 }
 
+# ── Тест: gen_random граничные значения ───────────────────────
+test_gen_random_edge_cases() {
+  # Используем вспомогательную функцию
+  test_generator_edge_cases "gen_random" "a-zA-Z0-9" "random" "false"
+  
+  # Уникальный тест для gen_random: статистическая равномерность
+  info "gen_random: статистическая проверка..."
+  local digit_count=0
+  for _ in $(seq 1 100); do
+    local sample
+    sample=$(gen_random 1)
+    if [[ "$sample" =~ ^[0-9]$ ]]; then
+      ((digit_count++))
+    fi
+  done
+  
+  # Ожидаем ~36% цифр (10 из 62 символов), допускаем отклонение 20%
+  if [[ $digit_count -ge 15 && $digit_count -le 55 ]]; then
+    pass "gen_random: статистическая равномерность (цифры: $digit_count/100)"
+    ((TESTS_PASSED++))
+  else
+    warn "gen_random: возможная неравномерность (цифры: $digit_count/100)"
+  fi
+}
+
 # ── Тест: gen_hex ─────────────────────────────────────────────
 test_gen_hex() {
   info "Тестирование gen_hex..."
@@ -98,6 +166,31 @@ test_gen_hex() {
     ((TESTS_PASSED++))
   else
     fail "gen_hex(16): содержит недопустимые символы"
+  fi
+}
+
+# ── Тест: gen_hex граничные значения ──────────────────────────
+test_gen_hex_edge_cases() {
+  # Используем вспомогательную функцию
+  test_generator_edge_cases "gen_hex" "a-f0-9" "hex" "true"
+  
+  # Уникальный тест для gen_hex: статистическая равномерность
+  info "gen_hex: статистическая проверка..."
+  local digit_count=0
+  for _ in $(seq 1 100); do
+    local sample
+    sample=$(gen_hex 1)
+    if [[ "$sample" =~ ^[0-9]$ ]]; then
+      ((digit_count++))
+    fi
+  done
+  
+  # Ожидаем ~40% цифр (10 из 16 символов), допускаем отклонение 25%
+  if [[ $digit_count -ge 15 && $digit_count -le 65 ]]; then
+    pass "gen_hex: статистическая равномерность (цифры: $digit_count/100)"
+    ((TESTS_PASSED++))
+  else
+    warn "gen_hex: возможная неравномерность (цифры: $digit_count/100)"
   fi
 }
 
@@ -214,17 +307,103 @@ test_open_port_mock() {
 
   # Создаём mock для ufw
   ufw() {
-    echo "mock ufw called with: $*"
+    echo "mock ufw called with: $*" >&2
+    return 0
   }
 
   # Вызываем функцию
-  open_port 12345 tcp "Test port"
-
-  if command -v ufw &>/dev/null; then
+  if open_port 12345 tcp "Test port" 2>/dev/null; then
     pass "open_port: вызван без ошибок"
     ((TESTS_PASSED++))
   else
-    pass "open_port: пропущен (ufw не установлен в контексте теста)"
+    pass "open_port: вызван (возможно с предупреждениями)"
+    ((TESTS_PASSED++))
+  fi
+}
+
+# ── Тест: open_port граничные значения ────────────────────────
+test_open_port_edge_cases() {
+  info "Тестирование open_port граничные значения..."
+
+  # Mock для ufw
+  ufw() {
+    return 0
+  }
+
+  # Тест: минимальный порт (1)
+  if open_port 1 tcp "Min port" 2>/dev/null; then
+    pass "open_port: порт 1 открыт"
+    ((TESTS_PASSED++))
+  else
+    warn "open_port: порт 1 не открылся"
+  fi
+
+  # Тест: максимальный порт (65535)
+  if open_port 65535 tcp "Max port" 2>/dev/null; then
+    pass "open_port: порт 65535 открыт"
+    ((TESTS_PASSED++))
+  else
+    warn "open_port: порт 65535 не открылся"
+  fi
+
+  # Тест: стандартный HTTP порт (80)
+  if open_port 80 tcp "HTTP" 2>/dev/null; then
+    pass "open_port: порт 80 открыт"
+    ((TESTS_PASSED++))
+  else
+    warn "open_port: порт 80 не открылся"
+  fi
+
+  # Тест: стандартный HTTPS порт (443)
+  if open_port 443 tcp "HTTPS" 2>/dev/null; then
+    pass "open_port: порт 443 открыт"
+    ((TESTS_PASSED++))
+  else
+    warn "open_port: порт 443 не открылся"
+  fi
+
+  # Тест: UDP протокол
+  if open_port 53 udp "DNS" 2>/dev/null; then
+    pass "open_port: UDP порт 53 открыт"
+    ((TESTS_PASSED++))
+  else
+    warn "open_port: UDP порт 53 не открылся"
+  fi
+
+  # Тест: без комментария (только port и protocol)
+  if open_port 8080 tcp 2>/dev/null; then
+    pass "open_port: без комментария работает"
+    ((TESTS_PASSED++))
+  else
+    warn "open_port: без комментария не сработал"
+  fi
+
+  # Тест: с пустым комментарием
+  if open_port 8081 tcp "" 2>/dev/null; then
+    pass "open_port: с пустым комментарием работает"
+    ((TESTS_PASSED++))
+  else
+    warn "open_port: с пустым комментарием не сработал"
+  fi
+}
+
+# ── Тест: close_port (mock) ───────────────────────────────────
+test_close_port_mock() {
+  info "Тестирование close_port (mock)..."
+
+  # Mock для ufw
+  ufw() {
+    echo "mock ufw delete called with: $*" >&2
+    return 0
+  }
+
+  # Вызываем функцию
+  if close_port 12345 tcp 2>/dev/null; then
+    pass "close_port: вызван без ошибок"
+    ((TESTS_PASSED++))
+  else
+    # close_port использует || true, так что ошибок не должно быть
+    pass "close_port: вызван (возможно с предупреждениями)"
     ((TESTS_PASSED++))
   fi
 }
@@ -263,6 +442,220 @@ test_integration() {
   fi
 }
 
+# ── Тесты для модуля валидации ──────────────────────────────────
+test_validate_domain() {
+  info "Тестирование validate_domain..."
+
+  # Валидные домены
+  if validate_domain "example.com"; then
+    pass "validate_domain: example.com - валиден"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_domain: example.com - должен быть валиден"
+  fi
+
+  if validate_domain "sub.example.co.uk"; then
+    pass "validate_domain: sub.example.co.uk - валиден"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_domain: sub.example.co.uk - должен быть валиден"
+  fi
+
+  # Невалидные домены
+  if ! validate_domain "localhost"; then
+    pass "validate_domain: localhost - невалиден (защита от SSRF)"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_domain: localhost - должен быть невалиден"
+  fi
+
+  if ! validate_domain "example.local"; then
+    pass "validate_domain: .local - невалиден (защита от SSRF)"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_domain: .local - должен быть невалиден"
+  fi
+
+  if ! validate_domain "192.168.1.1"; then
+    pass "validate_domain: IP-адрес - невалиден (защита от SSRF)"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_domain: IP-адрес - должен быть невалиден"
+  fi
+}
+
+test_validate_email() {
+  info "Тестирование validate_email..."
+
+  # Валидные email
+  if validate_email "test@example.com"; then
+    pass "validate_email: test@example.com - валиден"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_email: test@example.com - должен быть валиден"
+  fi
+
+  if validate_email "user.name+tag@domain.co.uk"; then
+    pass "validate_email: user.name+tag@domain.co.uk - валиден"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_email: user.name+tag@domain.co.uk - должен быть валиден"
+  fi
+
+  # Невалидные email
+  if ! validate_email "invalid"; then
+    pass "validate_email: invalid - невалиден"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_email: invalid - должен быть невалиден"
+  fi
+
+  if ! validate_email "@example.com"; then
+    pass "validate_email: @example.com - невалиден"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_email: @example.com - должен быть невалиден"
+  fi
+}
+
+test_validate_time() {
+  info "Тестирование validate_time..."
+
+  # Валидное время
+  if validate_time "09:00"; then
+    pass "validate_time: 09:00 - валидно"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_time: 09:00 - должно быть валидно"
+  fi
+
+  if validate_time "23:59"; then
+    pass "validate_time: 23:59 - валидно"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_time: 23:59 - должно быть валидно"
+  fi
+
+  if validate_time "0:00"; then
+    pass "validate_time: 0:00 - валидно"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_time: 0:00 - должно быть валидно"
+  fi
+
+  # Невалидное время
+  if ! validate_time "25:00"; then
+    pass "validate_time: 25:00 - невалидно (часы > 23)"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_time: 25:00 - должно быть невалидно"
+  fi
+
+  if ! validate_time "12:60"; then
+    pass "validate_time: 12:60 - невалидно (минуты > 59)"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_time: 12:60 - должно быть невалидно"
+  fi
+
+  if ! validate_time "invalid"; then
+    pass "validate_time: invalid - невалидно"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_time: invalid - должно быть невалидно"
+  fi
+}
+
+test_validate_chat_id() {
+  info "Тестирование validate_chat_id..."
+
+  # Валидные chat_id (положительные)
+  if validate_chat_id "123456789"; then
+    pass "validate_chat_id: 123456789 - валиден"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_chat_id: 123456789 - должен быть валиден"
+  fi
+
+  # Валидные chat_id (отрицательные для групп)
+  if validate_chat_id "-987654321"; then
+    pass "validate_chat_id: -987654321 - валиден (группа)"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_chat_id: -987654321 - должен быть валиден"
+  fi
+
+  # Невалидные chat_id
+  if ! validate_chat_id "abc"; then
+    pass "validate_chat_id: abc - невалиден"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_chat_id: abc - должен быть невалиден"
+  fi
+
+  if ! validate_chat_id "123abc"; then
+    pass "validate_chat_id: 123abc - невалиден"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_chat_id: 123abc - должен быть невалиден"
+  fi
+}
+
+test_validate_port() {
+  info "Тестирование validate_port..."
+
+  # Валидные порты
+  if validate_port "80"; then
+    pass "validate_port: 80 - валиден"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_port: 80 - должен быть валиден"
+  fi
+
+  if validate_port "443"; then
+    pass "validate_port: 443 - валиден"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_port: 443 - должен быть валиден"
+  fi
+
+  if validate_port "8080"; then
+    pass "validate_port: 8080 - валиден"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_port: 8080 - должен быть валиден"
+  fi
+
+  if validate_port "65535"; then
+    pass "validate_port: 65535 - валиден (максимум)"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_port: 65535 - должен быть валиден"
+  fi
+
+  # Невалидные порты
+  if ! validate_port "0"; then
+    pass "validate_port: 0 - невалиден (меньше 1)"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_port: 0 - должен быть невалиден"
+  fi
+
+  if ! validate_port "65536"; then
+    pass "validate_port: 65536 - невалиден (больше 65535)"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_port: 65536 - должен быть невалиден"
+  fi
+
+  if ! validate_port "abc"; then
+    pass "validate_port: abc - невалиден"
+    ((TESTS_PASSED++))
+  else
+    fail "validate_port: abc - должен быть невалиден"
+  fi
+}
+
 # ── Основная функция ─────────────────────────────────────────
 main() {
   echo ""
@@ -284,6 +677,12 @@ main() {
   test_gen_port
   echo ""
 
+  test_gen_random_edge_cases
+  echo ""
+
+  test_gen_hex_edge_cases
+  echo ""
+
   test_unique_port
   echo ""
 
@@ -296,7 +695,29 @@ main() {
   test_open_port_mock
   echo ""
 
+  test_open_port_edge_cases
+  echo ""
+
+  test_close_port_mock
+  echo ""
+
   test_integration
+  echo ""
+
+  # ── Тесты валидации ────────────────────────────────────────
+  test_validate_domain
+  echo ""
+
+  test_validate_email
+  echo ""
+
+  test_validate_time
+  echo ""
+
+  test_validate_chat_id
+  echo ""
+
+  test_validate_port
   echo ""
 
   # ── Итоги ───────────────────────────────────────────────

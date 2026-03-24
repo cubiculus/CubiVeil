@@ -9,34 +9,28 @@
 # LANG_NAME="English"
 LANG_NAME="Русский"
 
-# ── Цвета / Colors ────────────────────────────────────────────
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-PLAIN='\033[0m'
+# ── Подключение fallback функций ─────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "${SCRIPT_DIR}/lib/fallback.sh" ]]; then
+  source "${SCRIPT_DIR}/lib/fallback.sh"
+fi
 
-# ── Функции вывода / Output functions ─────────────────────────
-ok() { echo -e "${GREEN}[✓]${PLAIN} $1"; }
-warn() { echo -e "${YELLOW}[!]${PLAIN} $1"; }
-err() {
-  echo -e "${RED}[✗]${PLAIN} $1"
-  exit 1
-}
-info() { echo -e "${CYAN}[→]${PLAIN} $1"; }
-
-step() {
-  echo -e "\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
-  echo -e "${BLUE}  $1${PLAIN}"
-  echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
-}
+# ── Подключение унифицированного модуля локализации ───────
+if [[ -f "${SCRIPT_DIR}/lib/i18n.sh" ]]; then
+  source "${SCRIPT_DIR}/lib/i18n.sh"
+fi
 
 # ── Проверки / Checks ─────────────────────────────────────────
 ERR_ROOT="Scripts must be run as root (sudo)"
 ERR_ROOT_RU="Запускай от root"
 ERR_UBUNTU="This script is only for Ubuntu"
 ERR_UBUNTU_RU="Скрипт только для Ubuntu"
+ERR_MARZBAN_NOT_FOUND="Marzban not found. Run main installer first: bash install.sh"
+ERR_MARZBAN_NOT_FOUND_RU="Marzban не найден. Сначала запусти основной установщик: bash install.sh"
+ERR_PYTHON3_NOT_FOUND="Python3 not found. Install: apt-get install python3"
+ERR_PYTHON3_NOT_FOUND_RU="Python3 не установлен. Установи: apt-get install python3"
+ERR_CURL_NOT_FOUND="curl not found. Install: apt-get install curl"
+ERR_CURL_NOT_FOUND_RU="curl не установлен. Установи: apt-get install curl"
 
 check_root() {
   if [[ $EUID -ne 0 ]]; then
@@ -64,6 +58,21 @@ print_banner() {
   echo ""
   echo -e "${CYAN}  ╔══════════════════════════════════════════╗${PLAIN}"
   echo -e "${CYAN}  ║            CubiVeil Installer            ║${PLAIN}"
+  echo -e "${CYAN}  ║    github.com/cubiculus/cubiveil         ║${PLAIN}"
+  if [[ "$LANG_NAME" == "Русский" ]]; then
+    echo -e "${CYAN}  ║    Marzban + Sing-box + Telegram бот     ║${PLAIN}"
+  else
+    echo -e "${CYAN}  ║    Marzban + Sing-box + Telegram Bot     ║${PLAIN}"
+  fi
+  echo -e "${CYAN}  ╚══════════════════════════════════════════╝${PLAIN}"
+  echo ""
+}
+
+print_banner_telegram() {
+  clear
+  echo ""
+  echo -e "${CYAN}  ╔══════════════════════════════════════════╗${PLAIN}"
+  echo -e "${CYAN}  ║       CubiVeil Telegram Bot Setup       ║${PLAIN}"
   echo -e "${CYAN}  ║    github.com/cubiculus/cubiveil         ║${PLAIN}"
   if [[ "$LANG_NAME" == "Русский" ]]; then
     echo -e "${CYAN}  ║    Marzban + Sing-box + Telegram бот     ║${PLAIN}"
@@ -375,27 +384,178 @@ STEP_SSH_SECURITY_RU="3. Смени порт SSH, закрой 22 в ufw"
 STEP_SAVE_KEY="4. Save age key in a secure location!"
 STEP_SAVE_KEY_RU="4. Сохрани ключ age в безопасном месте!"
 
-# ── Helper function to get localized string ───────────────────
-get_str() {
-  local key="$1"
-  local ru_key="${key}_RU"
+# ── Update messages ──────────────────────────────────────────────
+MSG_TITLE_UPDATE="CubiVeil — Update Utility"
+MSG_TITLE_CHECK="Check version"
+MSG_TITLE_DOWNLOAD="Download new version"
+MSG_TITLE_BACKUP="Backup current version"
+MSG_TITLE_INSTALL="Install update"
+MSG_TITLE_FINISH="Update complete"
 
-  if [[ "$LANG_NAME" == "Русский" ]]; then
-    echo "${!ru_key:-${!key}}"
-  else
-    echo "${!key}"
-  fi
-}
+MSG_MSG_CURRENT_VERSION="Current version"
+MSG_MSG_LATEST_VERSION="Latest version"
+MSG_MSG_UP_TO_DATE="Latest version installed"
+MSG_MSG_NEW_VERSION_AVAILABLE="New version available"
+MSG_MSG_UPDATE_AVAILABLE="Update available"
+MSG_MSG_DOWNLOADING="Downloading files..."
+MSG_MSG_BACKING_UP="Creating backup..."
+MSG_MSG_INSTALLING="Installing update..."
+MSG_MSG_SUCCESS="Update completed successfully"
+MSG_MSG_NO_UPDATE="No updates required"
 
-# ── Step title helper ─────────────────────────────────────────
-step_title() {
-  local step_num="$1"
-  local title_ru="$2"
-  local title_en="$3"
+MSG_ERR_NOT_INSTALLED="CubiVeil not installed in ${CUBIVEIL_DIR}"
+MSG_ERR_DOWNLOAD_FAILED="Failed to download update files"
+MSG_ERR_BACKUP_FAILED="Failed to create backup"
+MSG_ERR_INSTALL_FAILED="Failed to install update"
+MSG_ERR_GIT_FAILED="Failed to get version info"
 
-  if [[ "$LANG_NAME" == "Русский" ]]; then
-    step "Шаг ${step_num}/12 — ${title_ru}"
-  else
-    step "Step ${step_num}/12 — ${title_en}"
-  fi
-}
+MSG_TITLE_UPDATE_RU="CubiVeil — Утилита обновления"
+MSG_TITLE_CHECK_RU="Проверка версии"
+MSG_TITLE_DOWNLOAD_RU="Загрузка новой версии"
+MSG_TITLE_BACKUP_RU="Бэкап текущей версии"
+MSG_TITLE_INSTALL_RU="Установка обновления"
+MSG_TITLE_FINISH_RU="Обновление завершено"
+
+MSG_MSG_CURRENT_VERSION_RU="Текущая версия"
+MSG_MSG_LATEST_VERSION_RU="Последняя версия"
+MSG_MSG_UP_TO_DATE_RU="Установлена последняя версия"
+MSG_MSG_NEW_VERSION_AVAILABLE_RU="Доступна новая версия"
+MSG_MSG_UPDATE_AVAILABLE_RU="Доступно обновление"
+MSG_MSG_DOWNLOADING_RU="Загрузка файлов..."
+MSG_MSG_BACKING_UP_RU="Создание бэкапа..."
+MSG_MSG_INSTALLING_RU="Установка обновления..."
+MSG_MSG_SUCCESS_RU="Обновление успешно завершено"
+MSG_MSG_NO_UPDATE_RU="Обновлений не требуется"
+
+MSG_ERR_NOT_INSTALLED_RU="CubiVeil не установлен в ${CUBIVEIL_DIR}"
+MSG_ERR_DOWNLOAD_FAILED_RU="Не удалось загрузить файлы обновления"
+MSG_ERR_BACKUP_FAILED_RU="Не удалось создать бэкап"
+MSG_ERR_INSTALL_FAILED_RU="Не удалось установить обновление"
+MSG_ERR_GIT_FAILED_RU="Не удалось получить информацию о версии"
+
+# ── Rollback messages ──────────────────────────────────────────────
+MSG_TITLE_ROLLBACK="CubiVeil — Rollback Utility"
+MSG_TITLE_ROLLBACK_CHECK="Check backup"
+MSG_TITLE_STOP="Stop services"
+MSG_TITLE_RESTORE="Restore files"
+MSG_TITLE_CONFIG="Restore configuration"
+MSG_TITLE_START="Start services"
+MSG_TITLE_ROLLBACK_FINISH="Rollback complete"
+
+MSG_MSG_AVAILABLE_BACKUPS="Available backups"
+MSG_MSG_SELECTED_BACKUP="Selected backup"
+MSG_MSG_RESTORING="Restoring from backup..."
+MSG_MSG_RESTORED="Restored from backup"
+MSG_MSG_ROLLBACK_SUCCESS="Rollback completed successfully"
+
+MSG_ERR_NO_BACKUPS="No backups found in ${BACKUP_DIR}"
+MSG_ERR_BACKUP_INVALID="Invalid backup: missing structure"
+MSG_ERR_RESTORE_FAILED="Failed to restore files"
+MSG_ERR_STOP_FAILED="Failed to stop services"
+MSG_ERR_START_FAILED="Failed to start services"
+
+MSG_PROMPT_SELECT_BACKUP="Select backup"
+MSG_PROMPT_CONFIRM="Confirm rollback"
+
+MSG_TITLE_ROLLBACK_RU="CubiVeil — Утилита отката"
+MSG_TITLE_ROLLBACK_CHECK_RU="Проверка бэкапа"
+MSG_TITLE_STOP_RU="Остановка сервисов"
+MSG_TITLE_RESTORE_RU="Восстановление файлов"
+MSG_TITLE_CONFIG_RU="Восстановление конфигурации"
+MSG_TITLE_START_RU="Запуск сервисов"
+MSG_TITLE_ROLLBACK_FINISH_RU="Откат завершён"
+
+MSG_MSG_AVAILABLE_BACKUPS_RU="Доступные бэкапы"
+MSG_MSG_SELECTED_BACKUP_RU="Выбранный бэкап"
+MSG_MSG_RESTORING_RU="Восстановление из бэкапа..."
+MSG_MSG_RESTORED_RU="Восстановлено из бэкапа"
+MSG_MSG_ROLLBACK_SUCCESS_RU="Откат успешно завершён"
+
+MSG_ERR_NO_BACKUPS_RU="Бэкапы не найдены в ${BACKUP_DIR}"
+MSG_ERR_BACKUP_INVALID_RU="Некорректный бэкап: отсутствует структура"
+MSG_ERR_RESTORE_FAILED_RU="Не удалось восстановить файлы"
+MSG_ERR_STOP_FAILED_RU="Не удалось остановить сервисы"
+MSG_ERR_START_FAILED_RU="Не удалось запустить сервисы"
+
+MSG_PROMPT_SELECT_BACKUP_RU="Выберите бэкап"
+MSG_PROMPT_CONFIRM_RU="Подтвердить откат"
+
+# ── Общие сообщения ───────────────────────────────────────────────
+MSG_INFO_ENV_CHECKED="Environment checked"
+MSG_INFO_ENV_CHECKED_RU="Окружение проверено"
+
+MSG_INFO_INSTALLING="Installing..."
+MSG_INFO_INSTALLING_RU="Устанавливаю..."
+
+MSG_INFO_DOWNLOADING="Downloading..."
+MSG_INFO_DOWNLOADING_RU="Загружаю..."
+
+MSG_INFO_FILES_LOADED="Files loaded"
+MSG_INFO_FILES_LOADED_RU="Файлы загружены"
+
+MSG_INFO_UPDATE_INSTALLED="Update installed"
+MSG_INFO_UPDATE_INSTALLED_RU="Обновление установлено"
+
+MSG_INFO_SERVICES_STOPPED="Services stopped"
+MSG_INFO_SERVICES_STOPPED_RU="Сервисы остановлены"
+
+MSG_INFO_SERVICES_STARTED="Services started"
+MSG_INFO_SERVICES_STARTED_RU="Сервисы запущены"
+
+MSG_PROMPT_UPDATE="Perform update?"
+MSG_PROMPT_UPDATE_RU="Выполнить обновление?"
+
+MSG_PROMPT_CONTINUE="Continue?"
+MSG_PROMPT_CONTINUE_RU="Продолжить?"
+
+MSG_INFO_UPDATE_CANCELLED="Update cancelled"
+MSG_INFO_UPDATE_CANCELLED_RU="Обновление отменено"
+
+MSG_INFO_ROLLBACK_CANCELLED="Rollback cancelled"
+MSG_INFO_ROLLBACK_CANCELLED_RU="Откат отменён"
+
+MSG_WARNING_RESTART_SERVICES="Restart services?"
+MSG_WARNING_RESTART_SERVICES_RU="Перезапустить сервисы?"
+
+MSG_INFO_RESTARTING="Restarting services..."
+MSG_INFO_RESTARTING_RU="Перезапуск сервисов..."
+
+MSG_INFO_SERVICES_RESTARTED="Services restarted"
+MSG_INFO_SERVICES_RESTARTED_RU="Сервисы перезапущены"
+
+MSG_WARN_CURRENT_DATA_REPLACED="Current data will be replaced with backup data!"
+MSG_WARN_CURRENT_DATA_REPLACED_RU="Текущие данные будут заменены данными из бэкапа!"
+
+MSG_WARN_CONTINUE_ROLLBACK="Perform rollback?"
+MSG_WARN_CONTINUE_ROLLBACK_RU="Продолжить откат?"
+
+MSG_INFO_BACKUP_CREATED="Backup created:"
+MSG_INFO_BACKUP_CREATED_RU="Бэкап создан:"
+
+MSG_INFO_ROLLBACK_FROM="Rollback performed from:"
+MSG_INFO_ROLLBACK_FROM_RU="Откат выполнен из:"
+
+MSG_WARN_SERVICE_NOT_STARTED="Marzban not started — check logs"
+MSG_WARN_SERVICE_NOT_STARTED_RU="Marzban не запустился — проверьте логи"
+
+MSG_WARN_SINGBOX_NOT_STARTED="Sing-box not started — check logs"
+MSG_WARN_SINGBOX_NOT_STARTED_RU="Sing-box не запустился — проверьте логи"
+
+MSG_ERR_ROOT_REQUIRED="Root access required"
+MSG_ERR_ROOT_REQUIRED_RU="Требуется запуск от root"
+
+MSG_ERR_COMMAND_REQUIRED="${cmd} required but not installed"
+MSG_ERR_COMMAND_REQUIRED_RU="Требуется ${cmd}, но он не установлен"
+
+# ── Utils messages ─────────────────────────────────────────────────
+MSG_ERR_NO_FREE_PORT="Failed to find free port after {MAX} attempts"
+MSG_ERR_NO_FREE_PORT_RU="Не удалось найти свободный порт после {MAX} попыток"
+
+MSG_ERR_OPEN_PORT="Failed to open port {PORT}/{PROTO} in firewall"
+MSG_ERR_OPEN_PORT_RU="Не удалось открыть порт {PORT}/{PROTO} в файрволе"
+
+MSG_ERR_INVALID_PORT="Invalid port: {PORT}"
+MSG_ERR_INVALID_PORT_RU="Невалидный порт: {PORT}"
+
+MSG_ERR_UNKNOWN_ARCH="Unknown architecture: {ARCH}"
+MSG_ERR_UNKNOWN_ARCH_RU="Неизвестная архитектура: {ARCH}"

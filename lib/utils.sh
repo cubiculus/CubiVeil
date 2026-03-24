@@ -1,8 +1,18 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║           CubiVeil — Common Utilities                    ║
-# ║         github.com/cubiculus/cubiveil                     ║
+# ║          CubiVeil — Common Utilities                     ║
+# ║          github.com/cubiculus/cubiveil                   ║
 # ╚═══════════════════════════════════════════════════════════╝
+
+# ── Подключение локализации (если доступно) ───────────────────────
+if [[ -f "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")/../}/lib/i18n.sh" ]]; then
+  source "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")/../}/lib/i18n.sh"
+fi
+
+# ── Подключение модуля валидации ──────────────────────────────────
+if [[ -f "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")/../}/lib/validation.sh" ]]; then
+  source "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")/../}/lib/validation.sh"
+fi
 
 # ── Генераторы случайных значений ────────────────────────────
 gen_random() {
@@ -18,7 +28,8 @@ gen_port() {
 }
 
 # ── Управление портами ───────────────────────────────────────
-USED_PORTS=(443)
+declare -A USED_PORTS_MAP
+USED_PORTS_MAP[443]=1
 
 unique_port() {
   local p
@@ -27,21 +38,28 @@ unique_port() {
 
   while [[ $attempts -lt $max_attempts ]]; do
     p=$(gen_port)
-    # Проверка: не используется ли порт в списке и не занят ли процессом
-    if [[ ! " ${USED_PORTS[*]} " =~ ${p} ]] &&
+    # Валидация порта через модуль validation.sh
+    if ! validate_port "$p"; then
+      ((attempts++))
+      continue
+    fi
+    # Быстрая проверка через ассоциативный массив вместо grep в цикле
+    if [[ -z "${USED_PORTS_MAP[$p]:-}" ]] &&
       ! ss -tlnp 2>/dev/null | grep -q ":${p} "; then
-      USED_PORTS+=("$p")
+      USED_PORTS_MAP[$p]=1
       echo "$p"
       return
     fi
     ((attempts++))
   done
 
-  if [[ "$LANG_NAME" == "Русский" ]]; then
-    err "Не удалось найти свободный порт после ${max_attempts} попыток"
+  local msg
+  if declare -f get_str >/dev/null; then
+    msg=$(get_str "MSG_ERR_NO_FREE_PORT" | sed "s/{MAX}/${max_attempts}/")
   else
-    err "Failed to find free port after ${max_attempts} attempts"
+    msg="Failed to find free port after ${max_attempts} attempts"
   fi
+  err "$msg"
 }
 
 open_port() {
@@ -49,14 +67,27 @@ open_port() {
   local proto="${2:-tcp}"
   local comment="${3:-cubiveil}"
 
+  # Валидация порта через модуль validation.sh
+  if ! validate_port "$port"; then
+    local msg
+    if declare -f get_str >/dev/null; then
+      msg=$(get_str "MSG_ERR_INVALID_PORT" | sed "s/{PORT}/${port}/")
+    else
+      msg="Invalid port: ${port}"
+    fi
+    err "$msg"
+  fi
+
   if ! ufw allow "${port}/${proto}" comment "${comment}" >/dev/null 2>&1; then
     # Пробуем без comment (некоторые версии ufw не поддерживают)
     if ! ufw allow "${port}/${proto}" >/dev/null 2>&1; then
-      if [[ "$LANG_NAME" == "Русский" ]]; then
-        err "Не удалось открыть порт ${port}/${proto} в файрволе"
+      local msg
+      if declare -f get_str >/dev/null; then
+        msg=$(get_str "MSG_ERR_OPEN_PORT" | sed "s/{PORT}/${port}/" | sed "s/{PROTO}/${proto}/")
       else
-        err "Failed to open port ${port}/${proto} in firewall"
+        msg="Failed to open port ${port}/${proto} in firewall"
       fi
+      err "$msg"
     fi
   fi
 }
@@ -69,18 +100,67 @@ close_port() {
 
 # ── Системная информация ───────────────────────────────────────
 arch() {
-  case "$(uname -m)" in
+  local arch_name
+  arch_name=$(uname -m)
+
+  case "$arch_name" in
   x86_64 | amd64) echo 'amd64' ;;
   aarch64 | arm64) echo 'arm64' ;;
-  *) err "Неизвестная архитектура: $(uname -m)" ;;
+  *)
+    local msg
+    if declare -f get_str >/dev/null; then
+      msg=$(get_str "MSG_ERR_UNKNOWN_ARCH" | sed "s/{ARCH}/${arch_name}/")
+    else
+      msg="Unknown architecture: ${arch_name}"
+    fi
+    err "$msg"
+    ;;
   esac
 }
 
 get_server_ip() {
-  local ip
-  for url in https://api4.ipify.org https://ipv4.icanhazip.com https://4.ident.me; do
-    ip=$(curl -s --max-time 4 "$url" 2>/dev/null | tr -d '[:space:]')
-    [[ -n "$ip" ]] && echo "$ip" && return
+  # Параллельные запросы для ускорения (~1 сек вместо до 12 сек)
+  local temp_file
+  temp_file=$(mktemp)
+  local pids=()
+  local urls=(
+    "https://api4.ipify.org"
+    "https://ipv4.icanhazip.com"
+    "https://4.ident.me"
+  )
+
+  # Запускаем все запросы параллельно
+  for url in "${urls[@]}"; do
+    {
+      local result
+      result=$(curl -sf --max-time 4 "$url" 2>/dev/null | tr -d '[:space:]')
+      if [[ -n "$result" ]]; then
+        echo "$result" > "${temp_file}.${BASHPID}"
+      fi
+    } &
+    pids+=($!)
   done
+
+  # Ждём завершения всех процессов
+  for pid in "${pids[@]}"; do
+    wait "$pid" 2>/dev/null || true
+  done
+
+  # Получаем первый успешный результат
+  local ip=""
+  for f in "${temp_file}".*; do
+    if [[ -f "$f" ]]; then
+      ip=$(cat "$f")
+      rm -f "$f"
+      if [[ -n "$ip" ]]; then
+        rm -f "$temp_file"
+        echo "$ip"
+        return 0
+      fi
+    fi
+  done
+
+  rm -f "$temp_file"
   echo ""
+  return 1
 }
