@@ -37,7 +37,10 @@ check_ubuntu() { :; }
 step() { echo "$1"; }
 ok() { echo -e "${GREEN}[✓]${PLAIN} $1"; }
 warn() { echo -e "${YELLOW}[!]${PLAIN} $1"; }
-err() { echo -e "${RED}[✗]${PLAIN} $1" >&2; exit 1; }
+err() {
+  echo -e "${RED}[✗]${PLAIN} $1" >&2
+  exit 1
+}
 
 # Загружаем модуль
 source "${SCRIPT_DIR}/lib/utils.sh"
@@ -174,13 +177,13 @@ test_arch() {
 
   # Проверка что результат один из поддерживаемых
   case "$result" in
-    amd64|arm64)
-      pass "arch: поддерживаемая архитектура $result"
-      ((TESTS_PASSED++))
-      ;;
-    *)
-      warn "arch: неизвестная архитектура $result (может быть нормально для тестовой системы)"
-      ;;
+  amd64 | arm64)
+    pass "arch: поддерживаемая архитектура $result"
+    ((TESTS_PASSED++))
+    ;;
+  *)
+    warn "arch: неизвестная архитектура $result (может быть нормально для тестовой системы)"
+    ;;
   esac
 }
 

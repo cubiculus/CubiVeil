@@ -176,7 +176,10 @@ test_module_loading() {
   step() { echo "$1"; }
   ok() { echo -e "${GREEN}[✓]${PLAIN} $1"; }
   warn() { echo -e "${YELLOW}[!]${PLAIN} $1"; }
-  err() { echo -e "${RED}[✗]${PLAIN} $1" >&2; exit 1; }
+  err() {
+    echo -e "${RED}[✗]${PLAIN} $1" >&2
+    exit 1
+  }
 
   # Проверка загрузки lib/utils.sh
   if bash -c "source ${SCRIPT_DIR}/lib/utils.sh 2>&1"; then
@@ -215,7 +218,10 @@ test_utils_functions() {
   step() { echo "$1"; }
   ok() { echo -e "${GREEN}[✓]${PLAIN} $1"; }
   warn() { echo -e "${YELLOW}[!]${PLAIN} $1"; }
-  err() { echo -e "${RED}[✗]${PLAIN} $1" >&2; exit 1; }
+  err() {
+    echo -e "${RED}[✗]${PLAIN} $1" >&2
+    exit 1
+  }
 
   # Загружаем модуль
   source "${SCRIPT_DIR}/lib/utils.sh"
@@ -241,6 +247,7 @@ test_utils_functions() {
 }
 
 # ── Тест: функции в lib/install-steps.sh ───────────────────────
+# shellcheck disable=SC2218
 test_install_steps_functions() {
   info "Тестирование функций в lib/install-steps.sh..."
 
@@ -251,7 +258,10 @@ test_install_steps_functions() {
   step_title() { echo "$1"; }
   ok() { echo -e "${GREEN}[✓]${PLAIN} $1"; }
   warn() { echo -e "${YELLOW}[!]${PLAIN} $1"; }
-  err() { echo -e "${RED}[✗]${PLAIN} $1" >&2; exit 1; }
+  err() {
+    echo -e "${RED}[✗]${PLAIN} $1" >&2
+    exit 1
+  }
   info() { echo "[INFO] $1"; }
 
   # Загружаем модули
@@ -319,7 +329,7 @@ test_file_sizes() {
 
   # Проверка что install.sh не слишком большой (рефакторинг удался)
   local install_size
-  install_size=$(wc -l < "${SCRIPT_DIR}/install.sh" 2>/dev/null || echo "0")
+  install_size=$(wc -l <"${SCRIPT_DIR}/install.sh" 2>/dev/null || echo "0")
 
   if [[ $install_size -lt 200 ]]; then
     pass "install.sh: компактный (${install_size} строк)"
@@ -332,7 +342,7 @@ test_file_sizes() {
 
   # Проверка что setup-telegram.sh имеет разумный размер
   local telegram_size
-  telegram_size=$(wc -l < "${SCRIPT_DIR}/setup-telegram.sh" 2>/dev/null || echo "0")
+  telegram_size=$(wc -l <"${SCRIPT_DIR}/setup-telegram.sh" 2>/dev/null || echo "0")
 
   if [[ $telegram_size -gt 0 ]]; then
     pass "setup-telegram.sh: содержит код (${telegram_size} строк)"
@@ -343,7 +353,7 @@ test_file_sizes() {
 
   # Проверка что lib/utils.sh имеет разумный размер
   local utils_size
-  utils_size=$(wc -l < "${SCRIPT_DIR}/lib/utils.sh" 2>/dev/null || echo "0")
+  utils_size=$(wc -l <"${SCRIPT_DIR}/lib/utils.sh" 2>/dev/null || echo "0")
 
   if [[ $utils_size -gt 0 ]]; then
     pass "lib/utils.sh: содержит код (${utils_size} строк)"
@@ -381,6 +391,7 @@ test_install_sh_integration() {
   fi
 }
 
+# shellcheck disable=SC2218
 # ── Основная функция ─────────────────────────────────────────
 main() {
   echo ""

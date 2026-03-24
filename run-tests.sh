@@ -138,28 +138,28 @@ main() {
   # Обработка аргументов
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --unit)
-        mode="unit"
-        shift
-        ;;
-      --integration)
-        mode="integration"
-        shift
-        ;;
-      --full)
-        mode="full"
-        shift
-        ;;
-      --help|-h)
-        show_help
-        exit 0
-        ;;
-      *)
-        echo -e "${RED}Неизвестная опция: $1${PLAIN}"
-        echo ""
-        show_help
-        exit 1
-        ;;
+    --unit)
+      mode="unit"
+      shift
+      ;;
+    --integration)
+      mode="integration"
+      shift
+      ;;
+    --full)
+      mode="full"
+      shift
+      ;;
+    --help | -h)
+      show_help
+      exit 0
+      ;;
+    *)
+      echo -e "${RED}Неизвестная опция: $1${PLAIN}"
+      echo ""
+      show_help
+      exit 1
+      ;;
     esac
   done
 
@@ -167,16 +167,16 @@ main() {
 
   # Запуск тестов в зависимости от режима
   case "$mode" in
-    unit)
-      run_unit_tests
-      ;;
-    integration)
-      run_integration_tests
-      ;;
-    full)
-      run_unit_tests
-      run_integration_tests
-      ;;
+  unit)
+    run_unit_tests
+    ;;
+  integration)
+    run_integration_tests
+    ;;
+  full)
+    run_unit_tests
+    run_integration_tests
+    ;;
   esac
 
   # ── Итоги ─────────────────────────────────────────────────

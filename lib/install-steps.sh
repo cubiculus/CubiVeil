@@ -117,8 +117,10 @@ prompt_inputs() {
   fi
   read -rp "$prompt_telegram" INSTALL_TG
 
-  # Сбрасываем переменные Telegram
+  # Сбрасываем переменные Telegram (используются в setup-telegram.sh)
+  # shellcheck disable=SC2034
   TG_TOKEN=""
+  # shellcheck disable=SC2034
   TG_CHAT_ID=""
 
   if [[ "$INSTALL_TG" == "y" || "$INSTALL_TG" == "Y" ]]; then

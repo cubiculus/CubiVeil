@@ -124,8 +124,8 @@ test_security() {
 
   # Проверка что systemd сервис имеет защитные директивы
   if grep -q 'ProtectHome' "${SCRIPT_DIR}/setup-telegram.sh" &&
-     grep -q 'ProtectSystem' "${SCRIPT_DIR}/setup-telegram.sh" &&
-     grep -q 'NoNewPrivileges' "${SCRIPT_DIR}/setup-telegram.sh"; then
+    grep -q 'ProtectSystem' "${SCRIPT_DIR}/setup-telegram.sh" &&
+    grep -q 'NoNewPrivileges' "${SCRIPT_DIR}/setup-telegram.sh"; then
     pass "Безопасность: systemd защитные директивы"
     ((TESTS_PASSED++))
   else
