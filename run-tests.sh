@@ -6,15 +6,14 @@
 
 set -euo pipefail
 
-# ── Цвета ──────────────────────────────────────────────────────
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-PLAIN='\033[0m'
+# ── Подключение унифицированных функций вывода ───────────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/lib/output.sh" || {
+  echo "❌ Не удалось загрузить lib/output.sh" >&2
+  exit 1
+}
 
 # ── Переменные ───────────────────────────────────────────────────
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TESTS_DIR="$SCRIPT_DIR/tests"
 
 TOTAL_PASSED=0

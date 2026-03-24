@@ -18,6 +18,12 @@ else
   source "${PROJECT_DIR}/lib/fallback.sh"
 fi
 
+# ── Подключение унифицированных функций вывода ───────────────
+source "${PROJECT_DIR}/lib/output.sh" || {
+  echo "❌ Не удалось загрузить lib/output.sh" >&2
+  exit 1
+}
+
 # ── Подключение общих утилит ───────────────────────────────────
 source "${PROJECT_DIR}/lib/utils.sh" || {
   err "Не удалось загрузить lib/utils.sh"
@@ -97,11 +103,6 @@ step_title() {
   fi
   echo "══════════════════════════════════════════════════════════"
 }
-
-info() { echo -e "ℹ️  $*"; }
-success() { echo -e "✅ $*"; }
-warning() { echo -e "⚠️  $*"; }
-err() { echo -e "❌ $*" >&2; exit 1; }
 
 # ══════════════════════════════════════════════════════════════
 # Утилиты для работы с Marzban API

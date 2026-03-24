@@ -26,7 +26,7 @@ else
     echo -e "${RED}[✗]${PLAIN} $1"
     exit 1
   }
-  info() { echo -e "${CYAN}[→]${PLAIN} $1"; }
+  info() { echo -e "ℹ️  $*"; }
 
   step() {
     echo -e "\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"

@@ -17,6 +17,12 @@ else
   source "${PROJECT_DIR}/lib/fallback.sh"
 fi
 
+# ── Подключение унифицированных функций вывода ───────────────
+source "${PROJECT_DIR}/lib/output.sh" || {
+  echo "❌ Не удалось загрузить lib/output.sh" >&2
+  exit 1
+}
+
 # ── Константы ─────────────────────────────────────────────────
 CUBIVEIL_CLI="/usr/local/bin/cubiveil"
 ALIASES_FILE="/etc/bash_aliases.d/cubiveil"
@@ -38,10 +44,6 @@ msg() {
   local key="$1"
   echo "${MSG[$key]:-$key}"
 }
-
-info() { echo -e "ℹ️  $*"; }
-success() { echo -e "✅ $*"; }
-err() { echo -e "❌ $*" >&2; exit 1; }
 
 # ══════════════════════════════════════════════════════════════
 # Проверка окружения
