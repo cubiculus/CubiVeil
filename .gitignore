@@ -74,6 +74,9 @@ node_modules/
 *.a
 *.exe
 
+# Claude
+.claude/settings.local.json
+
 # Системные файлы на сервере
 /root/cubiveil-credentials.*
 /opt/marzban/.env
