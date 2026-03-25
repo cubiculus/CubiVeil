@@ -1,9 +1,9 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Core Logging Functions              ║
-# ║          github.com/cubiculus/cubiveil                   ║
+# ║          CubiVeil — Core Logging Functions                ║
+# ║          github.com/cubiculus/cubiveil                    ║
 # ║                                                           ║
-# ║  Общие функции логирования для всех модулей             ║
+# ║  Общие функции логирования для всех модулей               ║
 # ║  - Логирование в файл                                     ║
 # ║  - Вывод сообщений с уровнями                             ║
 # ║  - Отслеживание прогресса                                 ║
@@ -104,44 +104,37 @@ log_success() {
 }
 
 # ── Логирование с выводом в консоль / Console Logging ────
+# Эти функции комбинируют вывод в консоль и логирование
+# Для простого вывода используйте функции из output.sh
 
 # Информационное сообщение (консоль + лог)
-info() {
+log_console_info() {
   echo -e "ℹ️  $*"
   log_info "$*"
 }
 
 # Успешное сообщение (консоль + лог)
-success() {
+log_console_success() {
   echo -e "${GREEN}✅${PLAIN} $*"
   log_success "$*"
 }
 
 # Предупреждение (консоль + лог)
-warning() {
+log_console_warning() {
   echo -e "${YELLOW}⚠️${PLAIN} $*"
   log_warn "$*"
 }
 
 # Ошибка (консоль + лог)
-err() {
+log_console_error() {
   echo -e "${RED}❌${PLAIN} $*" >&2
   log_error "$*"
 }
 
 # ── Функции совместимости / Compatibility Functions ────────
-
-# ok() — совместимость с output.sh
-ok() {
-  echo -e "${GREEN}[✓]${PLAIN} $1"
-  log_info "$1"
-}
-
-# warn() — совместимость с output.sh
-warn() {
-  echo -e "${YELLOW}[!]${PLAIN} $1"
-  log_warn "$1"
-}
+# Удалены дублирующие info(), success(), warning(), err(), ok(), warn()
+# Используйте функции из lib/output.sh для простого вывода
+# Используйте log_console_*() для вывода с логированием
 
 # ── Логирование выполнения команд / Command Logging ───────
 
@@ -186,9 +179,9 @@ log_run_verbose() {
   local exit_code=$?
 
   if [[ $exit_code -eq 0 ]]; then
-    success "${description}: OK"
+    log_console_success "${description}: OK"
   else
-    err "${description}: FAILED (exit code ${exit_code})"
+    log_console_error "${description}: FAILED (exit code ${exit_code})"
   fi
 
   return $exit_code
@@ -196,9 +189,9 @@ log_run_verbose() {
 
 # ── Логирование прогресса / Progress Logging ──────────────
 
-# Заголовок шага
-# Использование: step_title "номер" "описание на русском" "описание на английском"
-step_title() {
+# Заголовок шага с логированием
+# Использование: log_step_title "номер" "описание на русском" "описание на английском"
+log_step_title() {
   local step="$1"
   local ru="$2"
   local en="$3"
@@ -215,13 +208,19 @@ step_title() {
   echo "══════════════════════════════════════════════════════════"
 }
 
-# Простой заголовок шага (совместимость)
-step() {
+# Простой заголовок шага с логированием (совместимость)
+log_step() {
+  local msg="$1"
   echo -e "\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
-  echo -e "${BLUE}  $1${PLAIN}"
+  echo -e "${BLUE}  ${msg}${PLAIN}"
   echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
-  log_info "$1"
+  log_info "$msg"
 }
+
+# ── Функции совместимости / Compatibility Functions ────────
+# Удалены дублирующие step_title() и step()
+# Используйте функции из lib/output.sh для простого вывода
+# Используйте log_step_title() и log_step() для вывода с логированием
 
 # ── Логирование с контекстом / Contextual Logging ─────────
 
