@@ -35,7 +35,9 @@ svc_start() { echo "[MOCK] svc_start: $1" >&2; return 0; }
 
 # Mock для проверки SHA256
 verify_sha256() {
+  # shellcheck disable=SC2034
   local file="$1"
+  # shellcheck disable=SC2034
   local expected="$2"
   # Для тестов всегда возвращаем true
   return 0
@@ -53,7 +55,12 @@ openssl() {
   fi
 }
 
+# Mock для функций rollback (чтобы избежать ошибки SC2218)
+rollback_extract_backup() { echo "[MOCK] rollback_extract_backup: $1" >&2; return 0; }
+rollback_verify_integrity() { echo "[MOCK] rollback_verify_integrity" >&2; return 0; }
+
 # ── Загрузка модуля ───────────────────────────────────────────
+# shellcheck source=lib/modules/rollback/install.sh
 source "$MODULE_PATH"
 
 # ── Тест: файл существует ───────────────────────────────────────
@@ -241,6 +248,7 @@ test_rollback_marzban_db() {
   mkdir -p "$test_temp_dir" "$test_marzban_dir"
 
   ROLLBACK_TEMP_DIR="$test_temp_dir"
+  # shellcheck disable=SC2034
   MARZBAN_DIR="$test_marzban_dir"
 
   # Создаём тестовую БД
@@ -264,6 +272,7 @@ test_rollback_marzban_config() {
   mkdir -p "$test_temp_dir" "/opt/marzban"
 
   ROLLBACK_TEMP_DIR="$test_temp_dir"
+  # shellcheck disable=SC2034
   MARZBAN_ENV="/opt/marzban/.env"
   MARZBAN_TEMPLATE="${test_temp_dir}/sing-box-template.json"
 
@@ -313,6 +322,7 @@ test_rollback_ssl_certs() {
   mkdir -p "$test_temp_dir" "$test_ssl_dir"
 
   ROLLBACK_TEMP_DIR="$test_temp_dir"
+  # shellcheck disable=SC2034
   SSL_CERT_DIR="$test_ssl_dir"
 
   # Создаём тестовые сертификаты
@@ -337,7 +347,9 @@ test_rollback_keys() {
   mkdir -p "$test_temp_dir" "$test_marzban_dir"
 
   ROLLBACK_TEMP_DIR="$test_temp_dir"
+  # shellcheck disable=SC2034
   CREDENTIALS_FILE="${test_marzban_dir}/credentials.age"
+  # shellcheck disable=SC2034
   CREDENTIALS_KEY="${test_marzban_dir}/credentials.key"
 
   # Создаём тестовые ключи
@@ -545,6 +557,7 @@ test_verify_sha256_integration() {
   echo "test content" > "$test_file"
 
   # Получаем реальный hash
+  # shellcheck disable=SC2034
   local expected_hash
   expected_hash=$(sha256sum "$test_file" | awk '{print $1}')
 

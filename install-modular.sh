@@ -53,7 +53,7 @@ fi
 # ── Конфигурация установки / Installation Configuration ────
 
 # Режим установки
-INSTALL_MODE="full"  # full | minimal | custom
+INSTALL_MODE="full" # full | minimal | custom
 
 # Модули для установки
 INSTALL_MODULES=()
@@ -101,28 +101,28 @@ select_install_mode() {
     read -rp "  Enter choice [1-4]: " choice
 
     case "$choice" in
-      1)
-        INSTALL_MODE="full"
-        INSTALL_MODULES=($(manifest_get_install_order))
-        return
-        ;;
-      2)
-        INSTALL_MODE="minimal"
-        INSTALL_MODULES=($(manifest_get_install_order "${MINIMAL_INSTALL_ORDER[@]}"))
-        return
-        ;;
-      3)
-        INSTALL_MODE="custom"
-        select_custom_modules
-        return
-        ;;
-      4)
-        echo "Installation cancelled."
-        exit 0
-        ;;
-      *)
-        warn "Invalid choice"
-        ;;
+    1)
+      INSTALL_MODE="full"
+      mapfile -t INSTALL_MODULES < <(manifest_get_install_order)
+      return
+      ;;
+    2)
+      INSTALL_MODE="minimal"
+      mapfile -t INSTALL_MODULES < <(manifest_get_install_order "${MINIMAL_INSTALL_ORDER[@]}")
+      return
+      ;;
+    3)
+      INSTALL_MODE="custom"
+      select_custom_modules
+      return
+      ;;
+    4)
+      echo "Installation cancelled."
+      exit 0
+      ;;
+    *)
+      warn "Invalid choice"
+      ;;
     esac
   done
 }
@@ -224,6 +224,7 @@ install_modules() {
     fi
 
     # Подключаем модуль
+    # shellcheck source=lib/modules/MODULE/install.sh
     source "$module_file"
 
     # Проверяем зависимости
@@ -255,6 +256,7 @@ configure_modules() {
     local module_file="${SCRIPT_DIR}/lib/modules/${module}/install.sh"
 
     if [[ -f "$module_file" ]]; then
+      # shellcheck source=lib/modules/MODULE/install.sh
       source "$module_file"
 
       if declare -f module_configure >/dev/null; then
@@ -277,6 +279,7 @@ enable_modules() {
     local module_file="${SCRIPT_DIR}/lib/modules/${module}/install.sh"
 
     if [[ -f "$module_file" ]]; then
+      # shellcheck source=lib/modules/MODULE/install.sh
       source "$module_file"
 
       if declare -f module_enable >/dev/null; then

@@ -28,6 +28,7 @@ fail() { echo -e "${RED}[FAIL]${PLAIN} $*" >&2; ((TESTS_FAILED++)); }
 warn() { echo -e "${YELLOW}[WARN]${PLAIN} $*" >&2; }
 
 # ── Mock зависимостей ────────────────────────────────────────
+# shellcheck disable=SC2034
 LANG_NAME="English"
 SERVER_IP="1.2.3.4"
 DOMAIN="test.example.com"
@@ -127,6 +128,7 @@ openssl() {
 # ── Загрузка тестируемого модуля ─────────────────────────────
 load_module() {
   if [[ -f "$STEPS_FILE" ]]; then
+    # shellcheck source=lib/steps/install-steps-main.sh
     source "$STEPS_FILE"
   fi
 }

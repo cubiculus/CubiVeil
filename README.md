@@ -12,6 +12,16 @@
   <a href="docs/README_EN.md">English version</a>
 </p>
 
+<p align="center">
+  <a href="https://github.com/cubiculus/CubiVeil/actions/workflows/shellcheck.yml"><img src="https://github.com/cubiculus/CubiVeil/actions/workflows/shellcheck.yml/badge.svg" alt="Shellcheck"/></a>
+  <a href="https://github.com/cubiculus/CubiVeil/actions/workflows/integration-tests.yml"><img src="https://github.com/cubiculus/CubiVeil/actions/workflows/integration-tests.yml/badge.svg" alt="Integration Tests"/></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"/></a>
+  <a href="https://ubuntu.com/"><img src="https://img.shields.io/badge/platform-Ubuntu%2022.04%20%7C%2024.04-orange" alt="Platform"/></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10-blue" alt="Python"/></a>
+  <a href="https://mypy.readthedocs.io/"><img src="https://img.shields.io/badge/type%20checked-mypy-blue" alt="myPy"/></a>
+  <a href="https://github.com/PyCQA/bandit"><img src="https://img.shields.io/badge/security-bandit-green" alt="Security: Bandit"/></a>
+</p>
+
 ---
 
 ## 🚀 Быстрый старт

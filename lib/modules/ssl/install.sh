@@ -40,11 +40,13 @@ fi
 
 # Пути к SSL сертификатам
 SSL_CERT_DIR="/etc/letsencrypt/live"
+# shellcheck disable=SC2034
 SSL_CERT_ARCHIVE="/etc/letsencrypt/archive"
 SSL_CONFIG_DIR="/etc/letsencrypt"
 SSL_ACCOUNT_DIR="${SSL_CONFIG_DIR}/accounts"
 
 # Имя сервиса (для systemd таймера)
+# shellcheck disable=SC2034
 SSL_RENEW_SERVICE="certbot-renew"
 SSL_RENEW_TIMER="certbot-renew.timer"
 

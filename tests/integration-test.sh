@@ -132,7 +132,7 @@ test_manifest_order() {
   local test_name="Manifest order validation"
 
   local order
-  order=($(manifest_get_install_order))
+  mapfile -t order < <(manifest_get_install_order)
 
   if [[ ${#order[@]} -gt 0 ]]; then
     test_result "$test_name" "pass" "Found ${#order[@]} modules"

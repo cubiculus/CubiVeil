@@ -416,13 +416,14 @@ test_quoting_usage() {
   # Проверка что переменные используются с кавычками
   # shellcheck disable=SC2034
   local unquoted_vars
+  # shellcheck disable=SC2034
   unquoted_vars=$(grep -oE '\$[A-Za-z_][A-Za-z0-9_]*' "${SCRIPT_DIR}/install.sh" 2>/dev/null | \
     wc -l || echo "0")
-  
+
   local quoted_vars
   quoted_vars=$(grep -oE '"\$[A-Za-z_][A-Za-z0-9_]*"' "${SCRIPT_DIR}/install.sh" 2>/dev/null | \
     wc -l || echo "0")
-  
+
   if [[ $quoted_vars -gt 0 ]]; then
     pass "install.sh: использует кавычки для переменных ($quoted_vars)"
     ((TESTS_PASSED++))

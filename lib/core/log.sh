@@ -12,14 +12,19 @@
 # ── Конфигурация логирования / Logging Configuration ───────
 
 # Путь к лог-файлу по умолчанию
+# shellcheck disable=SC2034
 CUBIVEIL_LOG_DIR="/var/log/cubiveil"
 CUBIVEIL_LOG_FILE="${CUBIVEIL_LOG_FILE:-/var/log/cubiveil/install.log}"
 CUBIVEIL_LOG_LEVEL="${CUBIVEIL_LOG_LEVEL:-INFO}"
 
 # Уровни логирования
+# shellcheck disable=SC2034
 LOG_LEVEL_DEBUG=0
+# shellcheck disable=SC2034
 LOG_LEVEL_INFO=1
+# shellcheck disable=SC2034
 LOG_LEVEL_WARN=2
+# shellcheck disable=SC2034
 LOG_LEVEL_ERROR=3
 
 # Цвета для консоли (переопределяются из output.sh)
@@ -28,6 +33,7 @@ if [[ -z "${RED:-}" ]]; then
   GREEN='\033[0;32m'
   YELLOW='\033[0;33m'
   BLUE='\033[0;34m'
+  # shellcheck disable=SC2034
   CYAN='\033[0;36m'
   PLAIN='\033[0m'
 fi

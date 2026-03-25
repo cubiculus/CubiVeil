@@ -8,6 +8,7 @@ set -euo pipefail
 
 # ── Путь к проекту ───────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC2034
 TESTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # ── Счётчик тестов ───────────────────────────────────────────

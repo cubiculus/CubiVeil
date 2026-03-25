@@ -14,6 +14,7 @@ if [[ ! -f "${SCRIPT_DIR}/lib/install-steps.sh" ]]; then
 fi
 
 # ── Mock зависимостей ─────────────────────────────────────────
+# shellcheck disable=SC2034
 LANG_NAME="English"
 SERVER_IP="1.2.3.4"
 DOMAIN=""
@@ -545,13 +546,14 @@ test_step_ssl_dev() {
 
   # Проверяем что функция существует в install-steps-main.sh
   local main_steps_file="${SCRIPT_DIR}/lib/steps/install-steps-main.sh"
-  
+
   if [[ ! -f "$main_steps_file" ]]; then
     warn "lib/steps/install-steps-main.sh не найден"
     return
   fi
 
   # Загружаем функции из main файла
+  # shellcheck source=lib/steps/install-steps-main.sh
   source "$main_steps_file" 2>/dev/null || true
 
   if declare -f step_ssl_dev >/dev/null; then

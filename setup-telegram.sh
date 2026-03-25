@@ -71,7 +71,8 @@ step_prompt_telegram_config() {
 
   info "$(get_setup_str INFO_TG_BOT)"
 
-  local prompt_token="$(get_setup_str PROMPT_TG_TOKEN)"
+  local prompt_token
+  prompt_token="$(get_setup_str PROMPT_TG_TOKEN)"
   read -rp "$prompt_token" TG_TOKEN
   TG_TOKEN="${TG_TOKEN// /}"
 
@@ -90,7 +91,8 @@ step_prompt_telegram_config() {
 
   ok "$(get_setup_str OK_TG_TOKEN_VERIFIED)"
 
-  local prompt_chat_id="$(get_setup_str PROMPT_TG_CHAT_ID)"
+  local prompt_chat_id
+  prompt_chat_id="$(get_setup_str PROMPT_TG_CHAT_ID)"
   read -rp "$prompt_chat_id" TG_CHAT_ID
   TG_CHAT_ID="${TG_CHAT_ID// /}"
 
@@ -101,7 +103,8 @@ step_prompt_telegram_config() {
     TG_CHAT_ID="${TG_CHAT_ID// /}"
   done
 
-  local prompt_report="$(get_setup_str PROMPT_REPORT_TIME)"
+  local prompt_report
+  prompt_report="$(get_setup_str PROMPT_REPORT_TIME)"
   read -rp "$prompt_report" REPORT_TIME
   REPORT_TIME="${REPORT_TIME// /}"
   [[ -z "$REPORT_TIME" ]] && REPORT_TIME="09:00"
@@ -115,10 +118,14 @@ step_prompt_telegram_config() {
   done
 
   echo ""
-  local info_alerts="$(get_setup_str INFO_ALERT_THRESHOLDS)"
-  local prompt_cpu="$(get_setup_str PROMPT_ALERT_CPU)"
-  local prompt_ram="$(get_setup_str PROMPT_ALERT_RAM)"
-  local prompt_disk="$(get_setup_str PROMPT_ALERT_DISK)"
+  local info_alerts
+  local prompt_cpu
+  local prompt_ram
+  local prompt_disk
+  info_alerts="$(get_setup_str INFO_ALERT_THRESHOLDS)"
+  prompt_cpu="$(get_setup_str PROMPT_ALERT_CPU)"
+  prompt_ram="$(get_setup_str PROMPT_ALERT_RAM)"
+  prompt_disk="$(get_setup_str PROMPT_ALERT_DISK)"
   info "$info_alerts"
   read -rp "$prompt_cpu" ALERT_CPU
   ALERT_CPU="${ALERT_CPU// /}"

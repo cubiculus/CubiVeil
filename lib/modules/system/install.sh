@@ -309,7 +309,11 @@ system_check_services() {
     fi
   done
 
-  return $([[ "$all_active" == "true" ]] && echo 0 || echo 1)
+  if [[ "$all_active" == "true" ]]; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 # Перезапуск всех ключевых сервисов

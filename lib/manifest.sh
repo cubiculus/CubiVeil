@@ -162,6 +162,7 @@ manifest_validate_order() {
 }
 
 # Получение порядка установки с учётом зависимостей
+# Usage: manifest_get_install_order [modules...]
 manifest_get_install_order() {
   local modules=("$@")
 
@@ -233,6 +234,7 @@ manifest_install_module() {
   fi
 
   # Подключаем модуль
+  # shellcheck source=lib/modules/MODULE/install.sh
   source "$module_file"
 
   # Проверяем зависимости
@@ -255,7 +257,7 @@ manifest_install_all() {
   log_step "manifest_install_all" "Installing all modules"
 
   local modules
-  modules=($(manifest_get_install_order))
+  mapfile -t modules < <(manifest_get_install_order)
 
   for module in "${modules[@]}"; do
     if ! manifest_install_module "$module"; then
@@ -272,12 +274,13 @@ manifest_configure_all() {
   log_step "manifest_configure_all" "Configuring all modules"
 
   local modules
-  modules=($(manifest_get_install_order))
+  mapfile -t modules < <(manifest_get_install_order)
 
   for module in "${modules[@]}"; do
     local module_file="${SCRIPT_DIR}/lib/modules/${module}/install.sh"
 
     if [[ -f "$module_file" ]]; then
+      # shellcheck source=lib/modules/MODULE/install.sh
       source "$module_file"
 
       if declare -f module_configure >/dev/null; then
@@ -295,12 +298,13 @@ manifest_enable_all() {
   log_step "manifest_enable_all" "Enabling all modules"
 
   local modules
-  modules=($(manifest_get_install_order))
+  mapfile -t modules < <(manifest_get_install_order)
 
   for module in "${modules[@]}"; do
     local module_file="${SCRIPT_DIR}/lib/modules/${module}/install.sh"
 
     if [[ -f "$module_file" ]]; then
+      # shellcheck source=lib/modules/MODULE/install.sh
       source "$module_file"
 
       if declare -f module_enable >/dev/null; then

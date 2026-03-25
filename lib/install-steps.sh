@@ -16,12 +16,14 @@ STEPS_DIR="${SCRIPT_DIR}/steps"
 # Загружаем все step файлы автоматически
 for step_file in "${STEPS_DIR}"/*.sh; do
   if [[ -f "$step_file" ]]; then
+    # shellcheck source=lib/steps/STEPS.sh
     source "$step_file"
   fi
 done
 
 # ── Загрузка основных шагов установки ───────────────────────
 if [[ -f "${SCRIPT_DIR}/steps/install-steps-main.sh" ]]; then
+  # shellcheck source=lib/steps/install-steps-main.sh
   source "${SCRIPT_DIR}/steps/install-steps-main.sh"
 fi
 

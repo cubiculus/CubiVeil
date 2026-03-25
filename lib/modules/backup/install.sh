@@ -126,7 +126,11 @@ backup_check_environment() {
     log_success "Environment check passed"
   fi
 
-  return $([[ $issues -eq 0 ]] && echo 0 || echo 1)
+  if [[ $issues -eq 0 ]]; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 # ── Остановка сервисов / Stop Services ──────────────────────

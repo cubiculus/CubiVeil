@@ -63,6 +63,7 @@ monitor_check_services() {
 
   for service in "${MONITORED_SERVICES[@]}"; do
     local status
+    # shellcheck disable=SC2034
     local enabled
 
     if svc_active "$service"; then
@@ -393,7 +394,8 @@ monitor_health_check() {
 monitor_generate_report() {
   log_step "monitor_generate_report" "Generating system report"
 
-  local report_file="${MONITORING_DATA_DIR}/report-$(date +%Y%m%d_%H%M%S).txt"
+  local report_file
+  report_file="${MONITORING_DATA_DIR}/report-$(date +%Y%m%d_%H%M%S).txt"
 
   {
     echo "CubiVeil System Report"

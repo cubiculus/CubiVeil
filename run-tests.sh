@@ -89,12 +89,12 @@ run_unit_tests() {
 
 # ── Запуск unit-тестов через интеграционный тест ──────────────
 run_unit_via_integration() {
-  print_section "Unit Tests (через integration-tests.sh)"
+  print_section "Unit Tests (через integration-test.sh)"
 
-  echo -e "${BLUE}Запуск unit-тестов через integration-tests.sh${PLAIN}"
+  echo -e "${BLUE}Запуск unit-тестов через integration-test.sh${PLAIN}"
   echo ""
 
-  if bash "$TESTS_DIR/integration-tests.sh" . unit; then
+  if bash "$TESTS_DIR/integration-test.sh" . unit; then
     ((TOTAL_PASSED++))
     echo -e "${GREEN}✓ Unit тесты пройдены${PLAIN}"
   else
@@ -118,7 +118,7 @@ run_integration_tests() {
   echo -e "${BLUE}Запуск интеграционных тестов...${PLAIN}"
   echo ""
 
-  if bash "$TESTS_DIR/integration-tests.sh"; then
+  if bash "$TESTS_DIR/integration-test.sh"; then
     ((TOTAL_PASSED++))
     echo -e "${GREEN}✓ Интеграционные тесты пройдены${PLAIN}"
   else

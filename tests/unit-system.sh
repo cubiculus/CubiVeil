@@ -58,6 +58,7 @@ create_temp_dir() { echo "/tmp/test-$$"; }
 cleanup_temp_dir() { rm -rf "$1" 2>/dev/null || true; }
 
 # ── Загрузка модуля ───────────────────────────────────────────
+# shellcheck source=lib/modules/system/install.sh
 source "$MODULE_PATH"
 
 # ── Тест: файл существует ───────────────────────────────────────
@@ -214,12 +215,13 @@ test_system_bbr_load_module() {
   info "Тестирование system_bbr_load_module..."
 
   # Mock для проверки создания файла
+  # shellcheck disable=SC2034
   local test_file="/tmp/test-bbr-$$"
-  
+
   # Временная замена /etc/modules-load.d
   mkdir -p /tmp/test-modules-load.d
   sed() { return 0; }
-  
+
   # Вызываем функцию (она создаст файл в /etc/modules-load.d)
   # Для теста просто проверяем что функция вызывается
   system_bbr_load_module

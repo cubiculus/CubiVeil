@@ -347,6 +347,8 @@ singbox_update() {
   version_info=$(singbox_get_version)
 
   IFS='|' read -r sb_tag sb_ver sb_url sb_sha256 <<< "$version_info"
+  # shellcheck disable=SC2034
+  sb_ver="$sb_ver"
 
   log_info "Latest version: ${sb_tag}"
 
