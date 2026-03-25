@@ -58,6 +58,10 @@ run_unit_tests() {
     "unit-install.sh:install.sh"
     "unit-telegram.sh:setup-telegram.sh"
     "unit-utilities.sh:Новые утилиты"
+    "unit-system.sh:System module"
+    "unit-backup.sh:Backup module"
+    "unit-rollback.sh:Rollback module"
+    "unit-monitoring.sh:Monitoring module"
   )
 
   for test_info in "${unit_tests[@]}"; do

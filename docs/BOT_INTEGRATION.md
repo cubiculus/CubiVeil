@@ -297,19 +297,17 @@ journalctl -u cubiveil-bot -f
 
 ### Добавление новой команды
 
-1. Добавьте функцию в `lib/cubiveil-bot.py`:
+1. Добавьте функцию в `assets/telegram-bot/commands.py`:
    ```python
-   def cmd_newcommand():
+   def _newcommand(self):
        """Описание команды"""
-       tg_send("Ответ команды")
+       self.telegram.send("Ответ команды")
    ```
 
-2. Добавьте в словарь `COMMANDS`:
+2. Добавьте обработчик в метод `handle`:
    ```python
-   COMMANDS = {
-       ...
-       "newcommand": cmd_newcommand,
-   }
+   elif cmd == "/newcommand":
+       self._newcommand()
    ```
 
 3. Перезапустите бота:
@@ -328,9 +326,9 @@ journalctl -u cubiveil-bot -f
 3. Обработайте результат:
    ```python
    if returncode == 0:
-       tg_send(f"✅ {stdout}")
+       self.telegram.send(f"✅ {stdout}")
    else:
-       tg_send(f"❌ {stderr}")
+       self.telegram.send(f"❌ {stderr}")
    ```
 
 ---

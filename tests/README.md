@@ -32,6 +32,8 @@ tests/
 ├── modular-structure.sh      # Тесты модульной архитектуры
 ├── unit-utils.sh             # Unit-тесты lib/utils.sh
 ├── unit-install-steps.sh     # Unit-тесты lib/install-steps.sh
+├── unit-install-steps-main.sh # Unit-тесты lib/steps/install-steps-main.sh
+├── test-install-modes.sh     # Тесты режимов --dev и --dry-run
 ├── unit-lang.sh              # Unit-тесты lang.sh (локализация)
 ├── unit-install.sh           # Unit-тесты install.sh
 └── unit-telegram.sh          # Unit-тесты setup-telegram.sh
@@ -142,7 +144,48 @@ bash tests/unit-install.sh
 
 ---
 
-### 5. setup-telegram.sh (`unit-telegram.sh`)
+### 5. lib/steps/install-steps-main.sh (`unit-install-steps-main.sh`)
+
+Тестирует основные шаги установки из нового модуля:
+
+| Категория | Проверки |
+|-----------|----------|
+| **Базовые** | Наличие файла, синтаксис |
+| **Функции шагов** | Все 13 step_* функций существуют |
+| **step_ssl_dev** | Генерация self-signed SSL через openssl, директория /var/lib/marzban/certs, срок действия 100 лет |
+| **step_ssl** | Проверка DEV_MODE, вызов step_ssl_dev в dev-режиме |
+| **step_finish** | Отображение URL панели, предупреждения о dev-режиме и self-signed SSL |
+| **Локализация** | Поддержка EN/RU в функциях |
+
+**Запуск:**
+```bash
+bash tests/unit-install-steps-main.sh
+```
+
+---
+
+### 6. install.sh режимы (`test-install-modes.sh`)
+
+Тестирует режимы --dev и --dry-run:
+
+| Категория | Проверки |
+|-----------|----------|
+| **Переменные** | DEV_MODE, DRY_RUN, DEV_DOMAIN определены |
+| **Аргументы** | --dev, --dry-run, --domain, --help обрабатываются |
+| **Usage** | Содержит описание режимов и примеры |
+| **Dry-run** | Показывает план установки, проверяет root и Ubuntu, не вносит изменения |
+| **Dev-режим** | Предупреждения о self-signed SSL, dev.cubiveil.local по умолчанию |
+| **step_ssl_dev** | Функция существует, использует openssl |
+| **prompt_inputs** | Проверяет DEV_MODE, пропускает ввод в dev-режиме |
+
+**Запуск:**
+```bash
+bash tests/test-install-modes.sh
+```
+
+---
+
+### 7. setup-telegram.sh (`unit-telegram.sh`)
 
 Тестирует скрипт установки Telegram бота:
 
@@ -275,7 +318,7 @@ sudo bash tests/integration-tests.sh
 ### Все тесты пройдены ✅
 ```
 ╔══════════════════════════════════════════════════════╗
-║        CubiVeil Unit Tests - lib/utils.sh           ║
+║        CubiVeil Unit Tests - lib/utils.sh            ║
 ╚══════════════════════════════════════════════════════╝
 
 [INFO] Тестирование gen_random...
@@ -405,6 +448,8 @@ sudo bash tests/integration-tests.sh
 |--------|-----------|----------|
 | lib/utils.sh | unit-utils.sh | ✅ gen_random, gen_hex, gen_port, unique_port, open_port, arch, get_server_ip |
 | lib/install-steps.sh | unit-install-steps.sh | ✅ Все 13 функций установки |
+| lib/steps/install-steps-main.sh | unit-install-steps-main.sh | ✅ Все step_* функции, step_ssl_dev, dev-режим |
+| install.sh режимы | test-install-modes.sh | ✅ --dev, --dry-run, аргументы, usage |
 | lang.sh | unit-lang.sh | ✅ EN/RU строки, функции, локализация |
 | install.sh | unit-install.sh | ✅ Структура, модули, обработка ошибок |
 | setup-telegram.sh | unit-telegram.sh | ✅ Python бот, systemd, cron, валидация |

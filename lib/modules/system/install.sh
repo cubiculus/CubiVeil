@@ -1,12 +1,12 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — System Module                        ║
-# ║          github.com/cubiculus/cubiveil                   ║
+# ║          CubiVeil — System Module                         ║
+# ║          github.com/cubiculus/cubiveil                    ║
 # ║                                                           ║
-# ║  Модуль системных настроек                                   ║
-# ║  - Обновление системы                                        ║
-# ║  - Автообновления безопасности                                ║
-# ║  - BBR оптимизация                                         ║
+# ║  Модуль системных настроек                                ║
+# ║  - Обновление системы                                     ║
+# ║  - Автообновления безопасности                            ║
+# ║  - BBR оптимизация                                        ║
 # ║  - Проверка IP-соседей                                    ║
 # ╚═══════════════════════════════════════════════════════════╝
 
@@ -346,23 +346,90 @@ system_install_base_dependencies() {
 
 # ── Модульный интерфейс / Module Interface ─────────────────
 
-# Стандартный интерфейс модуля
-module_install() { :; }
-module_configure() {
+# Установка системного модуля
+module_install() {
+  log_step "module_install" "Installing system module"
+
+  # Обновляем индекс пакетов
+  pkg_update
+
+  # Устанавливаем базовые зависимости
+  system_install_base_dependencies
+
+  # Настраиваем автоматические обновления безопасности
   system_auto_updates_setup
+
+  # Настраиваем BBR оптимизацию
   system_bbr_setup
+
+  log_success "System module installed successfully"
 }
-module_enable() { :; }
-module_disable() { :; }
+
+# Конфигурация модуля
+module_configure() {
+  log_step "module_configure" "Configuring system module"
+
+  # Повторно применяем настройки автообновлений
+  system_auto_updates_setup
+
+  # Повторно применяем настройки BBR
+  system_bbr_setup
+
+  log_success "System module configured"
+}
+
+# Включение модуля
+module_enable() {
+  log_step "module_enable" "Enabling system module"
+
+  # Включаем сервис автоматических обновлений
+  svc_enable_start "unattended-upgrades"
+
+  # Применяем настройки sysctl
+  system_bbr_apply_sysctl
+
+  log_success "System module enabled"
+}
+
+# Выключение модуля
+module_disable() {
+  log_step "module_disable" "Disabling system module"
+
+  # Отключаем сервис автоматических обновлений
+  systemctl stop "unattended-upgrades" 2>/dev/null || true
+  systemctl disable "unattended-upgrades" 2>/dev/null || true
+
+  log_info "System module disabled"
+}
 
 # Обновление модуля
-module_update() { system_full_update; }
+module_update() {
+  log_step "module_update" "Updating system module"
+
+  system_full_update
+
+  log_success "System module updated"
+}
 
 # Проверка статуса модуля
 module_status() {
+  log_step "module_status" "Checking system module status"
+
+  # Проверяем статус BBR
   system_bbr_check_status
+
+  # Проверяем статус сервисов
   system_check_services
+
+  # Проверяем статус автообновлений
+  if svc_active "unattended-upgrades"; then
+    log_success "Auto-updates: active"
+  else
+    log_warn "Auto-updates: inactive"
+  fi
 }
 
 # Быстрое обновление (для cron)
-module_quick_update() { system_quick_update; }
+module_quick_update() {
+  system_quick_update
+}

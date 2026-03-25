@@ -143,17 +143,27 @@ step_install_bot() {
   mkdir -p /opt/cubiveil-bot/backups
 
   # ── Python-скрипт бота ────────────────────────────────────
-  # Копируем из lib/cubiveil-bot.py для безопасности
-  # (код не хранится в bash-скрипте, легче аудировать и обновлять)
-  local BOT_SOURCE="${SCRIPT_DIR}/lib/cubiveil-bot.py"
+  # Используем модульную версию из assets/telegram-bot/
+  local BOT_SOURCE="${SCRIPT_DIR}/assets/telegram-bot/bot.py"
+  local BOT_MODULES_DIR="${SCRIPT_DIR}/assets/telegram-bot"
+
   if [[ ! -f "$BOT_SOURCE" ]]; then
     err "Файл бота не найден: $BOT_SOURCE"
   fi
 
+  # Копируем основной файл бота
   cp "$BOT_SOURCE" /opt/cubiveil-bot/bot.py
   chmod +x /opt/cubiveil-bot/bot.py
 
-  ok "Python-скрипт бота установлен из lib/cubiveil-bot.py"
+  # Копируем модули
+  for module in telegram_client.py metrics.py backup.py alert_state.py commands.py health_check.py; do
+    if [[ -f "${BOT_MODULES_DIR}/${module}" ]]; then
+      cp "${BOT_MODULES_DIR}/${module}" /opt/cubiveil-bot/${module}
+      chmod +x /opt/cubiveil-bot/${module}
+    fi
+  done
+
+  ok "Python-скрипт бота установлен из assets/telegram-bot/"
 }
 
 # ══════════════════════════════════════════════════════════════
@@ -268,7 +278,7 @@ main() {
   echo ""
   if [[ "$LANG_NAME" == "Русский" ]]; then
     echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${PLAIN}"
-    echo -e "${GREEN}║      Telegram-бот установлен успешно! 🎉           ║${PLAIN}"
+    echo -e "${GREEN}║      Telegram-бот установлен успешно! 🎉             ║${PLAIN}"
     echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${PLAIN}"
     echo ""
     echo -e "${CYAN}  БОТ${PLAIN}"
@@ -284,7 +294,7 @@ main() {
     echo ""
   else
     echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${PLAIN}"
-    echo -e "${GREEN}║      Telegram bot installed successfully! 🎉        ║${PLAIN}"
+    echo -e "${GREEN}║      Telegram bot installed successfully! 🎉         ║${PLAIN}"
     echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${PLAIN}"
     echo ""
     echo -e "${CYAN}  BOT${PLAIN}"

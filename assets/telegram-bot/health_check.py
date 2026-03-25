@@ -12,8 +12,55 @@ import subprocess
 import time
 import json
 import os
+import logging
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, List, Any
+
+logger = logging.getLogger(__name__)
+
+
+class HealthCheckError(Exception):
+    """Custom exception for health check errors"""
+    pass
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Constants / Константы
+# ══════════════════════════════════════════════════════════════════════════════
+
+# File paths / Пути к файлам
+MARZBAN_DIR = "/opt/marzban"
+MARZBAN_ENV_FILE = os.path.join(MARZBAN_DIR, ".env")
+MARZBAN_DB_FILE = os.path.join(MARZBAN_DIR, "db.sqlite3")
+
+# Default ports / Порты по умолчанию
+DEFAULT_HEALTH_CHECK_PORT = 8080
+
+# Time intervals in seconds / Временные интервалы в секундах
+RESTART_COOLDOWN = 300  # 5 minutes between auto-restarts
+CONNECTION_TIMEOUT = 10  # Default connection timeout
+SERVICE_CHECK_TIMEOUT = 10  # Service status check timeout
+SERVICE_RESTART_TIMEOUT = 60  # Service restart timeout
+HEALTH_ENDPOINT_TIMEOUT = 15  # Health endpoint check timeout
+
+# Database timeout / Таймаут базы данных
+DB_TIMEOUT = 5
+
+# Default targets for connection tests / Цели для проверки соединения
+DEFAULT_CONNECTION_TARGETS = [
+    ("Google", "https://www.google.com"),
+    ("Cloudflare", "https://www.cloudflare.com"),
+    ("GitHub", "https://www.github.com"),
+    ("Telegram", "https://api.telegram.org"),
+]
+
+# Services to monitor / Сервисы для мониторинга
+MONITORED_SERVICES = ["marzban", "sing-box"]
+
+# Profile statuses / Статусы профилей
+PROFILE_STATUSES = ["active", "disabled", "limited", "expired"]
+
+# Profile display limit / Лимит отображения профилей
+PROFILE_DISPLAY_LIMIT = 10
 
 
 class HealthChecker:
@@ -21,25 +68,24 @@ class HealthChecker:
 
     def __init__(self, health_check_port: Optional[int] = None):
         self.health_check_port = health_check_port or self._get_health_check_port()
-        self.marzban_dir = "/opt/marzban"
+        self.marzban_dir = MARZBAN_DIR
         self.last_restart_time: dict = {}
-        self.restart_cooldown = 300  # 5 minutes between auto-restarts
+        self.restart_cooldown = RESTART_COOLDOWN
 
     def _get_health_check_port(self) -> int:
         """Get health check port from Marzban config"""
         try:
-            env_file = os.path.join(self.marzban_dir, ".env")
-            if os.path.exists(env_file):
-                with open(env_file) as f:
+            if os.path.exists(MARZBAN_ENV_FILE):
+                with open(MARZBAN_ENV_FILE) as f:
                     for line in f:
                         if line.startswith("HEALTH_CHECK_PORT="):
                             return int(line.split("=")[1].strip())
         except Exception:
             pass
-        return 8080  # Default fallback
+        return DEFAULT_HEALTH_CHECK_PORT  # Default fallback
 
     def check_connection_speed(self, target: str = "https://www.google.com",
-                                timeout: int = 10) -> dict:
+                                timeout: int = CONNECTION_TIMEOUT) -> dict:
         """
         Check connection speed to a target URL
         Returns dict with latency_ms, success, error
@@ -56,14 +102,23 @@ class HealthChecker:
             subprocess.run(
                 ["curl", "-sf", "--max-time", str(timeout), "-o", "/dev/null", target],
                 capture_output=True,
-                timeout=timeout + 5
+                timeout=timeout + 5,
+                check=True
             )
             elapsed = time.time() - start
             result["success"] = True
             result["latency_ms"] = round(elapsed * 1000, 2)
-        except subprocess.TimeoutExpired:
+        except subprocess.TimeoutExpired as e:
+            logger.warning(f"Connection timeout to {target}: {e}")
             result["error"] = f"Timeout after {timeout}s"
+        except subprocess.CalledProcessError as e:
+            logger.warning(f"Connection failed to {target}: {e}")
+            result["error"] = f"Connection failed (exit code {e.returncode})"
+        except FileNotFoundError:
+            logger.error("curl command not found")
+            result["error"] = "curl not installed"
         except Exception as e:
+            logger.error(f"Unexpected error checking connection to {target}: {e}")
             result["error"] = str(e)
 
         return result
@@ -84,13 +139,13 @@ class HealthChecker:
 
         try:
             # Read Marzban database
-            db_path = os.path.join(self.marzban_dir, "db.sqlite3")
-            if not os.path.exists(db_path):
+            if not os.path.exists(MARZBAN_DB_FILE):
+                logger.warning(f"Database not found: {MARZBAN_DB_FILE}")
                 result["error"] = "Database not found"
                 return result
 
             import sqlite3
-            conn = sqlite3.connect(db_path, timeout=5)
+            conn = sqlite3.connect(MARZBAN_DB_FILE, timeout=DB_TIMEOUT)
             cur = conn.cursor()
 
             cur.execute("""
@@ -108,9 +163,14 @@ class HealthChecker:
                 result["data_limit"] = row[2] or 0
                 result["expiry"] = row[3]
             else:
+                logger.info(f"User not found: {username}")
                 result["error"] = "User not found"
 
+        except sqlite3.Error as e:
+            logger.error(f"Database error checking profile {username}: {e}")
+            result["error"] = f"Database error: {str(e)}"
         except Exception as e:
+            logger.error(f"Unexpected error checking profile {username}: {e}")
             result["error"] = str(e)
 
         return result
@@ -123,12 +183,12 @@ class HealthChecker:
         profiles = []
 
         try:
-            db_path = os.path.join(self.marzban_dir, "db.sqlite3")
-            if not os.path.exists(db_path):
+            if not os.path.exists(MARZBAN_DB_FILE):
+                logger.warning(f"Database not found: {MARZBAN_DB_FILE}")
                 return profiles
 
             import sqlite3
-            conn = sqlite3.connect(db_path, timeout=5)
+            conn = sqlite3.connect(MARZBAN_DB_FILE, timeout=DB_TIMEOUT)
             cur = conn.cursor()
 
             cur.execute("""
@@ -148,8 +208,10 @@ class HealthChecker:
 
             conn.close()
 
+        except sqlite3.Error as e:
+            logger.error(f"Database error checking profiles: {e}")
         except Exception as e:
-            print(f"[health] Error checking profiles: {e}")
+            logger.error(f"Unexpected error checking profiles: {e}")
 
         return profiles
 
@@ -171,7 +233,7 @@ class HealthChecker:
                 ["systemctl", "is-active", service_name],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=SERVICE_CHECK_TIMEOUT
             )
             result["active"] = active_result.returncode == 0
 
@@ -180,13 +242,18 @@ class HealthChecker:
                 ["systemctl", "is-running", service_name],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=SERVICE_CHECK_TIMEOUT
             )
             result["running"] = running_result.returncode == 0
 
-        except subprocess.TimeoutExpired:
+        except subprocess.TimeoutExpired as e:
+            logger.error(f"Timeout checking service {service_name}: {e}")
             result["error"] = "Timeout checking service"
+        except FileNotFoundError:
+            logger.error("systemctl command not found")
+            result["error"] = "systemctl not available"
         except Exception as e:
+            logger.error(f"Unexpected error checking service {service_name}: {e}")
             result["error"] = str(e)
 
         return result
@@ -209,23 +276,36 @@ class HealthChecker:
                  f"http://localhost:{self.health_check_port}/health"],
                 capture_output=True,
                 text=True,
-                timeout=15
+                timeout=HEALTH_ENDPOINT_TIMEOUT,
+                check=True
             )
 
             if response.returncode == 0:
-                data = json.loads(response.stdout)
-                result["status"] = data.get("status", "unknown")
-                result["marzban"] = data.get("marzban", "unknown")
-                result["singbox"] = data.get("singbox", "unknown")
+                try:
+                    data = json.loads(response.stdout)
+                    result["status"] = data.get("status", "unknown")
+                    result["marzban"] = data.get("marzban", "unknown")
+                    result["singbox"] = data.get("singbox", "unknown")
+                except json.JSONDecodeError as e:
+                    logger.error(f"Invalid JSON from health endpoint: {e}")
+                    result["status"] = "invalid_response"
+                    result["error"] = "Invalid JSON from health endpoint"
             else:
                 result["status"] = "unreachable"
                 result["error"] = "Health endpoint not responding"
 
-        except subprocess.TimeoutExpired:
+        except subprocess.TimeoutExpired as e:
+            logger.warning(f"Timeout connecting to health endpoint: {e}")
             result["error"] = "Timeout connecting to health endpoint"
-        except json.JSONDecodeError:
-            result["error"] = "Invalid JSON from health endpoint"
+        except subprocess.CalledProcessError as e:
+            logger.info(f"Health endpoint not responding: {e}")
+            result["status"] = "unreachable"
+            result["error"] = "Health endpoint not responding"
+        except FileNotFoundError:
+            logger.error("curl command not found")
+            result["error"] = "curl not installed"
         except Exception as e:
+            logger.error(f"Unexpected error checking health endpoint: {e}")
             result["error"] = str(e)
 
         return result
@@ -241,16 +321,16 @@ class HealthChecker:
 
         if not force and (now - last_restart) < self.restart_cooldown:
             remaining = int(self.restart_cooldown - (now - last_restart))
-            print(f"[health] Restart cooldown active for {service_name}. "
-                  f"Wait {remaining}s")
+            logger.info(f"Restart cooldown active for {service_name}. Wait {remaining}s")
             return False
 
         try:
-            print(f"[health] Restarting {service_name}...")
+            logger.info(f"Restarting {service_name}...")
             subprocess.run(
                 ["systemctl", "restart", service_name],
                 capture_output=True,
-                timeout=60
+                timeout=SERVICE_RESTART_TIMEOUT,
+                check=True
             )
 
             # Wait for service to start
@@ -261,19 +341,28 @@ class HealthChecker:
                 ["systemctl", "is-active", service_name],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=SERVICE_CHECK_TIMEOUT
             )
 
             if status.returncode == 0:
                 self.last_restart_time[service_name] = now
-                print(f"[health] {service_name} restarted successfully")
+                logger.info(f"{service_name} restarted successfully")
                 return True
             else:
-                print(f"[health] {service_name} failed to restart")
+                logger.warning(f"{service_name} failed to restart")
                 return False
 
+        except subprocess.TimeoutExpired as e:
+            logger.error(f"Timeout restarting {service_name}: {e}")
+            return False
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to restart {service_name}: {e}")
+            return False
+        except FileNotFoundError:
+            logger.error("systemctl command not found")
+            return False
         except Exception as e:
-            print(f"[health] Error restarting {service_name}: {e}")
+            logger.error(f"Unexpected error restarting {service_name}: {e}")
             return False
 
     def auto_heal(self) -> list:
@@ -282,13 +371,12 @@ class HealthChecker:
         Returns list of actions taken
         """
         actions = []
-        services = ["marzban", "sing-box"]
 
-        for service in services:
+        for service in MONITORED_SERVICES:
             health = self.check_service_health(service)
 
             if not health["active"]:
-                print(f"[health] {service} is not active, attempting restart...")
+                logger.warning(f"{service} is not active, attempting restart...")
 
                 if self.restart_service(service):
                     actions.append({
@@ -319,7 +407,7 @@ class HealthChecker:
         }
 
         # Check services
-        for service in ["marzban", "sing-box", "cubiveil-bot"]:
+        for service in MONITORED_SERVICES + ["cubiveil-bot"]:
             report["services"][service] = self.check_service_health(service)
 
         # Profile summary
@@ -333,11 +421,7 @@ class HealthChecker:
         }
 
         # Connection tests
-        for target in [
-            ("Google", "https://www.google.com"),
-            ("Cloudflare", "https://www.cloudflare.com"),
-            ("GitHub", "https://www.github.com")
-        ]:
+        for target in DEFAULT_CONNECTION_TARGETS[:3]:  # First 3 targets
             name, url = target
             result = self.check_connection_speed(url)
             report["connection"][name] = result

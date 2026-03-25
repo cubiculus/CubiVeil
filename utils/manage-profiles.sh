@@ -1,7 +1,7 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║            CubiVeil — Profile Manager                     ║
-# ║         github.com/cubiculus/cubiveil                     ║
+# ║          CubiVeil — Profile Manager                       ║
+# ║          github.com/cubiculus/cubiveil                    ║
 # ║                                                           ║
 # ║  Управление профилями прокси: добавление, удаление,       ║
 # ║  генерация QR-кодов, статистика использования             ║
@@ -12,7 +12,11 @@ set -euo pipefail
 # ── Подключение локализации ───────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "${SCRIPT_DIR}")"
-if [[ -f "${PROJECT_DIR}/lang.sh" ]]; then
+
+# Подключаем i18n модуль для единых функций локализации
+if [[ -f "${PROJECT_DIR}/lib/i18n.sh" ]]; then
+  source "${PROJECT_DIR}/lib/i18n.sh"
+elif [[ -f "${PROJECT_DIR}/lang.sh" ]]; then
   source "${PROJECT_DIR}/lang.sh"
 else
   source "${PROJECT_DIR}/lib/fallback.sh"
@@ -86,25 +90,7 @@ declare -A MSG=(
   [CMD_HELP]="help"
 )
 
-msg() {
-  local key="$1"
-  local default="${2:-}"
-  echo "${MSG[$key]:-$default}"
-}
-
-step_title() {
-  local step="$1"
-  local ru="$2"
-  local en="$3"
-  echo ""
-  echo "══════════════════════════════════════════════════════════"
-  if [[ "$LANG_NAME" == "Русский" ]]; then
-    echo "  ${step}. ${ru}"
-  else
-    echo "  ${step}. ${en}"
-  fi
-  echo "══════════════════════════════════════════════════════════"
-}
+# Функции msg и step_title импортируются из lib/i18n.sh
 
 # ══════════════════════════════════════════════════════════════
 # Утилиты для работы с Marzban API

@@ -1,9 +1,9 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Export Config Utility                ║
-# ║          github.com/cubiculus/cubiveil                   ║
-# ║                                                          ║
-# ║  Экспорт конфигурации для миграции на другой сервер      ║
+# ║          CubiVeil — Export Config Utility                 ║
+# ║          github.com/cubiculus/cubiveil                    ║
+# ║                                                           ║
+# ║  Экспорт конфигурации для миграции на другой сервер       ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 set -euo pipefail
@@ -11,7 +11,11 @@ set -euo pipefail
 # ── Подключение локализации ───────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "${SCRIPT_DIR}")"
-if [[ -f "${PROJECT_DIR}/lang.sh" ]]; then
+
+# Подключаем i18n модуль для единых функций локализации
+if [[ -f "${PROJECT_DIR}/lib/i18n.sh" ]]; then
+  source "${PROJECT_DIR}/lib/i18n.sh"
+elif [[ -f "${PROJECT_DIR}/lang.sh" ]]; then
   source "${PROJECT_DIR}/lang.sh"
 else
   source "${PROJECT_DIR}/lib/fallback.sh"
@@ -60,25 +64,7 @@ declare -A MSG=(
   [PROMPT_OUTPUT]="Путь для сохранения"
 )
 
-msg() {
-  local key="$1"
-  local default="${2:-}"
-  echo "${MSG[$key]:-$default}"
-}
-
-step_title() {
-  local step="$1"
-  local ru="$2"
-  local en="$3"
-  echo ""
-  echo "══════════════════════════════════════════════════════════"
-  if [[ "$LANG_NAME" == "Русский" ]]; then
-    echo "  ${step}. ${ru}"
-  else
-    echo "  ${step}. ${en}"
-  fi
-  echo "══════════════════════════════════════════════════════════"
-}
+# Функции msg и step_title импортируются из lib/i18n.sh
 
 # ══════════════════════════════════════════════════════════════
 # ШАГ 1: Проверка окружения

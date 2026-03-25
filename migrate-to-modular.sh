@@ -1,8 +1,8 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Migration Script                   ║
-# ║          github.com/cubiculus/cubiveil                   ║
-# ╚═════════════════════════════════════════════════════════════╝
+# ║          CubiVeil — Migration Script                      ║
+# ║          github.com/cubiculus/cubiveil                    ║
+# ╚═══════════════════════════════════════════════════════════╝
 
 set -e
 
@@ -31,12 +31,12 @@ show_banner() {
 
   echo -e "${CYAN}"
   echo ""
-  echo "  ╔═════════════════════════════════════════════════════╗"
-  echo "  ║                                                     ║"
-  echo "  ║      CubiVeil — Migration to Modular Architecture      ║"
-  echo "  ║      github.com/cubiculus/cubiveil                     ║"
-  echo "  ║                                                     ║"
-  echo "  ╚═════════════════════════════════════════════════════╝"
+  echo "  ╔══════════════════════════════════════════════════════╗"
+  echo "  ║                                                      ║"
+  echo "  ║      CubiVeil — Migration to Modular Architecture    ║"
+  echo "  ║      github.com/cubiculus/cubiveil                   ║"
+  echo "  ║                                                      ║"
+  echo "  ╚══════════════════════════════════════════════════════╝"
   echo "${PLAIN}"
   echo ""
 }

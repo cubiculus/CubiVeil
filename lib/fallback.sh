@@ -1,6 +1,6 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Fallback Functions                   ║
+# ║          CubiVeil — Fallback Functions                    ║
 # ║          Базовые функции и цвета при отсутствии lang.sh   ║
 # ╚═══════════════════════════════════════════════════════════╝
 
@@ -62,7 +62,7 @@ print_banner_telegram() {
   clear
   echo ""
   echo -e "${CYAN}  ╔══════════════════════════════════════════╗${PLAIN}"
-  echo -e "${CYAN}  ║       CubiVeil Telegram Bot Setup       ║${PLAIN}"
+  echo -e "${CYAN}  ║       CubiVeil Telegram Bot Setup        ║${PLAIN}"
   echo -e "${CYAN}  ║    github.com/cubiculus/cubiveil         ║${PLAIN}"
   echo -e "${CYAN}  ╚══════════════════════════════════════════╝${PLAIN}"
   echo ""

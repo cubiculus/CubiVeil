@@ -1,7 +1,7 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Modular Installer                  ║
-# ║          github.com/cubiculus/cubiveil                   ║
+# ║          CubiVeil — Modular Installer                     ║
+# ║          github.com/cubiculus/cubiveil                    ║
 # ║                                                           ║
 # ║  Модульный установщик с использованием manifest           ║
 # ╚═══════════════════════════════════════════════════════════╝
@@ -62,6 +62,7 @@ INSTALL_MODULES=()
 FORCE_INSTALL=false
 SKIP_CHECKS=false
 VERBOSE=false
+DRY_RUN=false
 
 # ── Функции установки / Installation Functions ────────────────
 
@@ -71,8 +72,8 @@ show_banner() {
 
   echo -e "${CYAN}"
   echo "  ╔══════════════════════════════════════════╗"
-  echo "  ║     CubiVeil Modular Installer             ║"
-  echo "  ║     github.com/cubiculus/cubiveil           ║"
+  echo "  ║     CubiVeil Modular Installer           ║"
+  echo "  ║     github.com/cubiculus/cubiveil        ║"
   echo "  ╚══════════════════════════════════════════╝"
   echo "${PLAIN}"
   echo ""
@@ -294,6 +295,65 @@ enable_modules() {
 run_installation() {
   echo ""
   echo "═══════════════════════════════════════════════════"
+  
+  if [[ "$DRY_RUN" == "true" ]]; then
+    echo "  DRY-RUN MODE / Режим симуляции"
+    echo "  No changes will be made / Изменения не будут внесены"
+    echo "═══════════════════════════════════════════════════"
+    echo ""
+    
+    log_info "DRY-RUN: Would install CubiVeil with mode: $INSTALL_MODE"
+    log_info "DRY-RUN: Would install modules: ${INSTALL_MODULES[*]}"
+    
+    # Проверка окружения (без изменений)
+    check_environment
+    
+    # Симуляция установки модулей
+    for module in "${INSTALL_MODULES[@]}"; do
+      local module_file="${SCRIPT_DIR}/lib/modules/${module}/install.sh"
+      
+      if [[ ! -f "$module_file" ]]; then
+        log_error "DRY-RUN: Module file not found: $module_file"
+        return 1
+      fi
+      
+      log_info "DRY-RUN: Would install module: $module"
+      
+      # Проверка зависимостей
+      if ! manifest_check_dependencies "$module"; then
+        log_error "DRY-RUN: Missing dependencies for module: $module"
+        return 1
+      fi
+      
+      log_info "DRY-RUN: Would configure module: $module"
+      log_info "DRY-RUN: Would enable module: $module"
+    done
+    
+    log_success "DRY-RUN: All modules would be installed successfully"
+    
+    echo ""
+    echo "═══════════════════════════════════════════════════"
+    echo "  DRY-RUN Complete / Симуляция завершена"
+    echo "═══════════════════════════════════════════════════"
+    echo ""
+    
+    # Вывод информации
+    echo "Modules that would be installed / Модули для установки:"
+    echo "────────────────────────────────────────────────────────────"
+    
+    for module in "${INSTALL_MODULES[@]}"; do
+      local info
+      info=$(manifest_get_info "$module")
+      IFS='|' read -r type deps desc <<< "$info"
+      echo "  ✓ $module - $desc"
+    done
+    
+    echo "────────────────────────────────────────────────────────────"
+    echo ""
+    
+    return 0
+  fi
+  
   echo "  Starting Installation / Начало установки"
   echo "═══════════════════════════════════════════════════"
   echo ""
@@ -348,7 +408,10 @@ main() {
   echo "Modules: ${INSTALL_MODULES[*]}"
   echo ""
 
-  if [[ "$FORCE_INSTALL" != "true" ]]; then
+  if [[ "$DRY_RUN" == "true" ]]; then
+    echo "[DRY-RUN] Proceeding without confirmation..."
+    echo ""
+  elif [[ "$FORCE_INSTALL" != "true" ]]; then
     read -rp "Continue? (y/n): " confirm
     if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
       echo "Installation cancelled."
@@ -359,22 +422,27 @@ main() {
   # Запуск установки
   run_installation
 
-  # Сохранение информации об установке
-  local install_log="/var/log/cubiveil/install.log"
-  mkdir -p "$(dirname "$install_log")"
+  # Сохранение информации об установке (только не в dry-run)
+  if [[ "$DRY_RUN" != "true" ]]; then
+    local install_log="/var/log/cubiveil/install.log"
+    mkdir -p "$(dirname "$install_log")"
 
-  {
-    echo "CubiVeil Installation Log"
-    echo "Date: $(date '+%Y-%m-%d %H:%M:%S')"
-    echo "Mode: $INSTALL_MODE"
-    echo "Modules: ${INSTALL_MODULES[*]}"
-  } > "$install_log"
+    {
+      echo "CubiVeil Installation Log"
+      echo "Date: $(date '+%Y-%m-%d %H:%M:%S')"
+      echo "Mode: $INSTALL_MODE"
+      echo "Modules: ${INSTALL_MODULES[*]}"
+    } > "$install_log"
 
-  success "✅ Installation complete!"
-  echo ""
-  echo "For help and troubleshooting, visit:"
-  echo "  https://github.com/cubiculus/cubiveil"
-  echo ""
+    success "✅ Installation complete!"
+    echo ""
+    echo "For help and troubleshooting, visit:"
+    echo "  https://github.com/cubiculus/cubiveil"
+    echo ""
+  else
+    echo ""
+    echo "[DRY-RUN] No changes were made to the system."
+  fi
 }
 
 # ── Обработка аргументов / Argument Parsing ─────────────────
@@ -388,6 +456,7 @@ usage() {
   echo "  --force          Skip confirmation"
   echo "  --skip-checks    Skip environment checks"
   echo "  --verbose        Verbose output"
+  echo "  --dry-run        Simulate installation without making changes"
   echo "  --help           Show this help"
   echo ""
   echo "Examples:"
@@ -395,6 +464,7 @@ usage() {
   echo "  $0 --mode=full              # Full installation"
   echo "  $0 --mode=minimal           # Minimal installation"
   echo "  $0 --modules=system,firewall,ssl,singbox,marzban"
+  echo "  $0 --dry-run                # Dry-run mode (simulation)"
   echo ""
 }
 
@@ -421,6 +491,10 @@ parse_args() {
         ;;
       --verbose)
         VERBOSE=true
+        shift
+        ;;
+      --dry-run)
+        DRY_RUN=true
         shift
         ;;
       --help|-h)

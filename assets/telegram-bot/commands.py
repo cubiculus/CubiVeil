@@ -6,6 +6,49 @@ Handles Telegram bot commands
 
 import subprocess
 
+# ══════════════════════════════════════════════════════════════════════════════
+# Constants / Константы
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Command names / Имена команд
+COMMAND_START = "/start"
+COMMAND_STATUS = "/status"
+COMMAND_BACKUP = "/backup"
+COMMAND_USERS = "/users"
+COMMAND_RESTART = "/restart"
+COMMAND_HEALTH = "/health"
+COMMAND_SPEEDTEST = "/speedtest"
+COMMAND_PROFILES = "/profiles"
+COMMAND_HELP = "/help"
+
+# Progress bar settings / Настройки прогресс-бара
+PROGRESS_BAR_WIDTH = 10
+PROGRESS_BAR_FILLED = "█"
+PROGRESS_BAR_EMPTY = "░"
+
+# Timeouts in seconds / Таймауты в секундах
+SERVICE_RESTART_TIMEOUT = 30
+ERROR_MESSAGE_MAX_LENGTH = 500
+
+# Profile display limit / Лимит отображения профилей
+PROFILE_DISPLAY_LIMIT = 10
+
+# Profile status icons / Иконки статусов профилей
+PROFILE_STATUS_ICONS = {
+    "active": "🟢",
+    "disabled": "🔴",
+    "limited": "🟡",
+    "expired": "⚫",
+}
+
+# Default connection test targets / Цели для проверки соединения по умолчанию
+SPEEDTEST_TARGETS = [
+    ("Google", "https://www.google.com"),
+    ("Cloudflare", "https://www.cloudflare.com"),
+    ("GitHub", "https://www.github.com"),
+    ("Telegram", "https://api.telegram.org"),
+]
+
 
 class CommandHandler:
     """Handles bot commands"""
@@ -20,30 +63,30 @@ class CommandHandler:
         self.alert_disk = alert_disk
         self.health = health_checker
 
-    def _progress_bar(self, pct, width=10):
+    def _progress_bar(self, pct, width=PROGRESS_BAR_WIDTH):
         """Generate progress bar"""
         filled = int(min(pct, 100) / 100 * width)
-        return "█" * filled + "░" * (width - filled)
+        return PROGRESS_BAR_FILLED * filled + PROGRESS_BAR_EMPTY * (width - filled)
 
     def handle(self, command):
         """Handle incoming command"""
         cmd = command.strip().split()[0].lower()
 
-        if cmd in ("/start", "/status"):
+        if cmd in (COMMAND_START, COMMAND_STATUS):
             self._status()
-        elif cmd == "/backup":
+        elif cmd == COMMAND_BACKUP:
             self._backup()
-        elif cmd == "/users":
+        elif cmd == COMMAND_USERS:
             self._users()
-        elif cmd == "/restart":
+        elif cmd == COMMAND_RESTART:
             self._restart()
-        elif cmd == "/health":
+        elif cmd == COMMAND_HEALTH:
             self._health()
-        elif cmd == "/speedtest":
+        elif cmd == COMMAND_SPEEDTEST:
             self._speedtest()
-        elif cmd == "/profiles":
+        elif cmd == COMMAND_PROFILES:
             self._profiles()
-        elif cmd == "/help":
+        elif cmd == COMMAND_HELP:
             self._help()
         else:
             self.telegram.send("Unknown command. /help — command list")
@@ -87,12 +130,12 @@ class CommandHandler:
             result = subprocess.run(
                 ["systemctl", "restart", "marzban"],
                 capture_output=True,
-                timeout=30
+                timeout=SERVICE_RESTART_TIMEOUT
             )
             if result.returncode == 0:
                 self.telegram.send("✅ Marzban restarted")
             else:
-                stderr = result.stderr.decode()[:500] if result.stderr else "Unknown error"
+                stderr = result.stderr.decode()[:ERROR_MESSAGE_MAX_LENGTH] if result.stderr else "Unknown error"
                 self.telegram.send(f"❌ Error:\n<code>{stderr}</code>")
         except subprocess.TimeoutExpired:
             self.telegram.send("❌ Timeout: Marzban restart took too long")
@@ -135,15 +178,8 @@ class CommandHandler:
 
         self.telegram.send("⏳ Running speed test...")
 
-        targets = [
-            ("Google", "https://www.google.com"),
-            ("Cloudflare", "https://www.cloudflare.com"),
-            ("GitHub", "https://www.github.com"),
-            ("Telegram", "https://api.telegram.org")
-        ]
-
         results = []
-        for name, url in targets:
+        for name, url in SPEEDTEST_TARGETS:
             result = self.health.check_connection_speed(url)
             if result["success"]:
                 results.append(f"🟢 {name}: {result['latency_ms']}ms")
@@ -178,11 +214,11 @@ class CommandHandler:
 
         message = "<b>👥 Profiles Status</b>\n"
 
-        for status in ["active", "disabled", "limited", "expired"]:
+        for status in PROFILE_STATUS_ICONS.keys():
             if status in by_status:
-                icon = {"active": "🟢", "disabled": "🔴", "limited": "🟡", "expired": "⚫"}.get(status, "⚪")
-                usernames = ", ".join(by_status[status][:10])  # Limit to 10
-                more = f" +{len(by_status[status]) - 10}" if len(by_status[status]) > 10 else ""
+                icon = PROFILE_STATUS_ICONS.get(status, "⚪")
+                usernames = ", ".join(by_status[status][:PROFILE_DISPLAY_LIMIT])
+                more = f" +{len(by_status[status]) - PROFILE_DISPLAY_LIMIT}" if len(by_status[status]) > PROFILE_DISPLAY_LIMIT else ""
                 message += f"\n{icon} <b>{status.title()}</b> ({len(by_status[status])}): {usernames}{more}"
 
         self.telegram.send(message)

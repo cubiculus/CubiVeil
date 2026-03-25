@@ -1,9 +1,9 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Rollback Utility                     ║
-# ║          github.com/cubiculus/cubiveil                   ║
-# ║                                                          ║
-# ║  Откат к предыдущей версии из бэкапа                     ║
+# ║          CubiVeil — Rollback Utility                      ║
+# ║          github.com/cubiculus/cubiveil                    ║
+# ║                                                           ║
+# ║  Откат к предыдущей версии из бэкапа                      ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 set -euo pipefail

@@ -1,9 +1,9 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Monitor Utility                      ║
-# ║          github.com/cubiculus/cubiveil                   ║
-# ║                                                          ║
-# ║  Мониторинг состояния сервера в реальном времени         ║
+# ║          CubiVeil — Monitor Utility                       ║
+# ║          github.com/cubiculus/cubiveil                    ║
+# ║                                                           ║
+# ║  Мониторинг состояния сервера в реальном времени          ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 set -euo pipefail
@@ -11,7 +11,11 @@ set -euo pipefail
 # ── Подключение локализации ───────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "${SCRIPT_DIR}")"
-if [[ -f "${PROJECT_DIR}/lang.sh" ]]; then
+
+# Подключаем i18n модуль для единых функций локализации
+if [[ -f "${PROJECT_DIR}/lib/i18n.sh" ]]; then
+  source "${PROJECT_DIR}/lib/i18n.sh"
+elif [[ -f "${PROJECT_DIR}/lang.sh" ]]; then
   source "${PROJECT_DIR}/lang.sh"
 else
   source "${PROJECT_DIR}/lib/fallback.sh"
@@ -59,11 +63,7 @@ declare -A MSG=(
   [PROMPT_QUIT]="Нажмите Ctrl+C для выхода"
 )
 
-msg() {
-  local key="$1"
-  local default="${2:-}"
-  echo "${MSG[$key]:-$default}"
-}
+# Функция msg теперь импортируется из lib/i18n.sh
 
 # ══════════════════════════════════════════════════════════════
 # Утилиты мониторинга

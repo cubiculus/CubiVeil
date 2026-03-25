@@ -1,7 +1,7 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Backup Utility (Modular)           ║
-# ║          github.com/cubiculus/cubiveil                   ║
+# ║          CubiVeil — Backup Utility (Modular)              ║
+# ║          github.com/cubiculus/cubiveil                    ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 # ── Подключение зависимостей / Dependencies ─────────────────
@@ -28,8 +28,8 @@ print_banner_utility() {
   echo ""
   echo -e "${CYAN}"
   echo "  ╔══════════════════════════════════════════╗"
-  echo "  ║     CubiVeil — Backup Utility              ║"
-  echo "  ║     github.com/cubiculus/cubiveil          ║"
+  echo "  ║     CubiVeil — Backup Utility             ║"
+  echo "  ║     github.com/cubiculus/cubiveil         ║"
   echo "  ╚══════════════════════════════════════════╝"
   echo "${PLAIN}"
   echo ""

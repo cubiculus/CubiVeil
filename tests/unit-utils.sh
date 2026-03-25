@@ -1,6 +1,6 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║        CubiVeil Unit Tests - lib/utils.sh                ║
+# ║        CubiVeil Unit Tests - lib/utils.sh                 ║
 # ║        Тестирование функций утилит                        ║
 # ╚═══════════════════════════════════════════════════════════╝
 
@@ -523,7 +523,7 @@ test_validate_email() {
 main() {
   echo ""
   echo -e "${YELLOW}╔══════════════════════════════════════════════════════╗${PLAIN}"
-  echo -e "${YELLOW}║        CubiVeil Unit Tests - lib/utils.sh          ║${PLAIN}"
+  echo -e "${YELLOW}║        CubiVeil Unit Tests - lib/utils.sh            ║${PLAIN}"
   echo -e "${YELLOW}╚══════════════════════════════════════════════════════╝${PLAIN}"
   echo ""
 

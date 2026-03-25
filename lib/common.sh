@@ -1,12 +1,12 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Common Functions                     ║
-# ║          github.com/cubiculus/cubiveil                   ║
+# ║          CubiVeil — Common Functions                      ║
+# ║          github.com/cubiculus/cubiveil                    ║
 # ║                                                           ║
 # ║  Общие функции для всех скриптов проекта                  ║
-# ║  - Проверки окружения (root, ubuntu)                      ║
-# ║  - Баннеры                                                 ║
-# ║  - Интеграция с security.sh и output.sh                   ║
+# ║  - Утилиты проверки окружения                             ║
+# ║  - Работа с файмами и сетью                               ║
+# ║  - Логирование                                            ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 # ── Подключение модулей ──────────────────────────────────────
@@ -24,36 +24,6 @@ fi
 
 # ── Проверки окружения / Environment checks ──────────────────
 
-# Проверка root прав
-# Выходит с ошибкой если не root
-check_root() {
-  local err_msg="${1:-}"
-  local err_msg_ru="${2:-}"
-
-  if [[ $EUID -ne 0 ]]; then
-    if [[ "${LANG_NAME:-}" == "Русский" ]]; then
-      err "${err_msg_ru:-Запускай от root (sudo)}"
-    else
-      err "${err_msg:-Scripts must be run as root (sudo)}"
-    fi
-  fi
-}
-
-# Проверка что это Ubuntu
-# Выходит с ошибкой если не Ubuntu
-check_ubuntu() {
-  local err_msg="${1:-}"
-  local err_msg_ru="${2:-}"
-
-  if ! grep -qi "ubuntu" /etc/os-release; then
-    if [[ "${LANG_NAME:-}" == "Русский" ]]; then
-      err "${err_msg_ru:-Скрипт только для Ubuntu}"
-    else
-      err "${err_msg:-This script is only for Ubuntu}"
-    fi
-  fi
-}
-
 # Проверка root без выхода (возвращает 0/1)
 is_root() {
   [[ $EUID -eq 0 ]]
@@ -62,103 +32,6 @@ is_root() {
 # Проверка Ubuntu без выхода (возвращает 0/1)
 is_ubuntu() {
   grep -qi "ubuntu" /etc/os-release
-}
-
-# ── Баннеры / Banners ────────────────────────────────────────
-
-# Основной баннер установщика
-print_banner() {
-  clear
-  echo ""
-  echo -e "${CYAN}  ╔══════════════════════════════════════════╗${PLAIN}"
-  echo -e "${CYAN}  ║            CubiVeil Installer            ║${PLAIN}"
-  echo -e "${CYAN}  ║    github.com/cubiculus/cubiveil         ║${PLAIN}"
-  if [[ "${LANG_NAME:-}" == "Русский" ]]; then
-    echo -e "${CYAN}  ║    Marzban + Sing-box + Telegram бот     ║${PLAIN}"
-  else
-    echo -e "${CYAN}  ║    Marzban + Sing-box + Telegram Bot     ║${PLAIN}"
-  fi
-  echo -e "${CYAN}  ╚══════════════════════════════════════════╝${PLAIN}"
-  echo ""
-}
-
-# Баннер для Telegram бота
-print_banner_telegram() {
-  clear
-  echo ""
-  echo -e "${CYAN}  ╔══════════════════════════════════════════╗${PLAIN}"
-  echo -e "${CYAN}  ║       CubiVeil Telegram Bot Setup       ║${PLAIN}"
-  echo -e "${CYAN}  ║    github.com/cubiculus/cubiveil         ║${PLAIN}"
-  if [[ "${LANG_NAME:-}" == "Русский" ]]; then
-    echo -e "${CYAN}  ║    Marzban + Sing-box + Telegram бот     ║${PLAIN}"
-  else
-    echo -e "${CYAN}  ║    Marzban + Sing-box + Telegram Bot     ║${PLAIN}"
-  fi
-  echo -e "${CYAN}  ╚══════════════════════════════════════════╝${PLAIN}"
-  echo ""
-}
-
-# Баннер для утилит (monitor, backup, export и т.д.)
-print_banner_utility() {
-  local utility_name="${1:-Utility}"
-  clear
-  echo ""
-  echo -e "${CYAN}  ╔══════════════════════════════════════════╗${PLAIN}"
-  echo -e "${CYAN}  ║        CubiVeil — ${utility_name}          ║${PLAIN}"
-  echo -e "${CYAN}  ║    github.com/cubiculus/cubiveil         ║${PLAIN}"
-  echo -e "${CYAN}  ╚══════════════════════════════════════════╝${PLAIN}"
-  echo ""
-}
-
-# ── Выбор языка / Language selection ─────────────────────────
-
-# Стандартный выбор языка (используется в основных скриптах)
-select_language() {
-  echo ""
-  echo "  Select language / Выберите язык:"
-  echo ""
-  echo "  1) Русский (Russian)"
-  echo "  2) English"
-  echo ""
-
-  while true; do
-    read -rp "  Enter choice [1-2]: " lang_choice
-    case "$lang_choice" in
-      1)
-        LANG_NAME="Русский"
-        return
-        ;;
-      2)
-        LANG_NAME="English"
-        return
-        ;;
-      *)
-        warn "Invalid choice / Неверный выбор"
-        ;;
-    esac
-  done
-}
-
-# Быстрый выбор языка из аргументов
-select_language_fast() {
-  local default="${1:-Русский}"
-
-  # Проверяем аргументы командной строки
-  for arg in "$@"; do
-    case "$arg" in
-      --lang=ru|--language=ru|-ru)
-        LANG_NAME="Русский"
-        return
-        ;;
-      --lang=en|--language=en|-en)
-        LANG_NAME="English"
-        return
-        ;;
-    esac
-  done
-
-  # Если нет аргументов — используем дефолт
-  LANG_NAME="$default"
 }
 
 # ── Утилиты / Utilities ──────────────────────────────────────
@@ -267,12 +140,3 @@ log_message() {
 log_info() { log_message "INFO" "$1" "$2"; }
 log_warn() { log_message "WARN" "$1" "$2"; }
 log_error() { log_message "ERROR" "$1" "$2"; }
-
-# ── Обратная совместимость / Backward compatibility ──────────
-
-# Эти функции определены для совместимости со старыми скриптами
-# Они дублируются из output.sh и fallback.sh
-
-# step_title уже определён в output.sh
-# step уже определён в fallback.sh
-# ok, warn, err, info уже определены в output.sh

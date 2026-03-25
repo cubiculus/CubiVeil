@@ -23,33 +23,86 @@ from alert_state import AlertStateManager
 from commands import CommandHandler
 from health_check import HealthChecker
 
+# ══════════════════════════════════════════════════════════════════════════════
+# Constants / Константы
+# ══════════════════════════════════════════════════════════════════════════════
+
+# File paths / Пути к файлам
+DB_PATH = "/var/lib/marzban/db.sqlite3"
+BACKUP_DIR = "/opt/cubiveil-bot/backups"
+
+# Environment variables / Переменные окружения
+ENV_TG_TOKEN = "TG_TOKEN"
+ENV_TG_CHAT_ID = "TG_CHAT_ID"
+ENV_ALERT_CPU = "ALERT_CPU"
+ENV_ALERT_RAM = "ALERT_RAM"
+ENV_ALERT_DISK = "ALERT_DISK"
+
+# Alert thresholds defaults / Пороги уведомлений по умолчанию
+DEFAULT_ALERT_CPU = 80
+DEFAULT_ALERT_RAM = 85
+DEFAULT_ALERT_DISK = 90
+
+# Threshold validation bounds / Границы проверки порогов
+THRESHOLD_MIN = 0
+THRESHOLD_MAX = 100
+
+# Time intervals in seconds / Временные интервалы в секундах
+HEALTH_CHECK_INTERVAL = 300  # 5 minutes
+POLL_ERROR_DELAY = 5
+REQUEST_TIMEOUT = 30
+
+# Progress bar settings / Настройки прогресс-бара
+PROGRESS_BAR_WIDTH = 10
+PROGRESS_BAR_FILLED = "█"
+PROGRESS_BAR_EMPTY = "░"
+
+# Status icons / Иконки статусов
+STATUS_ICON_ALERT = "🔴"
+STATUS_ICON_OK = "🟢"
+
 
 class CubiVeilBot:
     """Main bot class coordinating all components"""
 
     def __init__(self):
         # Load sensitive data from environment variables (systemd Environment)
-        self.token = os.environ.get("TG_TOKEN")
-        self.chat_id = os.environ.get("TG_CHAT_ID")
-        self.db_path = "/var/lib/marzban/db.sqlite3"
-        self.backup_dir = "/opt/cubiveil-bot/backups"
+        self.token = os.environ.get(ENV_TG_TOKEN)
+        self.chat_id = os.environ.get(ENV_TG_CHAT_ID)
+        self.db_path = DB_PATH
+        self.backup_dir = BACKUP_DIR
 
         # Alert thresholds - validated and read from environment variables
         # with protection against SQL injection and XSS
-        self.alert_cpu = self._validate_threshold(int(os.environ.get("ALERT_CPU", "80")))
-        self.alert_ram = self._validate_threshold(int(os.environ.get("ALERT_RAM", "85")))
-        self.alert_disk = self._validate_threshold(int(os.environ.get("ALERT_DISK", "90")))
+        self.alert_cpu = self._validate_threshold(
+            int(os.environ.get(ENV_ALERT_CPU, str(DEFAULT_ALERT_CPU)))
+        )
+        self.alert_ram = self._validate_threshold(
+            int(os.environ.get(ENV_ALERT_RAM, str(DEFAULT_ALERT_RAM)))
+        )
+        self.alert_disk = self._validate_threshold(
+            int(os.environ.get(ENV_ALERT_DISK, str(DEFAULT_ALERT_DISK)))
+        )
 
         # Validate required environment variables
         if not self.token or not self.chat_id:
             print("[bot] ERROR: TG_TOKEN and TG_CHAT_ID must be set in environment variables")
             exit(1)
 
+        # Initialize Telegram client and validate token
+        self.telegram = TelegramClient(self.token, self.chat_id)
+        
+        print("[bot] Validating Telegram bot token...")
+        is_valid, message = self.telegram.validate_token()
+        if not is_valid:
+            print(f"[bot] ERROR: Invalid Telegram token - {message}")
+            exit(1)
+        print(f"[bot] Token validated successfully - {message}")
+
         # Create necessary directories
         os.makedirs(self.backup_dir, exist_ok=True)
 
         # Initialize components
-        self.telegram = TelegramClient(self.token, self.chat_id)
         self.metrics = MetricsCollector(self.db_path)
         self.backup = BackupManager(self.db_path, self.backup_dir)
         self.alert_state = AlertStateManager()
@@ -67,12 +120,12 @@ class CubiVeilBot:
 
     def _validate_threshold(self, value):
         """Validate threshold value is between 0 and 100"""
-        return min(100, max(0, value))
+        return min(THRESHOLD_MAX, max(THRESHOLD_MIN, value))
 
     def send_startup_message(self):
         """Send startup message with alert thresholds"""
         self.telegram.send(
-            "🟢 <b>CubiVeil Bot started</b>\n"
+            f"{STATUS_ICON_OK} <b>CubiVeil Bot started</b>\n"
             f"Alerts: CPU>{self.alert_cpu}% RAM>{self.alert_ram}% Disk>{self.alert_disk}%\n"
             "Send /help"
         )
@@ -87,23 +140,23 @@ class CubiVeilBot:
         now = datetime.now().strftime("%d.%m.%Y %H:%M UTC")
 
         # Determine status icons
-        ci = "🔴" if cpu > self.alert_cpu else "🟢"
-        ri = "🔴" if ram_p > self.alert_ram else "🟢"
-        di = "🔴" if dsk_p > self.alert_disk else "🟢"
+        cpu_icon = STATUS_ICON_ALERT if cpu > self.alert_cpu else STATUS_ICON_OK
+        ram_icon = STATUS_ICON_ALERT if ram_p > self.alert_ram else STATUS_ICON_OK
+        disk_icon = STATUS_ICON_ALERT if dsk_p > self.alert_disk else STATUS_ICON_OK
 
-        # Build progress bars
-        def bar(pct, width=10):
-            filled = int(min(pct, 100) / 100 * width)
-            return "█" * filled + "░" * (width - filled)
+        # Build progress bar
+        def bar(pct, width=PROGRESS_BAR_WIDTH):
+            filled = int(min(pct, THRESHOLD_MAX) / THRESHOLD_MAX * width)
+            return PROGRESS_BAR_FILLED * filled + PROGRESS_BAR_EMPTY * (width - filled)
 
         # Send report
         self.telegram.send(
             f"<b>🛡 CubiVeil — Daily Report</b>\n"
             f"<code>{now}</code>\n"
             f"━━━━━━━━━━━━━━━━━━━━━\n"
-            f"{ci} CPU:   {cpu}%  {bar(cpu)}\n"
-            f"{ri} RAM:   {ram_u}/{ram_t} MB ({ram_p}%)  {bar(ram_p)}\n"
-            f"{di} Disk:  {dsk_u}/{dsk_t} GB ({dsk_p}%)  {bar(dsk_p)}\n"
+            f"{cpu_icon} CPU:   {cpu}%  {bar(cpu)}\n"
+            f"{ram_icon} RAM:   {ram_u}/{ram_t} MB ({ram_p}%)  {bar(ram_p)}\n"
+            f"{disk_icon} Disk:  {dsk_u}/{dsk_t} GB ({dsk_p}%)  {bar(dsk_p)}\n"
             f"⏱ Uptime:  {uptime}\n"
             f"━━━━━━━━━━━━━━━━━━━━━\n"
             f"👥 Active users: <b>{users}</b>\n"
@@ -179,7 +232,7 @@ class CubiVeilBot:
         self.send_startup_message()
         offset = 0
         last_health_check = 0
-        health_check_interval = 300  # Check health every 5 minutes
+        health_check_interval = HEALTH_CHECK_INTERVAL
 
         while True:
             try:
@@ -190,7 +243,7 @@ class CubiVeilBot:
                     last_health_check = current_time
 
                 url = (f"https://api.telegram.org/bot{self.token}/getUpdates"
-                       f"?offset={offset}&timeout=30&allowed_updates=[\"message\"]")
+                       f"?offset={offset}&timeout={REQUEST_TIMEOUT}&allowed_updates=[\"message\"]")
 
                 response = self.telegram._make_request(url)
                 data = json.loads(response)
@@ -209,7 +262,7 @@ class CubiVeilBot:
 
             except Exception as e:
                 print(f"[bot] poll error: {e}")
-                time.sleep(5)
+                time.sleep(POLL_ERROR_DELAY)
 
 
 if __name__ == "__main__":

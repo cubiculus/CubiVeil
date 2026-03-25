@@ -1,7 +1,7 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
 # ║          CubiVeil — Installation Steps (Refactored)       ║
-# ║          github.com/cubiculus/cubiveil                   ║
+# ║          github.com/cubiculus/cubiveil                    ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 # ── Подключение модуля валидации ─────────────────────────────
@@ -20,6 +20,11 @@ for step_file in "${STEPS_DIR}"/*.sh; do
   fi
 done
 
+# ── Загрузка основных шагов установки ───────────────────────
+if [[ -f "${SCRIPT_DIR}/steps/install-steps-main.sh" ]]; then
+  source "${SCRIPT_DIR}/steps/install-steps-main.sh"
+fi
+
 # ── ШАГ 0: Ввод данных / Input data ──────────────────────────
 prompt_inputs() {
   local step_title
@@ -30,6 +35,62 @@ prompt_inputs() {
   fi
   step "$step_title"
 
+  # ── DEV MODE: Пропуск ввода домена ──────────────────────────
+  if [[ "${DEV_MODE:-false}" == "true" ]]; then
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+      info "DEV-режим: использование самоподписного SSL сертификата"
+      info "Домен не требуется, будет использован: ${DOMAIN:-${DEV_DOMAIN:-dev.cubiveil.local}}"
+    else
+      info "DEV mode: using self-signed SSL certificate"
+      info "Domain not required, will use: ${DOMAIN:-${DEV_DOMAIN:-dev.cubiveil.local}}"
+    fi
+    echo ""
+
+    # Установка домена по умолчанию если не задан
+    if [[ -z "${DOMAIN:-}" ]]; then
+      DOMAIN="${DEV_DOMAIN:-dev.cubiveil.local}"
+    fi
+
+    # Email по умолчанию
+    LE_EMAIL="${LE_EMAIL:-admin@${DOMAIN}}"
+
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+      ok "Домен:   $DOMAIN (dev-режим)"
+      ok "Email:   $LE_EMAIL"
+      warn "ВНИМАНИЕ: Браузеры будут показывать предупреждение о безопасности"
+    else
+      ok "Domain:  $DOMAIN (dev mode)"
+      ok "Email:   $LE_EMAIL"
+      warn "WARNING: Browsers will show security warning"
+    fi
+    echo ""
+
+    # Telegram - спрашиваем только要不要
+    local prompt_telegram
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+      info "Telegram-бот: ежедневные отчёты, алерты, управление через чат."
+      prompt_telegram="  Установить Telegram-бот? (y/n): "
+    else
+      info "Telegram bot: daily reports, alerts, chat control."
+      prompt_telegram="  Install Telegram bot? (y/n): "
+    fi
+    read -rp "$prompt_telegram" INSTALL_TG
+
+    # Сбрасываем переменные Telegram
+    # shellcheck disable=SC2034
+    TG_TOKEN=""
+    # shellcheck disable=SC2034
+    TG_CHAT_ID=""
+
+    if [[ "$INSTALL_TG" == "y" || "$INSTALL_TG" == "Y" ]]; then
+      warn "Telegram-бот будет установлен через отдельный скрипт после завершения установки."
+    fi
+
+    echo ""
+    return 0
+  fi
+
+  # ── PRODUCTION MODE: Запрос домена ─────────────────────────
   if [[ "$LANG_NAME" == "Русский" ]]; then
     warn "Убедись что A-запись домена уже указывает на этот сервер."
     warn "Let's Encrypt проверит DNS — установка упадёт если запись не прописана."

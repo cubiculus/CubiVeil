@@ -1,9 +1,9 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Update Utility                       ║
-# ║          github.com/cubiculus/cubiveil                   ║
-# ║                                                          ║
-# ║  Обновление CubiVeil до последней версии                 ║
+# ║          CubiVeil — Update Utility                        ║
+# ║          github.com/cubiculus/cubiveil                    ║
+# ║                                                           ║
+# ║  Обновление CubiVeil до последней версии                  ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 set -euo pipefail
@@ -29,6 +29,63 @@ RAW_URL="https://raw.githubusercontent.com/cubiculus/cubiveil/main"
 CUBIVEIL_DIR="/opt/cubiveil"
 BACKUP_DIR="/root/cubiveil-backup"
 VERSION_FILE="${CUBIVEIL_DIR}/.version"
+
+# ── Списки файлов для обновления ──────────────────────────────
+# Основные файлы в корне проекта
+ROOT_FILES=(
+  "install.sh"
+  "setup-telegram.sh"
+  "run-tests.sh"
+  "lang.sh"
+  "pyproject.toml"
+  ".version"
+  ".pre-commit-config.yaml"
+)
+
+# Файлы библиотеки
+LIB_FILES=(
+  "utils.sh"
+  "common.sh"
+  "validation.sh"
+  "security.sh"
+  "output.sh"
+  "fallback.sh"
+  "i18n.sh"
+  "manifest.sh"
+  "install-steps.sh"
+  "test-utils.sh"
+)
+
+# Тестовые файлы
+TEST_FILES=(
+  "integration-test.sh"
+  "modular-structure.sh"
+  "unit-utils.sh"
+  "unit-telegram.sh"
+  "unit-install.sh"
+  "unit-lang.sh"
+  "unit-install-steps.sh"
+  "unit-utilities.sh"
+)
+
+# Утилиты
+UTIL_FILES=(
+  "monitor.sh"
+  "backup.sh"
+  "update.sh"
+  "rollback.sh"
+  "export-config.sh"
+  "install-aliases.sh"
+  "manage-profiles.sh"
+  "cubiveil.sh"
+  "diagnose.sh"
+)
+
+# Core модули
+CORE_FILES=(
+  "system.sh"
+  "log.sh"
+)
 
 # ══════════════════════════════════════════════════════════════
 # ШАГ 1: Проверка окружения
@@ -159,40 +216,55 @@ step_download_update() {
   temp_dir=$(mktemp -d)
   info "$(get_str "MSG_MSG_DOWNLOADING") → ${temp_dir}"
 
-  # Список файлов для загрузки
-  local files=(
-    "install.sh"
-    "setup-telegram.sh"
-    "run-tests.sh"
-    "lang.sh"
-    "pyproject.toml"
-    ".version"
-  )
+  local download_failed=0
 
   # Загружаем основные файлы
-  for file in "${files[@]}"; do
+  for file in "${ROOT_FILES[@]}"; do
     if ! curl -sf --max-time 30 "${RAW_URL}/${file}" -o "${temp_dir}/${file}" 2>/dev/null; then
       warning "Не удалось загрузить ${file}"
+      download_failed=1
     fi
   done
 
   # Загружаем lib/*.sh
   mkdir -p "${temp_dir}/lib"
-  local lib_files=("utils.sh" "install-steps.sh" "fallback.sh" "security.sh" "validation.sh")
-  for file in "${lib_files[@]}"; do
+  for file in "${LIB_FILES[@]}"; do
     if ! curl -sf --max-time 30 "${RAW_URL}/lib/${file}" -o "${temp_dir}/lib/${file}" 2>/dev/null; then
       warning "Не удалось загрузить lib/${file}"
+      download_failed=1
+    fi
+  done
+
+  # Загружаем core/*.sh
+  mkdir -p "${temp_dir}/lib/core"
+  for file in "${CORE_FILES[@]}"; do
+    if ! curl -sf --max-time 30 "${RAW_URL}/lib/core/${file}" -o "${temp_dir}/lib/core/${file}" 2>/dev/null; then
+      warning "Не удалось загрузить lib/core/${file}"
+      download_failed=1
     fi
   done
 
   # Загружаем тесты
   mkdir -p "${temp_dir}/tests"
-  local test_files=("integration-tests.sh" "modular-structure.sh" "unit-utils.sh" "unit-telegram.sh" "unit-install.sh" "unit-lang.sh" "unit-install-steps.sh")
-  for file in "${test_files[@]}"; do
+  for file in "${TEST_FILES[@]}"; do
     if ! curl -sf --max-time 30 "${RAW_URL}/tests/${file}" -o "${temp_dir}/tests/${file}" 2>/dev/null; then
       warning "Не удалось загрузить tests/${file}"
+      download_failed=1
     fi
   done
+
+  # Загружаем утилиты
+  mkdir -p "${temp_dir}/utils"
+  for file in "${UTIL_FILES[@]}"; do
+    if ! curl -sf --max-time 30 "${RAW_URL}/utils/${file}" -o "${temp_dir}/utils/${file}" 2>/dev/null; then
+      warning "Не удалось загрузить utils/${file}"
+      download_failed=1
+    fi
+  done
+
+  if [[ $download_failed -eq 1 ]]; then
+    warning "$(get_str "MSG_ERR_DOWNLOAD_FAILED") (частично)"
+  fi
 
   success "Файлы загружены"
   export TEMP_DIR="$temp_dir"
@@ -218,7 +290,7 @@ step_install_update() {
   # Копируем новые файлы
   if [[ -d "${TEMP_DIR}" ]]; then
     # Копируем основные файлы
-    for file in install.sh setup-telegram.sh run-tests.sh lang.sh pyproject.toml; do
+    for file in "${ROOT_FILES[@]}"; do
       if [[ -f "${TEMP_DIR}/${file}" ]]; then
         cp "${TEMP_DIR}/${file}" "${SCRIPT_DIR}/${file}"
       fi
@@ -234,6 +306,11 @@ step_install_update() {
       cp -rp "${TEMP_DIR}/tests/"* "${SCRIPT_DIR}/tests/" 2>/dev/null || true
     fi
 
+    # Копируем утилиты
+    if [[ -d "${TEMP_DIR}/utils" ]]; then
+      cp -rp "${TEMP_DIR}/utils/"* "${SCRIPT_DIR}/utils/" 2>/dev/null || true
+    fi
+
     # Обновляем .version
     if [[ -f "${TEMP_DIR}/.version" ]]; then
       cp "${TEMP_DIR}/.version" "${VERSION_FILE}"
@@ -242,8 +319,7 @@ step_install_update() {
 
   # Восстанавливаем конфиги
   if [[ -f "${config_backup}/marzban.env" ]]; then
-    # Не перезаписываем .env, но можно обновить если есть новые переменные
-    info "$(get_str "MSG_INFO_INSTALLING")" "Marzban config preserved"
+    info "Marzban config preserved"
   fi
 
   # Очистка

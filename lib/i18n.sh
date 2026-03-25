@@ -1,11 +1,12 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Unified Localization                ║
-# ║          github.com/cubiculus/cubiveil                   ║
+# ║          CubiVeil — Unified Localization                  ║
+# ║          github.com/cubiculus/cubiveil                    ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 # ── Базовый модуль локализации ───────────────────────────────
 # Этот файл предоставляет унифицированный API для локализации
+# Функции вывода (step_title, step, ok, warn, err, info) импортируются из output.sh
 
 # ── Основные функции локализации ────────────────────────────────
 # get_str() - получить локализованную строку по ключу
@@ -45,24 +46,6 @@ msg() {
   fi
 }
 
-# ── Вспомогательные функции ───────────────────────────────────────
-# Эти функции могут быть переопределены в lang.sh
-
-step_title() {
-  local step="$1"
-  local ru="$2"
-  local en="$3"
-
-  echo ""
-  echo "══════════════════════════════════════════════════════════"
-  if [[ "$LANG_NAME" == "Русский" ]]; then
-    echo "  ${step}. ${ru}"
-  else
-    echo "  ${step}. ${en}"
-  fi
-  echo "══════════════════════════════════════════════════════════"
-}
-
 # ── Проверка инициализации локализации ───────────────────────────
 # Проверяет что LANG_NAME установлен, если нет - устанавливает дефолт
 
@@ -74,6 +57,53 @@ ensure_lang_initialized() {
 
 # Инициализируем при загрузке
 ensure_lang_initialized
+
+# ── Расширенные функции локализации ──────────────────────────────
+
+# msg_safe() - безопасная версия msg (не выводит ошибку если массив не найден)
+msg_safe() {
+  local key="$1"
+  local default="${2:-$key}"
+  msg "$key" "$default"
+}
+
+# ── Функции для работы с локализованными массивами ───────────────
+
+# init_msg_array() - инициализирует MSG массив если нужно
+init_msg_array() {
+  if ! declare -p MSG 2>/dev/null | grep -q 'declare -A'; then
+    declare -gA MSG
+  fi
+}
+
+# set_msg() - устанавливает сообщение в MSG массив
+# Аргументы: $1 = ключ, $2 = русский текст, $3 = английский текст
+set_msg() {
+  local key="$1"
+  local ru="$2"
+  local en="$3"
+
+  init_msg_array
+  MSG[$key]="$en"
+  MSG[${key}_RU]="$ru"
+}
+
+# get_msg() - получает сообщение из MSG массива с учётом языка
+get_msg() {
+  local key="$1"
+  local default="${2:-}"
+
+  if ! declare -p MSG 2>/dev/null | grep -q 'declare -A'; then
+    echo "$default"
+    return
+  fi
+
+  if [[ "$LANG_NAME" == "Русский" ]]; then
+    echo "${MSG[${key}_RU]:-${MSG[$key]:-$default}}"
+  else
+    echo "${MSG[$key]:-$default}"
+  fi
+}
 
 # ── Словарь локализации для setup-telegram.sh ─────────────
 

@@ -32,83 +32,21 @@ ERR_PYTHON3_NOT_FOUND_RU="Python3 не установлен. Установи: a
 ERR_CURL_NOT_FOUND="curl not found. Install: apt-get install curl"
 ERR_CURL_NOT_FOUND_RU="curl не установлен. Установи: apt-get install curl"
 
-check_root() {
-  if [[ $EUID -ne 0 ]]; then
-    if [[ "$LANG_NAME" == "Русский" ]]; then
-      err "$ERR_ROOT_RU"
-    else
-      err "$ERR_ROOT"
-    fi
-  fi
-}
+# ── Dev mode / Dev режим ──────────────────────────────────────
+INFO_DEV_MODE="DEV mode: using self-signed SSL certificate"
+INFO_DEV_MODE_RU="DEV-режим: использование самоподписного SSL сертификата"
 
-check_ubuntu() {
-  if ! grep -qi "ubuntu" /etc/os-release; then
-    if [[ "$LANG_NAME" == "Русский" ]]; then
-      err "$ERR_UBUNTU_RU"
-    else
-      err "$ERR_UBUNTU"
-    fi
-  fi
-}
+INFO_DEV_DOMAIN="Domain not required, will use: {DOMAIN}"
+INFO_DEV_DOMAIN_RU="Домен не требуется, будет использован: {DOMAIN}"
 
-# ── Баннер / Banner ───────────────────────────────────────────
-print_banner() {
-  clear
-  echo ""
-  echo -e "${CYAN}  ╔══════════════════════════════════════════╗${PLAIN}"
-  echo -e "${CYAN}  ║            CubiVeil Installer            ║${PLAIN}"
-  echo -e "${CYAN}  ║    github.com/cubiculus/cubiveil         ║${PLAIN}"
-  if [[ "$LANG_NAME" == "Русский" ]]; then
-    echo -e "${CYAN}  ║    Marzban + Sing-box + Telegram бот     ║${PLAIN}"
-  else
-    echo -e "${CYAN}  ║    Marzban + Sing-box + Telegram Bot     ║${PLAIN}"
-  fi
-  echo -e "${CYAN}  ╚══════════════════════════════════════════╝${PLAIN}"
-  echo ""
-}
+WARN_DEV_MODE="WARNING: Browsers will show security warning"
+WARN_DEV_MODE_RU="ВНИМАНИЕ: Браузеры будут показывать предупреждение о безопасности"
 
-print_banner_telegram() {
-  clear
-  echo ""
-  echo -e "${CYAN}  ╔══════════════════════════════════════════╗${PLAIN}"
-  echo -e "${CYAN}  ║       CubiVeil Telegram Bot Setup       ║${PLAIN}"
-  echo -e "${CYAN}  ║    github.com/cubiculus/cubiveil         ║${PLAIN}"
-  if [[ "$LANG_NAME" == "Русский" ]]; then
-    echo -e "${CYAN}  ║    Marzban + Sing-box + Telegram бот     ║${PLAIN}"
-  else
-    echo -e "${CYAN}  ║    Marzban + Sing-box + Telegram Bot     ║${PLAIN}"
-  fi
-  echo -e "${CYAN}  ╚══════════════════════════════════════════╝${PLAIN}"
-  echo ""
-}
+WARN_DEV_NOT_FOR_PRODUCTION="Do not use in production!"
+WARN_DEV_NOT_FOR_PRODUCTION_RU="Не используйте в production!"
 
-# ── Выбор языка / Language selection ──────────────────────────
-select_language() {
-  echo ""
-  echo "  Select language / Выберите язык:"
-  echo ""
-  echo "  1) Русский (Russian)"
-  echo "  2) English"
-  echo ""
-
-  while true; do
-    read -rp "  Enter choice [1-2]: " lang_choice
-    case "$lang_choice" in
-    1)
-      LANG_NAME="Русский"
-      return
-      ;;
-    2)
-      LANG_NAME="English"
-      return
-      ;;
-    *)
-      warn "Invalid choice. Please enter 1 or 2."
-      ;;
-    esac
-  done
-}
+OK_DEV_DOMAIN="Domain: {DOMAIN} (dev mode)"
+OK_DEV_DOMAIN_RU="Домен: {DOMAIN} (dev-режим)"
 
 # ── Строки ввода данных / Input prompts ───────────────────────
 PROMPT_DOMAIN="Domain for panel and subscriptions (e.g. panel.example.com):"

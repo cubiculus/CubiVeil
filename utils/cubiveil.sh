@@ -1,7 +1,7 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║            CubiVeil — CLI Utility Manager                 ║
-# ║         github.com/cubiculus/cubiveil                     ║
+# ║          CubiVeil — CLI Utility Manager                   ║
+# ║          github.com/cubiculus/cubiveil                    ║
 # ║                                                           ║
 # ║  Единая точка доступа ко всем утилитам CubiVeil           ║
 # ╚═══════════════════════════════════════════════════════════╝
@@ -11,7 +11,11 @@ set -euo pipefail
 # ── Подключение локализации ───────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "${SCRIPT_DIR}")"
-if [[ -f "${PROJECT_DIR}/lang.sh" ]]; then
+
+# Подключаем i18n модуль для единых функций локализации
+if [[ -f "${PROJECT_DIR}/lib/i18n.sh" ]]; then
+  source "${PROJECT_DIR}/lib/i18n.sh"
+elif [[ -f "${PROJECT_DIR}/lang.sh" ]]; then
   source "${PROJECT_DIR}/lang.sh"
 else
   source "${PROJECT_DIR}/lib/fallback.sh"
@@ -52,10 +56,7 @@ declare -A MSG=(
   [ERR_NOT_FOUND]="❌ Утилита не найдена"
 )
 
-msg() {
-  local key="$1"
-  echo "${MSG[$key]:-$key}"
-}
+# Функция msg импортируется из lib/i18n.sh
 
 # ── Вспомогательные функции ───────────────────────────────────
 print_header() {

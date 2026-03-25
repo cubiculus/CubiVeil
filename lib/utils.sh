@@ -119,48 +119,22 @@ arch() {
 }
 
 get_server_ip() {
-  # Параллельные запросы для ускорения (~1 сек вместо до 12 сек)
-  local temp_file
-  temp_file=$(mktemp)
-  local pids=()
+  local ip
   local urls=(
     "https://api4.ipify.org"
     "https://ipv4.icanhazip.com"
     "https://4.ident.me"
   )
 
-  # Запускаем все запросы параллельно
+  # Последовательные запросы с таймаутом
   for url in "${urls[@]}"; do
-    {
-      local result
-      result=$(curl -sf --max-time 4 "$url" 2>/dev/null | tr -d '[:space:]')
-      if [[ -n "$result" ]]; then
-        echo "$result" > "${temp_file}.${BASHPID}"
-      fi
-    } &
-    pids+=($!)
-  done
-
-  # Ждём завершения всех процессов
-  for pid in "${pids[@]}"; do
-    wait "$pid" 2>/dev/null || true
-  done
-
-  # Получаем первый успешный результат
-  local ip=""
-  for f in "${temp_file}".*; do
-    if [[ -f "$f" ]]; then
-      ip=$(cat "$f")
-      rm -f "$f"
-      if [[ -n "$ip" ]]; then
-        rm -f "$temp_file"
-        echo "$ip"
-        return 0
-      fi
+    ip=$(curl -sf --max-time 4 "$url" 2>/dev/null | tr -d '[:space:]')
+    if [[ -n "$ip" ]]; then
+      echo "$ip"
+      return 0
     fi
   done
 
-  rm -f "$temp_file"
   echo ""
   return 1
 }

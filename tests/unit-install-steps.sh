@@ -1,6 +1,6 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║      CubiVeil Unit Tests - lib/install-steps.sh         ║
+# ║      CubiVeil Unit Tests - lib/install-steps.sh           ║
 # ║      Тестирование функций установки                      ║
 # ╚═══════════════════════════════════════════════════════════╝
 
@@ -513,29 +513,116 @@ test_step_ssl() {
 
   local func_source
   func_source=$(declare -f step_ssl)
-  
+
   # Проверка что устанавливается acme.sh
   if echo "$func_source" | grep -q "acme.sh"; then
     pass "step_ssl: использует acme.sh"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что открывается порт 80 для валидации
   if echo "$func_source" | grep -q "open_port 80"; then
     pass "step_ssl: открывает порт 80 для валидации"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что порт 80 закрывается после получения
   if echo "$func_source" | grep -q "close_port 80"; then
     pass "step_ssl: закрывает порт 80 после получения"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что сертификаты сохраняются в правильную директорию
   if echo "$func_source" | grep -q "/var/lib/marzban/certs"; then
     pass "step_ssl: сохраняет сертификаты в /var/lib/marzban/certs"
     ((TESTS_PASSED++))
+  fi
+}
+
+# ── Тест: step_ssl_dev ───────────────────────────────────────
+test_step_ssl_dev() {
+  info "Тестирование step_ssl_dev..."
+
+  # Проверяем что функция существует в install-steps-main.sh
+  local main_steps_file="${SCRIPT_DIR}/lib/steps/install-steps-main.sh"
+  
+  if [[ ! -f "$main_steps_file" ]]; then
+    warn "lib/steps/install-steps-main.sh не найден"
+    return
+  fi
+
+  # Загружаем функции из main файла
+  source "$main_steps_file" 2>/dev/null || true
+
+  if declare -f step_ssl_dev >/dev/null; then
+    pass "Функция step_ssl_dev существует"
+    ((TESTS_PASSED++))
+  else
+    fail "Функция step_ssl_dev отсутствует"
+    return
+  fi
+
+  local func_source
+  func_source=$(declare -f step_ssl_dev)
+
+  # Проверка что используется openssl для генерации self-signed
+  if echo "$func_source" | grep -q "openssl.*req.*-x509"; then
+    pass "step_ssl_dev: использует openssl для self-signed"
+    ((TESTS_PASSED++))
+  fi
+
+  # Проверка что создаётся директория для сертификатов
+  if echo "$func_source" | grep -q "mkdir -p.*certs"; then
+    pass "step_ssl_dev: создаёт директорию для сертификатов"
+    ((TESTS_PASSED++))
+  fi
+
+  # Проверка что сертификат генерируется на 100 лет (36500 дней)
+  if echo "$func_source" | grep -q "\-days 36500\|\-days 3650"; then
+    pass "step_ssl_dev: длительный срок действия сертификата"
+    ((TESTS_PASSED++))
+  fi
+
+  # Проверка что используется dev.cubiveil.local по умолчанию
+  if echo "$func_source" | grep -q "dev.cubiveil.local"; then
+    pass "step_ssl_dev: использует dev.cubiveil.local по умолчанию"
+    ((TESTS_PASSED++))
+  fi
+
+  # Проверка что есть предупреждение о безопасности
+  if echo "$func_source" | grep -q "WARNING\|security warning\|Browsers will show"; then
+    pass "step_ssl_dev: показывает предупреждение о безопасности"
+    ((TESTS_PASSED++))
+  fi
+}
+
+# ── Тест: step_ssl проверяет DEV_MODE ────────────────────────
+test_step_ssl_dev_mode() {
+  info "Тестирование step_ssl: проверка DEV_MODE..."
+
+  # Проверяем что step_ssl проверяет DEV_MODE
+  local main_steps_file="${SCRIPT_DIR}/lib/steps/install-steps-main.sh"
+  
+  if [[ ! -f "$main_steps_file" ]]; then
+    warn "lib/steps/install-steps-main.sh не найден"
+    return
+  fi
+
+  local func_source
+  func_source=$(grep -A 50 "^step_ssl()" "$main_steps_file" 2>/dev/null || echo "")
+
+  if echo "$func_source" | grep -q "DEV_MODE.*true\|DEV_MODE:-false"; then
+    pass "step_ssl: проверяет DEV_MODE"
+    ((TESTS_PASSED++))
+  else
+    fail "step_ssl: не проверяет DEV_MODE"
+  fi
+
+  if echo "$func_source" | grep -q "step_ssl_dev"; then
+    pass "step_ssl: вызывает step_ssl_dev в dev-режиме"
+    ((TESTS_PASSED++))
+  else
+    fail "step_ssl: не вызывает step_ssl_dev"
   fi
 }
 
@@ -687,10 +774,10 @@ cleanup() {
 # ── Основная функция ─────────────────────────────────────────
 main() {
   trap cleanup EXIT
-  
+
   echo ""
   echo -e "${YELLOW}╔══════════════════════════════════════════════════════╗${PLAIN}"
-  echo -e "${YELLOW}║     CubiVeil Unit Tests - lib/install-steps.sh      ║${PLAIN}"
+  echo -e "${YELLOW}║     CubiVeil Unit Tests - lib/install-steps.sh       ║${PLAIN}"
   echo -e "${YELLOW}╚══════════════════════════════════════════════════════╝${PLAIN}"
   echo ""
 
@@ -735,6 +822,12 @@ main() {
   echo ""
 
   test_step_ssl
+  echo ""
+
+  test_step_ssl_dev
+  echo ""
+
+  test_step_ssl_dev_mode
   echo ""
 
   test_step_configure
