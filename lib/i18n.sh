@@ -74,3 +74,49 @@ ensure_lang_initialized() {
 
 # Инициализируем при загрузке
 ensure_lang_initialized
+
+# ── Словарь локализации для setup-telegram.sh ─────────────
+
+# Telegram Bot Setup
+declare -A TELEGRAM_SETUP=(
+  [INFO_TG_BOT_RU]="Telegram-бот: нужен токен от @BotFather и твой chat_id (узнать: @userinfobot)."
+  [INFO_TG_BOT]="Telegram bot: needs token from @BotFather and your chat_id (find out: @userinfobot)."
+  [PROMPT_TG_TOKEN_RU]="  Telegram Bot Token: "
+  [PROMPT_TG_TOKEN]="  Telegram Bot Token: "
+  [ERR_TG_TOKEN_FORMAT_RU]="Некорректный формат токена Telegram. Ожидается: 123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+  [ERR_TG_TOKEN_FORMAT]="Invalid Telegram token format. Expected: 123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+  [ERR_TG_TOKEN_INVALID_RU]="Токен Telegram недействителен. Проверь токен от @BotFather"
+  [ERR_TG_TOKEN_INVALID]="Invalid Telegram token. Verify token from @BotFather"
+  [OK_TG_TOKEN_VERIFIED_RU]="Токен Telegram проверен ✓"
+  [OK_TG_TOKEN_VERIFIED]="Telegram token verified ✓"
+  [PROMPT_TG_CHAT_ID_RU]="  Telegram Chat ID: "
+  [PROMPT_TG_CHAT_ID]="  Telegram Chat ID: "
+  [WARN_INVALID_CHAT_ID_RU]="Некорректный Chat ID. Ожидается число (например: 123456789)"
+  [WARN_INVALID_CHAT_ID]="Invalid Chat ID. Expected a number (e.g., 123456789)"
+  [PROMPT_REPORT_TIME_RU]="  Время ежедневного отчёта UTC [09:00]: "
+  [PROMPT_REPORT_TIME]="  Daily report time UTC [09:00]: "
+  [WARN_INVALID_TIME_RU]="Некорректное время. Формат: ЧЧ:ММ (например: 09:00)"
+  [WARN_INVALID_TIME]="Invalid time. Format: HH:MM (e.g., 09:00)"
+  [INFO_ALERT_THRESHOLDS_RU]="Пороги алертов (в %, Enter = по умолчанию):"
+  [INFO_ALERT_THRESHOLDS]="Alert thresholds (in %, Enter = default):"
+  [PROMPT_ALERT_CPU_RU]="  CPU  > ? % [80]: "
+  [PROMPT_ALERT_CPU]="  CPU  > ? % [80]: "
+  [PROMPT_ALERT_RAM_RU]="  RAM  > ? % [85]: "
+  [PROMPT_ALERT_RAM]="  RAM  > ? % [85]: "
+  [PROMPT_ALERT_DISK_RU]="  Диск > ? % [90]: "
+  [PROMPT_ALERT_DISK]="  Disk > ? % [90]: "
+  [OK_TG_CONFIGURED_RU]="Telegram: настроен (отчёт в ${REPORT_TIME} UTC)"
+  [OK_TG_CONFIGURED]="Telegram configured (report at ${REPORT_TIME} UTC)"
+  [OK_TG_CONFIGURED_SHORT_RU]="Пороги: CPU>${ALERT_CPU}% RAM>${ALERT_RAM}% Диск>${ALERT_DISK}%"
+  [OK_TG_CONFIGURED_SHORT]="Thresholds: CPU>${ALERT_CPU}% RAM>${ALERT_RAM}% Disk>${ALERT_DISK}%"
+)
+
+# Функция для получения локализованной строки из словаря
+get_setup_str() {
+  local key="$1"
+  if [[ "$LANG_NAME" == "Русский" ]]; then
+    echo "${TELEGRAM_SETUP[${key}_RU]:-${TELEGRAM_SETUP[$key]}}"
+  else
+    echo "${TELEGRAM_SETUP[$key]}"
+  fi
+}

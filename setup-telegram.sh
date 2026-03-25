@@ -69,28 +69,15 @@ step_check_environment() {
 step_prompt_telegram_config() {
   step_title "2" "Настройка Telegram" "Telegram configuration"
 
-  if [[ "$LANG_NAME" == "Русский" ]]; then
-    info "Telegram-бот: нужен токен от @BotFather и твой chat_id (узнать: @userinfobot)."
-  else
-    info "$INFO_TG_BOT"
-  fi
+  info "$(get_setup_str INFO_TG_BOT)"
 
-  local prompt_token
-  if [[ "$LANG_NAME" == "Русский" ]]; then
-    prompt_token="  Telegram Bot Token: "
-  else
-    prompt_token="  $PROMPT_TG_TOKEN "
-  fi
+  local prompt_token="$(get_setup_str PROMPT_TG_TOKEN)"
   read -rp "$prompt_token" TG_TOKEN
   TG_TOKEN="${TG_TOKEN// /}"
 
   # Валидация формата токена Telegram
   if [[ ! "$TG_TOKEN" =~ ^[0-9]+:[A-Za-z0-9_-]{35}$ ]]; then
-    if [[ "$LANG_NAME" == "Русский" ]]; then
-      err "Некорректный формат токена Telegram. Ожидается: 123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
-    else
-      err "$ERR_TG_TOKEN_FORMAT"
-    fi
+    err "$(get_setup_str ERR_TG_TOKEN_FORMAT)"
   fi
 
   # Проверка валидности токена через API с SSL pinning
@@ -98,74 +85,40 @@ step_prompt_telegram_config() {
   if ! curl -sf --max-time 5 \
       --cacert /etc/ssl/certs/ca-certificates.crt \
       "https://api.telegram.org/bot${TG_TOKEN}/getMe" >/dev/null 2>&1; then
-    if [[ "$LANG_NAME" == "Русский" ]]; then
-      err "Токен Telegram недействителен. Проверь токен от @BotFather"
-    else
-      err "$ERR_TG_TOKEN_INVALID"
-    fi
+    err "$(get_setup_str ERR_TG_TOKEN_INVALID)"
   fi
 
-  if [[ "$LANG_NAME" == "Русский" ]]; then
-    ok "Токен Telegram проверен ✓"
-  else
-    ok "$OK_TG_TOKEN_VERIFIED"
-  fi
+  ok "$(get_setup_str OK_TG_TOKEN_VERIFIED)"
 
-  local prompt_chat_id
-  if [[ "$LANG_NAME" == "Русский" ]]; then
-    prompt_chat_id="  Telegram Chat ID: "
-  else
-    prompt_chat_id="  $PROMPT_TG_CHAT_ID "
-  fi
+  local prompt_chat_id="$(get_setup_str PROMPT_TG_CHAT_ID)"
   read -rp "$prompt_chat_id" TG_CHAT_ID
   TG_CHAT_ID="${TG_CHAT_ID// /}"
 
   # Валидация Chat ID через модуль validation.sh
   while ! validate_chat_id "$TG_CHAT_ID"; do
-    if [[ "$LANG_NAME" == "Русский" ]]; then
-      warn "Некорректный Chat ID. Ожидается число (например: 123456789)"
-    else
-      warn "Invalid Chat ID. Expected a number (e.g., 123456789)"
-    fi
+    warn "$(get_setup_str WARN_INVALID_CHAT_ID)"
     read -rp "$prompt_chat_id" TG_CHAT_ID
     TG_CHAT_ID="${TG_CHAT_ID// /}"
   done
 
-  local prompt_report
-  if [[ "$LANG_NAME" == "Русский" ]]; then
-    prompt_report="  Время ежедневного отчёта UTC [09:00]: "
-  else
-    prompt_report="  $PROMPT_REPORT_TIME "
-  fi
+  local prompt_report="$(get_setup_str PROMPT_REPORT_TIME)"
   read -rp "$prompt_report" REPORT_TIME
   REPORT_TIME="${REPORT_TIME// /}"
   [[ -z "$REPORT_TIME" ]] && REPORT_TIME="09:00"
 
   # Валидация времени через модуль validation.sh
   while ! validate_time "$REPORT_TIME"; do
-    if [[ "$LANG_NAME" == "Русский" ]]; then
-      warn "Некорректное время. Формат: ЧЧ:ММ (например: 09:00)"
-    else
-      warn "Invalid time. Format: HH:MM (e.g., 09:00)"
-    fi
+    warn "$(get_setup_str WARN_INVALID_TIME)"
     read -rp "$prompt_report" REPORT_TIME
     REPORT_TIME="${REPORT_TIME// /}"
     [[ -z "$REPORT_TIME" ]] && REPORT_TIME="09:00"
   done
 
   echo ""
-  local info_alerts prompt_cpu prompt_ram prompt_disk
-  if [[ "$LANG_NAME" == "Русский" ]]; then
-    info_alerts="Пороги алертов (в %, Enter = по умолчанию):"
-    prompt_cpu="  CPU  > ? % [80]: "
-    prompt_ram="  RAM  > ? % [85]: "
-    prompt_disk="  Диск > ? % [90]: "
-  else
-    info_alerts="$INFO_ALERT_THRESHOLDS"
-    prompt_cpu="  $PROMPT_ALERT_CPU "
-    prompt_ram="  $PROMPT_ALERT_RAM "
-    prompt_disk="  $PROMPT_ALERT_DISK "
-  fi
+  local info_alerts="$(get_setup_str INFO_ALERT_THRESHOLDS)"
+  local prompt_cpu="$(get_setup_str PROMPT_ALERT_CPU)"
+  local prompt_ram="$(get_setup_str PROMPT_ALERT_RAM)"
+  local prompt_disk="$(get_setup_str PROMPT_ALERT_DISK)"
   info "$info_alerts"
   read -rp "$prompt_cpu" ALERT_CPU
   ALERT_CPU="${ALERT_CPU// /}"
@@ -178,12 +131,7 @@ step_prompt_telegram_config() {
   [[ -z "$ALERT_DISK" ]] && ALERT_DISK=90
 
   echo ""
-  if [[ "$LANG_NAME" == "Русский" ]]; then
-    ok "Telegram: настроен (отчёт в ${REPORT_TIME} UTC)"
-    ok "Пороги: CPU>${ALERT_CPU}% RAM>${ALERT_RAM}% Диск>${ALERT_DISK}%"
-  else
-    ok "$OK_TG_CONFIGURED"
-  fi
+  ok "$(get_setup_str OK_TG_CONFIGURED_RU)" && ok "$(get_setup_str OK_TG_CONFIGURED_SHORT_RU)" || ok "$(get_setup_str OK_TG_CONFIGURED)" && ok "$(get_setup_str OK_TG_CONFIGURED_SHORT)"
 }
 
 # ══════════════════════════════════════════════════════════════
