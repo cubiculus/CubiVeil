@@ -64,7 +64,7 @@ def _validate_threshold(value):
 ```python
 class CubiVeilBot:
     """Main bot class coordinating all components"""
-    
+
     def __init__(self):
         pass
 ```
@@ -92,7 +92,7 @@ def get_cpu(self):
     """
     Get CPU usage from /proc/stat
     Reads twice with minimal delay
-    
+
     Returns:
         float: CPU usage percentage
     """
@@ -103,11 +103,11 @@ def check_connection_speed(self, target: str = "https://www.google.com",
                             timeout: int = CONNECTION_TIMEOUT) -> dict:
     """
     Check connection speed to a target URL
-    
+
     Args:
         target: URL to check connection to
         timeout: Request timeout in seconds
-    
+
     Returns:
         dict: Dictionary with latency_ms, success, error keys
     """
@@ -138,11 +138,11 @@ CONSTANT_TWO = 2
 # Classes
 class MyClass:
     """Class docstring"""
-    
+
     def __init__(self):
         """Initializer docstring"""
         pass
-    
+
     def method(self):
         """Method docstring"""
         pass
@@ -216,7 +216,7 @@ check_ubuntu() {
 my_function() {
   local my_var="$1"
   local count=0
-  
+
   # Использование
   echo "$my_var"
 }
@@ -301,7 +301,7 @@ readonly CONSTANT="value"
 #   $1 - parameter description
 my_function() {
   local param="$1"
-  
+
   # Implementation
 }
 
@@ -440,7 +440,7 @@ class MetricsCollector:
     def __init__(self, db_path=DEFAULT_DB_PATH):
         """
         Initialize metrics collector
-        
+
         Args:
             db_path: Path to Marzban database
         """
@@ -450,7 +450,7 @@ class MetricsCollector:
         """
         Get CPU usage from /proc/stat
         Reads twice with minimal delay
-        
+
         Returns:
             float: CPU usage percentage
         """
@@ -514,12 +514,12 @@ unique_port() {
 
   while [[ $attempts -lt $max_attempts ]]; do
     p=$(gen_port)
-    
+
     if ! validate_port "$p"; then
       ((attempts++))
       continue
     fi
-    
+
     if [[ -z "${USED_PORTS_MAP[$p]:-}" ]]; then
       USED_PORTS_MAP[$p]=1
       echo "$p"

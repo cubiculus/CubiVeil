@@ -406,7 +406,7 @@ MIT License — см. файл [LICENSE](LICENSE)
 ---
 
 <p align="center">
-  <strong>CubiVeil</strong> | 
-  <a href="docs/README_EN.md">English</a> | 
+  <strong>CubiVeil</strong> |
+  <a href="docs/README_EN.md">English</a> |
   <a href="https://github.com/cubiculus/cubiveil">GitHub</a>
 </p>

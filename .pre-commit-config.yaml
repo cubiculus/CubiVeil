@@ -16,54 +16,85 @@ repos:
           (?x)^(
             .secrets.baseline|
             .*\.md|
-            .*\.txt|
-            tests/.*
+            .*\.txt
           )$
 
   # truffleHog — глубокая проверка на секреты в истории Git
-  # Опционально: установите trufflehog CLI для полной проверки
-  # go install github.com/trufflesecurity/trufflehog/v3@latest
-  # Ручная проверка: trufflehog git file://. --only-verified --fail
+  - repo: https://github.com/trufflesecurity/trufflehog
+    rev: v3.89.2
+    hooks:
+      - id: trufflehog
 
   # Проверка на приватные ключи (SSH, GPG, SSL)
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
       - id: detect-private-key
-        files: \.(pem|key|ssh|gpg)$
-      # Опционально: раскомментировать для запрета коммитов в main/master
-      # - id: no-commit-to-branch
-      #   args: ['--branch', 'main', '--branch', 'master']
+      - id: no-commit-to-branch
+        args: ['--branch', 'main', '--branch', 'master']
       - id: check-added-large-files
         args: ['--maxkb=1024']
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+        exclude: ^tests/|^assets/telegram-bot/|^lib/|^utils/|^lib/modules/|^lib/core/
+      - id: check-json
+      - id: check-yaml
+        args: ['--unsafe']
+      - id: check-toml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
 
   # ============================================
   # ПРОВЕРКА BASH-СКРИПТОВ
   # ============================================
-  # Примечание: shellcheck может иметь проблемы с кодировкой на Windows
-  # Для исправления: конвертируйте файлы в Unix LF (tr -d '\r' < file > file.tmp)
 
   # Shellcheck - статический анализ Bash-скриптов
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.11.0.1
     hooks:
       - id: shellcheck
-        args: [
-          '--exclude=SC1091,SC2086,SC1017',  # source не существует, намеренное отсутствие кавычек, CRLF
-          '--severity=error'  # только ошибки, не предупреждения
-        ]
-        files: \.sh$
-        exclude: ^(lib/|tests/|utils/).*\.sh$  # исключаем файлы с проблемами кодировки
+        args: ['--exclude=SC1091,SC2086,SC2126,SC2012,SC2005,SC2329,SC2016,SC2153,SC2269,SC2046,SC2129']
 
-  # Проверка синтаксиса Bash
-  # Примечание: на Windows может требовать рабочий WSL или Git Bash
-  # Временно отключено из-за проблем с WSL
-  # - repo: local
-  #   hooks:
-  #     - id: bash-n
-  #       name: Bash syntax check
-  #       entry: bash -n
-  #       language: system
-  #       types: [shell]
-  #       files: ^(install\.sh|install-modular\.sh|migrate-to-modular\.sh|setup-telegram\.sh|lang\.sh|run-tests\.sh)$
-  #       require_serial: true
+  # Проверка синтаксиса Bash (только основные скрипты)
+  - repo: local
+    hooks:
+      - id: bash-n
+        name: Bash syntax check
+        entry: bash -n
+        language: system
+        types: [shell]
+        files: ^(install\.sh|install-modular\.sh|migrate-to-modular\.sh|setup-telegram\.sh|lang\.sh|run-tests\.sh)$
+        require_serial: true
+
+  # ============================================
+  # ПРОВЕРКА PYTHON-КОДА
+  # ============================================
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-ast
+      - id: check-docstring-first
+      - id: requirements-txt-fixer
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.3
+    hooks:
+      - id: bandit
+        args: ['-iii', '-f', 'screen']
+        files: ^assets/telegram-bot/
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.15.0
+    hooks:
+      - id: mypy
+        args: ['--ignore-missing-imports', '--warn-unused-ignores', '--disable-error-code=no-untyped-def', '--disable-error-code=no-untyped-call', '--disable-error-code=type-arg', '--disable-error-code=var-annotated', '--disable-error-code=no-any-return', '--disable-error-code=index', '--disable-error-code=assignment']
+
+  # ============================================
+  # ПРОВЕРКА ДОКУМЕНТАЦИИ
+  # ============================================
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict

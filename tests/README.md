@@ -363,13 +363,13 @@ sudo bash tests/integration-test.sh
    ```bash
    #!/bin/bash
    set -euo pipefail
-   
+
    # Цвета
    RED='\033[0;31m'
    GREEN='\033[0;32m'
    YELLOW='\033[0;33m'
    PLAIN='\033[0m'
-   
+
    pass() { echo -e "${GREEN}[PASS]${PLAIN} $1"; }
    fail() {
      echo -e "${RED}[FAIL]${PLAIN} $1"
@@ -377,25 +377,25 @@ sudo bash tests/integration-test.sh
    }
    warn() { echo -e "${YELLOW}[WARN]${PLAIN} $1"; }
    info() { echo -e "[INFO] $1"; }
-   
+
    TESTS_PASSED=0
    TESTS_FAILED=0
-   
+
    # Mock зависимостей
    # ...
-   
+
    # Тесты
    test_my_function() {
      info "Тестирование..."
      # Твой код
    }
-   
+
    # Основная функция
    main() {
      test_my_function
      # Итоги...
    }
-   
+
    main "$@"
    ```
 
@@ -470,10 +470,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Run unit tests
         run: ./tests/run-tests.sh --unit
-      
+
       - name: Run integration tests
         run: sudo ./tests/run-tests.sh --integration
 ```

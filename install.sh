@@ -43,24 +43,24 @@ DOMAIN=""
 parse_args_early() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --dev)
-        DEV_MODE="true"
-        shift
-        ;;
-      --dry-run)
-        DRY_RUN="true"
-        shift
-        ;;
-      --domain=*)
-        DOMAIN="${1#*=}"
-        shift
-        ;;
-      --help|-h)
-        shift
-        ;;
-      *)
-        shift
-        ;;
+    --dev)
+      DEV_MODE="true"
+      shift
+      ;;
+    --dry-run)
+      DRY_RUN="true"
+      shift
+      ;;
+    --domain=*)
+      DOMAIN="${1#*=}"
+      shift
+      ;;
+    --help | -h)
+      shift
+      ;;
+    *)
+      shift
+      ;;
     esac
   done
 }

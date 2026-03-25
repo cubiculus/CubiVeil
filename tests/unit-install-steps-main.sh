@@ -132,7 +132,7 @@ seq() {
   local end="$2"
   # Для тестов возвращаем только несколько IP
   local i
-  for ((i=start; i<=end && i<=5; i++)); do
+  for ((i = start; i <= end && i <= 5; i++)); do
     echo "$i"
   done
 }

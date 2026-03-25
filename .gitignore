@@ -37,6 +37,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 ssh_connect.py
+AUTO-INSTALL.md
 venv/
 env/
 ENV/

@@ -584,8 +584,7 @@ step_ssl() {
   # Обновляйте acme_commit при выходе новых стабильных версий
   local acme_commit="REPLACE_WITH_STABLE_TAG"
   local acme_repo="https://github.com/acmesh-official/acme.sh.git"
-  local git_install_success=false
-  
+
   # Проверка: если тег не обновлён, предупреждаем
   if [[ "$acme_commit" == "REPLACE_WITH_STABLE_TAG" ]]; then
     if [[ "$LANG_NAME" == "Русский" ]]; then
@@ -596,11 +595,11 @@ step_ssl() {
       info "Continuing installation without pinned version (insecure)..."
     fi
   fi
-  
+
   if command -v git &>/dev/null; then
     if git clone "$acme_repo" >/dev/null 2>&1; then
       cd acme.sh || exit 1
-      
+
       # Если тег не настроен (заглушка), используем последнюю версию
       if [[ "$acme_commit" == "REPLACE_WITH_STABLE_TAG" ]]; then
         if [[ "$LANG_NAME" == "Русский" ]]; then
@@ -625,9 +624,8 @@ step_ssl() {
           fi
         fi
       fi
-      
+
       ./acme.sh --install >/dev/null 2>&1 || true
-      git_install_success=true
     else
       if [[ "$LANG_NAME" == "Русский" ]]; then
         warn "Не удалось клонировать acme.sh, пробую curl метод..."

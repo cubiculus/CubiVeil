@@ -91,7 +91,7 @@ class CubiVeilBot:
 
         # Initialize Telegram client and validate token
         self.telegram = TelegramClient(self.token, self.chat_id)
-        
+
         print("[bot] Validating Telegram bot token...")
         is_valid, message = self.telegram.validate_token()
         if not is_valid:

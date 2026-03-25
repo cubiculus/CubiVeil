@@ -168,18 +168,18 @@ for user in data.get('users', []):
     status = user.get('status', 'unknown')
     used = user.get('used_traffic', 0)
     used_gb = used / (1024**3)
-    
+
     # Статус
-    status_map = {'active': '🟢 active', 'disabled': '🔴 disabled', 
+    status_map = {'active': '🟢 active', 'disabled': '🔴 disabled',
                   'limited': '🟡 limited', 'expired': '🔴 expired'}
     status_display = status_map.get(status, status)
-    
+
     # Трафик
     if used_gb < 1:
         used_display = f'{used_gb*1024:.0f} MB'
     else:
         used_display = f'{used_gb:.2f} GB'
-    
+
     # Срок действия
     expiry = user.get('expire', 0)
     if expiry:
@@ -188,7 +188,7 @@ for user in data.get('users', []):
         expiry_display = exp_date.strftime('%Y-%m-%d')
     else:
         expiry_display = '∞'
-    
+
     print(f'  {username:<20} {status_display:<12} {used_display:<15} {expiry_display}')
 " 2>/dev/null || warning "  Не удалось получить данные"
 
