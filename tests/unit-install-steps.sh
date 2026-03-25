@@ -19,6 +19,7 @@ LANG_NAME="English"
 SERVER_IP="1.2.3.4"
 DOMAIN=""
 LE_EMAIL=""
+# shellcheck disable=SC2034
 INSTALL_TG="n"
 TROJAN_PORT=""
 SS_PORT=""

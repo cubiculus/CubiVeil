@@ -12,6 +12,24 @@
   <a href="../README.md">Русская версия</a>
 </p>
 
+<p align="center">
+  <a href="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml"><img src="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml/badge.svg?label=Shellcheck" alt="Shellcheck"/></a>
+  <a href="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml"><img src="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml/badge.svg?label=Integration%20Tests" alt="Integration Tests"/></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"/></a>
+  <a href="https://ubuntu.com/"><img src="https://img.shields.io/badge/platform-Ubuntu%2022.04%20%7C%2024.04-orange" alt="Platform"/></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10-blue" alt="Python"/></a>
+  <a href="https://mypy.readthedocs.io/"><img src="https://img.shields.io/badge/type%20checked-mypy-blue" alt="myPy"/></a>
+  <a href="https://github.com/PyCQA/bandit"><img src="https://img.shields.io/badge/security-bandit-green" alt="Security: Bandit"/></a>
+</p>
+
+---
+
+## 🚀 Quick Start
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/cubiculus/cubiveil/main/install.sh)
+```
+
 ---
 
 ## 📋 About
@@ -332,6 +350,7 @@ Ensure:
 
 - [Telegram Bot Integration](../BOT_INTEGRATION.md)
 - [CubiVeil Utilities](../utils/README.md)
+- [Testing](../tests/README.md)
 - [Russian README](../README.md)
 
 ## 🤝 Contributing
@@ -344,12 +363,53 @@ Ensure:
 
 ### Pre-commit Hooks
 
-Project uses pre-commit for automated checks:
+Project uses pre-commit for automated checks before commit:
 
 ```bash
-pip install pre-commit
+# Install dependencies
+pip install pre-commit detect-secrets
+
+# Activate hooks
 pre-commit install
 ```
+
+**What is checked:**
+- 🔐 Passwords, API keys, tokens (detect-secrets)
+- 🔐 SSH/GPG/SSL private keys
+- 🐛 Bash script syntax (shellcheck)
+- 📦 Files >1MB are blocked
+
+**Optionally (for full protection):**
+```bash
+# Install trufflehog for Git history check
+# Linux/MacOS:
+go install github.com/trufflesecurity/trufflehog/v3@latest
+
+# Manual history check:
+trufflehog git file://. --only-verified --fail
+```
+
+**Initial secrets scan:**
+```bash
+detect-secrets scan --baseline .secrets.baseline
+```
+
+> **Note for Windows:** shellcheck may have encoding issues. To fix, convert files to Unix LF: `tr -d '\r' < file.sh > file.tmp`
+
+## 🧪 Testing
+
+Run tests:
+
+```bash
+bash run-tests.sh
+```
+
+CI/CD includes checks:
+- **Shellcheck** — bash script static analysis
+- **shfmt** — code formatting
+- **bash -n** — syntax check
+- **Mypy** — Python type checking
+- **Bandit** — Python security analysis
 
 ## 📝 License
 
@@ -362,7 +422,8 @@ MIT License — see [LICENSE](LICENSE) file
 ---
 
 <p align="center">
-  <strong>CubiVeil</strong> | 
-  <a href="../README.md">Русский</a> | 
+  <strong>CubiVeil</strong> |
+  <a href="../README.md">Русский</a> |
+  <a href="../tests/README.md">Tests</a> |
   <a href="https://github.com/cubiculus/cubiveil">GitHub</a>
 </p>

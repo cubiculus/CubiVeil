@@ -179,10 +179,12 @@ select_language() {
 
     case "$lang_choice" in
     1)
+      # shellcheck disable=SC2034
       LANG_NAME="Русский"
       return
       ;;
     2)
+      # shellcheck disable=SC2034
       LANG_NAME="English"
       return
       ;;

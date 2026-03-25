@@ -45,7 +45,7 @@ jobs:
       run: |
         bash -n install.sh
         bash -n run-tests.sh
-        bash -n tests/integration-tests.sh
+        bash -n tests/integration-test.sh
 
   validate-tests:
     runs-on: ubuntu-latest
@@ -56,6 +56,6 @@ jobs:
     - name: Validate test scripts
       run: |
         echo "Validating test scripts..."
-        test -f tests/integration-tests.sh && echo "✓ integration-tests.sh exists"
+        test -f tests/integration-test.sh && echo "✓ integration-test.sh exists"
         test -f run-tests.sh && echo "✓ run-tests.sh exists"
         echo "Test scripts validated successfully"

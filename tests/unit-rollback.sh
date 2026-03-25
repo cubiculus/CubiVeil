@@ -184,13 +184,7 @@ test_rollback_extract_backup() {
   BACKUP_ARCHIVE_DIR="$test_archive_dir"
   ROLLBACK_TEMP_DIR="$test_temp_dir"
 
-  # Создаём тестовый архив
-  local test_file="${test_temp_dir}/test.txt"
-  echo "test" >"$test_file"
-
-  tar -czf "${test_archive_dir}/test.tar.gz" -C "$test_temp_dir" test.txt 2>/dev/null || true
-
-  # Mock для tar
+  # Mock для tar (должен быть определён до вызова tar)
   tar() {
     if [[ "$*" == *"-xzf"* ]]; then
       mkdir -p "$ROLLBACK_TEMP_DIR"
@@ -199,6 +193,12 @@ test_rollback_extract_backup() {
     fi
     command tar "$@" 2>/dev/null || true
   }
+
+  # Создаём тестовый архив
+  local test_file="${test_temp_dir}/test.txt"
+  echo "test" >"$test_file"
+
+  tar -czf "${test_archive_dir}/test.tar.gz" -C "$test_temp_dir" test.txt 2>/dev/null || true
 
   rollback_extract_backup "${test_archive_dir}/test.tar.gz"
 
@@ -559,8 +559,8 @@ test_verify_sha256_integration() {
   echo "test content" >"$test_file"
 
   # Получаем реальный hash
-  # shellcheck disable=SC2034
   local expected_hash
+  # shellcheck disable=SC2034
   expected_hash=$(sha256sum "$test_file" | awk '{print $1}')
 
   # Проверяем что verify_sha256 существует

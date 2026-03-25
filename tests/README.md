@@ -28,7 +28,7 @@ sudo ./run-tests.sh --integration
 tests/
 ├── run-tests.sh              # Главный runner тестов
 ├── README.md                 # Эта документация
-├── integration-tests.sh      # Интеграционные тесты
+├── integration-test.sh       # Интеграционные тесты
 ├── modular-structure.sh      # Тесты модульной архитектуры
 ├── unit-utils.sh             # Unit-тесты lib/utils.sh
 ├── unit-install-steps.sh     # Unit-тесты lib/install-steps.sh
@@ -241,7 +241,7 @@ bash tests/modular-structure.sh
 
 ---
 
-## Интеграционные тесты (`integration-tests.sh`)
+## Интеграционные тесты (`integration-test.sh`)
 
 Проверяют установленную систему (требуют root):
 
@@ -283,7 +283,7 @@ bash tests/modular-structure.sh
 
 **Запуск:**
 ```bash
-sudo bash tests/integration-tests.sh
+sudo bash tests/integration-test.sh
 ```
 
 ---
@@ -308,7 +308,7 @@ bash tests/unit-lang.sh
 bash tests/unit-install.sh
 bash tests/unit-telegram.sh
 bash tests/modular-structure.sh
-sudo bash tests/integration-tests.sh
+sudo bash tests/integration-test.sh
 ```
 
 ---
@@ -403,7 +403,7 @@ sudo bash tests/integration-tests.sh
 
 ### Интеграционные тесты
 
-1. Открой `tests/integration-tests.sh`
+1. Открой `tests/integration-test.sh`
 2. Добавь функцию:
    ```bash
    check_my_feature() {
@@ -454,7 +454,7 @@ sudo bash tests/integration-tests.sh
 | install.sh | unit-install.sh | ✅ Структура, модули, обработка ошибок |
 | setup-telegram.sh | unit-telegram.sh | ✅ Python бот, systemd, cron, валидация |
 | Модульная структура | modular-structure.sh | ✅ Архитектура, зависимости |
-| Установленная система | integration-tests.sh | ✅ Сервисы, сеть, безопасность |
+| Установленная система | integration-test.sh | ✅ Сервисы, сеть, безопасность |
 
 ---
 
