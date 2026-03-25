@@ -14,6 +14,14 @@
 
 ---
 
+## 🚀 Быстрый старт
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/cubiculus/cubiveil/main/install.sh)
+```
+
+---
+
 ## 📋 О проекте
 
 **CubiVeil** — это комплексное решение для развёртывания и управления прокси-инфраструктурой на базе **Marzban** и **Sing-box** на серверах Ubuntu.
