@@ -245,9 +245,20 @@ EOF
 
 # ── Управление сервисом / Service Management ────────────────
 
+# Создание системного пользователя singbox
+singbox_create_user() {
+  if ! id -u singbox >/dev/null 2>&1; then
+    useradd -r -s /usr/sbin/nologin singbox
+  fi
+  log_debug "Sing-box system user created"
+}
+
 # Создание systemd сервиса для Sing-box
 singbox_create_service() {
   log_step "singbox_create_service" "Creating Sing-box systemd service"
+
+  # Создаём системного пользователя если нужно
+  singbox_create_user
 
   cat >/etc/systemd/system/sing-box.service <<EOF
 [Unit]
@@ -256,7 +267,8 @@ After=network.target
 
 [Service]
 Type=simple
-User=root
+User=singbox
+WorkingDirectory=/etc/sing-box
 ExecStart=$SINGBOX_BINARY run -c $SINGBOX_CONFIG_DIR/config.json
 Restart=on-failure
 RestartSec=5s
@@ -265,6 +277,9 @@ LimitNOFILE=65536
 [Install]
 WantedBy=multi-user.target
 EOF
+
+  # Установка прав на директорию конфигурации
+  chown -R singbox:singbox /etc/sing-box
 
   svc_daemon_reload
 

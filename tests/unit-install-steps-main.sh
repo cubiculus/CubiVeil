@@ -4,7 +4,7 @@
 # ║      Тестирование шагов установки                         ║
 # ╚═══════════════════════════════════════════════════════════╝
 
-set -euo pipefail
+# Strict mode отключен для совместимости с mock-функциями
 
 # ── Путь к проекту ───────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -57,6 +57,10 @@ warn() { echo "[WARN] $1" >&2; }
 err() { echo "[ERR] $1" >&2; }
 info() { echo "[INFO] $1" >&2; }
 
+# Mock функций из utils.sh
+get_server_ip_info() { echo "Server IP: ${SERVER_IP:-1.2.3.4}"; }
+get_server_ip_info_en() { echo "Server IP: ${SERVER_IP:-1.2.3.4}"; }
+
 # Mock внешних команд
 curl() {
   local url=""
@@ -70,6 +74,10 @@ curl() {
   case "$url" in
   *api4.ipify.org*) echo "1.2.3.4" ;;
   *api.github.com*) echo '{"tag_name": "v1.10.1"}' ;;
+  *ip-api.com/json/*)
+    # Mock ответ от ip-api.com (чистый IP, без proxy/hosting)
+    echo '{"status":"success","message":"","proxy":false,"hosting":false,"mobile":false}'
+    ;;
   *) echo "mock_response" ;;
   esac
 }
@@ -117,6 +125,21 @@ uname() {
   -m) echo "x86_64" ;;
   *) echo "Linux" ;;
   esac
+}
+
+seq() {
+  local start="$1"
+  local end="$2"
+  # Для тестов возвращаем только несколько IP
+  local i
+  for ((i=start; i<=end && i<=5; i++)); do
+    echo "$i"
+  done
+}
+
+sleep() {
+  # Игнорируем sleep в тестах
+  true
 }
 
 openssl() {
@@ -173,6 +196,54 @@ test_step_check_ip_neighborhood() {
     pass "step_check_ip_neighborhood: функция существует"
   else
     fail "step_check_ip_neighborhood: функция не найдена"
+  fi
+}
+
+# ── Тест: step_check_ip_neighborhood использует curl ─────────
+test_step_check_ip_neighborhood_uses_curl() {
+  info "Тестирование step_check_ip_neighborhood: использование curl..."
+
+  load_module
+
+  local func_content
+  func_content=$(declare -f step_check_ip_neighborhood 2>/dev/null || echo "")
+
+  if [[ "$func_content" == *"curl"* ]] && [[ "$func_content" == *"ip-api.com"* ]]; then
+    pass "step_check_ip_neighborhood: использует curl и ip-api.com"
+  else
+    fail "step_check_ip_neighborhood: не использует curl/ip-api.com"
+  fi
+}
+
+# ── Тест: step_check_ip_neighborhood проверяет proxy/hosting ─
+test_step_check_ip_neighborhood_checks_proxy_hosting() {
+  info "Тестирование step_check_ip_neighborhood: проверка proxy/hosting..."
+
+  load_module
+
+  local func_content
+  func_content=$(declare -f step_check_ip_neighborhood 2>/dev/null || echo "")
+
+  if [[ "$func_content" == *"proxy"* ]] && [[ "$func_content" == *"hosting"* ]]; then
+    pass "step_check_ip_neighborhood: проверяет proxy и hosting"
+  else
+    fail "step_check_ip_neighborhood: не проверяет proxy/hosting"
+  fi
+}
+
+# ── Тест: step_check_ip_neighborhood имеет цикл проверки ─────
+test_step_check_ip_neighborhood_has_loop() {
+  info "Тестирование step_check_ip_neighborhood: наличие цикла..."
+
+  load_module
+
+  local func_content
+  func_content=$(declare -f step_check_ip_neighborhood 2>/dev/null || echo "")
+
+  if [[ "$func_content" == *"for"* ]] || [[ "$func_content" == *"seq"* ]]; then
+    pass "step_check_ip_neighborhood: имеет цикл для проверки IP"
+  else
+    fail "step_check_ip_neighborhood: нет цикла для проверки IP"
   fi
 }
 
@@ -497,6 +568,9 @@ main() {
 
   # Тесты функций
   test_step_check_ip_neighborhood
+  test_step_check_ip_neighborhood_uses_curl
+  test_step_check_ip_neighborhood_checks_proxy_hosting
+  test_step_check_ip_neighborhood_has_loop
   test_step_system_update
   test_step_auto_updates
   test_step_bbr

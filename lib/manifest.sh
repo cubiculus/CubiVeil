@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════╗
 # ║          CubiVeil — Manifest                              ║
 # ║          github.com/cubiculus/cubiveil                    ║

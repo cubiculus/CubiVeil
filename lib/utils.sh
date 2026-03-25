@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════╗
 # ║          CubiVeil — Common Utilities                     ║
 # ║          github.com/cubiculus/cubiveil                   ║

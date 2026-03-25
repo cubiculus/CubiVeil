@@ -10,14 +10,14 @@
 LANG_NAME="Русский"
 
 # ── Подключение fallback функций ─────────────────────────────
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [[ -f "${SCRIPT_DIR}/lib/fallback.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/fallback.sh"
+LANG_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "${LANG_SCRIPT_DIR}/lib/fallback.sh" ]]; then
+  source "${LANG_SCRIPT_DIR}/lib/fallback.sh"
 fi
 
 # ── Подключение унифицированного модуля локализации ───────
-if [[ -f "${SCRIPT_DIR}/lib/i18n.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/i18n.sh"
+if [[ -f "${LANG_SCRIPT_DIR}/lib/i18n.sh" ]]; then
+  source "${LANG_SCRIPT_DIR}/lib/i18n.sh"
 fi
 
 # ── Проверки / Checks ─────────────────────────────────────────
@@ -173,8 +173,15 @@ STEP_TELEGRAM="Step 12/12 — Telegram bot"
 STEP_TELEGRAM_RU="Шаг 12/12 — Telegram-бот"
 
 # ── Subnet check ──────────────────────────────────────────────
-INFO_SERVER_IP="Server IP: ${SERVER_IP}"
-INFO_SERVER_IP_RU="IP сервера: ${SERVER_IP}"
+# Примечание: SERVER_IP определяется динамически через get_server_ip()
+get_server_ip_info() {
+  local ip="${SERVER_IP:-$(get_server_ip 2>/dev/null)}"
+  echo "IP сервера: ${ip}"
+}
+get_server_ip_info_en() {
+  local ip="${SERVER_IP:-$(get_server_ip 2>/dev/null)}"
+  echo "Server IP: ${ip}"
+}
 
 INFO_CHECKING_NEIGHBORS="Checking neighboring IPs in /24 range..."
 INFO_CHECKING_NEIGHBORS_RU="Проверяю соседние адреса в диапазоне /24..."

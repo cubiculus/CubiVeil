@@ -6,6 +6,12 @@
 # ║  Унифицированные функции вывода для всех скриптов        ║
 # ╚═══════════════════════════════════════════════════════════╝
 
+# Guard check - не подключать повторно
+if [[ -n "${_CUBIVEIL_OUTPUT_LOADED:-}" ]]; then
+  return 0
+fi
+_CUBIVEIL_OUTPUT_LOADED=1
+
 # ── Цвета / Colors ───────────────────────────────────────────
 # shellcheck disable=SC2034
 # ANSI color codes for terminal output

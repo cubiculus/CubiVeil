@@ -6,44 +6,92 @@
 # ║           Marzban + Sing-box | 5 profiles                 ║
 # ╚═══════════════════════════════════════════════════════════╝
 
-set -euo pipefail
+set -eo pipefail
+
+INSTALL_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$INSTALL_SCRIPT_DIR"
+
+# ── Переменные-заглушки для локализации ──────────────────────
+# Определяем переменные до загрузки lang.sh чтобы избежать ошибок
+REPORT_TIME="${REPORT_TIME:-09:00}"
+ALERT_CPU="${ALERT_CPU:-80}"
+ALERT_RAM="${ALERT_RAM:-85}"
+ALERT_DISK="${ALERT_DISK:-90}"
+DOMAIN="${DOMAIN:-}"
+SERVER_IP="${SERVER_IP:-}"
+CHECKED="${CHECKED:-0}"
+VPN_COUNT="${VPN_COUNT:-0}"
+CURRENT="${CURRENT:-}"
+SSH_PORT="${SSH_PORT:-22}"
+SB_TAG="${SB_TAG:-}"
+REALITY_SNI="${REALITY_SNI:-}"
+TROJAN_PORT="${TROJAN_PORT:-}"
+SS_PORT="${SS_PORT:-}"
+PANEL_PORT="${PANEL_PORT:-}"
+SUB_PORT="${SUB_PORT:-}"
+CUBIVEIL_DIR="${CUBIVEIL_DIR:-/opt/cubiveil}"
+BACKUP_DIR="${BACKUP_DIR:-}"
+cmd="${cmd:-}"
+
+# ── Режимы установки / Installation Modes (до загрузки модулей) ─
+DEV_MODE="${DEV_MODE:-false}"
+DRY_RUN="${DRY_RUN:-false}"
+DEV_DOMAIN="${DEV_DOMAIN:-dev.cubiveil.local}"
+DOMAIN=""
+
+# ── Обработка аргументов / Argument Parsing (рано) ─────────────
+parse_args_early() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --dev)
+        DEV_MODE="true"
+        shift
+        ;;
+      --dry-run)
+        DRY_RUN="true"
+        shift
+        ;;
+      --domain=*)
+        DOMAIN="${1#*=}"
+        shift
+        ;;
+      --help|-h)
+        shift
+        ;;
+      *)
+        shift
+        ;;
+    esac
+  done
+}
+
+parse_args_early "$@"
+
+# Устанавливаем DOMAIN для dev режима если не задан
+if [[ "$DEV_MODE" == "true" && -z "$DOMAIN" ]]; then
+  DOMAIN="$DEV_DOMAIN"
+fi
 
 # ── Подключение локализации ───────────────────────────────────
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [[ -f "${SCRIPT_DIR}/lang.sh" ]]; then
-  source "${SCRIPT_DIR}/lang.sh"
+if [[ -f "${INSTALL_SCRIPT_DIR}/lang.sh" ]]; then
+  source "${INSTALL_SCRIPT_DIR}/lang.sh"
 else
-  # Fallback если файл локализации отсутствует
-  source "${SCRIPT_DIR}/lib/fallback.sh"
+  source "${INSTALL_SCRIPT_DIR}/lib/fallback.sh"
 fi
 
 # ── Подключение общих модулей ─────────────────────────────────
-source "${SCRIPT_DIR}/lib/common.sh" || {
+source "${INSTALL_SCRIPT_DIR}/lib/common.sh" || {
   err "Не удалось загрузить lib/common.sh"
 }
-source "${SCRIPT_DIR}/lib/utils.sh" || {
+source "${INSTALL_SCRIPT_DIR}/lib/utils.sh" || {
   err "Не удалось загрузить lib/utils.sh"
 }
-source "${SCRIPT_DIR}/lib/install-steps.sh" || {
+source "${INSTALL_SCRIPT_DIR}/lib/install-steps.sh" || {
   err "Не удалось загрузить lib/install-steps.sh"
 }
 
-# ── Режимы установки / Installation Modes ────────────────────
-# DEV_MODE: true | false (по умолчанию)
-#   - true:  используется самоподписной SSL сертификат
-#   - false: используется Let's Encrypt (требуется домен)
-DEV_MODE="${DEV_MODE:-false}"
-
-# DRY_RUN: true | false (по умолчанию)
-#   - true:  симуляция установки без внесения изменений
-#   - false: реальная установка
-DRY_RUN="${DRY_RUN:-false}"
-
-# Домен по умолчанию для dev-режима
-DEV_DOMAIN="${DEV_DOMAIN:-dev.cubiveil.local}"
-
 # ══════════════════════════════════════════════════════════════
-# Обработка аргументов / Argument Parsing
+# Обработка аргументов / Argument Parsing (полная)
 # ══════════════════════════════════════════════════════════════
 
 usage() {
@@ -83,50 +131,61 @@ Dry-run Mode Features:
 EOF
 }
 
-parse_args() {
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-    --dev)
-      DEV_MODE="true"
-      shift
+# ══════════════════════════════════════════════════════════════
+# Точка входа / Entry point
+# ══════════════════════════════════════════════════════════════
+
+# Выбор языка / Select language
+select_language() {
+  echo ""
+  echo "Select language / Выберите язык:"
+  echo ""
+  echo "  1) Русский (Russian)"
+  echo "  2) English"
+  echo ""
+
+  while true; do
+    read -rp "  Enter choice [1-2]: " lang_choice
+
+    case "$lang_choice" in
+    1)
+      LANG_NAME="Русский"
+      return
       ;;
-    --dry-run)
-      DRY_RUN="true"
-      shift
-      ;;
-    --domain=*)
-      DOMAIN="${1#*=}"
-      shift
-      ;;
-    --help | -h)
-      usage
-      exit 0
+    2)
+      LANG_NAME="English"
+      return
       ;;
     *)
-      err "Unknown option: $1. Use --help for usage."
+      warn "Invalid choice"
       ;;
     esac
   done
 }
 
-# ══════════════════════════════════════════════════════════════
-# Точка входа / Entry point
-# ══════════════════════════════════════════════════════════════
+# Печать баннера / Print banner
+print_banner() {
+  echo ""
+  echo "  ╔══════════════════════════════════════════╗"
+  echo "  ║     CubiVeil Installer                   ║"
+  echo "  ║     github.com/cubiculus/cubiveil        ║"
+  echo "  ╚══════════════════════════════════════════╝"
+  echo ""
+}
 
-# Шаг установки (заглушка для dry-run)
-step_dry_run() {
-  local step_name="$1"
-  if [[ "$DRY_RUN" == "true" ]]; then
-    echo -e "${CYAN}  [DRY-RUN] Would execute: ${step_name}${PLAIN}"
-  fi
+# Предупреждение / Warning
+warn() {
+  echo -e "${ICON_WARNING}$*"
 }
 
 main() {
-  # Парсинг аргументов
-  parse_args "$@"
-
-  # Выбор языка
-  select_language
+  # В dry-run режиме выбираем язык автоматически
+  if [[ "$DRY_RUN" == "true" ]]; then
+    LANG_NAME="Русский"
+  else
+    # Выбор языка
+    select_language
+  fi
 
   # Печать баннера с учётом режима
   print_banner

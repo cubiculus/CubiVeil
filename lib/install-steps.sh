@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════╗
 # ║          CubiVeil — Installation Steps (Refactored)       ║
 # ║          github.com/cubiculus/cubiveil                    ║

@@ -179,7 +179,21 @@ step_install_bot() {
 step_configure_services() {
   step_title "4" "Настройка сервисов" "Service configuration"
 
-  # ── Systemd сервис с безопасными переменными окружения ───
+  # ── Безопасный файл с чувствительными данными ───────────
+  mkdir -p /etc/cubiveil
+  cat >/etc/cubiveil/bot.env <<EOF
+TG_TOKEN=${TG_TOKEN}
+TG_CHAT_ID=${TG_CHAT_ID}
+ALERT_CPU=${ALERT_CPU}
+ALERT_RAM=${ALERT_RAM}
+ALERT_DISK=${ALERT_DISK}
+EOF
+  chmod 600 /etc/cubiveil/bot.env
+  chown root:root /etc/cubiveil/bot.env
+
+  ok "Файл с чувствительными данными создан (/etc/cubiveil/bot.env, 0600)"
+
+  # ── Systemd сервис с EnvironmentFile ───────────────────
   cat >/etc/systemd/system/cubiveil-bot.service <<EOF
 [Unit]
 Description=CubiVeil Telegram Bot
@@ -187,12 +201,8 @@ After=network.target marzban.service
 
 [Service]
 Type=simple
-# Чувствительные данные через Environment — не хранятся в файле скрипта
-Environment="TG_TOKEN=${TG_TOKEN}"
-Environment="TG_CHAT_ID=${TG_CHAT_ID}"
-Environment="ALERT_CPU=${ALERT_CPU}"
-Environment="ALERT_RAM=${ALERT_RAM}"
-Environment="ALERT_DISK=${ALERT_DISK}"
+# Чувствительные данные в защищённом файле с правами 0600
+EnvironmentFile=/etc/cubiveil/bot.env
 Environment="CUBIVEIL_UTILS_DIR=${SCRIPT_DIR}/utils"
 ExecStart=/usr/bin/python3 /opt/cubiveil-bot/bot.py poll
 Restart=always

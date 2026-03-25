@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════╗
 # ║          CubiVeil — Unified Localization                  ║
 # ║          github.com/cubiculus/cubiveil                    ║
@@ -135,10 +136,10 @@ declare -A TELEGRAM_SETUP=(
   [PROMPT_ALERT_RAM]="  RAM  > ? % [85]: "
   [PROMPT_ALERT_DISK_RU]="  Диск > ? % [90]: "
   [PROMPT_ALERT_DISK]="  Disk > ? % [90]: "
-  [OK_TG_CONFIGURED_RU]="Telegram: настроен (отчёт в ${REPORT_TIME} UTC)"
-  [OK_TG_CONFIGURED]="Telegram configured (report at ${REPORT_TIME} UTC)"
-  [OK_TG_CONFIGURED_SHORT_RU]="Пороги: CPU>${ALERT_CPU}% RAM>${ALERT_RAM}% Диск>${ALERT_DISK}%"
-  [OK_TG_CONFIGURED_SHORT]="Thresholds: CPU>${ALERT_CPU}% RAM>${ALERT_RAM}% Disk>${ALERT_DISK}%"
+  [OK_TG_CONFIGURED_RU]='Telegram: настроен (отчёт в ${REPORT_TIME} UTC)'
+  [OK_TG_CONFIGURED]='Telegram configured (report at ${REPORT_TIME} UTC)'
+  [OK_TG_CONFIGURED_SHORT_RU]='Пороги: CPU>${ALERT_CPU}% RAM>${ALERT_RAM}% Диск>${ALERT_DISK}%'
+  [OK_TG_CONFIGURED_SHORT]='Thresholds: CPU>${ALERT_CPU}% RAM>${ALERT_RAM}% Disk>${ALERT_DISK}%'
 )
 
 # Функция для получения локализованной строки из словаря

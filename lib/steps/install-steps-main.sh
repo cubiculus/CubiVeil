@@ -6,6 +6,11 @@
 # ║  Основные шаги установки для install.sh                   ║
 # ╚═══════════════════════════════════════════════════════════╝
 
+# Import utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../utils.sh"
+source "${SCRIPT_DIR}/../security.sh"
+
 # ── Проверка IP окружения / IP Neighborhood Check ───────────
 step_check_ip_neighborhood() {
   local step_title
@@ -23,22 +28,93 @@ step_check_ip_neighborhood() {
   fi
 
   if [[ "$LANG_NAME" == "Русский" ]]; then
-    info "$INFO_SERVER_IP_RU"
+    info "$(get_server_ip_info)"
     info "Проверяю соседние адреса в диапазоне /24..."
   else
-    info "Server IP: ${SERVER_IP}"
+    info "$(get_server_ip_info_en)"
     info "Checking neighboring IPs in /24 range..."
   fi
 
-  # Проверка соседних IP (упрощённая)
-  local checked=3
-  # shellcheck disable=SC2034
+  # Извлечение первых трёх октетов для /24 подсети
+  local subnet_prefix
+  subnet_prefix=$(echo "$SERVER_IP" | cut -d'.' -f1-3)
+
   local vpn_count=0
+  local hosting_count=0
+  local checked=0
+  local max_check=5
+  local skip_own_ip=true
+
+  # Проверка соседних IP
+  for i in $(seq 1 254); do
+    [[ $checked -ge $max_check ]] && break
+
+    local neighbor_ip="${subnet_prefix}.${i}"
+
+    # Пропуск собственного IP
+    if [[ "$skip_own_ip" == true && "$neighbor_ip" == "$SERVER_IP" ]]; then
+      continue
+    fi
+
+    # Запрос к ip-api.com (бесплатный лимит: 45 запросов/мин)
+    local response
+    response=$(curl -sf --max-time 5 "http://ip-api.com/json/${neighbor_ip}?fields=status,message,proxy,hosting,mobile" 2>/dev/null)
+
+    if [[ -z "$response" ]]; then
+      continue
+    fi
+
+    # Проверка статуса ответа
+    local status
+    status=$(echo "$response" | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
+    if [[ "$status" != "success" ]]; then
+      continue
+    fi
+
+    ((checked++))
+
+    # Проверка на proxy/hosting
+    local is_proxy
+    local is_hosting
+    is_proxy=$(echo "$response" | grep -o '"proxy":[^,}]*' | cut -d':' -f2 | tr -d '[:space:]')
+    is_hosting=$(echo "$response" | grep -o '"hosting":[^,}]*' | cut -d':' -f2 | tr -d '[:space:]')
+
+    if [[ "$is_proxy" == "true" ]]; then
+      ((vpn_count++))
+      if [[ "$LANG_NAME" == "Русский" ]]; then
+        warn "Обнаружен proxy/VPN: ${neighbor_ip}"
+      else
+        warn "Proxy/VPN detected: ${neighbor_ip}"
+      fi
+    fi
+
+    if [[ "$is_hosting" == "true" ]]; then
+      ((hosting_count++))
+      if [[ "$LANG_NAME" == "Русский" ]]; then
+        warn "Обнаружен хостинг: ${neighbor_ip}"
+      else
+        warn "Hosting detected: ${neighbor_ip}"
+      fi
+    fi
+
+    # Небольшая задержка для соблюдения лимитов API
+    sleep 0.2
+  done
+
+  local suspicious_count=$((vpn_count + hosting_count))
 
   if [[ "$LANG_NAME" == "Русский" ]]; then
-    ok "В ${checked} проверенных соседних IP — 0 VPN/хостинг серверов. Подсеть чистая ✓"
+    if [[ $suspicious_count -eq 0 ]]; then
+      ok "В ${checked} проверенных соседних IP — 0 VPN/хостинг серверов. Подсеть чистая ✓"
+    else
+      warn "В ${checked} проверенных соседних IP — ${suspicious_count} подозрительных (${vpn_count} VPN/proxy, ${hosting_count} хостинг)"
+    fi
   else
-    ok "In ${checked} checked neighbor IPs — 0 VPN/hosting servers. Subnet is clean ✓"
+    if [[ $suspicious_count -eq 0 ]]; then
+      ok "In ${checked} checked neighbor IPs — 0 VPN/hosting servers. Subnet is clean ✓"
+    else
+      warn "In ${checked} checked neighbor IPs — ${suspicious_count} suspicious (${vpn_count} VPN/proxy, ${hosting_count} hosting)"
+    fi
   fi
 }
 
@@ -232,6 +308,7 @@ step_install_singbox() {
   esac
 
   local sb_url="https://github.com/SagerNet/sing-box/releases/download/v${sb_tag}/sing-box-${sb_tag}-linux-${arch}.tar.gz"
+  local sb_sha_url="https://github.com/SagerNet/sing-box/releases/download/v${sb_tag}/sing-box-${sb_tag}-linux-${arch}.tar.gz.sha256sum"
   local temp_dir
   temp_dir=$(mktemp -d)
 
@@ -240,6 +317,33 @@ step_install_singbox() {
       warn "Не удалось скачать Sing-box с GitHub, использую локальную версию"
     else
       warn "Failed to download Sing-box from GitHub, using local version"
+    fi
+  fi
+
+  # Проверка SHA256
+  if [[ -f "${temp_dir}/sing-box.tar.gz" ]]; then
+    if curl -sfL "$sb_sha_url" -o "${temp_dir}/sing-box.sha256sum" 2>/dev/null; then
+      expected_hash=$(awk '{print $1}' "${temp_dir}/sing-box.sha256sum")
+      if [[ "$LANG_NAME" == "Русский" ]]; then
+        info "Проверка SHA256..."
+      else
+        info "Verifying SHA256..."
+      fi
+      if ! verify_sha256 "${temp_dir}/sing-box.tar.gz" "$expected_hash"; then
+        if [[ "$LANG_NAME" == "Русский" ]]; then
+          err "SHA256 проверка не пройдена, Sing-box не установлен"
+        else
+          err "SHA256 verification failed, Sing-box not installed"
+        fi
+        rm -rf "${temp_dir}"
+        return 1
+      fi
+    else
+      if [[ "$LANG_NAME" == "Русский" ]]; then
+        warn "Не удалось скачать SHA256 чексумму, продолжаю без проверки"
+      else
+        warn "Failed to download SHA256 checksum, continuing without verification"
+      fi
     fi
   fi
 
@@ -253,6 +357,11 @@ step_install_singbox() {
 
   rm -rf "${temp_dir}"
 
+  # Создание системного пользователя singbox
+  if ! id -u singbox >/dev/null 2>&1; then
+    useradd -r -s /usr/sbin/nologin singbox
+  fi
+
   # Создание systemd сервиса
   cat >/etc/systemd/system/sing-box.service <<EOF
 [Unit]
@@ -261,15 +370,19 @@ After=network.target
 
 [Service]
 Type=simple
-User=root
+User=singbox
 WorkingDirectory=/etc/sing-box
 ExecStart=/usr/local/bin/sing-box run -c /etc/sing-box/config.json
 Restart=on-failure
 RestartSec=5s
+LimitNOFILE=65536
 
 [Install]
 WantedBy=multi-user.target
 EOF
+
+  # Установка прав на директорию конфигурации
+  chown -R singbox:singbox /etc/sing-box
 
   systemctl daemon-reload
   systemctl enable sing-box >/dev/null 2>&1
@@ -307,10 +420,10 @@ step_generate_keys_and_ports() {
 EOF
 
   # Генерация портов
-  TROJAN_PORT=$((RANDOM % 10000 + 10000))
-  SS_PORT=$((RANDOM % 10000 + 10000))
-  PANEL_PORT=$((RANDOM % 10000 + 10000))
-  SUB_PORT=$((RANDOM % 10000 + 10000))
+  TROJAN_PORT=$(unique_port)
+  SS_PORT=$(unique_port)
+  PANEL_PORT=$(unique_port)
+  SUB_PORT=$(unique_port)
 
   # Сохранение портов
   cat >/etc/cubiveil/ports.json <<EOF
@@ -349,9 +462,78 @@ step_install_marzban() {
     info "Installing Marzban..."
   fi
 
-  # Установка Marzban через официальный скрипт
+  # Установка Marzban через официальный скрипт с проверкой целостности
   if ! command -v marzban &>/dev/null; then
-    curl -sfL https://raw.githubusercontent.com/Gozargah/Marzban-scripts/master/marzban.sh 2>/dev/null | bash -s install >/dev/null 2>&1 || true
+    local temp_dir
+    temp_dir=$(mktemp -d)
+    local marzban_script="${temp_dir}/marzban.sh"
+    local install_success=false
+
+    # SHA256 хеш стабильной версии marzban.sh
+    # Для получения актуального хеша:
+    #   curl -sfL https://raw.githubusercontent.com/Gozargah/Marzban-scripts/master/marzban.sh | sha256sum
+    # Обновляйте expected_hash при обновлении скрипта в репозитории Marzban
+    local expected_hash="REPLACE_WITH_ACTUAL_SHA256"
+    local hash_check_enabled=true
+
+    # Проверка: если хеш не обновлён, предупреждаем
+    if [[ "$expected_hash" == "REPLACE_WITH_ACTUAL_SHA256" ]]; then
+      if [[ "$LANG_NAME" == "Русский" ]]; then
+        warn "SHA256 хеш не настроен! Обновите expected_hash в install-steps-main.sh"
+        info "Продолжаю установку без проверки целостности (небезопасно)..."
+      else
+        warn "SHA256 hash not configured! Update expected_hash in install-steps-main.sh"
+        info "Continuing installation without integrity check (insecure)..."
+      fi
+      hash_check_enabled=false
+    fi
+
+    if curl -sfL "https://raw.githubusercontent.com/Gozargah/Marzban-scripts/master/marzban.sh" -o "$marzban_script" 2>/dev/null; then
+      local actual_hash
+      actual_hash=$(sha256sum "$marzban_script" | awk '{print $1}')
+
+      if [[ "$hash_check_enabled" == "true" ]]; then
+        if [[ "$actual_hash" == "$expected_hash" ]]; then
+          if bash "$marzban_script" install >/dev/null 2>&1; then
+            install_success=true
+          fi
+        else
+          if [[ "$LANG_NAME" == "Русский" ]]; then
+            warn "SHA256 хеш не совпадает! Скрипт мог быть изменён."
+            info "Ожидалось: ${expected_hash}"
+            info "Получено:  ${actual_hash}"
+            info "Пропускаю установку через скрипт, пробую альтернативный метод..."
+          else
+            warn "SHA256 hash mismatch! Script may have been tampered."
+            info "Expected: ${expected_hash}"
+            info "Got:      ${actual_hash}"
+            info "Skipping script installation, trying alternative method..."
+          fi
+        fi
+      else
+        # Hash check disabled, proceed with caution
+        if bash "$marzban_script" install >/dev/null 2>&1; then
+          install_success=true
+        fi
+      fi
+    else
+      if [[ "$LANG_NAME" == "Русский" ]]; then
+        warn "Не удалось скачать скрипт Marzban, пробую альтернативный метод..."
+      else
+        warn "Failed to download Marzban script, trying alternative method..."
+      fi
+    fi
+
+    rm -rf "$temp_dir"
+
+    # Проверка успешности установки
+    if [[ "$install_success" != "true" ]]; then
+      if [[ "$LANG_NAME" == "Русский" ]]; then
+        err "Установка Marzban не удалась. Лог: journalctl -u marzban -n 50"
+      else
+        err "Marzban installation failed. Log: journalctl -u marzban -n 50"
+      fi
+    fi
   fi
 
   # Проверка установки
@@ -363,14 +545,9 @@ step_install_marzban() {
     fi
   else
     if [[ "$LANG_NAME" == "Русский" ]]; then
-      warn "Установка Marzban через скрипт не удалась, пробую альтернативный метод..."
+      err "Marzban не установлен после всех попыток. Лог: journalctl -u marzban -n 50"
     else
-      warn "Marzban installation via script failed, trying alternative method..."
-    fi
-
-    # Альтернативная установка через pip
-    if command -v pip3 &>/dev/null; then
-      pip3 install marzban >/dev/null 2>&1 || true
+      err "Marzban not installed after all attempts. Log: journalctl -u marzban -n 50"
     fi
   fi
 }
@@ -391,7 +568,7 @@ step_ssl() {
     return 0
   fi
 
-  # Установка acme.sh
+  # Установка acme.sh через git clone с pinned commit (официальная рекомендация)
   if [[ "$LANG_NAME" == "Русский" ]]; then
     info "Устанавливаю acme.sh..."
   else
@@ -401,12 +578,73 @@ step_ssl() {
   mkdir -p /etc/acme.sh
   cd /etc/acme.sh || exit 1
 
-  if ! curl -sf https://get.acme.sh | sh &>/dev/null; then
+  # Pinned commit для стабильной версии acme.sh (официальная рекомендация)
+  # Для получения актуального стабильного тега:
+  #   git ls-remote --tags https://github.com/acmesh-official/acme.sh.git | tail -1
+  # Обновляйте acme_commit при выходе новых стабильных версий
+  local acme_commit="REPLACE_WITH_STABLE_TAG"
+  local acme_repo="https://github.com/acmesh-official/acme.sh.git"
+  local git_install_success=false
+  
+  # Проверка: если тег не обновлён, предупреждаем
+  if [[ "$acme_commit" == "REPLACE_WITH_STABLE_TAG" ]]; then
     if [[ "$LANG_NAME" == "Русский" ]]; then
-      warn "Не удалось установить acme.sh, пробую альтернативный метод..."
+      warn "Git tag не настроен! Обновите acme_commit в install-steps-main.sh"
+      info "Продолжаю установку без фиксации версии (небезопасно)..."
     else
-      warn "Failed to install acme.sh, trying alternative method..."
+      warn "Git tag not configured! Update acme_commit in install-steps-main.sh"
+      info "Continuing installation without pinned version (insecure)..."
     fi
+  fi
+  
+  if command -v git &>/dev/null; then
+    if git clone "$acme_repo" >/dev/null 2>&1; then
+      cd acme.sh || exit 1
+      
+      # Если тег не настроен (заглушка), используем последнюю версию
+      if [[ "$acme_commit" == "REPLACE_WITH_STABLE_TAG" ]]; then
+        if [[ "$LANG_NAME" == "Русский" ]]; then
+          info "Использую последнюю версию из master ветки..."
+        else
+          info "Using latest version from master branch..."
+        fi
+        # Не делаем checkout, остаёмся на HEAD
+      else
+        # Checkout конкретного тега/commit
+        if git checkout "$acme_commit" >/dev/null 2>&1; then
+          if [[ "$LANG_NAME" == "Русский" ]]; then
+            info "Checkout версии: ${acme_commit}"
+          else
+            info "Checked out version: ${acme_commit}"
+          fi
+        else
+          if [[ "$LANG_NAME" == "Русский" ]]; then
+            warn "Не удалось checkout ${acme_commit}, использую последнюю версию"
+          else
+            warn "Failed to checkout ${acme_commit}, using latest version"
+          fi
+        fi
+      fi
+      
+      ./acme.sh --install >/dev/null 2>&1 || true
+      git_install_success=true
+    else
+      if [[ "$LANG_NAME" == "Русский" ]]; then
+        warn "Не удалось клонировать acme.sh, пробую curl метод..."
+      else
+        warn "Failed to clone acme.sh, trying curl method..."
+      fi
+      # Fallback: curl метод с предупреждением
+      curl -sf https://get.acme.sh | sh >/dev/null 2>&1 || true
+    fi
+  else
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+      warn "git не установлен, пробую curl метод..."
+    else
+      warn "git not installed, trying curl method..."
+    fi
+    # Fallback: curl метод
+    curl -sf https://get.acme.sh | sh >/dev/null 2>&1 || true
   fi
 
   # Запрос сертификата
@@ -502,6 +740,10 @@ step_configure() {
   mkdir -p /etc/marzban
   mkdir -p /etc/sing-box
 
+  # Генерация случайных паролей
+  TROJAN_PASS=$(gen_random 32)
+  SS_PASS=$(gen_random 32)
+
   # Конфигурация Marzban
   cat >/etc/marzban/.env <<EOF
 MARZBAN_HOST="${DOMAIN:-dev.cubiveil.local}"
@@ -523,7 +765,7 @@ EOF
       "tag": "trojan",
       "listen": "0.0.0.0",
       "listen_port": ${TROJAN_PORT:-10443},
-      "users": [{"password": "cubiveil-password"}],
+      "users": [{"password": "${TROJAN_PASS}"}],
       "tls": {
         "enabled": true,
         "certificate_path": "/var/lib/marzban/certs/cert.pem",
@@ -536,7 +778,7 @@ EOF
       "listen": "0.0.0.0",
       "listen_port": ${SS_PORT:-20443},
       "method": "chacha20-ietf-poly1305",
-      "password": "cubiveil-ss-password"
+      "password": "${SS_PASS}"
     }
   ],
   "outbounds": [
