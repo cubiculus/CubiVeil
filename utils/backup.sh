@@ -97,25 +97,25 @@ main() {
     read -rp "  Select action [1-5]: " choice
 
     case "$choice" in
-      1)
-        run_backup
-        ;;
-      2)
-        run_quick_backup
-        ;;
-      3)
-        run_list
-        ;;
-      4)
-        run_cleanup
-        ;;
-      5)
-        echo "Exiting..."
-        exit 0
-        ;;
-      *)
-        warn "Invalid choice"
-        ;;
+    1)
+      run_backup
+      ;;
+    2)
+      run_quick_backup
+      ;;
+    3)
+      run_list
+      ;;
+    4)
+      run_cleanup
+      ;;
+    5)
+      echo "Exiting..."
+      exit 0
+      ;;
+    *)
+      warn "Invalid choice"
+      ;;
     esac
 
     echo ""

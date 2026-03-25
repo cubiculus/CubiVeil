@@ -76,7 +76,7 @@ test_test_files() {
   info "Тестирование тестовых файлов..."
 
   local test_files=(
-    "tests/integration-tests.sh"
+    "tests/integration-test.sh"
     "tests/unit-utils.sh"
     "tests/unit-telegram.sh"
     "tests/modular-structure.sh"
@@ -101,7 +101,7 @@ test_all_syntax() {
     "setup-telegram.sh"
     "lib/utils.sh"
     "lib/install-steps.sh"
-    "tests/integration-tests.sh"
+    "tests/integration-test.sh"
     "tests/unit-utils.sh"
     "tests/unit-telegram.sh"
     "tests/modular-structure.sh"
@@ -129,7 +129,7 @@ test_executable() {
     "setup-telegram.sh"
     "lib/utils.sh"
     "lib/install-steps.sh"
-    "tests/integration-tests.sh"
+    "tests/integration-test.sh"
     "tests/unit-utils.sh"
     "tests/unit-telegram.sh"
     "tests/modular-structure.sh"

@@ -51,15 +51,15 @@ MODULE_INFO=(
 
 # Порядок модулей для установки (с учётом зависимостей)
 DEFAULT_INSTALL_ORDER=(
-  "system"          # 1. Базовые системные настройки
-  "firewall"        # 2. Файрвол
-  "fail2ban"        # 3. Защита от брутфорса
-  "ssl"             # 4. SSL сертификаты (зависит от firewall)
-  "singbox"         # 5. Sing-box (зависит от ssl)
-  "marzban"         # 6. Marzban (зависит от ssl, singbox)
-  "backup"          # 7. Бэкап (установка после настройки)
-  "rollback"        # 8. Rollback (всегда после backup)
-  "monitoring"      # 9. Мониторинг (после всех сервисов)
+  "system"     # 1. Базовые системные настройки
+  "firewall"   # 2. Файрвол
+  "fail2ban"   # 3. Защита от брутфорса
+  "ssl"        # 4. SSL сертификаты (зависит от firewall)
+  "singbox"    # 5. Sing-box (зависит от ssl)
+  "marzban"    # 6. Marzban (зависит от ssl, singbox)
+  "backup"     # 7. Бэкап (установка после настройки)
+  "rollback"   # 8. Rollback (всегда после backup)
+  "monitoring" # 9. Мониторинг (после всех сервисов)
 )
 
 # Минимальный набор модулей для базовой установки
@@ -78,7 +78,7 @@ manifest_get_info() {
   local module="$1"
 
   for info in "${MODULE_INFO[@]}"; do
-    IFS=':' read -r mod type deps desc <<< "$info"
+    IFS=':' read -r mod type deps desc <<<"$info"
     if [[ "$mod" == "$module" ]]; then
       echo "$type|$deps|$desc"
       return 0
@@ -109,12 +109,12 @@ manifest_check_dependencies() {
 
   local info
   info=$(manifest_get_info "$module")
-  IFS='|' read -r type deps desc <<< "$info"
+  IFS='|' read -r type deps desc <<<"$info"
 
   if [[ -n "$deps" ]] && [[ "$deps" != "none" ]]; then
-    IFS=',' read -ra dep_array <<< "$deps"
+    IFS=',' read -ra dep_array <<<"$deps"
     for dep in "${dep_array[@]}"; do
-      dep=$(echo "$dep" | xargs)  # trim whitespace
+      dep=$(echo "$dep" | xargs) # trim whitespace
       if ! manifest_module_exists "$dep"; then
         missing_deps+=("$dep")
       fi
@@ -163,6 +163,7 @@ manifest_validate_order() {
 
 # Получение порядка установки с учётом зависимостей
 # Usage: manifest_get_install_order [modules...]
+# shellcheck disable=SC2120
 manifest_get_install_order() {
   local modules=("$@")
 
@@ -190,7 +191,7 @@ manifest_list_all() {
   echo "─────────────────────────────────────────────────────"
 
   for info in "${MODULE_INFO[@]}"; do
-    IFS=':' read -r mod type deps desc <<< "$info"
+    IFS=':' read -r mod type deps desc <<<"$info"
     echo ""
     echo "  Module:  $mod"
     echo "  Type:    $type"

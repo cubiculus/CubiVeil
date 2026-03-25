@@ -38,12 +38,12 @@ fi
 # ── Вспомогательная функция для тестирования генераторов ──────
 # Usage: test_generator_edge_cases "gen_random" "a-zA-Z0-9" "random" "false"
 test_generator_edge_cases() {
-  local gen_func="$1"      # Имя функции (gen_random/gen_hex)
-  local pattern="$2"       # Regex паттерн для проверки символов
+  local gen_func="$1" # Имя функции (gen_random/gen_hex)
+  local pattern="$2"  # Regex паттерн для проверки символов
   # shellcheck disable=SC2034
-  local gen_type="$3"      # Тип для сообщений (random/hex)
-  local is_lowercase="${4:-false}"  # Проверка на lowercase
-  
+  local gen_type="$3"              # Тип для сообщений (random/hex)
+  local is_lowercase="${4:-false}" # Проверка на lowercase
+
   info "Тестирование $gen_func граничные значения..."
 
   # Тест: длина 1 (минимальная полезная)
@@ -126,7 +126,7 @@ test_gen_random() {
 test_gen_random_edge_cases() {
   # Используем вспомогательную функцию
   test_generator_edge_cases "gen_random" "a-zA-Z0-9" "random" "false"
-  
+
   # Уникальный тест для gen_random: статистическая равномерность
   info "gen_random: статистическая проверка..."
   local digit_count=0
@@ -137,7 +137,7 @@ test_gen_random_edge_cases() {
       ((digit_count++))
     fi
   done
-  
+
   # Ожидаем ~36% цифр (10 из 62 символов), допускаем отклонение 20%
   if [[ $digit_count -ge 15 && $digit_count -le 55 ]]; then
     pass "gen_random: статистическая равномерность (цифры: $digit_count/100)"
@@ -174,7 +174,7 @@ test_gen_hex() {
 test_gen_hex_edge_cases() {
   # Используем вспомогательную функцию
   test_generator_edge_cases "gen_hex" "a-f0-9" "hex" "true"
-  
+
   # Уникальный тест для gen_hex: статистическая равномерность
   info "gen_hex: статистическая проверка..."
   local digit_count=0
@@ -185,7 +185,7 @@ test_gen_hex_edge_cases() {
       ((digit_count++))
     fi
   done
-  
+
   # Ожидаем ~40% цифр (10 из 16 символов), допускаем отклонение 25%
   if [[ $digit_count -ge 15 && $digit_count -le 65 ]]; then
     pass "gen_hex: статистическая равномерность (цифры: $digit_count/100)"

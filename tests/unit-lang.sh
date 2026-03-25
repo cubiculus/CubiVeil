@@ -56,7 +56,7 @@ test_default_language() {
   # Загружаем модуль в подпроцессе чтобы не загрязнять среду
   local lang_name
   lang_name=$(bash -c "source ${SCRIPT_DIR}/lang.sh && echo \$LANG_NAME" 2>/dev/null)
-  
+
   if [[ "$lang_name" == "Русский" || "$lang_name" == "English" ]]; then
     pass "Язык по умолчанию установлен: $lang_name"
     ((TESTS_PASSED++))
@@ -107,13 +107,13 @@ test_colors_defined() {
 
   local colors=("RED" "GREEN" "YELLOW" "BLUE" "CYAN" "PLAIN")
   local defined=0
-  
+
   for color in "${colors[@]}"; do
     if bash -c "source ${SCRIPT_DIR}/lang.sh && [[ -n \"\$$color\" ]] && echo 'yes'" 2>/dev/null | grep -q "yes"; then
       ((defined++))
     fi
   done
-  
+
   if [[ $defined -ge 5 ]]; then
     pass "Цвета определены: $defined из ${#colors[@]}"
     ((TESTS_PASSED++))
@@ -128,13 +128,13 @@ test_output_functions() {
 
   local functions=("ok" "warn" "err" "info" "step")
   local defined=0
-  
+
   for func in "${functions[@]}"; do
     if bash -c "source ${SCRIPT_DIR}/lang.sh && declare -f $func >/dev/null 2>&1" 2>/dev/null; then
       ((defined++))
     fi
   done
-  
+
   if [[ $defined -eq ${#functions[@]} ]]; then
     pass "Все функции вывода определены: ${defined}"
     ((TESTS_PASSED++))
@@ -155,14 +155,14 @@ test_en_strings() {
     "WARN_DNS_RECORD"
     "WARN_LETS_ENCRYPT"
   )
-  
+
   local found=0
   for str in "${en_strings[@]}"; do
     if grep -q "^${str}=" "${SCRIPT_DIR}/lang.sh" 2>/dev/null; then
       ((found++))
     fi
   done
-  
+
   if [[ $found -eq ${#en_strings[@]} ]]; then
     pass "Все EN строки найдены: $found"
     ((TESTS_PASSED++))
@@ -183,14 +183,14 @@ test_ru_strings() {
     "WARN_DNS_RECORD_RU"
     "WARN_LETS_ENCRYPT_RU"
   )
-  
+
   local found=0
   for str in "${ru_strings[@]}"; do
     if grep -q "^${str}=" "${SCRIPT_DIR}/lang.sh" 2>/dev/null; then
       ((found++))
     fi
   done
-  
+
   if [[ $found -eq ${#ru_strings[@]} ]]; then
     pass "Все RU строки найдены: $found"
     ((TESTS_PASSED++))
@@ -217,14 +217,14 @@ test_step_titles() {
     "STEP_CONFIGURE"
     "STEP_TELEGRAM"
   )
-  
+
   local found=0
   for str in "${step_strings[@]}"; do
     if grep -q "^${str}=" "${SCRIPT_DIR}/lang.sh" 2>/dev/null; then
       ((found++))
     fi
   done
-  
+
   if [[ $found -ge 10 ]]; then
     pass "Заголовки шагов найдены: $found"
     ((TESTS_PASSED++))
@@ -251,14 +251,14 @@ test_step_titles_ru() {
     "STEP_CONFIGURE_RU"
     "STEP_TELEGRAM_RU"
   )
-  
+
   local found=0
   for str in "${step_strings[@]}"; do
     if grep -q "^${str}=" "${SCRIPT_DIR}/lang.sh" 2>/dev/null; then
       ((found++))
     fi
   done
-  
+
   if [[ $found -ge 10 ]]; then
     pass "Заголовки шагов RU найдены: $found"
     ((TESTS_PASSED++))
@@ -279,14 +279,14 @@ test_telegram_strings() {
     "OK_TG_TOKEN_VERIFIED"
     "ERR_CHAT_ID_FORMAT"
   )
-  
+
   local found=0
   for str in "${tg_strings[@]}"; do
     if grep -q "^${str}" "${SCRIPT_DIR}/lang.sh" 2>/dev/null; then
       ((found++))
     fi
   done
-  
+
   if [[ $found -ge 4 ]]; then
     pass "Telegram строки найдены: $found"
     ((TESTS_PASSED++))
@@ -307,14 +307,14 @@ test_final_messages() {
     "SUCCESS_TELEGRAM"
     "NEXT_STEPS"
   )
-  
+
   local found=0
   for str in "${final_strings[@]}"; do
     if grep -q "^${str}" "${SCRIPT_DIR}/lang.sh" 2>/dev/null; then
       ((found++))
     fi
   done
-  
+
   if [[ $found -ge 4 ]]; then
     pass "Финальные сообщения найдены: $found"
     ((TESTS_PASSED++))
@@ -335,14 +335,14 @@ test_final_messages_ru() {
     "SUCCESS_TELEGRAM_RU"
     "NEXT_STEPS_RU"
   )
-  
+
   local found=0
   for str in "${final_strings[@]}"; do
     if grep -q "^${str}" "${SCRIPT_DIR}/lang.sh" 2>/dev/null; then
       ((found++))
     fi
   done
-  
+
   if [[ $found -ge 4 ]]; then
     pass "Финальные сообщения RU найдены: $found"
     ((TESTS_PASSED++))
@@ -362,21 +362,21 @@ test_step_title_functionality() {
     LANG_NAME='English'
     step_title '1' 'Тест RU' 'Test EN'
   " 2>&1)
-  
+
   if echo "$output" | grep -q "Step 1/12"; then
     pass "step_title: English формат корректен"
     ((TESTS_PASSED++))
   else
     warn "step_title: English формат не найден в выводе"
   fi
-  
+
   # Тест для русского языка
   output=$(bash -c "
     source ${SCRIPT_DIR}/lang.sh
     LANG_NAME='Русский'
     step_title '1' 'Тест RU' 'Test EN'
   " 2>&1)
-  
+
   if echo "$output" | grep -q "Шаг 1/12"; then
     pass "step_title: Русский формат корректен"
     ((TESTS_PASSED++))
@@ -393,9 +393,9 @@ test_localization_completeness() {
   local en_count ru_count
   en_count=$(grep -cE '^[A-Z_]+="[A-Za-z ]+"$' "${SCRIPT_DIR}/lang.sh" 2>/dev/null || echo "0")
   ru_count=$(grep -cE '^[A-Z_]+_RU=' "${SCRIPT_DIR}/lang.sh" 2>/dev/null || echo "0")
-  
+
   info "Найдено EN строк: $en_count, RU строк: $ru_count"
-  
+
   # Ожидаем что RU строк хотя бы 80% от EN
   if [[ $en_count -gt 0 ]]; then
     local threshold=$((en_count * 80 / 100))
@@ -417,7 +417,7 @@ test_no_empty_strings() {
   # Проверяем что нет строк вида KEY=""
   local empty_count
   empty_count=$(grep -cE '^[A-Z_]+=""$' "${SCRIPT_DIR}/lang.sh" 2>/dev/null || echo "0")
-  
+
   if [[ $empty_count -eq 0 ]]; then
     pass "Пустые строки локализации отсутствуют"
     ((TESTS_PASSED++))
@@ -434,7 +434,7 @@ test_escaping_correctness() {
   # (простая эвристическая проверка)
   local bad_lines
   bad_lines=$(grep -n '="[^"]*"[^"]*="' "${SCRIPT_DIR}/lang.sh" 2>/dev/null | head -5 || true)
-  
+
   if [[ -z "$bad_lines" ]]; then
     pass "Экранирование кавычек корректно"
     ((TESTS_PASSED++))
@@ -490,7 +490,7 @@ test_integration_with_modules() {
     source ${SCRIPT_DIR}/lib/utils.sh 2>&1
     echo 'OK'
   " 2>&1)
-  
+
   if echo "$result" | grep -q "OK"; then
     pass "Интеграция с lib/utils.sh успешна"
     ((TESTS_PASSED++))

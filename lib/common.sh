@@ -134,7 +134,7 @@ log_message() {
   local message="$2"
   local log_file="${3:-/var/log/cubiveil.log}"
 
-  echo "[$(date '+%Y-%m-%d %H:%M:%S')] [${level}] ${message}" >> "$log_file"
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] [${level}] ${message}" >>"$log_file"
 }
 
 log_info() { log_message "INFO" "$1" "$2"; }

@@ -61,7 +61,7 @@ marzban_install() {
 
   # Загружаем официальный скрипт установки
   log_info "Downloading Marzban installation script..."
-  
+
   if ! curl -sfL "https://github.com/Gozargah/Marzban-scripts/raw/master/marzban.sh" -o "$MARZBAN_INSTALL_SCRIPT" 2>/dev/null; then
     log_error "Failed to download Marzban installation script"
     return 1
@@ -71,7 +71,7 @@ marzban_install() {
 
   # Запускаем установку в автоматическом режиме
   log_info "Running Marzban installation..."
-  
+
   if ! bash "$MARZBAN_INSTALL_SCRIPT" install --yes >/dev/null 2>&1; then
     log_error "Marzban installation failed"
     rm -f "$MARZBAN_INSTALL_SCRIPT"

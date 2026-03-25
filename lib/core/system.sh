@@ -244,7 +244,7 @@ config_create() {
     mkdir -p "$dir"
   fi
 
-  echo "$content" > "$path"
+  echo "$content" >"$path"
 }
 
 # Проверка существования конфигурации
@@ -310,7 +310,7 @@ env_set() {
   fi
 
   # Добавляем новую переменную
-  echo "${key}=\"${value}\"" >> "$env_file"
+  echo "${key}=\"${value}\"" >>"$env_file"
 }
 
 # Получение переменной окружения из /etc/environment

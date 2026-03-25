@@ -30,8 +30,14 @@ log_error() { echo "[ERROR] $1" >&2; }
 dir_ensure() { mkdir -p "$1" 2>/dev/null || true; }
 
 svc_active() { return 1; }
-svc_stop() { echo "[MOCK] svc_stop: $1" >&2; return 0; }
-svc_start() { echo "[MOCK] svc_start: $1" >&2; return 0; }
+svc_stop() {
+  echo "[MOCK] svc_stop: $1" >&2
+  return 0
+}
+svc_start() {
+  echo "[MOCK] svc_start: $1" >&2
+  return 0
+}
 
 # Mock для проверки SHA256
 verify_sha256() {
@@ -54,10 +60,6 @@ openssl() {
     echo "[MOCK] openssl: $*" >&2
   fi
 }
-
-# Mock для функций rollback (чтобы избежать ошибки SC2218)
-rollback_extract_backup() { echo "[MOCK] rollback_extract_backup: $1" >&2; return 0; }
-rollback_verify_integrity() { echo "[MOCK] rollback_verify_integrity" >&2; return 0; }
 
 # ── Загрузка модуля ───────────────────────────────────────────
 # shellcheck source=lib/modules/rollback/install.sh
@@ -130,7 +132,7 @@ test_rollback_list_backups() {
   BACKUP_ARCHIVE_DIR="$test_archive_dir"
 
   # Создаём тестовый бэкап
-  echo "test" > "${test_archive_dir}/test-backup.tar.gz"
+  echo "test" >"${test_archive_dir}/test-backup.tar.gz"
 
   rollback_list_backups || true
 
@@ -152,11 +154,11 @@ test_rollback_select_backup_mock() {
   BACKUP_ARCHIVE_DIR="$test_archive_dir"
 
   # Создаём тестовый бэкап
-  echo "test" > "${test_archive_dir}/test-backup.tar.gz"
+  echo "test" >"${test_archive_dir}/test-backup.tar.gz"
 
   # Mock для read
   read() {
-    echo "1"  # Возвращаем первый вариант
+    echo "1" # Возвращаем первый вариант
     return 0
   }
 
@@ -184,15 +186,15 @@ test_rollback_extract_backup() {
 
   # Создаём тестовый архив
   local test_file="${test_temp_dir}/test.txt"
-  echo "test" > "$test_file"
-  
+  echo "test" >"$test_file"
+
   tar -czf "${test_archive_dir}/test.tar.gz" -C "$test_temp_dir" test.txt 2>/dev/null || true
 
   # Mock для tar
   tar() {
     if [[ "$*" == *"-xzf"* ]]; then
       mkdir -p "$ROLLBACK_TEMP_DIR"
-      echo "extracted" > "${ROLLBACK_TEMP_DIR}/test.txt"
+      echo "extracted" >"${ROLLBACK_TEMP_DIR}/test.txt"
       return 0
     fi
     command tar "$@" 2>/dev/null || true
@@ -217,8 +219,8 @@ test_rollback_verify_integrity() {
   ROLLBACK_TEMP_DIR="$test_temp_dir"
 
   # Создаём тестовые файлы с hash
-  echo "test db" > "${test_temp_dir}/marzban-db.sqlite3"
-  echo "abc123" > "${test_temp_dir}/marzban-db.sqlite3.sha256"
+  echo "test db" >"${test_temp_dir}/marzban-db.sqlite3"
+  echo "abc123" >"${test_temp_dir}/marzban-db.sqlite3.sha256"
 
   rollback_verify_integrity
 
@@ -252,8 +254,8 @@ test_rollback_marzban_db() {
   MARZBAN_DIR="$test_marzban_dir"
 
   # Создаём тестовую БД
-  echo "test db" > "${test_temp_dir}/marzban-db.sqlite3"
-  echo "abc123" > "${test_temp_dir}/marzban-db.sqlite3.sha256"
+  echo "test db" >"${test_temp_dir}/marzban-db.sqlite3"
+  echo "abc123" >"${test_temp_dir}/marzban-db.sqlite3.sha256"
 
   rollback_marzban_db || true
 
@@ -277,10 +279,10 @@ test_rollback_marzban_config() {
   MARZBAN_TEMPLATE="${test_temp_dir}/sing-box-template.json"
 
   # Создаём тестовые файлы
-  echo "TEST=1" > "${test_temp_dir}/marzban.env"
-  echo "abc123" > "${test_temp_dir}/marzban.env.sha256"
-  echo "{}" > "$MARZBAN_TEMPLATE"
-  echo "abc123" > "${MARZBAN_TEMPLATE}.sha256"
+  echo "TEST=1" >"${test_temp_dir}/marzban.env"
+  echo "abc123" >"${test_temp_dir}/marzban.env.sha256"
+  echo "{}" >"$MARZBAN_TEMPLATE"
+  echo "abc123" >"${MARZBAN_TEMPLATE}.sha256"
 
   rollback_marzban_config || true
 
@@ -301,8 +303,8 @@ test_rollback_singbox_config() {
   ROLLBACK_TEMP_DIR="$test_temp_dir"
 
   # Создаём тестовую конфигурацию
-  echo "{}" > "${test_temp_dir}/singbox-config.json"
-  echo "abc123" > "${test_temp_dir}/singbox-config.json.sha256"
+  echo "{}" >"${test_temp_dir}/singbox-config.json"
+  echo "abc123" >"${test_temp_dir}/singbox-config.json.sha256"
 
   rollback_singbox_config || true
 
@@ -327,7 +329,7 @@ test_rollback_ssl_certs() {
 
   # Создаём тестовые сертификаты
   mkdir -p "${test_temp_dir}/ssl-certs"
-  echo "test cert" > "${test_temp_dir}/ssl-certs/fullchain.pem"
+  echo "test cert" >"${test_temp_dir}/ssl-certs/fullchain.pem"
 
   rollback_ssl_certs || true
 
@@ -353,8 +355,8 @@ test_rollback_keys() {
   CREDENTIALS_KEY="${test_marzban_dir}/credentials.key"
 
   # Создаём тестовые ключи
-  echo "test credentials" > "${test_temp_dir}/credentials.age"
-  echo "test key" > "${test_temp_dir}/credentials.key"
+  echo "test credentials" >"${test_temp_dir}/credentials.age"
+  echo "test key" >"${test_temp_dir}/credentials.key"
 
   rollback_keys
 
@@ -388,7 +390,7 @@ test_rollback_full_mock() {
   ROLLBACK_TEMP_DIR="$test_temp_dir"
 
   # Создаём тестовый бэкап
-  echo "test" > "${test_archive_dir}/test.tar.gz"
+  echo "test" >"${test_archive_dir}/test.tar.gz"
 
   # Mock для select
   rollback_select_backup() {
@@ -427,7 +429,7 @@ test_rollback_latest_mock() {
   ROLLBACK_TEMP_DIR="$test_temp_dir"
 
   # Создаём тестовый бэкап
-  echo "test" > "${test_archive_dir}/test.tar.gz"
+  echo "test" >"${test_archive_dir}/test.tar.gz"
 
   rollback_extract_backup() { return 0; }
   rollback_verify_integrity() { return 0; }
@@ -554,7 +556,7 @@ test_verify_sha256_integration() {
   info "Тестирование интеграции verify_sha256..."
 
   local test_file="/tmp/test-verify-$$"
-  echo "test content" > "$test_file"
+  echo "test content" >"$test_file"
 
   # Получаем реальный hash
   # shellcheck disable=SC2034

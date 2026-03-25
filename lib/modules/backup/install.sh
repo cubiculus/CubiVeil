@@ -67,7 +67,7 @@ backup_generate_encryption_key() {
   key=$(generate_secure_key 32)
 
   # Сохраняем ключ
-  echo "$key" > "$key_file"
+  echo "$key" >"$key_file"
   chmod 600 "$key_file"
 
   log_debug "Encryption key generated"
@@ -174,7 +174,7 @@ backup_marzban_db() {
   # Генерируем SHA256 для проверки целостности
   local hash
   hash=$(sha256sum "$backup_db" 2>/dev/null | awk '{print $1}')
-  echo "$hash" > "${backup_db}.sha256"
+  echo "$hash" >"${backup_db}.sha256"
 
   log_success "Marzban database backed up (SHA256: ${hash:0:8}...)"
 }
@@ -192,7 +192,7 @@ backup_marzban_config() {
     # Генерируем SHA256
     local hash
     hash=$(sha256sum "${BACKUP_DIR}/marzban.env" 2>/dev/null | awk '{print $1}')
-    echo "$hash" > "${BACKUP_DIR}/marzban.env.sha256"
+    echo "$hash" >"${BACKUP_DIR}/marzban.env.sha256"
 
     backed_up=true
   fi
@@ -204,7 +204,7 @@ backup_marzban_config() {
     # Генерируем SHA256
     local hash
     hash=$(sha256sum "${BACKUP_DIR}/sing-box-template.json" 2>/dev/null | awk '{print $1}')
-    echo "$hash" > "${BACKUP_DIR}/sing-box-template.json.sha256"
+    echo "$hash" >"${BACKUP_DIR}/sing-box-template.json.sha256"
 
     backed_up=true
   fi
@@ -228,7 +228,7 @@ backup_singbox_config() {
     # Генерируем SHA256
     local hash
     hash=$(sha256sum "${BACKUP_DIR}/singbox-config.json" 2>/dev/null | awk '{print $1}')
-    echo "$hash" > "${BACKUP_DIR}/singbox-config.json.sha256"
+    echo "$hash" >"${BACKUP_DIR}/singbox-config.json.sha256"
 
     log_success "Sing-box configuration backed up (SHA256: ${hash:0:8}...)"
   else
@@ -320,7 +320,7 @@ backup_encrypt_archive() {
 
   # Шифруем архив используя encrypt_to_file из security.sh
   local encrypted_file="${archive}.age"
-  
+
   # Читаем содержимое архива и шифруем
   if encrypt_to_file "$(cat "$archive")" "$encryption_key" "$encrypted_file"; then
     # Удаляем оригинальный архив
@@ -359,12 +359,12 @@ backup_system_info() {
     echo "Sing-box: $(svc_active "sing-box" && echo "active" || echo "inactive")"
     echo "UFW: $(svc_active "ufw" && echo "active" || echo "inactive")"
     echo "Fail2ban: $(svc_active "fail2ban" && echo "active" || echo "inactive")"
-  } > "${BACKUP_DIR}/system-info.txt"
+  } >"${BACKUP_DIR}/system-info.txt"
 
   # Генерируем SHA256
   local hash
   hash=$(sha256sum "${BACKUP_DIR}/system-info.txt" 2>/dev/null | awk '{print $1}')
-  echo "$hash" > "${BACKUP_DIR}/system-info.txt.sha256"
+  echo "$hash" >"${BACKUP_DIR}/system-info.txt.sha256"
 
   log_success "System information backed up (SHA256: ${hash:0:8}...)"
 }
@@ -525,9 +525,12 @@ module_enable() {
 
   # Создаём cron job для ежедневного бэкапа
   local cron_job="0 2 * * * /bin/bash -c 'cd ${SCRIPT_DIR} && source lib/modules/backup/install.sh && backup_full >> /var/log/cubiveil/backup-cron.log 2>&1'"
-  
+
   if ! crontab -l 2>/dev/null | grep -q "backup_full"; then
-    (crontab -l 2>/dev/null | grep -v "backup_full"; echo "$cron_job") | crontab -
+    (
+      crontab -l 2>/dev/null | grep -v "backup_full"
+      echo "$cron_job"
+    ) | crontab -
     log_success "Daily backup cron job added"
   else
     log_info "Backup cron job already exists"

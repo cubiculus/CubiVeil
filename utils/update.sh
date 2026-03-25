@@ -199,8 +199,8 @@ step_create_backup() {
   done
 
   # Сохраняем информацию о бэкапе
-  echo "${timestamp}" > "${backup_path}/.timestamp"
-  echo "${CURRENT_VERSION}" > "${backup_path}/.version"
+  echo "${timestamp}" >"${backup_path}/.timestamp"
+  echo "${CURRENT_VERSION}" >"${backup_path}/.version"
 
   success "$(get_str "MSG_INFO_BACKUP_CREATED") ${backup_path}"
   export BACKUP_PATH="$backup_path"

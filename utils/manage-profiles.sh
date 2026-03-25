@@ -444,8 +444,8 @@ for link in links:
   if command -v qrencode &>/dev/null; then
     echo ""
     info "QR-код:"
-    echo "$links" | head -1 | qrencode -t UTF8 2>/dev/null || \
-      echo "$links" | head -1 | qrencode -o - 2>/dev/null || \
+    echo "$links" | head -1 | qrencode -t UTF8 2>/dev/null ||
+      echo "$links" | head -1 | qrencode -o - 2>/dev/null ||
       warning "Не удалось сгенерировать QR-код"
 
     echo ""
@@ -575,7 +575,7 @@ show_profile_info() {
     -H "Authorization: Bearer ${token}" \
     --insecure 2>/dev/null || echo "")
 
-    if [[ -z "$user_data" ]]; then
+  if [[ -z "$user_data" ]]; then
     err "${MSG[ERR_USER_NOT_FOUND]}"
   fi
 
@@ -665,36 +665,36 @@ main() {
   step_check_environment
 
   case "$command" in
-    list|l)
-      list_profiles
-      ;;
-    add|a)
-      add_profile
-      ;;
-    remove|rm|del|delete)
-      remove_profile
-      ;;
-    enable|on)
-      enable_profile
-      ;;
-    disable|off)
-      disable_profile
-      ;;
-    qr|qrcode)
-      generate_qr
-      ;;
-    stats|statistics)
-      show_stats
-      ;;
-    info|i)
-      show_profile_info
-      ;;
-    help|h|--help|-h)
-      show_help
-      ;;
-    *)
-      err "Неизвестная команда: ${command}. Используйте '$0 help'"
-      ;;
+  list | l)
+    list_profiles
+    ;;
+  add | a)
+    add_profile
+    ;;
+  remove | rm | del | delete)
+    remove_profile
+    ;;
+  enable | on)
+    enable_profile
+    ;;
+  disable | off)
+    disable_profile
+    ;;
+  qr | qrcode)
+    generate_qr
+    ;;
+  stats | statistics)
+    show_stats
+    ;;
+  info | i)
+    show_profile_info
+    ;;
+  help | h | --help | -h)
+    show_help
+    ;;
+  *)
+    err "Неизвестная команда: ${command}. Используйте '$0 help'"
+    ;;
   esac
 }
 

@@ -84,8 +84,8 @@ step_prompt_telegram_config() {
   # Проверка валидности токена через API с SSL pinning
   # Используем доверенный CA и pinning публичного ключа
   if ! curl -sf --max-time 5 \
-      --cacert /etc/ssl/certs/ca-certificates.crt \
-      "https://api.telegram.org/bot${TG_TOKEN}/getMe" >/dev/null 2>&1; then
+    --cacert /etc/ssl/certs/ca-certificates.crt \
+    "https://api.telegram.org/bot${TG_TOKEN}/getMe" >/dev/null 2>&1; then
     err "$(get_setup_str ERR_TG_TOKEN_INVALID)"
   fi
 

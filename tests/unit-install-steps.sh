@@ -24,20 +24,34 @@ TROJAN_PORT=""
 SS_PORT=""
 PANEL_PORT=""
 SUB_PORT=""
+# shellcheck disable=SC2034
 REALITY_PRIVATE_KEY=""
+# shellcheck disable=SC2034
 REALITY_PUBLIC_KEY=""
+# shellcheck disable=SC2034
 REALITY_SHORT_ID=""
 REALITY_SNI=""
+# shellcheck disable=SC2034
 UUID_VLESS_TCP=""
+# shellcheck disable=SC2034
 UUID_VLESS_GRPC=""
+# shellcheck disable=SC2034
 UUID_HY2=""
+# shellcheck disable=SC2034
 UUID_TROJAN=""
+# shellcheck disable=SC2034
 SS_PASSWORD=""
+# shellcheck disable=SC2034
 SUDO_USERNAME=""
+# shellcheck disable=SC2034
 SUDO_PASSWORD=""
+# shellcheck disable=SC2034
 SECRET_KEY=""
+# shellcheck disable=SC2034
 PANEL_PATH=""
+# shellcheck disable=SC2034
 SUB_PATH=""
+# shellcheck disable=SC2034
 TROJAN_WS_PATH=""
 
 # Mock функций из utils.sh
@@ -65,7 +79,7 @@ open_port() {
   # shellcheck disable=SC2034
   local comment="${3:-cubiveil}"
   # Mock: просто записываем в лог
-  echo "mock_open_port: $port/$proto" >> /tmp/cubiveil_test_ports.log
+  echo "mock_open_port: $port/$proto" >>/tmp/cubiveil_test_ports.log
 }
 
 close_port() {
@@ -99,7 +113,7 @@ curl() {
       break
     fi
   done
-  
+
   # Mock для разных URL
   if [[ "$url" =~ ipinfo\.io ]]; then
     echo '{"ip":"1.2.3.5","org":"Test ISP"}'
@@ -143,8 +157,8 @@ command() {
   if [[ "$cmd" == "-v" ]]; then
     # Некоторые команды "не установлены"
     case "$1" in
-      dig|jq|logrotate) return 1 ;;
-      *) return 0 ;;
+    dig | jq | logrotate) return 1 ;;
+    *) return 0 ;;
     esac
   fi
 }
@@ -153,17 +167,17 @@ sing-box() {
   local subcmd="$1"
   shift
   case "$subcmd" in
-    generate)
-      if [[ "$1" == "reality-keypair" ]]; then
-        echo "PrivateKey mock_private_key_12345"
-        echo "PublicKey mock_public_key_67890"
-      elif [[ "$1" == "uuid" ]]; then
-        echo "mock-uuid-$(gen_random 8)"
-      fi
-      ;;
-    *)
-      echo "mock sing-box: $*" >&2
-      ;;
+  generate)
+    if [[ "$1" == "reality-keypair" ]]; then
+      echo "PrivateKey mock_private_key_12345"
+      echo "PublicKey mock_public_key_67890"
+    elif [[ "$1" == "uuid" ]]; then
+      echo "mock-uuid-$(gen_random 8)"
+    fi
+    ;;
+  *)
+    echo "mock sing-box: $*" >&2
+    ;;
   esac
 }
 
@@ -184,19 +198,19 @@ test_prompt_inputs_mock() {
   # и базовую структуру
   local func_source
   func_source=$(declare -f prompt_inputs)
-  
+
   # Проверка что есть валидация домена
   if echo "$func_source" | grep -q "DOMAIN"; then
     pass "prompt_inputs: работает с DOMAIN"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что есть валидация email
   if echo "$func_source" | grep -q "LE_EMAIL"; then
     pass "prompt_inputs: работает с LE_EMAIL"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что есть опция Telegram
   if echo "$func_source" | grep -q "INSTALL_TG"; then
     pass "prompt_inputs: работает с INSTALL_TG"
@@ -242,19 +256,19 @@ test_step_system_update() {
   # Функция требует root и реальный apt-get, проверяем только структуру
   local func_source
   func_source=$(declare -f step_system_update)
-  
+
   # Проверка что есть apt-get update
   if echo "$func_source" | grep -q "apt-get update"; then
     pass "step_system_update: содержит apt-get update"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что устанавливаются пакеты
   if echo "$func_source" | grep -q "apt-get install"; then
     pass "step_system_update: содержит установку пакетов"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что есть DEBIAN_FRONTEND
   if echo "$func_source" | grep -q "DEBIAN_FRONTEND"; then
     pass "step_system_update: устанавливает DEBIAN_FRONTEND"
@@ -276,19 +290,19 @@ test_step_auto_updates() {
 
   local func_source
   func_source=$(declare -f step_auto_updates)
-  
+
   # Проверка что создаётся файл автообновлений
   if echo "$func_source" | grep -q "20auto-upgrades"; then
     pass "step_auto_updates: настраивает 20auto-upgrades"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что настраивается unattended-upgrades
   if echo "$func_source" | grep -q "50unattended-upgrades"; then
     pass "step_auto_updates: настраивает 50unattended-upgrades"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что сервис включается
   if echo "$func_source" | grep -q "systemctl enable unattended-upgrades"; then
     pass "step_auto_updates: включает сервис unattended-upgrades"
@@ -310,19 +324,19 @@ test_step_bbr() {
 
   local func_source
   func_source=$(declare -f step_bbr)
-  
+
   # Проверка что загружается модуль tcp_bbr
   if echo "$func_source" | grep -q "modprobe tcp_bbr"; then
     pass "step_bbr: загружает модуль tcp_bbr"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что создаётся sysctl конфиг
   if echo "$func_source" | grep -q "99-cubiveil.conf"; then
     pass "step_bbr: создаёт sysctl конфиг"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что применяется sysctl
   if echo "$func_source" | grep -q "sysctl -p"; then
     pass "step_bbr: применяет sysctl настройки"
@@ -344,19 +358,19 @@ test_step_firewall() {
 
   local func_source
   func_source=$(declare -f step_firewall)
-  
+
   # Проверка что сбрасывается ufw
   if echo "$func_source" | grep -q "ufw --force reset"; then
     pass "step_firewall: сбрасывает ufw"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что устанавливаются правила по умолчанию
   if echo "$func_source" | grep -q "ufw default deny incoming"; then
     pass "step_firewall: устанавливает deny incoming"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что используется open_port
   if echo "$func_source" | grep -q "open_port"; then
     pass "step_firewall: использует open_port"
@@ -378,19 +392,19 @@ test_step_fail2ban() {
 
   local func_source
   func_source=$(declare -f step_fail2ban)
-  
+
   # Проверка что создаётся jail конфиг
   if echo "$func_source" | grep -q "cubiveil.conf"; then
     pass "step_fail2ban: создаёт cubiveil.conf"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что настраивается SSH порт
   if echo "$func_source" | grep -q "SSH_PORT\|sshd_config"; then
     pass "step_fail2ban: читает SSH порт из конфига"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что сервис включается
   if echo "$func_source" | grep -q "systemctl enable fail2ban"; then
     pass "step_fail2ban: включает сервис fail2ban"
@@ -412,19 +426,19 @@ test_step_install_singbox() {
 
   local func_source
   func_source=$(declare -f step_install_singbox)
-  
+
   # Проверка что версия получается с GitHub
   if echo "$func_source" | grep -q "api.github.com.*sing-box"; then
     pass "step_install_singbox: получает версию с GitHub"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что используется curl для скачивания
   if echo "$func_source" | grep -q "curl.*sing-box"; then
     pass "step_install_singbox: скачивает sing-box"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что бинарник устанавливается в /usr/local/bin
   if echo "$func_source" | grep -q "/usr/local/bin/sing-box"; then
     pass "step_install_singbox: устанавливает в /usr/local/bin"
@@ -446,25 +460,25 @@ test_step_generate_keys_and_ports() {
 
   local func_source
   func_source=$(declare -f step_generate_keys_and_ports)
-  
+
   # Проверка что генерируется Reality keypair
   if echo "$func_source" | grep -q "sing-box generate reality-keypair"; then
     pass "step_generate_keys_and_ports: генерирует Reality keypair"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что генерируются UUID
   if echo "$func_source" | grep -q "sing-box generate uuid"; then
     pass "step_generate_keys_and_ports: генерирует UUID"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что используются unique_port
   if echo "$func_source" | grep -q "unique_port"; then
     pass "step_generate_keys_and_ports: использует unique_port"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что есть CDN список для camouflage
   if echo "$func_source" | grep -q "CDN_LIST\|cloudflare\|google"; then
     pass "step_generate_keys_and_ports: имеет CDN список для camouflage"
@@ -486,13 +500,13 @@ test_step_install_marzban() {
 
   local func_source
   func_source=$(declare -f step_install_marzban)
-  
+
   # Проверка что используется официальный скрипт установки
   if echo "$func_source" | grep -q "Marzban/raw/master/script.sh"; then
     pass "step_install_marzban: использует официальный скрипт"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что есть проверка наличия скрипта
   if echo "$func_source" | grep -q "/opt/marzban/script.sh"; then
     pass "step_install_marzban: проверяет наличие скрипта"
@@ -604,7 +618,7 @@ test_step_ssl_dev_mode() {
 
   # Проверяем что step_ssl проверяет DEV_MODE
   local main_steps_file="${SCRIPT_DIR}/lib/steps/install-steps-main.sh"
-  
+
   if [[ ! -f "$main_steps_file" ]]; then
     warn "lib/steps/install-steps-main.sh не найден"
     return
@@ -642,25 +656,25 @@ test_step_configure() {
 
   local func_source
   func_source=$(declare -f step_configure)
-  
+
   # Проверка что создаётся .env файл
   if echo "$func_source" | grep -q "/opt/marzban/.env"; then
     pass "step_configure: создаёт /opt/marzban/.env"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что создаётся шаблон sing-box
   if echo "$func_source" | grep -q "sing-box-template.json"; then
     pass "step_configure: создаёт sing-box-template.json"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что используется gen_random для паролей
   if echo "$func_source" | grep -q "gen_random"; then
     pass "step_configure: использует gen_random для паролей"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что есть 5 профилей в шаблоне
   if echo "$func_source" | grep -q "vless-reality-tcp\|vless-reality-grpc\|hysteria2\|trojan-ws-tls\|shadowsocks-2022"; then
     pass "step_configure: шаблон содержит 5 профилей"
@@ -682,19 +696,19 @@ test_step_finish() {
 
   local func_source
   func_source=$(declare -f step_finish)
-  
+
   # Проверка что перезапускается marzban
   if echo "$func_source" | grep -q "systemctl restart marzban"; then
     pass "step_finish: перезапускает marzban"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что есть health-check
   if echo "$func_source" | grep -q "health_check\|health-check"; then
     pass "step_finish: настраивает health-check"
     ((TESTS_PASSED++))
   fi
-  
+
   # Проверка что есть проверка статуса сервиса
   if echo "$func_source" | grep -q "systemctl is-active"; then
     pass "step_finish: проверяет статус сервиса"
@@ -747,7 +761,7 @@ test_localization_in_steps() {
 
   # Проверяем что функции используют LANG_NAME для локализации
   local localized_steps=0
-  
+
   for func in prompt_inputs step_check_ip_neighborhood step_finish; do
     if declare -f "$func" >/dev/null; then
       local source

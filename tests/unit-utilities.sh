@@ -519,8 +519,8 @@ test_cli_manager() {
     )
 
     for cmd in "${commands[@]}"; do
-      if grep -qE "${cmd}\|u\)|${cmd}\|rb\)|${cmd}\|exp\)" "$cli_file" || \
-         grep -q "run_${cmd}" "$cli_file"; then
+      if grep -qE "${cmd}\|u\)|${cmd}\|rb\)|${cmd}\|exp\)" "$cli_file" ||
+        grep -q "run_${cmd}" "$cli_file"; then
         pass "Команда существует: $cmd"
         ((TESTS_PASSED++))
       else

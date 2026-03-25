@@ -173,7 +173,7 @@ step_check_ssl() {
 
   # Ищем домен в конфиге Marzban
   if [[ -f "${MARZBAN_DIR}/.env" ]]; then
-    domain=$(grep -E "^XRAY_SUBSCRIPTION_URL_PREFIX=" "${MARZBAN_DIR}/.env" 2>/dev/null | \
+    domain=$(grep -E "^XRAY_SUBSCRIPTION_URL_PREFIX=" "${MARZBAN_DIR}/.env" 2>/dev/null |
       sed 's/.*https:\/\/\([^/]*\).*/\1/' | head -1 || echo "")
 
     if [[ -z "$domain" ]]; then
@@ -201,7 +201,7 @@ step_check_ssl() {
       local expiry_epoch current_epoch
       expiry_epoch=$(date -d "$expiry_date" +%s 2>/dev/null || echo "0")
       current_epoch=$(date +%s)
-      days_until_expiry=$(( (expiry_epoch - current_epoch) / 86400 ))
+      days_until_expiry=$(((expiry_epoch - current_epoch) / 86400))
 
       info "${MSG[MSG_SSL_DAYS]}: ${days_until_expiry}"
 
@@ -316,7 +316,7 @@ step_check_services() {
   info "Проверка логов на ошибки..."
   for service in "marzban" "sing-box"; do
     local error_count
-    error_count=$(journalctl -u "$service" --since "1 hour ago" 2>/dev/null | \
+    error_count=$(journalctl -u "$service" --since "1 hour ago" 2>/dev/null |
       grep -ciE "(error|fail|critical)" || echo "0")
 
     if [[ "$error_count" -gt 10 ]]; then
@@ -396,10 +396,10 @@ step_analyze_logs() {
       journalctl -u "$service" --since "24 hours ago" --priority=err --no-pager 2>/dev/null | tail -20 || echo "No errors"
       echo ""
     done
-  } > "$log_file"
+  } >"$log_file"
 
   local error_count
-  error_count=$(wc -l < "$log_file" || echo "0")
+  error_count=$(wc -l <"$log_file" || echo "0")
   info "Собрано строк логов: ${error_count}"
 
   # Проверка места под логи
@@ -502,7 +502,7 @@ step_generate_report() {
     echo "  Internal IP: $(hostname -I 2>/dev/null | awk '{print $1}' || echo 'N/A')"
     echo ""
 
-  } > "$report_file"
+  } >"$report_file"
 
   success "Отчёт сохранён: ${report_file}"
 

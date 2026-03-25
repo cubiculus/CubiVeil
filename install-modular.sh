@@ -142,7 +142,7 @@ select_custom_modules() {
 
   read -rp "  Modules: " input
 
-  IFS=' ' read -ra INSTALL_MODULES <<< "$input"
+  IFS=' ' read -ra INSTALL_MODULES <<<"$input"
 
   if [[ ${#INSTALL_MODULES[@]} -eq 0 ]]; then
     err "No modules selected"
@@ -178,17 +178,17 @@ select_language() {
     read -rp "  Enter choice [1-2]: " lang_choice
 
     case "$lang_choice" in
-      1)
-        LANG_NAME="Русский"
-        return
-        ;;
-      2)
-        LANG_NAME="English"
-        return
-        ;;
-      *)
-        warn "Invalid choice"
-        ;;
+    1)
+      LANG_NAME="Русский"
+      return
+      ;;
+    2)
+      LANG_NAME="English"
+      return
+      ;;
+    *)
+      warn "Invalid choice"
+      ;;
     esac
   done
 }
@@ -298,65 +298,65 @@ enable_modules() {
 run_installation() {
   echo ""
   echo "═══════════════════════════════════════════════════"
-  
+
   if [[ "$DRY_RUN" == "true" ]]; then
     echo "  DRY-RUN MODE / Режим симуляции"
     echo "  No changes will be made / Изменения не будут внесены"
     echo "═══════════════════════════════════════════════════"
     echo ""
-    
+
     log_info "DRY-RUN: Would install CubiVeil with mode: $INSTALL_MODE"
     log_info "DRY-RUN: Would install modules: ${INSTALL_MODULES[*]}"
-    
+
     # Проверка окружения (без изменений)
     check_environment
-    
+
     # Симуляция установки модулей
     for module in "${INSTALL_MODULES[@]}"; do
       local module_file="${SCRIPT_DIR}/lib/modules/${module}/install.sh"
-      
+
       if [[ ! -f "$module_file" ]]; then
         log_error "DRY-RUN: Module file not found: $module_file"
         return 1
       fi
-      
+
       log_info "DRY-RUN: Would install module: $module"
-      
+
       # Проверка зависимостей
       if ! manifest_check_dependencies "$module"; then
         log_error "DRY-RUN: Missing dependencies for module: $module"
         return 1
       fi
-      
+
       log_info "DRY-RUN: Would configure module: $module"
       log_info "DRY-RUN: Would enable module: $module"
     done
-    
+
     log_success "DRY-RUN: All modules would be installed successfully"
-    
+
     echo ""
     echo "═══════════════════════════════════════════════════"
     echo "  DRY-RUN Complete / Симуляция завершена"
     echo "═══════════════════════════════════════════════════"
     echo ""
-    
+
     # Вывод информации
     echo "Modules that would be installed / Модули для установки:"
     echo "────────────────────────────────────────────────────────────"
-    
+
     for module in "${INSTALL_MODULES[@]}"; do
       local info
       info=$(manifest_get_info "$module")
-      IFS='|' read -r type deps desc <<< "$info"
+      IFS='|' read -r type deps desc <<<"$info"
       echo "  ✓ $module - $desc"
     done
-    
+
     echo "────────────────────────────────────────────────────────────"
     echo ""
-    
+
     return 0
   fi
-  
+
   echo "  Starting Installation / Начало установки"
   echo "═══════════════════════════════════════════════════"
   echo ""
@@ -386,7 +386,7 @@ run_installation() {
   for module in "${INSTALL_MODULES[@]}"; do
     local info
     info=$(manifest_get_info "$module")
-    IFS='|' read -r type deps desc <<< "$info"
+    IFS='|' read -r type deps desc <<<"$info"
     echo "  ✓ $module - $desc"
   done
 
@@ -435,7 +435,7 @@ main() {
       echo "Date: $(date '+%Y-%m-%d %H:%M:%S')"
       echo "Mode: $INSTALL_MODE"
       echo "Modules: ${INSTALL_MODULES[*]}"
-    } > "$install_log"
+    } >"$install_log"
 
     success "✅ Installation complete!"
     echo ""
@@ -475,38 +475,40 @@ usage() {
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --mode=*)
-        INSTALL_MODE="${1#*=}"
-        shift
-        ;;
-      --modules=*)
-        IFS=',' read -ra INSTALL_MODULES <<< "${1#*=}"
-        INSTALL_MODE="custom"
-        shift
-        ;;
-      --force)
-        FORCE_INSTALL=true
-        shift
-        ;;
-      --skip-checks)
-        SKIP_CHECKS=true
-        shift
-        ;;
-      --verbose)
-        VERBOSE=true
-        shift
-        ;;
-      --dry-run)
-        DRY_RUN=true
-        shift
-        ;;
-      --help|-h)
-        usage
-        exit 0
-        ;;
-      *)
-        err "Unknown option: $1. Use --help for usage."
-        ;;
+    --mode=*)
+      INSTALL_MODE="${1#*=}"
+      shift
+      ;;
+    --modules=*)
+      IFS=',' read -ra INSTALL_MODULES <<<"${1#*=}"
+      INSTALL_MODE="custom"
+      shift
+      ;;
+    --force)
+      FORCE_INSTALL=true
+      shift
+      ;;
+    --skip-checks)
+      # shellcheck disable=SC2034
+      SKIP_CHECKS=true
+      shift
+      ;;
+    --verbose)
+      # shellcheck disable=SC2034
+      VERBOSE=true
+      shift
+      ;;
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    --help | -h)
+      usage
+      exit 0
+      ;;
+    *)
+      err "Unknown option: $1. Use --help for usage."
+      ;;
     esac
   done
 }

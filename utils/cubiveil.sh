@@ -210,40 +210,40 @@ main() {
   shift || true
 
   case "$command" in
-    update|u)
-      run_update "$@"
-      ;;
-    rollback|rb)
-      run_rollback "$@"
-      ;;
-    export|exp)
-      run_export "$@"
-      ;;
-    monitor|mon)
-      run_monitor "$@"
-      ;;
-    diagnose|diag)
-      run_diagnose "$@"
-      ;;
-    profiles|prof|p)
-      run_profiles "$@"
-      ;;
-    backup|bak|b)
-      run_backup "$@"
-      ;;
-    help|--help|-h|h)
-      print_help
-      ;;
-    list|--list|-l)
-      print_header
-      print_utility_list
-      ;;
-    *)
-      echo "❌ Неизвестная команда: $command"
-      echo ""
-      print_help
-      exit 1
-      ;;
+  update | u)
+    run_update "$@"
+    ;;
+  rollback | rb)
+    run_rollback "$@"
+    ;;
+  export | exp)
+    run_export "$@"
+    ;;
+  monitor | mon)
+    run_monitor "$@"
+    ;;
+  diagnose | diag)
+    run_diagnose "$@"
+    ;;
+  profiles | prof | p)
+    run_profiles "$@"
+    ;;
+  backup | bak | b)
+    run_backup "$@"
+    ;;
+  help | --help | -h | h)
+    print_help
+    ;;
+  list | --list | -l)
+    print_header
+    print_utility_list
+    ;;
+  *)
+    echo "❌ Неизвестная команда: $command"
+    echo ""
+    print_help
+    exit 1
+    ;;
   esac
 }
 

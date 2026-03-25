@@ -59,13 +59,13 @@ log_init() {
   chmod 640 "$log_file" 2>/dev/null || true
 
   # Записываем заголовок сессии
-  echo "" >> "$log_file"
-  echo "══════════════════════════════════════════════════════════" >> "$log_file"
-  echo "  CubiVeil Installation Session" >> "$log_file"
-  echo "  Start: $(date '+%Y-%m-%d %H:%M:%S')" >> "$log_file"
-  echo "  User: $(whoami)@$(hostname)" >> "$log_file"
-  echo "══════════════════════════════════════════════════════════" >> "$log_file"
-  echo "" >> "$log_file"
+  echo "" >>"$log_file"
+  echo "══════════════════════════════════════════════════════════" >>"$log_file"
+  echo "  CubiVeil Installation Session" >>"$log_file"
+  echo "  Start: $(date '+%Y-%m-%d %H:%M:%S')" >>"$log_file"
+  echo "  User: $(whoami)@$(hostname)" >>"$log_file"
+  echo "══════════════════════════════════════════════════════════" >>"$log_file"
+  echo "" >>"$log_file"
 
   CUBIVEIL_LOG_FILE="$log_file"
 }
@@ -80,7 +80,7 @@ _log_write() {
   local timestamp
   timestamp=$(date '+%Y-%m-%d %H:%M:%S')
 
-  echo "[$timestamp] [$level] ${message}" >> "$log_file"
+  echo "[$timestamp] [$level] ${message}" >>"$log_file"
 }
 
 # Логирование уровня DEBUG
@@ -261,7 +261,7 @@ log_metric() {
 
   mkdir -p "$(dirname "$metric_file")" 2>/dev/null || true
 
-  echo "$(date '+%Y-%m-%d %H:%M:%S') ${metric_name}=${metric_value}" >> "$metric_file"
+  echo "$(date '+%Y-%m-%d %H:%M:%S') ${metric_name}=${metric_value}" >>"$metric_file"
 }
 
 # Запись времени выполнения
@@ -271,7 +271,7 @@ log_timer_start() {
   local start_time
 
   start_time=$(date +%s)
-  echo "TIMER_${name}=${start_time}" > /tmp/cubiveil_timer_${name}
+  echo "TIMER_${name}=${start_time}" >/tmp/cubiveil_timer_${name}
 }
 
 # Завершение таймера и логирование

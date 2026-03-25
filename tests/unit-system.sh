@@ -34,9 +34,15 @@ pkg_install_packages() { echo "[MOCK] pkg_install_packages: $*" >&2; }
 svc_enable_start() { echo "[MOCK] svc_enable_start: $1" >&2; }
 svc_active() { return 1; }
 svc_restart() { echo "[MOCK] svc_restart: $1" >&2; }
-systemctl() { echo "[MOCK] systemctl: $*" >&2; return 0; }
+systemctl() {
+  echo "[MOCK] systemctl: $*" >&2
+  return 0
+}
 
-modprobe() { echo "[MOCK] modprobe: $*" >&2; return 0; }
+modprobe() {
+  echo "[MOCK] modprobe: $*" >&2
+  return 0
+}
 sysctl() {
   if [[ "$*" == *"-n net.ipv4.tcp_congestion_control"* ]]; then
     echo "bbr"
@@ -228,7 +234,7 @@ test_system_bbr_load_module() {
 
   pass "system_bbr_load_module: вызвана без ошибок"
   ((TESTS_PASSED++))
-  
+
   rm -rf /tmp/test-modules-load.d
 }
 
@@ -237,7 +243,7 @@ test_system_bbr_create_sysctl_config() {
   info "Тестирование system_bbr_create_sysctl_config..."
 
   cat() {
-    if [[ "$*" == *">"* ]]; then
+    if [[ "$*" == *">"* ]] || [[ $# -eq 0 ]]; then
       return 0
     fi
     command cat "$@" 2>/dev/null || echo ""
@@ -436,10 +442,10 @@ test_functions_exported() {
   info "Тестирование экспорта функций..."
 
   # Проверяем что module_* функции доступны
-  if declare -f module_install &>/dev/null && \
-     declare -f module_configure &>/dev/null && \
-     declare -f module_enable &>/dev/null && \
-     declare -f module_disable &>/dev/null; then
+  if declare -f module_install &>/dev/null &&
+    declare -f module_configure &>/dev/null &&
+    declare -f module_enable &>/dev/null &&
+    declare -f module_disable &>/dev/null; then
     pass "Module interface функции экспортированы"
     ((TESTS_PASSED++))
   else

@@ -43,7 +43,7 @@ test_init() {
   dir_ensure "$TEST_RESULTS_DIR"
 
   # Очищаем лог-файл
-  echo "" > "$TEST_LOG_FILE"
+  echo "" >"$TEST_LOG_FILE"
 
   log_debug "Test environment initialized"
 }
@@ -59,21 +59,21 @@ test_result() {
   ((TESTS_TOTAL++))
 
   case "$result" in
-    pass)
-      ((TESTS_PASSED++))
-      echo "[PASS] $test_name" | tee -a "$TEST_LOG_FILE"
-      ;;
-    fail)
-      ((TESTS_FAILED++))
-      echo "[FAIL] $test_name" | tee -a "$TEST_LOG_FILE"
-      if [[ -n "$message" ]]; then
-        echo "       $message" | tee -a "$TEST_LOG_FILE"
-      fi
-      ;;
-    skip)
-      ((TESTS_SKIPPED++))
-      echo "[SKIP] $test_name: $message" | tee -a "$TEST_LOG_FILE"
-      ;;
+  pass)
+    ((TESTS_PASSED++))
+    echo "[PASS] $test_name" | tee -a "$TEST_LOG_FILE"
+    ;;
+  fail)
+    ((TESTS_FAILED++))
+    echo "[FAIL] $test_name" | tee -a "$TEST_LOG_FILE"
+    if [[ -n "$message" ]]; then
+      echo "       $message" | tee -a "$TEST_LOG_FILE"
+    fi
+    ;;
+  skip)
+    ((TESTS_SKIPPED++))
+    echo "[SKIP] $test_name: $message" | tee -a "$TEST_LOG_FILE"
+    ;;
   esac
 }
 
@@ -84,7 +84,7 @@ test_core_modules_available() {
   local test_name="Core modules availability"
 
   if [[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]] &&
-     [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
+    [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
     test_result "$test_name" "pass"
   else
     test_result "$test_name" "fail" "Core modules not found"

@@ -10,16 +10,16 @@
 # Возвращает 0 если валиден, 1 если невалиден
 validate_domain() {
   local domain="$1"
-  
+
   # Проверка длины (RFC 1035: max 253 символа)
   [[ ${#domain} -gt 253 ]] && return 1
-  
+
   # Regex проверка: буквы, цифры, дефис, точка; TLD 2+ символа
   [[ ! "$domain" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$ ]] && return 1
-  
+
   # Защита от SSRF: localhost, .local, IP-адреса
   [[ "$domain" =~ ^localhost$ || "$domain" =~ \.local$ || "$domain" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] && return 1
-  
+
   return 0
 }
 

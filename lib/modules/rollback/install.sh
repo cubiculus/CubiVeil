@@ -180,7 +180,7 @@ rollback_verify_integrity() {
 
   # Проверяем SHA256 базы данных Marzban
   if [[ -f "${ROLLBACK_TEMP_DIR}/marzban-db.sqlite3" ]] &&
-     [[ -f "${ROLLBACK_TEMP_DIR}/marzban-db.sqlite3.sha256" ]]; then
+    [[ -f "${ROLLBACK_TEMP_DIR}/marzban-db.sqlite3.sha256" ]]; then
     local expected_hash
     expected_hash=$(cat "${ROLLBACK_TEMP_DIR}/marzban-db.sqlite3.sha256")
 
@@ -194,7 +194,7 @@ rollback_verify_integrity() {
 
   # Проверяем SHA256 конфигурации Marzban
   if [[ -f "${ROLLBACK_TEMP_DIR}/marzban.env" ]] &&
-     [[ -f "${ROLLBACK_TEMP_DIR}/marzban.env.sha256" ]]; then
+    [[ -f "${ROLLBACK_TEMP_DIR}/marzban.env.sha256" ]]; then
     local expected_hash
     expected_hash=$(cat "${ROLLBACK_TEMP_DIR}/marzban.env.sha256")
 
@@ -208,7 +208,7 @@ rollback_verify_integrity() {
 
   # Проверяем SHA256 конфигурации Sing-box
   if [[ -f "${ROLLBACK_TEMP_DIR}/singbox-config.json" ]] &&
-     [[ -f "${ROLLBACK_TEMP_DIR}/singbox-config.json.sha256" ]]; then
+    [[ -f "${ROLLBACK_TEMP_DIR}/singbox-config.json.sha256" ]]; then
     local expected_hash
     expected_hash=$(cat "${ROLLBACK_TEMP_DIR}/singbox-config.json.sha256")
 
@@ -564,10 +564,10 @@ module_configure() {
   # Проверяем целостность последнего бэкапа
   local latest_backup
   latest_backup=$(ls -t "${BACKUP_ARCHIVE_DIR}"/*.tar.gz* 2>/dev/null | head -1)
-  
+
   if [[ -n "$latest_backup" ]]; then
     log_info "Latest backup: $(basename "$latest_backup")"
-    
+
     # Проверяем SHA256 если есть файл проверки
     local sha_file="${latest_backup}.sha256"
     if [[ -f "$sha_file" ]]; then

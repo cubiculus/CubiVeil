@@ -180,8 +180,8 @@ draw_bar() {
   empty=$((width - filled))
 
   bar=""
-  for ((i=0; i<filled; i++)); do bar+="█"; done
-  for ((i=0; i<empty; i++)); do bar+="░"; done
+  for ((i = 0; i < filled; i++)); do bar+="█"; done
+  for ((i = 0; i < empty; i++)); do bar+="░"; done
 
   echo "${bar}"
 }
@@ -381,26 +381,26 @@ main() {
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --snapshot|-s)
-        mode="snapshot"
-        shift
-        ;;
-      --interval|-i)
-        interval="${2:-$REFRESH_INTERVAL}"
-        shift 2
-        ;;
-      --help|-h)
-        echo "Использование: $0 [опции]"
-        echo ""
-        echo "Опции:"
-        echo "  --snapshot, -s   Однократный вывод (не обновлять)"
-        echo "  --interval, -i N Интервал обновления в секундах (по умолчанию: ${REFRESH_INTERVAL})"
-        echo "  --help, -h       Показать эту справку"
-        exit 0
-        ;;
-      *)
-        err "Неизвестный аргумент: $1"
-        ;;
+    --snapshot | -s)
+      mode="snapshot"
+      shift
+      ;;
+    --interval | -i)
+      interval="${2:-$REFRESH_INTERVAL}"
+      shift 2
+      ;;
+    --help | -h)
+      echo "Использование: $0 [опции]"
+      echo ""
+      echo "Опции:"
+      echo "  --snapshot, -s   Однократный вывод (не обновлять)"
+      echo "  --interval, -i N Интервал обновления в секундах (по умолчанию: ${REFRESH_INTERVAL})"
+      echo "  --help, -h       Показать эту справку"
+      exit 0
+      ;;
+    *)
+      err "Неизвестный аргумент: $1"
+      ;;
     esac
   done
 

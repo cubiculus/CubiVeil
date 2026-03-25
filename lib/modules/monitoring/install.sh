@@ -32,10 +32,10 @@ MONITORING_DATA_DIR="/var/lib/cubiveil/monitoring"
 MONITORED_SERVICES=("marzban" "sing-box" "cubiveil-bot" "ufw" "fail2ban")
 
 # Пороги алертов
-ALERT_CPU_THRESHOLD=80          # CPU utilization %
-ALERT_RAM_THRESHOLD=80          # RAM utilization %
-ALERT_DISK_THRESHOLD=85        # Disk usage %
-ALERT_UPTIME_THRESHOLD=99      # Uptime %
+ALERT_CPU_THRESHOLD=80    # CPU utilization %
+ALERT_RAM_THRESHOLD=80    # RAM utilization %
+ALERT_DISK_THRESHOLD=85   # Disk usage %
+ALERT_UPTIME_THRESHOLD=99 # Uptime %
 
 # ── Инициализация / Initialization ─────────────────────────────
 
@@ -77,8 +77,10 @@ monitor_check_services() {
 
     # Проверяем, включён ли сервис
     if svc_exists "$service"; then
+      # shellcheck disable=SC2034
       enabled="enabled"
     else
+      # shellcheck disable=SC2034
       enabled="not installed"
     fi
   done
@@ -372,7 +374,7 @@ monitor_health_check() {
   echo "────────────────────────"
 
   local health_percent
-  health_percent=$(( health_score * 100 / total_checks ))
+  health_percent=$((health_score * 100 / total_checks))
 
   echo "Health Score: ${health_percent}%"
 
@@ -411,7 +413,7 @@ monitor_generate_report() {
     echo ""
     echo "=== Health ==="
     monitor_health_check
-  } > "$report_file"
+  } >"$report_file"
 
   log_success "Report generated: $report_file"
   echo "$report_file"
@@ -431,8 +433,8 @@ module_configure() {
 
   # Создаём конфиг с порогами алертов
   local config_file="${MONITORING_DATA_DIR}/config.conf"
-  
-  cat > "$config_file" <<EOF
+
+  cat >"$config_file" <<EOF
 # CubiVeil Monitoring Configuration
 # Generated: $(date)
 
@@ -478,20 +480,26 @@ module_enable() {
 
   # Создаём cron job для почасовой проверки здоровья
   local health_job="0 * * * * /bin/bash -c 'cd ${SCRIPT_DIR} && source lib/modules/monitoring/install.sh && monitor_health_check >> /var/log/cubiveil/monitoring-health.log 2>&1'"
-  
+
   # Создаём cron job для ежедневного отчёта
   local report_job="0 6 * * * /bin/bash -c 'cd ${SCRIPT_DIR} && source lib/modules/monitoring/install.sh && monitor_generate_report >> /var/log/cubiveil/monitoring-report.log 2>&1'"
-  
+
   local jobs_added=0
-  
+
   if ! crontab -l 2>/dev/null | grep -q "monitor_health_check"; then
-    (crontab -l 2>/dev/null | grep -v "monitor_health_check"; echo "$health_job") | crontab -
+    (
+      crontab -l 2>/dev/null | grep -v "monitor_health_check"
+      echo "$health_job"
+    ) | crontab -
     log_info "Hourly health check cron job added"
     ((jobs_added++))
   fi
-  
+
   if ! crontab -l 2>/dev/null | grep -q "monitor_generate_report"; then
-    (crontab -l 2>/dev/null | grep -v "monitor_generate_report"; echo "$report_job") | crontab -
+    (
+      crontab -l 2>/dev/null | grep -v "monitor_generate_report"
+      echo "$report_job"
+    ) | crontab -
     log_info "Daily report cron job added"
     ((jobs_added++))
   fi

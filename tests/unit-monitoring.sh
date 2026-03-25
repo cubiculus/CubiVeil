@@ -38,6 +38,7 @@ get_server_ip() { echo "1.2.3.4"; }
 verify_ssl_cert() { return 0; }
 
 # ── Загрузка модуля ───────────────────────────────────────────
+# shellcheck source=lib/modules/monitoring/install.sh
 source "$MODULE_PATH"
 
 # ── Тест: файл существует ───────────────────────────────────────
@@ -210,7 +211,7 @@ test_monitor_network_check_mock() {
 
   # Mock для ping
   ping() {
-    return 0  # Успешный ping
+    return 0 # Успешный ping
   }
 
   monitor_network_check || true
@@ -251,7 +252,7 @@ test_monitor_check_marzban_logs() {
 
   # Mock для journalctl
   journalctl() {
-    echo ""  # Пустой вывод
+    echo "" # Пустой вывод
     return 0
   }
 
@@ -268,7 +269,7 @@ test_monitor_check_singbox_logs() {
   # Mock для grep
   grep() {
     echo "0"
-    return 1  # Нет ошибок
+    return 1 # Нет ошибок
   }
 
   monitor_check_singbox_logs || true
@@ -494,8 +495,8 @@ test_config_variables() {
   fi
 
   # Проверяем пороги алертов
-  if [[ -n "$ALERT_CPU_THRESHOLD" ]] && [[ -n "$ALERT_RAM_THRESHOLD" ]] && \
-     [[ -n "$ALERT_DISK_THRESHOLD" ]] && [[ -n "$ALERT_UPTIME_THRESHOLD" ]]; then
+  if [[ -n "$ALERT_CPU_THRESHOLD" ]] && [[ -n "$ALERT_RAM_THRESHOLD" ]] &&
+    [[ -n "$ALERT_DISK_THRESHOLD" ]] && [[ -n "$ALERT_UPTIME_THRESHOLD" ]]; then
     pass "Пороги алертов установлены"
     ((TESTS_PASSED++))
   else

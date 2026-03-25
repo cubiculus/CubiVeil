@@ -142,7 +142,7 @@ system_bbr_load_module() {
 
   # Добавляем модуль в автозагрузку
   if [[ ! -f "/etc/modules-load.d/tcp-bbr.conf" ]]; then
-    echo "tcp_bbr" > /etc/modules-load.d/tcp-bbr.conf
+    echo "tcp_bbr" >/etc/modules-load.d/tcp-bbr.conf
   fi
 
   log_debug "BBR module loaded"

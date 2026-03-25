@@ -23,7 +23,7 @@ check_python_functions() {
   shift
   local functions=("$@")
   local found=0
-  
+
   for func in "${functions[@]}"; do
     if grep -q "def ${func}" "${SCRIPT_DIR}/setup-telegram.sh"; then
       pass "Python $category: $func"
@@ -33,7 +33,7 @@ check_python_functions() {
       warn "Python $category: $func не найдена"
     fi
   done
-  
+
   if [[ $found -eq ${#functions[@]} ]]; then
     pass "Python $category: все функции найдены ($found/${#functions[@]})"
     ((TESTS_PASSED++))
@@ -45,7 +45,7 @@ check_python_functions() {
 check_systemd_directives() {
   local directives=("$@")
   local found=0
-  
+
   for directive in "${directives[@]}"; do
     if grep -q "$directive" "${SCRIPT_DIR}/setup-telegram.sh"; then
       pass "Systemd: $directive"
@@ -55,7 +55,7 @@ check_systemd_directives() {
       warn "Systemd: $directive не найдена"
     fi
   done
-  
+
   if [[ $found -eq ${#directives[@]} ]]; then
     pass "Systemd: все директивы найдены ($found/${#directives[@]})"
     ((TESTS_PASSED++))
@@ -348,15 +348,15 @@ test_python_bot_send_functions() {
 # ── Тест: Python бот — команды ────────────────────────────────
 test_python_bot_commands() {
   info "Тестирование Python команд бота..."
-  
+
   check_python_functions "команд" "handle_command"
-  
+
   # Проверка наличия команд
   local commands=("/start" "/status" "/backup" "/users" "/restart" "/help")
   local found=0
   for cmd in "${commands[@]}"; do
-    if grep -q "\"${cmd}\"" "${SCRIPT_DIR}/setup-telegram.sh" || \
-       grep -q "'${cmd}'" "${SCRIPT_DIR}/setup-telegram.sh"; then
+    if grep -q "\"${cmd}\"" "${SCRIPT_DIR}/setup-telegram.sh" ||
+      grep -q "'${cmd}'" "${SCRIPT_DIR}/setup-telegram.sh"; then
       ((found++))
     fi
   done
@@ -371,9 +371,9 @@ test_python_bot_commands() {
 # ── Тест: Python бот — polling ────────────────────────────────
 test_python_bot_polling() {
   info "Тестирование Python polling..."
-  
+
   check_python_functions "" "poll"
-  
+
   # Проверка что используется getUpdates API
   if grep -q "getUpdates" "${SCRIPT_DIR}/setup-telegram.sh"; then
     pass "Python: используется getUpdates API"
@@ -381,10 +381,10 @@ test_python_bot_polling() {
   else
     warn "Python: getUpdates API не найден"
   fi
-  
+
   # Проверка авторизации по chat_id (комплексная)
-  if grep -q "CHAT_ID" "${SCRIPT_DIR}/setup-telegram.sh" && \
-     grep -q "msg.get.*chat.*id" "${SCRIPT_DIR}/setup-telegram.sh"; then
+  if grep -q "CHAT_ID" "${SCRIPT_DIR}/setup-telegram.sh" &&
+    grep -q "msg.get.*chat.*id" "${SCRIPT_DIR}/setup-telegram.sh"; then
     pass "Python: авторизация по chat_id"
     ((TESTS_PASSED++))
   else
@@ -395,9 +395,9 @@ test_python_bot_polling() {
 # ── Тест: Python бот — алерты ─────────────────────────────────
 test_python_bot_alerts() {
   info "Тестирование Python системы алертов..."
-  
+
   check_python_functions "алертов" "check_alerts"
-  
+
   # Проверка что используется state файл для предотвращения спама
   if grep -q "load_state\|save_state" "${SCRIPT_DIR}/setup-telegram.sh"; then
     pass "Python: состояние алертов сохраняется"
@@ -405,11 +405,11 @@ test_python_bot_alerts() {
   else
     warn "Python: состояние алертов не сохраняется"
   fi
-  
+
   # Проверка пороговых значений (все сразу)
-  if grep -q "ALERT_CPU" "${SCRIPT_DIR}/setup-telegram.sh" && \
-     grep -q "ALERT_RAM" "${SCRIPT_DIR}/setup-telegram.sh" && \
-     grep -q "ALERT_DISK" "${SCRIPT_DIR}/setup-telegram.sh"; then
+  if grep -q "ALERT_CPU" "${SCRIPT_DIR}/setup-telegram.sh" &&
+    grep -q "ALERT_RAM" "${SCRIPT_DIR}/setup-telegram.sh" &&
+    grep -q "ALERT_DISK" "${SCRIPT_DIR}/setup-telegram.sh"; then
     pass "Python: все пороговые значения найдены"
     ((TESTS_PASSED++))
   else
@@ -420,7 +420,7 @@ test_python_bot_alerts() {
 # ── Тест: Python бот — бэкапы ─────────────────────────────────
 test_python_bot_backups() {
   info "Тестирование Python системы бэкапов..."
-  
+
   check_python_functions "бэкапов" "make_backup"
 
   # Проверка что используется правильный путь к БД
@@ -497,11 +497,11 @@ test_python_bot_error_handling() {
 test_python_bot_visualization() {
   info "Тестирование Python визуализации..."
   check_python_functions "визуализации" "bar"
-  
+
   # Проверка использования emoji (все сразу)
-  if grep -q "🔴" "${SCRIPT_DIR}/setup-telegram.sh" && \
-     grep -q "🟢" "${SCRIPT_DIR}/setup-telegram.sh" && \
-     grep -q "⚠️" "${SCRIPT_DIR}/setup-telegram.sh"; then
+  if grep -q "🔴" "${SCRIPT_DIR}/setup-telegram.sh" &&
+    grep -q "🟢" "${SCRIPT_DIR}/setup-telegram.sh" &&
+    grep -q "⚠️" "${SCRIPT_DIR}/setup-telegram.sh"; then
     pass "Python: emoji используются"
     ((TESTS_PASSED++))
   else

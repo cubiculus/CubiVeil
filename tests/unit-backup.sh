@@ -30,8 +30,14 @@ log_error() { echo "[ERROR] $1" >&2; }
 dir_ensure() { mkdir -p "$1" 2>/dev/null || true; }
 
 svc_active() { return 1; }
-svc_stop() { echo "[MOCK] svc_stop: $1" >&2; return 0; }
-svc_start() { echo "[MOCK] svc_start: $1" >&2; return 0; }
+svc_stop() {
+  echo "[MOCK] svc_stop: $1" >&2
+  return 0
+}
+svc_start() {
+  echo "[MOCK] svc_start: $1" >&2
+  return 0
+}
 
 # Mock для генерации ключей
 generate_secure_key() {
@@ -44,7 +50,7 @@ encrypt_to_file() {
   local content="$1"
   local key="$2"
   local file="$3"
-  echo "$content" > "$file"
+  echo "$content" >"$file"
   return 0
 }
 
@@ -61,7 +67,7 @@ command() {
   case "$cmd" in
   -v)
     if [[ "$1" == "age" ]]; then
-      return 1  # age не установлен по умолчанию в тестах
+      return 1 # age не установлен по умолчанию в тестах
     fi
     ;;
   esac
@@ -215,7 +221,7 @@ test_backup_marzban_db() {
   MARZBAN_DIR="$test_marzban_dir"
 
   # Создаём тестовую БД
-  echo "test db content" > "${MARZBAN_DIR}/db.sqlite3"
+  echo "test db content" >"${MARZBAN_DIR}/db.sqlite3"
 
   # Mock для sha256sum
   sha256sum() {
@@ -247,7 +253,7 @@ test_backup_marzban_config() {
   MARZBAN_ENV="/tmp/test-marzban-env-$$"
 
   # Создаём тестовый .env
-  echo "TEST_VAR=test" > "$MARZBAN_ENV"
+  echo "TEST_VAR=test" >"$MARZBAN_ENV"
 
   sha256sum() { echo "abc123  $1"; }
 
@@ -290,7 +296,7 @@ test_backup_ssl_certs() {
   SSL_CERT_DIR="$test_ssl_dir"
 
   # Создаём тестовый сертификат
-  echo "test cert" > "${test_ssl_dir}/fullchain.pem"
+  echo "test cert" >"${test_ssl_dir}/fullchain.pem"
 
   backup_ssl_certs || true
 
@@ -311,8 +317,8 @@ test_backup_keys() {
   CREDENTIALS_FILE="/tmp/test-credentials-$$"
   CREDENTIALS_KEY="/tmp/test-key-$$"
 
-  echo "test credentials" > "$CREDENTIALS_FILE"
-  echo "test key" > "$CREDENTIALS_KEY"
+  echo "test credentials" >"$CREDENTIALS_FILE"
+  echo "test key" >"$CREDENTIALS_KEY"
 
   backup_keys
 
@@ -333,10 +339,10 @@ test_backup_encrypt_archive() {
 
   # Создаём тестовый архив
   local test_archive="${test_backup_dir}/test.tar.gz"
-  echo "test archive" > "$test_archive"
+  echo "test archive" >"$test_archive"
 
   # Создаём ключ
-  echo "test-key-123" > "${test_backup_dir}/backup-key.txt"
+  echo "test-key-123" >"${test_backup_dir}/backup-key.txt"
 
   # Mock для age
   age() {
@@ -392,8 +398,8 @@ test_backup_create_archive() {
   BACKUP_ARCHIVE_DIR="$test_archive_dir"
 
   # Создаём тестовые файлы
-  echo "test" > "${test_backup_dir}/marzban-db.sqlite3"
-  echo "test" > "${test_backup_dir}/marzban.env"
+  echo "test" >"${test_backup_dir}/marzban-db.sqlite3"
+  echo "test" >"${test_backup_dir}/marzban.env"
 
   backup_create_archive "test-backup"
 
@@ -453,7 +459,7 @@ test_backup_full() {
   MARZBAN_DIR="$test_marzban_dir"
 
   # Создаём тестовую БД
-  echo "test db" > "${MARZBAN_DIR}/db.sqlite3"
+  echo "test db" >"${MARZBAN_DIR}/db.sqlite3"
 
   sha256sum() { echo "abc123  $1"; }
   hostname() { echo "test-host"; }

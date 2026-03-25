@@ -46,7 +46,7 @@ singbox_get_version() {
 
   local CACHE_DIR="/tmp/cubiveil-cache"
   local CACHE_FILE="${CACHE_DIR}/singbox-version.json"
-  local CACHE_MAX_AGE=3600  # 1 час
+  local CACHE_MAX_AGE=3600 # 1 час
 
   mkdir -p "$CACHE_DIR"
 
@@ -185,7 +185,7 @@ singbox_install() {
   local version_info
   version_info=$(singbox_get_version)
 
-  IFS='|' read -r sb_tag sb_ver sb_url sb_sha256 <<< "$version_info"
+  IFS='|' read -r sb_tag sb_ver sb_url sb_sha256 <<<"$version_info"
 
   singbox_download "$sb_tag" "$sb_url"
 
@@ -346,7 +346,7 @@ singbox_update() {
   local version_info
   version_info=$(singbox_get_version)
 
-  IFS='|' read -r sb_tag sb_ver sb_url sb_sha256 <<< "$version_info"
+  IFS='|' read -r sb_tag sb_ver sb_url sb_sha256 <<<"$version_info"
   # shellcheck disable=SC2034
   sb_ver="$sb_ver"
 

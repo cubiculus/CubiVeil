@@ -183,7 +183,7 @@ step_collect_config() {
     echo ""
     echo "## Installed Packages"
     dpkg -l 2>/dev/null | grep -E "(marzban|sing-box|cubiveil)" || echo "N/A"
-  } > "${EXPORT_PATH}/system/info.txt"
+  } >"${EXPORT_PATH}/system/info.txt"
 
   success "  ✓ Системная информация собрана"
 }
@@ -251,7 +251,7 @@ step_generate_manifest() {
   fi
 
   # Генерируем JSON манифест
-  cat > "${manifest}" << EOF
+  cat >"${manifest}" <<EOF
 {
   "version": "1.0",
   "timestamp": "$(date -Iseconds)",
@@ -307,7 +307,7 @@ step_encrypt_sensitive() {
   # Создаём passphrase файл для age
   local passphrase_file
   passphrase_file=$(mktemp)
-  echo "$encrypt_password" > "$passphrase_file"
+  echo "$encrypt_password" >"$passphrase_file"
   chmod 600 "$passphrase_file"
 
   # Список файлов для шифрования

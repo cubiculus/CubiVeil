@@ -74,7 +74,7 @@ fail2ban_configure() {
   log_info "Detected SSH port: ${ssh_port}"
 
   # Создаём конфигурацию
-  cat > "${FAIL2BAN_CONF_FILE}" <<EOF
+  cat >"${FAIL2BAN_CONF_FILE}" <<EOF
 [DEFAULT]
 bantime  = ${FAIL2BAN_DEFAULT_BANTIME}
 findtime = ${FAIL2BAN_DEFAULT_FINDTIME}

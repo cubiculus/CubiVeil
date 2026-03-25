@@ -23,8 +23,14 @@ PLAIN='\033[0m'
 
 # ── Функции вывода ───────────────────────────────────────────
 info() { echo -e "${CYAN}[INFO]${PLAIN} $*" >&2; }
-pass() { echo -e "${GREEN}[PASS]${PLAIN} $*" >&2; ((TESTS_PASSED++)); }
-fail() { echo -e "${RED}[FAIL]${PLAIN} $*" >&2; ((TESTS_FAILED++)); }
+pass() {
+  echo -e "${GREEN}[PASS]${PLAIN} $*" >&2
+  ((TESTS_PASSED++))
+}
+fail() {
+  echo -e "${RED}[FAIL]${PLAIN} $*" >&2
+  ((TESTS_FAILED++))
+}
 warn() { echo -e "${YELLOW}[WARN]${PLAIN} $*" >&2; }
 
 # ── Mock зависимостей ────────────────────────────────────────
@@ -33,6 +39,7 @@ LANG_NAME="English"
 SERVER_IP="1.2.3.4"
 DOMAIN="test.example.com"
 LE_EMAIL="test@example.com"
+# shellcheck disable=SC2034
 INSTALL_TG="n"
 TROJAN_PORT="10443"
 SS_PORT="10444"
@@ -40,6 +47,7 @@ PANEL_PORT="10445"
 SUB_PORT="10446"
 REALITY_SNI="www.microsoft.com"
 DEV_MODE="false"
+# shellcheck disable=SC2034
 DRY_RUN="false"
 
 # Mock функций из output.sh
@@ -58,11 +66,11 @@ curl() {
       break
     fi
   done
-  
+
   case "$url" in
-    *api4.ipify.org*) echo "1.2.3.4" ;;
-    *api.github.com*) echo '{"tag_name": "v1.10.1"}' ;;
-    *) echo "mock_response" ;;
+  *api4.ipify.org*) echo "1.2.3.4" ;;
+  *api.github.com*) echo '{"tag_name": "v1.10.1"}' ;;
+  *) echo "mock_response" ;;
   esac
 }
 
@@ -70,9 +78,9 @@ apt-get() {
   local action="$1"
   shift
   case "$action" in
-    update) echo "[MOCK] apt-get update" >&2 ;;
-    upgrade) echo "[MOCK] apt-get upgrade" >&2 ;;
-    install) echo "[MOCK] apt-get install $*" >&2 ;;
+  update) echo "[MOCK] apt-get update" >&2 ;;
+  upgrade) echo "[MOCK] apt-get upgrade" >&2 ;;
+  install) echo "[MOCK] apt-get install $*" >&2 ;;
   esac
 }
 
@@ -106,8 +114,8 @@ jq() {
 uname() {
   local arg="$1"
   case "$arg" in
-    -m) echo "x86_64" ;;
-    *) echo "Linux" ;;
+  -m) echo "x86_64" ;;
+  *) echo "Linux" ;;
   esac
 }
 
@@ -115,13 +123,13 @@ openssl() {
   local action="$1"
   shift
   case "$action" in
-    req) 
-      # Mock генерации сертификата
-      touch /tmp/mock_cert.pem 2>/dev/null || true
-      touch /tmp/mock_key.pem 2>/dev/null || true
-      ;;
-    rand) echo "mock_random_$(date +%s)" ;;
-    *) echo "mock_openssl_output" ;;
+  req)
+    # Mock генерации сертификата
+    touch /tmp/mock_cert.pem 2>/dev/null || true
+    touch /tmp/mock_key.pem 2>/dev/null || true
+    ;;
+  rand) echo "mock_random_$(date +%s)" ;;
+  *) echo "mock_openssl_output" ;;
   esac
 }
 
@@ -398,8 +406,8 @@ test_step_finish_dev_warning() {
   local func_content
   func_content=$(declare -f step_finish 2>/dev/null || echo "")
 
-  if [[ "$func_content" == *"DEV MODE"* ]] || [[ "$func_content" == *"DEV-РЕЖИМ"* ]] || \
-     [[ "$func_content" == *"DEV_MODE"* ]]; then
+  if [[ "$func_content" == *"DEV MODE"* ]] || [[ "$func_content" == *"DEV-РЕЖИМ"* ]] ||
+    [[ "$func_content" == *"DEV_MODE"* ]]; then
     pass "step_finish: предупреждает о dev-режиме"
   else
     fail "step_finish: не предупреждает о dev-режиме"
@@ -415,8 +423,8 @@ test_step_finish_ssl_warning() {
   local func_content
   func_content=$(declare -f step_finish 2>/dev/null || echo "")
 
-  if [[ "$func_content" == *"self-signed"* ]] || [[ "$func_content" == *"самоподписной"* ]] || \
-     [[ "$func_content" == *"security warning"* ]]; then
+  if [[ "$func_content" == *"self-signed"* ]] || [[ "$func_content" == *"самоподписной"* ]] ||
+    [[ "$func_content" == *"security warning"* ]]; then
     pass "step_finish: предупреждает о self-signed SSL"
   else
     fail "step_finish: не предупреждает о self-signed SSL"

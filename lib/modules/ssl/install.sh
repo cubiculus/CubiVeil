@@ -43,6 +43,7 @@ SSL_CERT_DIR="/etc/letsencrypt/live"
 # shellcheck disable=SC2034
 SSL_CERT_ARCHIVE="/etc/letsencrypt/archive"
 SSL_CONFIG_DIR="/etc/letsencrypt"
+# shellcheck disable=SC2034
 SSL_ACCOUNT_DIR="${SSL_CONFIG_DIR}/accounts"
 
 # Имя сервиса (для systemd таймера)
@@ -149,7 +150,7 @@ ssl_configure_webroot() {
   dir_ensure "$webroot_dir"
 
   # Создаём тестовую страницу
-  cat > "${webroot_dir}/index.html" <<EOF
+  cat >"${webroot_dir}/index.html" <<EOF
 <!DOCTYPE html>
 <html>
 <head>
@@ -239,7 +240,7 @@ ssl_verify_cert() {
   local current_date
   current_date=$(date +%s)
   local days_left
-  days_left=$(( (expiry_date - current_date) / 86400 ))
+  days_left=$(((expiry_date - current_date) / 86400))
 
   log_info "Certificate for ${domain} expires in ${days_left} days"
 

@@ -39,7 +39,7 @@ test_shebang() {
 
   local shebang
   shebang=$(head -1 "${SCRIPT_DIR}/install.sh")
-  
+
   if [[ "$shebang" == "#!/bin/bash" ]]; then
     pass "install.sh: корректный shebang"
     ((TESTS_PASSED++))
@@ -93,8 +93,8 @@ test_module_loading() {
 test_main_function() {
   info "Тестирование функции main..."
 
-  if grep -q "^main()" "${SCRIPT_DIR}/install.sh" || \
-     grep -q "main() {" "${SCRIPT_DIR}/install.sh"; then
+  if grep -q "^main()" "${SCRIPT_DIR}/install.sh" ||
+    grep -q "main() {" "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: функция main существует"
     ((TESTS_PASSED++))
   else
@@ -106,9 +106,9 @@ test_main_function() {
 test_main_call() {
   info "Тестирование вызова функции main..."
 
-  if grep -q 'main "$@"' "${SCRIPT_DIR}/install.sh" || \
-     grep -q 'main "$1"' "${SCRIPT_DIR}/install.sh" || \
-     grep -q 'main' "${SCRIPT_DIR}/install.sh"; then
+  if grep -q 'main "$@"' "${SCRIPT_DIR}/install.sh" ||
+    grep -q 'main "$1"' "${SCRIPT_DIR}/install.sh" ||
+    grep -q 'main' "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: main вызывается"
     ((TESTS_PASSED++))
   else
@@ -144,7 +144,7 @@ test_module_functions_usage() {
       ((found++))
     fi
   done
-  
+
   if [[ $found -ge 15 ]]; then
     pass "install.sh: использует функции из модулей ($found/${#required_functions[@]})"
     ((TESTS_PASSED++))
@@ -160,7 +160,7 @@ test_installation_steps_order() {
   # Извлекаем тело функции main
   local main_body
   main_body=$(sed -n '/^main()/,/^}/p' "${SCRIPT_DIR}/install.sh" 2>/dev/null || echo "")
-  
+
   if [[ -z "$main_body" ]]; then
     warn "Не удалось извлечь тело функции main"
     return
@@ -179,11 +179,11 @@ test_installation_steps_order() {
 
   local last_line=0
   local correct_order=true
-  
+
   for step in "${expected_order[@]}"; do
     local current_line
     current_line=$(grep -n "$step" "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
-    
+
     if [[ "$current_line" -gt 0 && "$current_line" -gt "$last_line" ]]; then
       last_line=$current_line
     elif [[ "$current_line" -eq 0 ]]; then
@@ -192,7 +192,7 @@ test_installation_steps_order() {
       correct_order=false
     fi
   done
-  
+
   if $correct_order; then
     pass "install.sh: последовательность шагов корректна"
     ((TESTS_PASSED++))
@@ -206,8 +206,8 @@ test_error_handling() {
   info "Тестирование обработки ошибок..."
 
   # Проверка что err функция используется
-  if grep -q 'err "' "${SCRIPT_DIR}/install.sh" || \
-     grep -q "err '" "${SCRIPT_DIR}/install.sh"; then
+  if grep -q 'err "' "${SCRIPT_DIR}/install.sh" ||
+    grep -q "err '" "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: использует функцию err для ошибок"
     ((TESTS_PASSED++))
   else
@@ -215,9 +215,9 @@ test_error_handling() {
   fi
 
   # Проверка что есть проверки на ошибки
-  if grep -q "|| {" "${SCRIPT_DIR}/install.sh" || \
-     grep -q "|| true" "${SCRIPT_DIR}/install.sh" || \
-     grep -q "&&" "${SCRIPT_DIR}/install.sh"; then
+  if grep -q "|| {" "${SCRIPT_DIR}/install.sh" ||
+    grep -q "|| true" "${SCRIPT_DIR}/install.sh" ||
+    grep -q "&&" "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: использует обработку ошибок"
     ((TESTS_PASSED++))
   else
@@ -243,8 +243,8 @@ test_script_size() {
   info "Тестирование размера скрипта..."
 
   local line_count
-  line_count=$(wc -l < "${SCRIPT_DIR}/install.sh")
-  
+  line_count=$(wc -l <"${SCRIPT_DIR}/install.sh")
+
   # install.sh должен быть компактным (< 200 строк — хорошо)
   if [[ $line_count -lt 200 ]]; then
     pass "install.sh: компактный ($line_count строк)"
@@ -262,7 +262,7 @@ test_comments() {
 
   local comment_count
   comment_count=$(grep -c "^#" "${SCRIPT_DIR}/install.sh" 2>/dev/null || echo "0")
-  
+
   if [[ $comment_count -ge 5 ]]; then
     pass "install.sh: достаточное количество комментариев ($comment_count)"
     ((TESTS_PASSED++))
@@ -304,10 +304,10 @@ test_environment_variables() {
   # Проверка что скрипт не требует внешних переменных окружения
   # (кроме тех что устанавливаются внутри скрипта)
   local env_deps
-  env_deps=$(grep -oE '\$\{?[A-Z_]+\}?' "${SCRIPT_DIR}/install.sh" 2>/dev/null | \
-    grep -v "^\${SCRIPT_DIR}\|^\${LANG_NAME}\|^\${DOMAIN}\|^\${LE_EMAIL}" | \
+  env_deps=$(grep -oE '\$\{?[A-Z_]+\}?' "${SCRIPT_DIR}/install.sh" 2>/dev/null |
+    grep -v "^\${SCRIPT_DIR}\|^\${LANG_NAME}\|^\${DOMAIN}\|^\${LE_EMAIL}" |
     sort -u | wc -l || echo "0")
-  
+
   if [[ $env_deps -lt 10 ]]; then
     pass "install.sh: минимальные внешние зависимости ($env_deps)"
     ((TESTS_PASSED++))
@@ -343,11 +343,11 @@ test_dry_run_simulation() {
 
   # Создаём mock для всех внешних команд
   LANG_NAME="English"
-  
+
   # Mock функций
   select_language() { :; }
   print_banner() { :; }
-  prompt_inputs() { 
+  prompt_inputs() {
     DOMAIN="test.example.com"
     LE_EMAIL="test@example.com"
     INSTALL_TG="n"
@@ -364,7 +364,7 @@ test_dry_run_simulation() {
   step_ssl() { :; }
   step_configure() { :; }
   step_finish() { :; }
-  
+
   # Mock утилит
   check_root() { :; }
   check_ubuntu() { :; }
@@ -380,11 +380,11 @@ test_dry_run_simulation() {
   get_server_ip() { echo "1.2.3.4"; }
   arch() { echo "amd64"; }
   unique_port() { echo "30000"; }
-  
+
   # Загружаем модули
   source "${SCRIPT_DIR}/lib/utils.sh" 2>/dev/null || true
   source "${SCRIPT_DIR}/lib/install-steps.sh" 2>/dev/null || true
-  
+
   # Пытаемся загрузить install.sh и проверить что main существует
   if bash -c "source ${SCRIPT_DIR}/install.sh 2>&1 && declare -f main >/dev/null" 2>/dev/null; then
     pass "install.sh: загружается и main существует"
@@ -401,7 +401,7 @@ test_security_no_hardcoded_secrets() {
 
   # Проверка что нет хардкодных паролей или ключей
   if grep -qiE "password\s*=\s*['\"][^'\"]+['\"]|secret\s*=\s*['\"][^'\"]+['\"]|key\s*=\s*['\"][^'\"]+['\"]" \
-     "${SCRIPT_DIR}/install.sh" 2>/dev/null | grep -v "SUDO_PASSWORD\|SECRET_KEY\|SS_PASSWORD"; then
+    "${SCRIPT_DIR}/install.sh" 2>/dev/null | grep -v "SUDO_PASSWORD\|SECRET_KEY\|SS_PASSWORD"; then
     fail "install.sh: возможны хардкодные секреты"
   else
     pass "install.sh: хардкодные секреты не найдены"
@@ -417,11 +417,11 @@ test_quoting_usage() {
   # shellcheck disable=SC2034
   local unquoted_vars
   # shellcheck disable=SC2034
-  unquoted_vars=$(grep -oE '\$[A-Za-z_][A-Za-z0-9_]*' "${SCRIPT_DIR}/install.sh" 2>/dev/null | \
+  unquoted_vars=$(grep -oE '\$[A-Za-z_][A-Za-z0-9_]*' "${SCRIPT_DIR}/install.sh" 2>/dev/null |
     wc -l || echo "0")
 
   local quoted_vars
-  quoted_vars=$(grep -oE '"\$[A-Za-z_][A-Za-z0-9_]*"' "${SCRIPT_DIR}/install.sh" 2>/dev/null | \
+  quoted_vars=$(grep -oE '"\$[A-Za-z_][A-Za-z0-9_]*"' "${SCRIPT_DIR}/install.sh" 2>/dev/null |
     wc -l || echo "0")
 
   if [[ $quoted_vars -gt 0 ]]; then

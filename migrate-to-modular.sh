@@ -110,7 +110,7 @@ backup_current_config() {
   fi
 
   # Сохраняем список установленных пакетов
-  dpkg -l 2>/dev/null | grep -E "(marzban|sing-box|ufw|fail2ban)" > "${BACKUP_DIR}/installed-packages.txt"
+  dpkg -l 2>/dev/null | grep -E "(marzban|sing-box|ufw|fail2ban)" >"${BACKUP_DIR}/installed-packages.txt"
 
   log_success "Current configuration backed up"
 }
@@ -246,16 +246,16 @@ run_migration() {
     read -rp "Choose [1-2]: " choice
 
     case "$choice" in
-      1)
-        echo ""
-        info "Restoring from backup..."
-        restore_config
-        success "✅ Configuration restored"
-        ;;
-      2)
-        echo ""
-        exit 1
-        ;;
+    1)
+      echo ""
+      info "Restoring from backup..."
+      restore_config
+      success "✅ Configuration restored"
+      ;;
+    2)
+      echo ""
+      exit 1
+      ;;
     esac
   fi
 
@@ -317,22 +317,22 @@ main() {
     read -rp "  Select action [1-4]: " choice
 
     case "$choice" in
-      1)
-        run_migration
-        ;;
-      2)
-        check_migration_status
-        ;;
-      3)
-        run_rollback
-        ;;
-      4)
-        echo "Exiting..."
-        exit 0
-        ;;
-      *)
-        warn "Invalid choice"
-        ;;
+    1)
+      run_migration
+      ;;
+    2)
+      check_migration_status
+      ;;
+    3)
+      run_rollback
+      ;;
+    4)
+      echo "Exiting..."
+      exit 0
+      ;;
+    *)
+      warn "Invalid choice"
+      ;;
     esac
 
     echo ""

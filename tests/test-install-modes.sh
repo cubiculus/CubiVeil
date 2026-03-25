@@ -24,8 +24,14 @@ PLAIN='\033[0m'
 
 # ── Функции вывода ───────────────────────────────────────────
 info() { echo -e "${CYAN}[INFO]${PLAIN} $*" >&2; }
-pass() { echo -e "${GREEN}[PASS]${PLAIN} $*" >&2; ((TESTS_PASSED++)); }
-fail() { echo -e "${RED}[FAIL]${PLAIN} $*" >&2; ((TESTS_FAILED++)); }
+pass() {
+  echo -e "${GREEN}[PASS]${PLAIN} $*" >&2
+  ((TESTS_PASSED++))
+}
+fail() {
+  echo -e "${RED}[FAIL]${PLAIN} $*" >&2
+  ((TESTS_FAILED++))
+}
 warn() { echo -e "${YELLOW}[WARN]${PLAIN} $*" >&2; }
 
 # ── Загрузка модулей ─────────────────────────────────────────
@@ -137,8 +143,8 @@ test_usage_has_examples() {
 test_dry_run_shows_plan() {
   info "Тестирование dry-run: план установки..."
 
-  if grep -q 'Installation Plan' "${SCRIPT_DIR}/install.sh" || \
-     grep -q 'План установки' "${SCRIPT_DIR}/install.sh"; then
+  if grep -q 'Installation Plan' "${SCRIPT_DIR}/install.sh" ||
+    grep -q 'План установки' "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: dry-run показывает план установки"
   else
     fail "install.sh: dry-run не показывает план установки"
@@ -149,8 +155,8 @@ test_dry_run_shows_plan() {
 test_dry_run_checks_root() {
   info "Тестирование dry-run: проверка root..."
 
-  if grep -q 'EUID' "${SCRIPT_DIR}/install.sh" && \
-     grep -q 'Root access' "${SCRIPT_DIR}/install.sh"; then
+  if grep -q 'EUID' "${SCRIPT_DIR}/install.sh" &&
+    grep -q 'Root access' "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: dry-run проверяет root доступ"
   else
     fail "install.sh: dry-run не проверяет root доступ"
@@ -161,8 +167,8 @@ test_dry_run_checks_root() {
 test_dry_run_checks_ubuntu() {
   info "Тестирование dry-run: проверка Ubuntu..."
 
-  if grep -q 'ubuntu' "${SCRIPT_DIR}/install.sh" && \
-     grep -q 'Ubuntu detected' "${SCRIPT_DIR}/install.sh"; then
+  if grep -q 'ubuntu' "${SCRIPT_DIR}/install.sh" &&
+    grep -q 'Ubuntu detected' "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: dry-run проверяет Ubuntu"
   else
     fail "install.sh: dry-run не проверяет Ubuntu"
@@ -184,8 +190,8 @@ test_dev_mode_warning() {
 test_dry_run_simulation_message() {
   info "Тестирование dry-run: сообщение о симуляции..."
 
-  if grep -q 'Simulation mode' "${SCRIPT_DIR}/install.sh" || \
-     grep -q 'Режим симуляции' "${SCRIPT_DIR}/install.sh"; then
+  if grep -q 'Simulation mode' "${SCRIPT_DIR}/install.sh" ||
+    grep -q 'Режим симуляции' "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: dry-run показывает сообщение о симуляции"
   else
     fail "install.sh: dry-run не показывает сообщение о симуляции"
@@ -196,8 +202,8 @@ test_dry_run_simulation_message() {
 test_dry_run_no_changes() {
   info "Тестирование dry-run: отсутствие изменений..."
 
-  if grep -q 'No changes' "${SCRIPT_DIR}/install.sh" || \
-     grep -q 'изменения не будут' "${SCRIPT_DIR}/install.sh"; then
+  if grep -q 'No changes' "${SCRIPT_DIR}/install.sh" ||
+    grep -q 'изменения не будут' "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: dry-run указывает на отсутствие изменений"
   else
     fail "install.sh: dry-run не указывает на отсутствие изменений"
@@ -230,8 +236,8 @@ test_usage_exists() {
 test_help_argument() {
   info "Тестирование обработки --help..."
 
-  if grep -q '\-\-help' "${SCRIPT_DIR}/install.sh" && \
-     grep -q 'usage' "${SCRIPT_DIR}/install.sh"; then
+  if grep -q '\-\-help' "${SCRIPT_DIR}/install.sh" &&
+    grep -q 'usage' "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: --help обрабатывается"
   else
     fail "install.sh: --help не обрабатывается"
@@ -302,8 +308,8 @@ test_step_ssl_checks_dev_mode() {
   info "Тестирование step_ssl: проверка DEV_MODE..."
 
   if [[ -f "${SCRIPT_DIR}/lib/steps/install-steps-main.sh" ]]; then
-    if grep -q 'DEV_MODE.*true' "${SCRIPT_DIR}/lib/steps/install-steps-main.sh" || \
-       grep -q 'DEV_MODE:-false' "${SCRIPT_DIR}/lib/steps/install-steps-main.sh"; then
+    if grep -q 'DEV_MODE.*true' "${SCRIPT_DIR}/lib/steps/install-steps-main.sh" ||
+      grep -q 'DEV_MODE:-false' "${SCRIPT_DIR}/lib/steps/install-steps-main.sh"; then
       pass "step_ssl: проверяет DEV_MODE"
     else
       fail "step_ssl: не проверяет DEV_MODE"
@@ -332,8 +338,8 @@ test_openssl_for_self_signed() {
 test_prompt_inputs_checks_dev_mode() {
   info "Тестирование prompt_inputs: проверка DEV_MODE..."
 
-  if grep -q 'DEV_MODE.*true' "${SCRIPT_DIR}/lib/install-steps.sh" || \
-     grep -q 'DEV_MODE:-false' "${SCRIPT_DIR}/lib/install-steps.sh"; then
+  if grep -q 'DEV_MODE.*true' "${SCRIPT_DIR}/lib/install-steps.sh" ||
+    grep -q 'DEV_MODE:-false' "${SCRIPT_DIR}/lib/install-steps.sh"; then
     pass "prompt_inputs: проверяет DEV_MODE"
   else
     fail "prompt_inputs: не проверяет DEV_MODE"
@@ -344,8 +350,8 @@ test_prompt_inputs_checks_dev_mode() {
 test_prompt_inputs_skips_in_dev_mode() {
   info "Тестирование prompt_inputs: пропуск ввода в dev-режиме..."
 
-  if grep -q 'return 0' "${SCRIPT_DIR}/lib/install-steps.sh" && \
-     grep -q 'DEV-режим\|DEV mode' "${SCRIPT_DIR}/lib/install-steps.sh"; then
+  if grep -q 'return 0' "${SCRIPT_DIR}/lib/install-steps.sh" &&
+    grep -q 'DEV-режим\|DEV mode' "${SCRIPT_DIR}/lib/install-steps.sh"; then
     pass "prompt_inputs: пропускает ввод в dev-режиме"
   else
     fail "prompt_inputs: не пропускает ввод в dev-режиме"

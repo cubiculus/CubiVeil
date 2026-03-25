@@ -86,25 +86,25 @@ EOF
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --dev)
-        DEV_MODE="true"
-        shift
-        ;;
-      --dry-run)
-        DRY_RUN="true"
-        shift
-        ;;
-      --domain=*)
-        DOMAIN="${1#*=}"
-        shift
-        ;;
-      --help|-h)
-        usage
-        exit 0
-        ;;
-      *)
-        err "Unknown option: $1. Use --help for usage."
-        ;;
+    --dev)
+      DEV_MODE="true"
+      shift
+      ;;
+    --dry-run)
+      DRY_RUN="true"
+      shift
+      ;;
+    --domain=*)
+      DOMAIN="${1#*=}"
+      shift
+      ;;
+    --help | -h)
+      usage
+      exit 0
+      ;;
+    *)
+      err "Unknown option: $1. Use --help for usage."
+      ;;
     esac
   done
 }

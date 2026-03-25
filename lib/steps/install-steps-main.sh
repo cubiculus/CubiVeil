@@ -32,6 +32,7 @@ step_check_ip_neighborhood() {
 
   # Проверка соседних IP (упрощённая)
   local checked=3
+  # shellcheck disable=SC2034
   local vpn_count=0
 
   if [[ "$LANG_NAME" == "Русский" ]]; then
@@ -78,7 +79,7 @@ step_auto_updates() {
   step "$step_title"
 
   # Настройка автоматических обновлений безопасности
-  cat > /etc/apt/apt.conf.d/20auto-upgrades <<EOF
+  cat >/etc/apt/apt.conf.d/20auto-upgrades <<EOF
 APT::Periodic::Update-Package-Lists "1";
 APT::Periodic::Unattended-Upgrade "1";
 APT::Periodic::Download-Upgradeable-Packages "1";
@@ -104,7 +105,7 @@ step_bbr() {
 
   # Включение BBR
   if ! grep -q "net.core.default_qdisc=fq" /etc/sysctl.conf; then
-    cat >> /etc/sysctl.conf <<EOF
+    cat >>/etc/sysctl.conf <<EOF
 net.core.default_qdisc=fq
 net.ipv4.tcp_congestion_control=bbr
 EOF
@@ -175,7 +176,7 @@ step_fail2ban() {
   SSH_PORT="${ssh_port:-22}"
 
   # Конфигурация fail2ban для SSH
-  cat > /etc/fail2ban/jail.local <<EOF
+  cat >/etc/fail2ban/jail.local <<EOF
 [sshd]
 enabled = true
 port = ${SSH_PORT}
@@ -225,9 +226,9 @@ step_install_singbox() {
   local arch
   arch=$(uname -m)
   case "$arch" in
-    x86_64) arch="amd64" ;;
-    aarch64) arch="arm64" ;;
-    armv7l) arch="armv7" ;;
+  x86_64) arch="amd64" ;;
+  aarch64) arch="arm64" ;;
+  armv7l) arch="armv7" ;;
   esac
 
   local sb_url="https://github.com/SagerNet/sing-box/releases/download/v${sb_tag}/sing-box-${sb_tag}-linux-${arch}.tar.gz"
@@ -253,7 +254,7 @@ step_install_singbox() {
   rm -rf "${temp_dir}"
 
   # Создание systemd сервиса
-  cat > /etc/systemd/system/sing-box.service <<EOF
+  cat >/etc/systemd/system/sing-box.service <<EOF
 [Unit]
 Description=Sing-box Service
 After=network.target
@@ -298,7 +299,7 @@ step_generate_keys_and_ports() {
   reality_private_key=$(/usr/local/bin/sing-box generate reality-keypair 2>/dev/null | grep "PrivateKey:" | awk '{print $2}' || echo "$(openssl rand -base64 32)")
 
   # Сохранение ключей
-  cat > /etc/cubiveil/reality.json <<EOF
+  cat >/etc/cubiveil/reality.json <<EOF
 {
   "private_key": "${reality_private_key}",
   "sni": "www.microsoft.com"
@@ -312,7 +313,7 @@ EOF
   SUB_PORT=$((RANDOM % 10000 + 10000))
 
   # Сохранение портов
-  cat > /etc/cubiveil/ports.json <<EOF
+  cat >/etc/cubiveil/ports.json <<EOF
 {
   "trojan": ${TROJAN_PORT},
   "shadowsocks": ${SS_PORT},
@@ -502,7 +503,7 @@ step_configure() {
   mkdir -p /etc/sing-box
 
   # Конфигурация Marzban
-  cat > /etc/marzban/.env <<EOF
+  cat >/etc/marzban/.env <<EOF
 MARZBAN_HOST="${DOMAIN:-dev.cubiveil.local}"
 MARZBAN_PORT=${PANEL_PORT:-8080}
 SSL_CERT_FILE="/var/lib/marzban/certs/cert.pem"
@@ -510,7 +511,7 @@ SSL_KEY_FILE="/var/lib/marzban/certs/key.pem"
 EOF
 
   # Конфигурация Sing-box с 5 профилями
-  cat > /etc/sing-box/config.json <<EOF
+  cat >/etc/sing-box/config.json <<EOF
 {
   "log": {
     "level": "info",

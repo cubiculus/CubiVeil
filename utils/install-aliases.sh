@@ -92,7 +92,7 @@ step_install_aliases() {
   mkdir -p "$(dirname "${ALIASES_FILE}")"
 
   # Создаём файл с алиасами
-  cat > "${ALIASES_FILE}" << 'EOF'
+  cat >"${ALIASES_FILE}" <<'EOF'
 # CubiVeil Aliases
 alias cv='cubiveil'
 alias cv-update='cubiveil update'
@@ -109,7 +109,7 @@ EOF
 
   # Добавляем загрузку алиасов в .bashrc если нужно
   if ! grep -q "bash_aliases.d" /root/.bashrc 2>/dev/null; then
-    cat >> /root/.bashrc << 'EOF'
+    cat >>/root/.bashrc <<'EOF'
 
 # Load CubiVeil aliases
 if [ -d /etc/bash_aliases.d ]; then
