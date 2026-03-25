@@ -23,6 +23,7 @@ source "${PROJECT_DIR}/lib/utils.sh" || {
 }
 
 # ── Константы ─────────────────────────────────────────────────
+# shellcheck disable=SC2034
 REPO_URL="https://github.com/cubiculus/cubiveil"
 RAW_URL="https://raw.githubusercontent.com/cubiculus/cubiveil/main"
 CUBIVEIL_DIR="/opt/cubiveil"

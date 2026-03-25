@@ -40,6 +40,7 @@ fi
 test_generator_edge_cases() {
   local gen_func="$1"      # Имя функции (gen_random/gen_hex)
   local pattern="$2"       # Regex паттерн для проверки символов
+  # shellcheck disable=SC2034
   local gen_type="$3"      # Тип для сообщений (random/hex)
   local is_lowercase="${4:-false}"  # Проверка на lowercase
   

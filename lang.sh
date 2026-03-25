@@ -544,6 +544,7 @@ MSG_WARN_SINGBOX_NOT_STARTED_RU="Sing-box не запустился — пров
 MSG_ERR_ROOT_REQUIRED="Root access required"
 MSG_ERR_ROOT_REQUIRED_RU="Требуется запуск от root"
 
+# shellcheck disable=SC2154
 MSG_ERR_COMMAND_REQUIRED="${cmd} required but not installed"
 MSG_ERR_COMMAND_REQUIRED_RU="Требуется ${cmd}, но он не установлен"
 

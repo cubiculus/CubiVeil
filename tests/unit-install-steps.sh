@@ -61,6 +61,7 @@ unique_port() {
 open_port() {
   local port="$1"
   local proto="${2:-tcp}"
+  # shellcheck disable=SC2034
   local comment="${3:-cubiveil}"
   # Mock: просто записываем в лог
   echo "mock_open_port: $port/$proto" >> /tmp/cubiveil_test_ports.log
@@ -120,8 +121,9 @@ apt-get() {
 
 systemctl() {
   local action="$1"
+  # shellcheck disable=SC2034
   local service="$2"
-  
+
   if [[ "$action" == "is-active" ]]; then
     echo "active"
   else

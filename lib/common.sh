@@ -29,7 +29,7 @@ fi
 check_root() {
   local err_msg="${1:-}"
   local err_msg_ru="${2:-}"
-  
+
   if [[ $EUID -ne 0 ]]; then
     if [[ "${LANG_NAME:-}" == "Русский" ]]; then
       err "${err_msg_ru:-Запускай от root (sudo)}"
@@ -44,7 +44,7 @@ check_root() {
 check_ubuntu() {
   local err_msg="${1:-}"
   local err_msg_ru="${2:-}"
-  
+
   if ! grep -qi "ubuntu" /etc/os-release; then
     if [[ "${LANG_NAME:-}" == "Русский" ]]; then
       err "${err_msg_ru:-Скрипт только для Ubuntu}"
@@ -142,7 +142,7 @@ select_language() {
 # Быстрый выбор языка из аргументов
 select_language_fast() {
   local default="${1:-Русский}"
-  
+
   # Проверяем аргументы командной строки
   for arg in "$@"; do
     case "$arg" in
@@ -156,7 +156,7 @@ select_language_fast() {
         ;;
     esac
   done
-  
+
   # Если нет аргументов — используем дефолт
   LANG_NAME="$default"
 }
@@ -174,13 +174,13 @@ check_command() {
 # Выходит с ошибкой если какая-то команда не найдена
 require_commands() {
   local missing=()
-  
+
   for cmd in "$@"; do
     if ! check_command "$cmd"; then
       missing+=("$cmd")
     fi
   done
-  
+
   if [[ ${#missing[@]} -gt 0 ]]; then
     if [[ "${LANG_NAME:-}" == "Русский" ]]; then
       err "Отсутствуют команды: ${missing[*]}. Установи: apt-get install ${missing[*]}"
@@ -223,7 +223,7 @@ cleanup_temp_dir() {
 validate_file() {
   local file="$1"
   local min_size="${2:-1}"
-  
+
   [[ -f "$file" ]] && [[ -s "$file" ]] && [[ $(stat -c%s "$file") -ge $min_size ]]
 }
 
@@ -233,14 +233,14 @@ validate_file() {
 check_host() {
   local host="$1"
   local timeout="${2:-5}"
-  
+
   curl -sf --max-time "$timeout" "https://${host}" &>/dev/null
 }
 
 # Получение внешнего IP (быстрое, с fallback)
 get_external_ip() {
   local ip
-  
+
   # Пробуем несколько сервисов параллельно
   for url in "https://api4.ipify.org" "https://ipv4.icanhazip.com" "https://4.ident.me"; do
     ip=$(curl -sf --max-time 4 "$url" 2>/dev/null | tr -d '[:space:]')
@@ -249,7 +249,7 @@ get_external_ip() {
       return 0
     fi
   done
-  
+
   return 1
 }
 
@@ -260,7 +260,7 @@ log_message() {
   local level="$1"
   local message="$2"
   local log_file="${3:-/var/log/cubiveil.log}"
-  
+
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] [${level}] ${message}" >> "$log_file"
 }
 

@@ -31,7 +31,9 @@ source "${PROJECT_DIR}/lib/utils.sh" || {
 
 # ── Константы ─────────────────────────────────────────────────
 MARZBAN_DIR="/opt/marzban"
+# shellcheck disable=SC2034
 MARZBAN_CLI="marzban-cli"
+# shellcheck disable=SC2034
 PYTHON="/opt/marzban/bin/python3"
 
 # ── Локализация сообщений ─────────────────────────────────────
@@ -311,11 +313,13 @@ remove_profile() {
   info "Удаление профиля: ${username}..."
 
   local response
+  local curl_status
   response=$(curl -sf -X DELETE "${api_url}/api/user/${username}" \
     -H "Authorization: Bearer ${token}" \
     --insecure 2>/dev/null || echo "")
+  curl_status=$?
 
-  if [[ -n "$response" ]] || [[ $? -eq 0 ]]; then
+  if [[ -n "$response" ]] || [[ $curl_status -eq 0 ]]; then
     success "${MSG[MSG_PROFILE]} ${username} ${MSG[MSG_DELETED]}"
   else
     err "${MSG[ERR_USER_NOT_FOUND]}"

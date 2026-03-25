@@ -472,7 +472,8 @@ step_check_resources() {
 step_generate_report() {
   step_title "9" "${MSG[TITLE_REPORT]}" "Generate report"
 
-  local report_file="${DIAGNOSE_DIR}/diagnose_report_$(date +%Y%m%d_%H%M%S).txt"
+  local report_file
+  report_file="${DIAGNOSE_DIR}/diagnose_report_$(date +%Y%m%d_%H%M%S).txt"
 
   {
     echo "══════════════════════════════════════════════════════════"

@@ -473,8 +473,10 @@ step_install_singbox() {
     SB_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz"
 
     # Получаем SHA256 и GPG подпись
-    local SHA_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz.sha256sum"
-    local SIG_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz.sig"
+    local SHA_URL
+    local SIG_URL
+    SHA_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz.sha256sum"
+    SIG_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz.sig"
     SB_SHA256=$(curl -fsSL "$SHA_URL" | awk '{print $1}')
 
     # Сохраняем в кэш

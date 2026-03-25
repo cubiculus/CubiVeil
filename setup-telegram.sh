@@ -228,6 +228,7 @@ Environment="TG_CHAT_ID=${TG_CHAT_ID}"
 Environment="ALERT_CPU=${ALERT_CPU}"
 Environment="ALERT_RAM=${ALERT_RAM}"
 Environment="ALERT_DISK=${ALERT_DISK}"
+Environment="CUBIVEIL_UTILS_DIR=${SCRIPT_DIR}/utils"
 ExecStart=/usr/bin/python3 /opt/cubiveil-bot/bot.py poll
 Restart=always
 RestartSec=10s

@@ -414,6 +414,7 @@ test_quoting_usage() {
   info "Тестирование использования кавычек..."
 
   # Проверка что переменные используются с кавычками
+  # shellcheck disable=SC2034
   local unquoted_vars
   unquoted_vars=$(grep -oE '\$[A-Za-z_][A-Za-z0-9_]*' "${SCRIPT_DIR}/install.sh" 2>/dev/null | \
     wc -l || echo "0")
