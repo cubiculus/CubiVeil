@@ -1,9 +1,9 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Rollback Module (Enhanced)         ║
-# ║          github.com/cubiculus/cubiveil                   ║
+# ║          CubiVeil — Rollback Module (Enhanced)            ║
+# ║          github.com/cubiculus/cubiveil                    ║
 # ║                                                           ║
-# ║  Модуль отката с проверкой целостности                  ║
+# ║  Модуль отката с проверкой целостности                    ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 # ── Подключение зависимостей / Dependencies ─────────────────
@@ -546,9 +546,65 @@ rollback_latest() {
 
 # Стандартный интерфейс модуля
 module_install() { rollback_init; }
-module_configure() { :; }
-module_enable() { :; }
-module_disable() { :; }
+
+# Настройка модуля: проверка целостности бэкапов
+module_configure() {
+  log_step "module_configure" "Configuring rollback module"
+
+  # Инициализируем модуль
+  rollback_init
+
+  # Проверяем наличие бэкапов
+  if [[ ! -d "$BACKUP_ARCHIVE_DIR" ]] || [[ -z "$(ls -A "$BACKUP_ARCHIVE_DIR" 2>/dev/null)" ]]; then
+    log_warn "No backups found in ${BACKUP_ARCHIVE_DIR}"
+    log_info "Run backup module first to create backups"
+    return 1
+  fi
+
+  # Проверяем целостность последнего бэкапа
+  local latest_backup
+  latest_backup=$(ls -t "${BACKUP_ARCHIVE_DIR}"/*.tar.gz* 2>/dev/null | head -1)
+  
+  if [[ -n "$latest_backup" ]]; then
+    log_info "Latest backup: $(basename "$latest_backup")"
+    
+    # Проверяем SHA256 если есть файл проверки
+    local sha_file="${latest_backup}.sha256"
+    if [[ -f "$sha_file" ]]; then
+      local expected_hash
+      expected_hash=$(cat "$sha_file")
+      if verify_sha256 "$latest_backup" "$expected_hash"; then
+        log_success "Backup integrity verified"
+      else
+        log_error "Backup integrity check failed"
+        return 1
+      fi
+    fi
+  fi
+
+  log_success "Rollback module configured"
+}
+
+# Включение модуля: не требуется (утилитный модуль)
+module_enable() {
+  log_step "module_enable" "Enabling rollback module"
+
+  log_info "Rollback module is a utility module"
+  log_info "No services to enable"
+  log_info "Use 'module_rollback' to perform rollback"
+
+  log_success "Rollback module ready"
+}
+
+# Выключение модуля: не требуется (утилитный модуль)
+module_disable() {
+  log_step "module_disable" "Disabling rollback module"
+
+  log_info "Rollback module is a utility module"
+  log_info "No services to disable"
+
+  log_success "Rollback module disabled"
+}
 
 # Полный откат с интерактивным выбором бэкапа
 module_rollback() { rollback_full; }

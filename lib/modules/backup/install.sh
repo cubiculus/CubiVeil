@@ -1,9 +1,9 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Backup Module (Enhanced)          ║
-# ║          github.com/cubiculus/cubiveil                   ║
+# ║          CubiVeil — Backup Module (Enhanced)              ║
+# ║          github.com/cubiculus/cubiveil                    ║
 # ║                                                           ║
-# ║  Модуль резервного копирования с шифрованием        ║
+# ║  Модуль резервного копирования с шифрованием              ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 # ── Подключение зависимостей / Dependencies ─────────────────
@@ -483,9 +483,69 @@ backup_full() {
 
 # Стандартный интерфейс модуля
 module_install() { backup_init; }
-module_configure() { :; }
-module_enable() { :; }
-module_disable() { :; }
+
+# Настройка модуля: проверка окружения и генерация ключей
+module_configure() {
+  log_step "module_configure" "Configuring backup module"
+
+  # Инициализируем модуль
+  backup_init
+
+  # Проверяем окружение
+  if ! backup_check_environment; then
+    log_warn "Backup environment check failed"
+  fi
+
+  # Генерируем ключ шифрования если его нет
+  local key_file="${BACKUP_DIR}/backup-key.txt"
+  if [[ ! -f "$key_file" ]]; then
+    log_info "Generating encryption key..."
+    backup_generate_encryption_key
+    log_success "Encryption key generated: ${key_file}"
+  else
+    log_info "Encryption key already exists"
+  fi
+
+  log_success "Backup module configured"
+}
+
+# Включение модуля: настройка cron для автоматических бэкапов
+module_enable() {
+  log_step "module_enable" "Enabling backup module"
+
+  # Проверяем наличие cron
+  if ! pkg_check "cron"; then
+    log_warn "Cron not installed, installing..."
+    pkg_install_packages "cron"
+  fi
+
+  # Создаём cron job для ежедневного бэкапа
+  local cron_job="0 2 * * * /bin/bash -c 'cd ${SCRIPT_DIR} && source lib/modules/backup/install.sh && backup_full >> /var/log/cubiveil/backup-cron.log 2>&1'"
+  
+  if ! crontab -l 2>/dev/null | grep -q "backup_full"; then
+    (crontab -l 2>/dev/null | grep -v "backup_full"; echo "$cron_job") | crontab -
+    log_success "Daily backup cron job added"
+  else
+    log_info "Backup cron job already exists"
+  fi
+
+  log_success "Backup module enabled"
+}
+
+# Выключение модуля: удаление cron job
+module_disable() {
+  log_step "module_disable" "Disabling backup module"
+
+  # Удаляем cron job
+  if crontab -l 2>/dev/null | grep -q "backup_full"; then
+    crontab -l 2>/dev/null | grep -v "backup_full" | crontab -
+    log_success "Backup cron job removed"
+  else
+    log_info "Backup cron job not found"
+  fi
+
+  log_success "Backup module disabled"
+}
 
 # Создание бэкапа
 module_backup() { backup_full; }

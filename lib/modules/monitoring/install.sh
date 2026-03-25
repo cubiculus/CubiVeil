@@ -1,9 +1,9 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Monitoring Module (Enhanced)       ║
-# ║          github.com/cubiculus/cubiveil                   ║
+# ║          CubiVeil — Monitoring Module (Enhanced)          ║
+# ║          github.com/cubiculus/cubiveil                    ║
 # ║                                                           ║
-# ║  Модуль мониторинга с проверкой SSL                     ║
+# ║  Модуль мониторинга с проверкой SSL                       ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 # ── Подключение зависимостей / Dependencies ─────────────────
@@ -419,9 +419,112 @@ monitor_generate_report() {
 
 # Стандартный интерфейс модуля
 module_install() { monitor_init; }
-module_configure() { :; }
-module_enable() { :; }
-module_disable() { :; }
+
+# Настройка модуля: проверка порогов и создание конфигов
+module_configure() {
+  log_step "module_configure" "Configuring monitoring module"
+
+  # Инициализируем модуль
+  monitor_init
+
+  # Создаём конфиг с порогами алертов
+  local config_file="${MONITORING_DATA_DIR}/config.conf"
+  
+  cat > "$config_file" <<EOF
+# CubiVeil Monitoring Configuration
+# Generated: $(date)
+
+# CPU Threshold (%)
+ALERT_CPU_THRESHOLD=${ALERT_CPU_THRESHOLD}
+
+# RAM Threshold (%)
+ALERT_RAM_THRESHOLD=${ALERT_RAM_THRESHOLD}
+
+# Disk Threshold (%)
+ALERT_DISK_THRESHOLD=${ALERT_DISK_THRESHOLD}
+
+# Uptime Threshold (%)
+ALERT_UPTIME_THRESHOLD=${ALERT_UPTIME_THRESHOLD}
+
+# Monitored Services
+MONITORED_SERVICES="${MONITORED_SERVICES[*]}"
+EOF
+
+  chmod 644 "$config_file"
+  log_info "Configuration file created: ${config_file}"
+
+  # Проверяем наличие необходимых утилит
+  local required_tools=("systemctl" "free" "df" "uptime")
+  for tool in "${required_tools[@]}"; do
+    if ! command -v "$tool" &>/dev/null; then
+      log_warn "Required tool not found: $tool"
+    fi
+  done
+
+  log_success "Monitoring module configured"
+}
+
+# Включение модуля: настройка cron для периодических проверок
+module_enable() {
+  log_step "module_enable" "Enabling monitoring module"
+
+  # Проверяем наличие cron
+  if ! pkg_check "cron"; then
+    log_warn "Cron not installed, installing..."
+    pkg_install_packages "cron"
+  fi
+
+  # Создаём cron job для почасовой проверки здоровья
+  local health_job="0 * * * * /bin/bash -c 'cd ${SCRIPT_DIR} && source lib/modules/monitoring/install.sh && monitor_health_check >> /var/log/cubiveil/monitoring-health.log 2>&1'"
+  
+  # Создаём cron job для ежедневного отчёта
+  local report_job="0 6 * * * /bin/bash -c 'cd ${SCRIPT_DIR} && source lib/modules/monitoring/install.sh && monitor_generate_report >> /var/log/cubiveil/monitoring-report.log 2>&1'"
+  
+  local jobs_added=0
+  
+  if ! crontab -l 2>/dev/null | grep -q "monitor_health_check"; then
+    (crontab -l 2>/dev/null | grep -v "monitor_health_check"; echo "$health_job") | crontab -
+    log_info "Hourly health check cron job added"
+    ((jobs_added++))
+  fi
+  
+  if ! crontab -l 2>/dev/null | grep -q "monitor_generate_report"; then
+    (crontab -l 2>/dev/null | grep -v "monitor_generate_report"; echo "$report_job") | crontab -
+    log_info "Daily report cron job added"
+    ((jobs_added++))
+  fi
+
+  if [[ $jobs_added -gt 0 ]]; then
+    log_success "Monitoring cron jobs added"
+  else
+    log_info "Monitoring cron jobs already exist"
+  fi
+
+  log_success "Monitoring module enabled"
+}
+
+# Выключение модуля: удаление cron job
+module_disable() {
+  log_step "module_disable" "Disabling monitoring module"
+
+  # Удаляем cron job для проверок
+  if crontab -l 2>/dev/null | grep -q "monitor_health_check"; then
+    crontab -l 2>/dev/null | grep -v "monitor_health_check" | crontab -
+    log_success "Health check cron job removed"
+  else
+    log_info "Health check cron job not found"
+  fi
+
+  # Удаляем cron job для отчётов
+  if crontab -l 2>/dev/null | grep -q "monitor_generate_report"; then
+    crontab -l 2>/dev/null | grep -v "monitor_generate_report" | crontab -
+    log_success "Report cron job removed"
+  else
+    log_info "Report cron job not found"
+  fi
+
+  log_success "Monitoring module disabled"
+}
 
 # Полная проверка здоровья
 module_check() { monitor_health_check; }
