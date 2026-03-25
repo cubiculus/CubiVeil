@@ -1,12 +1,12 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
 # ║          CubiVeil — Sing-box Module                       ║
-# ║          github.com/cubiculus/cubiveil                   ║
+# ║          github.com/cubiculus/cubiveil                    ║
 # ║                                                           ║
-# ║  Модуль управления Sing-box                                 ║
-# ║  - Установка Sing-box                                       ║
-# ║  - Управление версиями                                       ║
-# ║  - Настройка конфигурации                                  ║
+# ║  Модуль управления Sing-box                               ║
+# ║  - Установка Sing-box                                     ║
+# ║  - Управление версиями                                    ║
+# ║  - Настройка конфигурации                                 ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 # ── Подключение зависимостей / Dependencies ─────────────────
@@ -211,13 +211,13 @@ singbox_configure_dirs() {
   log_debug "Configuration directories created"
 }
 
-# Настройка конфигурации (заглушка - настраивается через Marzban)
+# Настройка конфигурации
+# Примечание: Sing-box конфигурация управляется Marzban
 singbox_configure() {
   log_step "singbox_configure" "Configuring Sing-box"
 
   singbox_configure_dirs
 
-  # Sing-box конфигурация управляется Marzban
   # Создаём базовый конфиг если его нет
   if [[ ! -f "$SINGBOX_CONFIG_DIR/config.json" ]]; then
     cat >"$SINGBOX_CONFIG_DIR/config.json" <<EOF
@@ -388,7 +388,7 @@ singbox_remove() {
   log_step "singbox_remove" "Removing Sing-box"
 
   # Останавливаем сервис
-  if svc_active "$SINGBOX_SERVICE" ]]; then
+  if svc_active "$SINGBOX_SERVICE"; then
     svc_stop "$SINGBOX_SERVICE"
   fi
 
