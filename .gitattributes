@@ -1,0 +1,7 @@
+# Handle line endings automatically for all shell scripts
+*.sh text eol=lf
+
+# Ensure shell scripts use LF line endings
+*.bash text eol=lf
+.bashrc text eol=lf
+.zshrc text eol=lf
