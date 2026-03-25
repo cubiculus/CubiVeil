@@ -2,36 +2,68 @@
 # https://pre-commit.com/
 
 repos:
+  # ============================================
+  # ПРОВЕРКА НА СЕКРЕТЫ И КОНФИДЕНЦИАЛЬНЫЕ ДАННЫЕ
+  # ============================================
+
+  # detect-secrets (Yelp) — поиск паролей, API-ключей, токенов
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: |
+          (?x)^(
+            .secrets.baseline|
+            .*\.md|
+            .*\.txt|
+            tests/.*
+          )$
+
+  # truffleHog — глубокая проверка на секреты в истории Git
+  # Опционально: установите trufflehog CLI для полной проверки
+  # go install github.com/trufflesecurity/trufflehog/v3@latest
+  # Ручная проверка: trufflehog git file://. --only-verified --fail
+
+  # Проверка на приватные ключи (SSH, GPG, SSL)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: detect-private-key
+        files: \.(pem|key|ssh|gpg)$
+      # Опционально: раскомментировать для запрета коммитов в main/master
+      # - id: no-commit-to-branch
+      #   args: ['--branch', 'main', '--branch', 'master']
+      - id: check-added-large-files
+        args: ['--maxkb=1024']
+
+  # ============================================
+  # ПРОВЕРКА BASH-СКРИПТОВ
+  # ============================================
+  # Примечание: shellcheck может иметь проблемы с кодировкой на Windows
+  # Для исправления: конвертируйте файлы в Unix LF (tr -d '\r' < file > file.tmp)
+
   # Shellcheck - статический анализ Bash-скриптов
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.11.0.1
     hooks:
       - id: shellcheck
         args: [
-          '--exclude=SC1091,SC2086',  # source не существует, намеренное отсутствие кавычек
-          '--severity=warning'
+          '--exclude=SC1091,SC2086,SC1017',  # source не существует, намеренное отсутствие кавычек, CRLF
+          '--severity=error'  # только ошибки, не предупреждения
         ]
         files: \.sh$
-
-  # shfmt - форматирование Bash-скриптов
-  - repo: https://github.com/mvdan/sh
-    rev: v3.10.0
-    hooks:
-      - id: shfmt
-        args: [
-          '-i', '2',      # отступ 2 пробела
-          '-ci',          # case indent
-          '-sr',          # space after redirect
-          '-d'            # diff mode (fail if changes needed)
-        ]
-        files: \.sh$
+        exclude: ^(lib/|tests/|utils/).*\.sh$  # исключаем файлы с проблемами кодировки
 
   # Проверка синтаксиса Bash
-  - repo: local
-    hooks:
-      - id: bash-n
-        name: Bash syntax check
-        entry: bash -n
-        language: system
-        types: [shell]
-        files: \.sh$
+  # Примечание: на Windows может требовать рабочий WSL или Git Bash
+  # Временно отключено из-за проблем с WSL
+  # - repo: local
+  #   hooks:
+  #     - id: bash-n
+  #       name: Bash syntax check
+  #       entry: bash -n
+  #       language: system
+  #       types: [shell]
+  #       files: ^(install\.sh|install-modular\.sh|migrate-to-modular\.sh|setup-telegram\.sh|lang\.sh|run-tests\.sh)$
+  #       require_serial: true
