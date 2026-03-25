@@ -1,13 +1,9 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Monitoring Module                    ║
+# ║          CubiVeil — Monitoring Module (Enhanced)       ║
 # ║          github.com/cubiculus/cubiveil                   ║
 # ║                                                           ║
-# ║  Модуль мониторинга                                         ║
-# ║  - Мониторинг сервисов                                    ║
-# ║  - Мониторинг ресурсов (CPU, RAM, Disk)                  ║
-# ║  - Проверка здоровья системы                               ║
-# ║  - Анализ логов                                           ║
+# ║  Модуль мониторинга с проверкой SSL                     ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 # ── Подключение зависимостей / Dependencies ─────────────────
@@ -22,9 +18,9 @@ if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
   source "${SCRIPT_DIR}/lib/core/log.sh"
 fi
 
-# Подключаем utils
-if [[ -f "${SCRIPT_DIR}/lib/utils.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/utils.sh"
+# Подключаем security (ENHANCED - использование verify_ssl_cert)
+if [[ -f "${SCRIPT_DIR}/lib/security.sh" ]]; then
+  source "${SCRIPT_DIR}/lib/security.sh"
 fi
 
 # ── Конфигурация / Configuration ────────────────────────────
@@ -223,7 +219,44 @@ monitor_external_ip() {
   fi
 }
 
-# ── Мониторинг логов / Log Monitoring ────────────────────────
+# Проверка SSL сертификатов сервера
+monitor_check_ssl() {
+  log_step "monitor_check_ssl" "Checking SSL certificates"
+
+  local domains=()
+  local external_ip
+  external_ip=$(monitor_external_ip)
+
+  # Проверяем внешний IP
+  if [[ "$external_ip" != "unknown" ]]; then
+    domains+=("$external_ip")
+  fi
+
+  # Добавляем тестовые домены
+  domains+=("google.com" "cloudflare.com")
+
+  local failed=0
+
+  for domain in "${domains[@]}"; do
+    log_info "Checking SSL certificate for: $domain"
+
+    if verify_ssl_cert "$domain" 443 5 2>/dev/null; then
+      log_success "SSL certificate valid: $domain"
+    else
+      log_warn "SSL certificate check failed: $domain"
+      ((failed++))
+    fi
+  done
+
+  if [[ $failed -gt 0 ]]; then
+    log_warn "$failed SSL certificate checks failed"
+    return 1
+  fi
+
+  return 0
+}
+
+# ── Мониторинг логов / Log Monitoring ───────────────────────
 
 # Проверка ошибок в логах Marzban
 monitor_check_marzban_logs() {
@@ -281,7 +314,7 @@ monitor_health_check() {
   log_step "monitor_health_check" "Performing system health check"
 
   local health_score=0
-  local total_checks=5
+  local total_checks=6
 
   echo ""
   echo "System Health Check:"
@@ -311,7 +344,15 @@ monitor_health_check() {
     echo "  ✗ Network: FAIL"
   fi
 
-  # 4. Проверка логов Marzban
+  # 4. Проверка SSL
+  if monitor_check_ssl >/dev/null 2>&1; then
+    ((health_score++))
+    echo "  ✓ SSL: OK"
+  else
+    echo "  ✗ SSL: WARNING"
+  fi
+
+  # 5. Проверка логов Marzban
   if monitor_check_marzban_logs >/dev/null 2>&1; then
     ((health_score++))
     echo "  ✓ Marzban logs: OK"
@@ -319,7 +360,7 @@ monitor_health_check() {
     echo "  ✗ Marzban logs: WARNING"
   fi
 
-  # 5. Проверка логов Sing-box
+  # 6. Проверка логов Sing-box
   if monitor_check_singbox_logs >/dev/null 2>&1; then
     ((health_score++))
     echo "  ✓ Sing-box logs: OK"
@@ -390,6 +431,9 @@ module_check_services() { monitor_check_services; }
 
 # Проверка ресурсов
 module_check_resources() { monitor_check_resources; }
+
+# Проверка SSL сертификатов
+module_check_ssl() { monitor_check_ssl; }
 
 # Генерация отчёта
 module_report() { monitor_generate_report; }

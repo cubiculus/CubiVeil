@@ -1,12 +1,9 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Rollback Module                      ║
+# ║          CubiVeil — Rollback Module (Enhanced)         ║
 # ║          github.com/cubiculus/cubiveil                   ║
 # ║                                                           ║
-# ║  Модуль отката (restore)                                  ║
-# ║  - Восстановление из бэкапов                             ║
-# ║  - Откат конфигураций                                    ║
-# ║  - Управление точками восстановления                       ║
+# ║  Модуль отката с проверкой целостности                  ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 # ── Подключение зависимостей / Dependencies ─────────────────
@@ -21,9 +18,9 @@ if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
   source "${SCRIPT_DIR}/lib/core/log.sh"
 fi
 
-# Подключаем utils
-if [[ -f "${SCRIPT_DIR}/lib/utils.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/utils.sh"
+# Подключаем security (ENHANCED - использование verify_sha256)
+if [[ -f "${SCRIPT_DIR}/lib/security.sh" ]]; then
+  source "${SCRIPT_DIR}/lib/security.sh"
 fi
 
 # ── Конфигурация / Configuration ────────────────────────────
@@ -53,7 +50,7 @@ rollback_init() {
 
 # ── Список доступных бэкапов / List Backups ───────────
 
-# Получение списка бэкапов
+# Получение списка бэкапов с информацией о шифровании
 rollback_list_backups() {
   log_step "rollback_list_backups" "Listing available backups"
 
@@ -64,19 +61,27 @@ rollback_list_backups() {
   local i=1
   declare -A BACKUP_MAP
 
-  for archive in "${BACKUP_ARCHIVE_DIR}"/*.tar.gz; do
+  for archive in "${BACKUP_ARCHIVE_DIR}"/*.tar.gz*; do
     if [[ -f "$archive" ]]; then
       local name
       local size
       local date
+      local encrypted
 
       name=$(basename "$archive")
       size=$(du -h "$archive" | cut -f1)
       date=$(stat -c %y "$archive" | cut -d' ' -f1)
 
+      # Проверяем, зашифрован ли архив
+      if [[ "$name" == *.age ]]; then
+        encrypted=" [ENCRYPTED]"
+      else
+        encrypted=""
+      fi
+
       BACKUP_MAP[$i]="$archive"
       echo ""
-      echo "  [$i] $name"
+      echo "  [$i] $name$encrypted"
       echo "      Size: $size"
       echo "      Date: $date"
 
@@ -110,7 +115,7 @@ rollback_select_backup() {
       exit 0
     fi
 
-    if [[ -n "$BACKUP_MAP[$selection]" ]]; then
+    if [[ -n "${BACKUP_MAP[$selection]}" ]]; then
       echo "${BACKUP_MAP[$selection]}"
       return 0
     fi
@@ -121,7 +126,7 @@ rollback_select_backup() {
 
 # ── Подготовка бэкапа / Prepare Backup ───────────────────
 
-# Распаковка бэкапа
+# Распаковка архива
 rollback_extract_backup() {
   local archive="$1"
 
@@ -131,6 +136,31 @@ rollback_extract_backup() {
   rm -rf "${ROLLBACK_TEMP_DIR:?}"/*
   mkdir -p "$ROLLBACK_TEMP_DIR"
 
+  # Проверяем, зашифрован ли архив
+  if [[ "$archive" == *.age ]]; then
+    log_info "Encrypted archive detected, decrypting..."
+
+    # Получаем ключ шифрования
+    local key_file="${BACKUP_DIR}/backup-key.txt"
+    if [[ ! -f "$key_file" ]]; then
+      log_error "Encryption key not found: $key_file"
+      return 1
+    fi
+
+    local key
+    key=$(cat "$key_file")
+
+    # Расшифровываем архив
+    local decrypted_file="${archive%.age}"
+    if ! age --decrypt -i "$key_file" -o "$decrypted_file" "$archive" 2>/dev/null; then
+      log_error "Failed to decrypt archive"
+      return 1
+    fi
+
+    archive="$decrypted_file"
+    log_info "Archive decrypted successfully"
+  fi
+
   # Распаковываем архив
   if ! tar -xzf "$archive" -C "$ROLLBACK_TEMP_DIR"; then
     log_error "Failed to extract backup archive"
@@ -138,6 +168,64 @@ rollback_extract_backup() {
   fi
 
   log_success "Backup extracted"
+}
+
+# ── Проверка целостности / Integrity Check ───────────────
+
+# Проверка целостности восстановленных файлов
+rollback_verify_integrity() {
+  log_step "rollback_verify_integrity" "Verifying backup integrity"
+
+  local issues=0
+
+  # Проверяем SHA256 базы данных Marzban
+  if [[ -f "${ROLLBACK_TEMP_DIR}/marzban-db.sqlite3" ]] &&
+     [[ -f "${ROLLBACK_TEMP_DIR}/marzban-db.sqlite3.sha256" ]]; then
+    local expected_hash
+    expected_hash=$(cat "${ROLLBACK_TEMP_DIR}/marzban-db.sqlite3.sha256")
+
+    if ! verify_sha256 "${ROLLBACK_TEMP_DIR}/marzban-db.sqlite3" "$expected_hash"; then
+      log_warn "Marzban database integrity check FAILED"
+      ((issues++))
+    else
+      log_success "Marzban database integrity verified"
+    fi
+  fi
+
+  # Проверяем SHA256 конфигурации Marzban
+  if [[ -f "${ROLLBACK_TEMP_DIR}/marzban.env" ]] &&
+     [[ -f "${ROLLBACK_TEMP_DIR}/marzban.env.sha256" ]]; then
+    local expected_hash
+    expected_hash=$(cat "${ROLLBACK_TEMP_DIR}/marzban.env.sha256")
+
+    if ! verify_sha256 "${ROLLBACK_TEMP_DIR}/marzban.env" "$expected_hash"; then
+      log_warn "Marzban configuration integrity check FAILED"
+      ((issues++))
+    else
+      log_success "Marzban configuration integrity verified"
+    fi
+  fi
+
+  # Проверяем SHA256 конфигурации Sing-box
+  if [[ -f "${ROLLBACK_TEMP_DIR}/singbox-config.json" ]] &&
+     [[ -f "${ROLLBACK_TEMP_DIR}/singbox-config.json.sha256" ]]; then
+    local expected_hash
+    expected_hash=$(cat "${ROLLBACK_TEMP_DIR}/singbox-config.json.sha256")
+
+    if ! verify_sha256 "${ROLLBACK_TEMP_DIR}/singbox-config.json" "$expected_hash"; then
+      log_warn "Sing-box configuration integrity check FAILED"
+      ((issues++))
+    else
+      log_success "Sing-box configuration integrity verified"
+    fi
+  fi
+
+  if [[ $issues -gt 0 ]]; then
+    log_error "Integrity checks failed: $issues files corrupted"
+    return 1
+  fi
+
+  log_success "All integrity checks passed"
 }
 
 # ── Остановка сервисов / Stop Services ──────────────────────
@@ -175,6 +263,17 @@ rollback_marzban_db() {
     return 1
   fi
 
+  # Проверяем целостность перед восстановлением
+  if [[ -f "${backup_db}.sha256" ]]; then
+    local expected_hash
+    expected_hash=$(cat "${backup_db}.sha256")
+
+    if ! verify_sha256 "$backup_db" "$expected_hash"; then
+      log_error "Marzban database integrity check failed, aborting restore"
+      return 1
+    fi
+  fi
+
   # Останавливаем Marzban если активен
   if svc_active "marzban"; then
     svc_stop "marzban"
@@ -194,6 +293,17 @@ rollback_marzban_db() {
 rollback_marzban_config() {
   log_step "rollback_marzban_config" "Restoring Marzban configuration"
 
+  # Проверяем целостность .env
+  if [[ -f "${ROLLBACK_TEMP_DIR}/marzban.env.sha256" ]]; then
+    local expected_hash
+    expected_hash=$(cat "${ROLLBACK_TEMP_DIR}/marzban.env.sha256")
+
+    if ! verify_sha256 "${ROLLBACK_TEMP_DIR}/marzban.env" "$expected_hash"; then
+      log_error "Marzban .env integrity check failed, skipping restore"
+      return 1
+    fi
+  fi
+
   # Восстанавливаем .env
   if [[ -f "${ROLLBACK_TEMP_DIR}/marzban.env" ]]; then
     cp "${ROLLBACK_TEMP_DIR}/marzban.env" "$MARZBAN_ENV"
@@ -201,6 +311,17 @@ rollback_marzban_config() {
     log_success "Marzban .env restored"
   else
     log_warn "Marzban .env backup not found"
+  fi
+
+  # Проверяем целостность шаблона Sing-box
+  if [[ -f "${ROLLBACK_TEMP_DIR}/sing-box-template.json.sha256" ]]; then
+    local expected_hash
+    expected_hash=$(cat "${ROLLBACK_TEMP_DIR}/sing-box-template.json.sha256")
+
+    if ! verify_sha256 "${ROLLBACK_TEMP_DIR}/sing-box-template.json" "$expected_hash"; then
+      log_error "Sing-box template integrity check failed, skipping restore"
+      return 1
+    fi
   fi
 
   # Восстанавливаем шаблон Sing-box
@@ -215,9 +336,20 @@ rollback_marzban_config() {
 
 # ── Восстановление Sing-box / Restore Sing-box ───────────────
 
-# Восстановление конфигурации Sing-box
+# Восстановление конфигурации Sing-box с проверкой целостности
 rollback_singbox_config() {
   log_step "rollback_singbox_config" "Restoring Sing-box configuration"
+
+  # Проверяем целостность конфигурации
+  if [[ -f "${ROLLBACK_TEMP_DIR}/singbox-config.json.sha256" ]]; then
+    local expected_hash
+    expected_hash=$(cat "${ROLLBACK_TEMP_DIR}/singbox-config.json.sha256")
+
+    if ! verify_sha256 "${ROLLBACK_TEMP_DIR}/singbox-config.json" "$expected_hash"; then
+      log_error "Sing-box configuration integrity check failed, skipping restore"
+      return 1
+    fi
+  fi
 
   local backup_conf="${ROLLBACK_TEMP_DIR}/singbox-config.json"
 
@@ -240,7 +372,7 @@ rollback_singbox_config() {
 
 # ── Восстановление SSL сертификатов / Restore SSL ───────────
 
-# Восстановление SSL сертификатов
+# Восстановление SSL сертификатов с проверкой валидности
 rollback_ssl_certs() {
   log_step "rollback_ssl_certs" "Restoring SSL certificates"
 
@@ -257,6 +389,23 @@ rollback_ssl_certs() {
   # Устанавливаем права
   chmod 640 "${SSL_CERT_DIR}"/*.pem
   chown root:root "${SSL_CERT_DIR}"/*.pem
+
+  # Проверяем валидность сертификатов используя verify_ssl_cert из security.sh
+  local cert_file="${SSL_CERT_DIR}/fullchain.pem"
+  if [[ -f "$cert_file" ]]; then
+    # Извлекаем домен из сертификата
+    local domain
+    domain=$(openssl x509 -in "$cert_file" -noout -subject 2>/dev/null | grep -oP '(?<=CN=)[^,]+' || echo "unknown")
+
+    if [[ "$domain" != "unknown" ]]; then
+      log_info "Checking SSL certificate for: $domain"
+      if verify_ssl_cert "$domain" 443 5 2>/dev/null; then
+        log_success "SSL certificate is valid: $domain"
+      else
+        log_warn "SSL certificate validation failed: $domain"
+      fi
+    fi
+  fi
 
   log_success "SSL certificates restored"
 }
@@ -310,9 +459,9 @@ rollback_start_services() {
 
 # ── Полный откат / Full Rollback ────────────────────────────
 
-# Выполнение полного отката
+# Выполнение полного отката с проверкой целостности
 rollback_full() {
-  log_step "rollback_full" "Performing full rollback"
+  log_step "rollback_full" "Performing full rollback with integrity checks"
 
   rollback_init
 
@@ -322,6 +471,12 @@ rollback_full() {
 
   # Распаковка
   rollback_extract_backup "$archive"
+
+  # Проверка целостности
+  if ! rollback_verify_integrity; then
+    log_error "Integrity checks failed, aborting rollback"
+    return 1
+  fi
 
   # Останавливаем сервисы
   rollback_stop_services
@@ -344,7 +499,7 @@ rollback_full() {
 
 # ── Быстрый откат (без выбора) / Quick Rollback ─────────
 
-# Откат из последнего бэкапа
+# Откат из последнего бэкапа с проверкой целостности
 rollback_latest() {
   log_step "rollback_latest" "Performing rollback from latest backup"
 
@@ -363,6 +518,12 @@ rollback_latest() {
 
   # Распаковка
   rollback_extract_backup "$latest_backup"
+
+  # Проверка целостности
+  if ! rollback_verify_integrity; then
+    log_error "Integrity checks failed, aborting rollback"
+    return 1
+  fi
 
   # Останавливаем сервисы
   rollback_stop_services
@@ -389,7 +550,7 @@ module_configure() { :; }
 module_enable() { :; }
 module_disable() { :; }
 
-# Полный откат с интерактивным выбором
+# Полный откат с интерактивным выбором бэкапа
 module_rollback() { rollback_full; }
 
 # Быстрый откат из последнего бэкапа

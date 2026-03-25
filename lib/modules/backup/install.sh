@@ -1,13 +1,9 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Backup Module                        ║
+# ║          CubiVeil — Backup Module (Enhanced)          ║
 # ║          github.com/cubiculus/cubiveil                   ║
 # ║                                                           ║
-# ║  Модуль резервного копирования                            ║
-# ║  - Резервное копирование Marzban                           ║
-# ║  - Резервное копирование Sing-box                          ║
-# ║  - Резервное копирование SSL сертификатов                   ║
-# ║  - Создание архивов                                       ║
+# ║  Модуль резервного копирования с шифрованием        ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 # ── Подключение зависимостей / Dependencies ─────────────────
@@ -27,7 +23,7 @@ if [[ -f "${SCRIPT_DIR}/lib/utils.sh" ]]; then
   source "${SCRIPT_DIR}/lib/utils.sh"
 fi
 
-# Подключаем security
+# Подключаем security (ENHANCED - использование функций)
 if [[ -f "${SCRIPT_DIR}/lib/security.sh" ]]; then
   source "${SCRIPT_DIR}/lib/security.sh"
 fi
@@ -58,6 +54,40 @@ backup_init() {
   log_debug "Backup directories created"
 }
 
+# ── Генерация ключей шифрования / Encryption Keys ─────────
+
+# Генерация ключа для шифрования бэкапов
+backup_generate_encryption_key() {
+  log_step "backup_generate_encryption_key" "Generating encryption key"
+
+  local key_file="${BACKUP_DIR}/backup-key.txt"
+
+  # Генерируем безопасный ключ используя generate_secure_key из security.sh
+  local key
+  key=$(generate_secure_key 32)
+
+  # Сохраняем ключ
+  echo "$key" > "$key_file"
+  chmod 600 "$key_file"
+
+  log_debug "Encryption key generated"
+  echo "$key"
+}
+
+# Получение ключа шифрования
+backup_get_encryption_key() {
+  local key_file="${BACKUP_DIR}/backup-key.txt"
+
+  if [[ -f "$key_file" ]]; then
+    cat "$key_file"
+    return 0
+  else
+    log_warn "Encryption key not found, generating new key..."
+    backup_generate_encryption_key
+    return 1
+  fi
+}
+
 # ── Проверка окружения / Environment Check ────────────────
 
 # Проверка окружения перед бэкапом
@@ -81,6 +111,12 @@ backup_check_environment() {
   # Проверяем наличие SSL сертификатов
   if [[ ! -d "$SSL_CERT_DIR" ]]; then
     log_warn "SSL certificates directory not found: $SSL_CERT_DIR"
+    ((issues++))
+  fi
+
+  # Проверяем наличие age для шифрования
+  if ! command -v age &>/dev/null; then
+    log_warn "age encryption tool not found, backups will not be encrypted"
     ((issues++))
   fi
 
@@ -117,7 +153,7 @@ backup_stop_services() {
 
 # ── Бэкап Marzban / Backup Marzban ────────────────────────
 
-# Бэкап базы данных Marzban
+# Бэкап базы данных Marzban с проверкой целостности
 backup_marzban_db() {
   log_step "backup_marzban_db" "Backing up Marzban database"
 
@@ -126,9 +162,17 @@ backup_marzban_db() {
     return 1
   fi
 
-  cp "${MARZBAN_DIR}/db.sqlite3" "${BACKUP_DIR}/marzban-db.sqlite3"
+  local backup_db="${BACKUP_DIR}/marzban-db.sqlite3"
 
-  log_success "Marzban database backed up"
+  # Копируем базу данных
+  cp "${MARZBAN_DIR}/db.sqlite3" "$backup_db"
+
+  # Генерируем SHA256 для проверки целостности
+  local hash
+  hash=$(sha256sum "$backup_db" 2>/dev/null | awk '{print $1}')
+  echo "$hash" > "${backup_db}.sha256"
+
+  log_success "Marzban database backed up (SHA256: ${hash:0:8}...)"
 }
 
 # Бэкап конфигурации Marzban
@@ -140,17 +184,29 @@ backup_marzban_config() {
   # Бэкап .env
   if [[ -f "$MARZBAN_ENV" ]]; then
     cp "$MARZBAN_ENV" "${BACKUP_DIR}/marzban.env"
+
+    # Генерируем SHA256
+    local hash
+    hash=$(sha256sum "${BACKUP_DIR}/marzban.env" 2>/dev/null | awk '{print $1}')
+    echo "$hash" > "${BACKUP_DIR}/marzban.env.sha256"
+
     backed_up=true
   fi
 
   # Бэкап шаблона Sing-box
   if [[ -f "$MARZBAN_TEMPLATE" ]]; then
     cp "$MARZBAN_TEMPLATE" "${BACKUP_DIR}/sing-box-template.json"
+
+    # Генерируем SHA256
+    local hash
+    hash=$(sha256sum "${BACKUP_DIR}/sing-box-template.json" 2>/dev/null | awk '{print $1}')
+    echo "$hash" > "${BACKUP_DIR}/sing-box-template.json.sha256"
+
     backed_up=true
   fi
 
   if [[ "$backed_up" == "true" ]]; then
-    log_success "Marzban configuration backed up"
+    log_success "Marzban configuration backed up with integrity hashes"
   fi
 }
 
@@ -164,7 +220,13 @@ backup_singbox_config() {
 
   if [[ -f "$SINGBOX_CONF" ]]; then
     cp "$SINGBOX_CONF" "${BACKUP_DIR}/singbox-config.json"
-    log_success "Sing-box configuration backed up"
+
+    # Генерируем SHA256
+    local hash
+    hash=$(sha256sum "${BACKUP_DIR}/singbox-config.json" 2>/dev/null | awk '{print $1}')
+    echo "$hash" > "${BACKUP_DIR}/singbox-config.json.sha256"
+
+    log_success "Sing-box configuration backed up (SHA256: ${hash:0:8}...)"
   else
     log_warn "Sing-box configuration not found"
   fi
@@ -172,7 +234,7 @@ backup_singbox_config() {
 
 # ── Бэкап SSL сертификатов / Backup SSL ────────────────────
 
-# Бэкап SSL сертификатов
+# Бэкап SSL сертификатов с проверкой валидности
 backup_ssl_certs() {
   log_step "backup_ssl_certs" "Backing up SSL certificates"
 
@@ -184,18 +246,40 @@ backup_ssl_certs() {
   # Копируем все сертификаты
   cp -r "$SSL_CERT_DIR" "${BACKUP_DIR}/ssl-certs/"
 
+  # Проверяем валидность сертификатов используя verify_ssl_cert из security.sh
+  local cert_file="${SSL_CERT_DIR}/fullchain.pem"
+  if [[ -f "$cert_file" ]]; then
+    # Извлекаем домен из сертификата
+    local domain
+    domain=$(openssl x509 -in "$cert_file" -noout -subject 2>/dev/null | grep -oP '(?<=CN=)[^,]+' || echo "unknown")
+
+    if [[ "$domain" != "unknown" ]]; then
+      log_info "Checking SSL certificate for: $domain"
+      if verify_ssl_cert "$domain" 443 5 2>/dev/null; then
+        log_success "SSL certificate is valid: $domain"
+      else
+        log_warn "SSL certificate validation failed: $domain"
+      fi
+    fi
+  fi
+
   log_success "SSL certificates backed up"
 }
 
 # ── Бэкап ключей / Backup Keys ───────────────────────────
 
-# Бэкап ключей и credentials
+# Бэкап ключей и credentials с шифрованием
 backup_keys() {
   log_step "backup_keys" "Backing up keys and credentials"
 
   local backed_up=false
 
-  # Бэкап credentials.age
+  # Проверяем наличие age
+  if ! command -v age &>/dev/null; then
+    log_warn "age not available, credentials will not be encrypted"
+  fi
+
+  # Бэкап credentials.age если есть
   if [[ -f "$CREDENTIALS_FILE" ]]; then
     cp "$CREDENTIALS_FILE" "${BACKUP_DIR}/credentials.age"
     backed_up=true
@@ -212,32 +296,73 @@ backup_keys() {
   fi
 }
 
+# ── Шифрование архива / Encrypt Archive ───────────────────
+
+# Шифрование архива бэкапа
+backup_encrypt_archive() {
+  local archive="$1"
+
+  log_step "backup_encrypt_archive" "Encrypting backup archive"
+
+  # Проверяем наличие age
+  if ! command -v age &>/dev/null; then
+    log_warn "age not available, skipping encryption"
+    return 1
+  fi
+
+  # Получаем или генерируем ключ шифрования
+  local encryption_key
+  encryption_key=$(backup_get_encryption_key)
+
+  # Шифруем архив используя encrypt_to_file из security.sh
+  local encrypted_file="${archive}.age"
+  
+  # Читаем содержимое архива и шифруем
+  if encrypt_to_file "$(cat "$archive")" "$encryption_key" "$encrypted_file"; then
+    # Удаляем оригинальный архив
+    rm -f "$archive"
+
+    # Сохраняем ключ в архив
+    cp "${BACKUP_DIR}/backup-key.txt" "${encrypted_file}.key"
+
+    log_success "Backup encrypted: $encrypted_file"
+    log_info "Encryption key: ${encrypted_file}.key"
+  else
+    log_warn "Failed to encrypt backup archive"
+    return 1
+  fi
+}
+
 # ── Бэкап системной информации / Backup System Info ───────
 
 # Сбор системной информации
 backup_system_info() {
   log_step "backup_system_info" "Backing up system information"
 
-  # Создаём файл с информацией о системе
-  cat >"${BACKUP_DIR}/system-info.txt" <<EOF
-CubiVeil Backup Information
-Generated: $(date '+%Y-%m-%d %H:%M:%S')
-Hostname: $(hostname)
-IP Address: $(get_server_ip 2>/dev/null || echo "unknown")
-Ubuntu Version: $(grep 'VERSION=' /etc/os-release 2>/dev/null | cut -d= -f2 | tr -d '"')
-Kernel: $(uname -r)
+  {
+    echo "CubiVeil Backup Information"
+    echo "Generated: $(date '+%Y-%m-%d %H:%M:%S')"
+    echo "Hostname: $(hostname)"
+    echo "IP Address: $(get_server_ip 2>/dev/null || echo "unknown")"
+    echo "Ubuntu Version: $(grep 'VERSION=' /etc/os-release 2>/dev/null | cut -d= -f2 | tr -d '"')"
+    echo "Kernel: $(uname -r)"
+    echo ""
+    echo "Installed Packages:"
+    dpkg -l 2>/dev/null | grep -E "(marzban|sing-box|cubiveil|ufw|fail2ban)" || echo "N/A"
+    echo ""
+    echo "Services Status:"
+    echo "Marzban: $(svc_active "marzban" && echo "active" || echo "inactive")"
+    echo "Sing-box: $(svc_active "sing-box" && echo "active" || echo "inactive")"
+    echo "UFW: $(svc_active "ufw" && echo "active" || echo "inactive")"
+    echo "Fail2ban: $(svc_active "fail2ban" && echo "active" || echo "inactive")"
+  } > "${BACKUP_DIR}/system-info.txt"
 
-Installed Packages:
-$(dpkg -l 2>/dev/null | grep -E "(marzban|sing-box|cubiveil|ufw|fail2ban)" || echo "N/A")
+  # Генерируем SHA256
+  local hash
+  hash=$(sha256sum "${BACKUP_DIR}/system-info.txt" 2>/dev/null | awk '{print $1}')
+  echo "$hash" > "${BACKUP_DIR}/system-info.txt.sha256"
 
-Services Status:
-Marzban: $(svc_active "marzban" && echo "active" || echo "inactive")
-Sing-box: $(svc_active "sing-box" && echo "active" || echo "inactive")
-UFW: $(svc_active "ufw" && echo "active" || echo "inactive")
-Fail2ban: $(svc_active "fail2ban" && echo "active" || echo "inactive")
-EOF
-
-  log_success "System information backed up"
+  log_success "System information backed up (SHA256: ${hash:0:8}...)"
 }
 
 # ── Создание архива / Create Archive ───────────────────────
@@ -255,13 +380,18 @@ backup_create_archive() {
   # Создаём архив
   tar -czf "$archive_file" -C "$BACKUP_DIR" \
     marzban-db.sqlite3 \
+    marzban-db.sqlite3.sha256 \
     marzban.env \
+    marzban.env.sha256 \
     sing-box-template.json \
+    sing-box-template.json.sha256 \
     singbox-config.json \
+    singbox-config.json.sha256 \
     ssl-certs/ \
     credentials.age \
     credentials.key \
-    system-info.txt 2>/dev/null || true
+    system-info.txt \
+    system-info.txt.sha256 2>/dev/null || true
 
   # Проверяем размер архива
   if [[ -f "$archive_file" ]]; then
@@ -313,7 +443,7 @@ backup_cleanup_old() {
 
 # ── Полный бэкап / Full Backup ─────────────────────────────
 
-# Выполнение полного бэкапа
+# Выполнение полного бэкапа с шифрованием
 backup_full() {
   log_step "backup_full" "Performing full backup"
 
@@ -332,7 +462,13 @@ backup_full() {
   backup_system_info
 
   # Создаём архив
-  backup_create_archive "cubiveil-full"
+  local archive_file
+  archive_file=$(backup_create_archive "cubiveil-full")
+
+  # Шифруем архив если доступен age
+  if command -v age &>/dev/null; then
+    backup_encrypt_archive "$archive_file"
+  fi
 
   # Запускаем сервисы
   backup_start_services
@@ -377,7 +513,7 @@ module_list() {
   echo "Available backups:"
   echo "────────────────"
 
-  for archive in "${BACKUP_ARCHIVE_DIR}"/*.tar.gz; do
+  for archive in "${BACKUP_ARCHIVE_DIR}"/*.tar.gz*; do
     if [[ -f "$archive" ]]; then
       local name
       local size
