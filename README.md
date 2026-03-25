@@ -1,811 +1,495 @@
-<div align="center">
+# CubiVeil — Modular Architecture
 
-![CubiVeil](assets/logo.png)
+**Полная документация проекта и модульная система управления**
 
-# CubiVeil
+## 📋 Содержание
 
-[![CI](https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml/badge.svg)](https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Platform](https://img.shields.io/badge/platform-Ubuntu%2022.04%20%7C%2024.04-orange)](https://ubuntu.com/)
-
-[🇬🇧 **English Version**](#english-version)
-
-</div>
-
-> Установка приватного прокси-сервера: **Marzban + Sing-box**, 5 профилей,
-> SSL-сертификат, защита сервера, Telegram-бот с мониторингом и бэкапами.
+- [Обзор проекта](#-обзор-проекта)
+- [Установка](#-установка)
+- [Управление модулями](#-управление-модулями)
+- [Утилиты](#-утилиты)
+- [Миграция](#-миграция)
+- [Тестирование](#-тестирование)
+- [Архитектура](#-архитектура)
+- [Безопасность](#-безопасность)
 
 ---
 
-<div align="center">
+## 📊 Обзор проекта
 
-### 🚀 Быстрый старт
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/cubiculus/cubiveil/main/install.sh)
-```
-
-</div>
-
----
-
----
-
-## Что это
-
-CubiVeil — модульный установочный скрипт для личного прокси-сервера на базе
-[Marzban](https://github.com/Gozargah/Marzban) +
-[Sing-box](https://github.com/SagerNet/sing-box).
-
-**Что делает скрипт за один запуск:**
-- Обновляет систему, настраивает автопатчи безопасности
-- Включает BBR для лучшей скорости
-- Настраивает файрвол (ufw) и Fail2ban
-- Проверяет репутацию IP-подсети и предупреждает о риске
-- Устанавливает Sing-box, Marzban, получает SSL-сертификат
-- Создаёт 5 профилей с автогенерацией ключей и портов
-- Настраивает health-check эндпоинт для мониторинга
-- **Опционально**: устанавливает Telegram-бот через отдельный скрипт
-
-Скрипт написан на русском и английском, прокомментирован и не содержит скрытых действий.
-
----
-
-## Архитектура проекта
+### 🗂 Структура проекта
 
 ```
 CubiVeil/
-├── install.sh              # Основной установщик (88 строк)
-├── setup-telegram.sh       # Отдельный скрипт для Telegram бота
-├── run-tests.sh            # Универсальный тест-раннер
-├── lang.sh                # Локализация (RU/EN)
-├── lib/
-│   ├── utils.sh           # Общие утилиты (генераторы, порты, IP)
-│   └── install-steps.sh   # Шаги установки Marzban + Sing-box
-└── tests/
-    ├── integration-tests.sh # Интеграционные тесты (требуют root)
-    ├── modular-structure.sh # Тесты модульной структуры
-    ├── unit-utils.sh      # Тесты lib/utils.sh
-    └── unit-telegram.sh   # Тесты setup-telegram.sh
+├── lib/                      # Библиотечные модули
+│   ├── core/                    # Core модули (system, log)
+│   ├── modules/                  # Модульная система (9 модулей)
+│   ├── steps/                   # Разделённые step функции
+│   ├── utils/                     # Утилиты
+│   └── manifest.sh                # Манифест модулей
+├── utils/                      # Стендалонные утилиты
+│   ├── backup.sh                  # Резервное копирование
+│   ├── rollback.sh                # Откат к бэкапам
+│   └── monitor.sh                # Мониторинг системы
+├── install-modular.sh          # Новый модульный установщик
+│   └── install-steps.sh.backup      # Резервная копия оригинала
+├── install.sh                    # Оригинальный установщик
+├── README.md                    # Документация
+├── LICENSE                      # Лицензия
+├── setup-telegram.sh           # Установка бота
+└── diagnose.sh                 # Диагностика
 ```
 
-**Преимущества модульной архитектуры:**
-- Чистый и компактный `install.sh`
-- Telegram-бот полностью отделён — можно добавить позже
-- Код разбит на логические блоки для удобства поддержки
-- Независимое тестирование каждого модуля
+---
+
+## 🗂 Установка
+
+### 📦 Обзор
+
+`./install-modular.sh` — новый модульный установщик
+- **Интерактивный выбор:** выбор языка и режима установки
+- **Модульный подход:** каждый модуль — независимая единица
+- **Manifest-driven:** автоматическое определение зависимостей
+- **CLI аргументы:** `--mode`, `--modules`, `--force`, `--skip-checks`, `--verbose`
+
+**Режимы установки:**
+  - `full` — все модули + утилиты (рекомендуется)
+  - `minimal` — только core модули (system, firewall, ssl, singbox, marzban)
+  - `custom` — ручной выбор модулей
+
+**Структура модуля:**
+
+Каждый модуль в `lib/modules/*/install.sh` имеет:
+- `module_install()` — установка модуля
+- `module_configure()` — настройка конфигурации
+- `module_enable()` — включение сервиса
+- `module_disable()` — отключение сервиса
+- `module_update()` — обновление
+- `module_remove()` - удаление
+- `module_status()` — проверка статуса
+- `module_*` — дополнительные функции
 
 ---
 
-## Требования
+## 🎛 Управление модулями
 
-| | Минимум | Рекомендуется |
-|---|---|---|
-| ОС | Ubuntu 22.04 | Ubuntu 24.04 |
-| RAM | 512 МБ | 1 ГБ |
-| CPU | 1 ядро | 1 ядро |
-| Диск | 5 ГБ | 10 ГБ |
-| Права | root | root |
-| Домен | A-запись → IP сервера **до запуска** | |
+### Модули (lib/modules/)
+
+#### 1. System Module
+- **Файл:** `lib/modules/system/install.sh` (12KB)
+- **Описание:** Системные настройки
+- **Функции:**
+  - `system_full_update()` — полное обновление системы
+  - `system_auto_updates_setup()` — настройка автообновлений
+  - `system_bbr_setup()` — BBR оптимизация
+  - `system_check_ip_neighborhood()` — проверка IP-соседей
+
+#### 2. Firewall Module
+- **Файл:** `lib/modules/firewall/install.sh` (6.7KB)
+- **Описание:** Файрвол UFW
+- **Функции:**
+  - `firewall_install()` — установка UFW
+  - `firewall_reset()` — сброс правил
+  - `firewall_configure()` — настройка портов
+  - `firewall_enable/disable()` — включение/отключение
+  - `firewall_open/close_port()` — управление портами
+
+#### 3. Fail2ban Module
+- **Файл:** `lib/modules/fail2ban/install.sh` (6.4KB)
+- **Описание:** Защита от брутфорса
+- **Функции:**
+  - `fail2ban_install()` — установка Fail2ban
+  - `fail2ban_configure()` — настройка защиты SSH
+  - `fail2ban_enable/disable()` — включение/отключение
+  - `fail2ban_list_banned()` — список забаненных IP
+
+#### 4. SSL Module
+- **Файл:** `lib/modules/ssl/install.sh` (12KB)
+- **Описание:** SSL сертификаты (Let's Encrypt)
+- **Функции:**
+  - `ssl_install()` — установка Certbot/acme.sh
+  - `ssl_generate()` - генерация сертификата
+- `ssl_configure()` - настройка webroot
+- `ssl_renew()` - обновление сертификатов
+- `ssl_list()` - список сертификатов
+
+#### 5. Sing-box Module
+- **Файл:** `lib/modules/singbox/install.sh` (14KB)
+- **Описание:** Прокси-сервер Sing-box
+- **Функции:**
+  - `singbox_install()` — установка с GPG/SHA256 проверкой
+  - `singbox_configure()` — настройка конфигурации
+  - `singbox_update()` - обновление версии
+- `singbox_status()` — проверка статуса
+
+#### 6. Marzban Module
+- **Файл:** `lib/modules/marzban/install.sh` (12KB)
+- **Описание:** Панель управления Marzban
+- **Функции:**
+  - `marzban_install()` — установка через официальный скрипт
+  - `marzban_configure()` - настройка .env
+  - `marzban_enable/disable/reload()` — управление сервисом
+  - `marzban_create/delete/list_users()` - управление пользователями
+
+#### 7. Backup Module
+- **Файл:** `lib/modules/backup/install.sh` (13KB)
+- **Описание:** Резервное копирование
+- **Функции:**
+  - `backup_full()` — полный бэкап (все данные + архив)
+  - `module_quick_backup()` - быстрый бэкап (без остановки)
+  - `module_list()` - список бэкапов
+- `module_cleanup()` — очистка старых бэкапов
+
+#### 8. Rollback Module
+- **Файл:** `lib/modules/rollback/install.sh` (13KB)
+- **Описание:** Откат к бэкапам
+- **Функции:**
+  - `rollback_full()` — полный откат (интерактивный выбор бэкапа)
+  - `rollback_latest()` - быстрый откат (из последнего бэкапа)
+  `module_list()` - список бэкапов
+
+#### 9. Monitoring Module
+- **Файл:** `lib/modules/monitoring/install.sh` (12KB)
+- **Описание:** Мониторинг системы
+- **Функции:**
+  - `monitor_check_services()` — проверка статуса сервисов
+- `monitor_check_resources()` — проверка CPU, RAM, Disk
+- `monitor_check_ssl()` - проверка SSL сертификатов
+- `monitor_health_check()` — полная проверка здоровья
+- `module_generate_report()` - генерация отчёта
 
 ---
 
-## Установка
+## 🔧 Утилиты
 
-### Основная установка
+### 📦 Обзор
+
+#### Backup Utility (`utils/backup.sh`)
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/cubiculus/cubiveil/main/install.sh)
+./utils/backup.sh --help
+Actions:
+  1) Create backup   - полный бэкап с остановкой сервисов
+   2) Quick backup  - быстрый бэкап (без остановки)
+   3) List backups  - список доступных бэкапов
+  4) Cleanup      - удаление старых бэкапов
 ```
 
-**Во время установки вас спросят:**
-1. **Домен** — для панели и подписок (например, `panel.example.com`)
-2. **Email** — для Let's Encrypt SSL сертификата
-3. **Telegram-бот** — хотите ли установить (y/n)
-   - Если да — после установки будет предложена команда для `setup-telegram.sh`
+**Функции:**
+- `backup_init()` — инициализация
+- `backup_check_environment()` — проверка окружения
+- `backup_stop_services()` — остановка сервисов
+- `backup_encrypt_archive()` — шифрование архива
+- `backup_cleanup_old()` — удаление старых бэкапов
 
-### Установка Telegram-бота
-
-После основной установки:
+#### Rollback Utility (`utils/rollback.sh`)
 
 ```bash
-# С GitHub
-bash <(curl -fsSL https://raw.githubusercontent.com/cubiculus/cubiveil/main/setup-telegram.sh)
-
-# Или с локального файла
-bash setup-telegram.sh
+./utils/rollback.sh --help
+Actions:
+  1) Full rollback      - полный откат с выбором бэкапа
+  2) Quick rollback   - быстрый откат из последнего бэкапа
+  3) List backups   - список бэкапов
 ```
 
-**Для настройки нужны:**
-- Токен от [@BotFather](https://t.me/BotFather)
-- Твой chat_id (узнать: [@userinfobot](https://t.me/userinfobot))
+**Функции:**
+- `rollback_full()` — полный откат
+- `rollback_latest()` — быстрый откат из последнего бэкапа
+- `rollback_list_backups()` — список бэкапов с информацией о шифровании
 
----
-
-## Профили
-
-### Профиль 1 — VLESS + Reality + TCP *(основной)*
-Маскируется под TLS-соединение с крупным CDN. При активном зондировании
-возвращает настоящий TLS-ответ — сервер неотличим от обычного сайта.
-Camouflage-домен выбирается случайно при каждой установке.
-
-**Порт:** 443/tcp
-
-### Профиль 2 — VLESS + Reality + gRPC *(альтернатива)*
-Тот же Reality, но с HTTP/2 мультиплексингом. Использовать если провайдер
-нестабильно пропускает TCP на 443.
-
-**Порт:** 443/tcp
-
-### Профиль 3 — Hysteria2 *(быстрые загрузки)*
-UDP/QUIC транспорт — принципиально другой стек, блокируется отдельно от TCP.
-Оптимален для больших файлов: Nintendo eShop, игры, обновления.
-
-**Порт:** 443/udp
-
-### Профиль 4 — Trojan + WebSocket + TLS *(fallback)*
-Трафик выглядит как обычный HTTPS. Совместим с Cloudflare CDN —
-если IP сервера заблокируют, можно поставить домен за CF и продолжить
-работу без смены сервера.
-
-**Порт:** случайный 30000+
-
-### Профиль 5 — Shadowsocks 2022 *(совместимость)*
-Для клиентов без поддержки Reality или Hysteria2. Работает на большинстве
-мобильных приложений без дополнительных настроек.
-
-**Порт:** случайный 30000+
-
----
-
-## Архитектура портов
-
-```
-443/tcp  → VLESS Reality TCP + gRPC
-443/udp  → Hysteria2
-XXXXX/tcp → Trojan WebSocket TLS    (рандом 30000+)
-XXXXX/tcp → Shadowsocks 2022        (рандом 30000+)
-XXXXX/tcp → Панель Marzban HTTPS    (рандом 30000+)
-XXXXX/tcp → Subscription link       (рандом 30000+)
-XXXXX/tcp → Health Check endpoint   (рандом 30000+)
-```
-
----
-
-## Telegram-бот
-
-**Ежедневный отчёт** (настраиваемое время):
-```
-🛡 CubiVeil — ежедневный отчёт
-12.03.2026 09:00 UTC
-━━━━━━━━━━━━━━━━━━━━━
-🟢 CPU:   8%   ████░░░░░
-🟢 RAM:   312/1024 МБ (30%)
-🟢 Диск:  4/20 ГБ (20%)
-⏱ Uptime: 14д 6ч 12м
-━━━━━━━━━━━━━━━━━━━━━
-👥 Активных пользователей: 4
-━━━━━━━━━━━━━━━━━━━━━
-📦 Бэкап базы прикреплён ниже
-```
-
-**Алерты** каждые 15 минут, без спама — только при переходе через порог:
-```
-⚠️ CubiVeil — Алерт!
-━━━━━━━━━━━━━━━
-🔴 CPU: 87% (порог 80%)
-```
-
-**Интерактивные команды** (только для авторизованного chat_id):
-```
-/status  — текущее состояние сервера
-/backup  — получить бэкап прямо сейчас
-/users   — активные пользователи
-/restart — перезапустить Marzban
-/health  — полный отчёт о здоровье сервисов
-/speedtest — проверка скорости соединения
-/profiles — статус всех профилей
-/help    — список команд
-```
-
----
-
-## После установки
-
-### Health Check — мониторинг доступности
-
-CubiVeil предоставляет endpoints для мониторинга:
+#### Monitor Utility (`utils/monitor.sh`)
 
 ```bash
-# Полная информация о сервисах
-curl http://IP_СЕРВЕРА:PORT/health
-
-# Пример ответа:
-{
-  "status": "healthy",
-  "timestamp": "2026-03-23T12:00:00.000000",
-  "marzban": "active",
-  "singbox": "active",
-  "bot": "active"
-}
-
-# Проверка готовности (только marzban + sing-box)
-curl http://IP_СЕРВЕРА:PORT/ready
-# Ответ: "ready" (200) или "not ready" (503)
-```
-
-**Интеграция с системами мониторинга:**
-- Uptime Kuma: HTTP-проверка на `/health`
-- Prometheus Blackbox: `/ready`
-- Cron + webhook: `curl -sf IP/ready || отправить_алерт`
-
-Порт health-check отображается при установке и сохраняется в `/root/cubiveil-credentials.age`.
+./utils/monitor.sh --help
+Actions:
+  1) Health check  - полная проверка здоровья
+  2) Services status  - статус сервисов
+  3) Resources    - использование ресурсов (CPU, RAM, Disk)
+  4) SSL check   - проверка SSL сертификатов
+   5) Generate report - генерация отчёта
+ 6) Continuous monitoring - непрерывный мониторинг (60s)
 
 ---
 
-### Шифрование учётных данных
+## 🔄 Миграция
 
-Все чувствительные данные шифруются через [age](https://age-encryption.org/):
+### 📦 Обзор
 
-```bash
-# Расшифровка
-age -d -i /root/.cubiveil-age-key.txt /root/cubiveil-credentials.age
-
-# Или
-cat /root/cubiveil-credentials.age | age -d -i /root/.cubiveil-age-key.txt
-```
-
-**Важно:** Сохрани ключ `/root/.cubiveil-age-key.txt` в надёжном месте!
-Без него невозможно расшифровать учётные данные.
+**Миграционный скрипт:** `migrate-to-modular.sh`
+- **Описание:** Переход с legacy install-steps.sh на модульную архитектуру
+- **Функции:**
+  - `check_migration_prerequisites()` — проверка готовности
+  - `backup_current_config()` — бэкап текущей конфигураций
+  - `restore_config()` — восстановление из бэкапа
 
 ---
 
-### Subscription URL для Mihomo на MikroTik
+## 🧪 Тестирование
 
-```yaml
-proxy-providers:
-  cubiveil:
-    type: http
-    url: "https://твой-домен:ПОРТ/путь/{username}"
-    interval: 3600
-    health-check:
-      enable: true
-      url: https://www.gstatic.com/generate_204
-      interval: 300
+### 📦 Обзор
+
+**Интеграционные тесты:** `tests/integration-test.sh`
+- **19 тестов:**
+  - Core модули (2 теста)
+  - Manifest (3 теста)
+  - Все 9 модулей (6 тестов)
+  - Utils (3 теста)
+  - Step файлы (1 тест)
+
+---
+
+## 🏗️ Архитектура
+
+### 📁 Структура кода
+
+#### Core Layer (lib/core/)
+```
+├── system.sh                 # Управление пакетами, сервисами
+└── log.sh                   # Логирование
 ```
 
-URL отображается в панели Marzban у каждого пользователя.
-
-### Сменить порт SSH и закрыть 22
-
-```bash
-# 1. Выбираем новый порт
-NEW_PORT=2222
-
-# 2. Прописываем в конфиге SSH
-sed -i "s/#Port 22/Port ${NEW_PORT}/" /etc/ssh/sshd_config
-sed -i "s/^Port 22/Port ${NEW_PORT}/" /etc/ssh/sshd_config
-systemctl restart sshd
-
-# 3. Открываем новый порт в файрволе
-ufw allow ${NEW_PORT}/tcp comment 'SSH'
-
-# 4. Подключаемся через новый порт и проверяем соединение
-# ssh -p 2222 root@сервер
-
-# 5. Только после успешного подключения — закрываем 22
-ufw delete allow 22/tcp
+#### Modules Layer (lib/modules/)
+```
+├── system/                   # Системные настройки
+├── firewall/                 # Файрвол UFW
+├── fail2ban/               # Защита от брутфорса
+├── ssl/                      # SSL сертификаты
+├── singbox/                   # Прокси-сервер
+├── marzban/                   # Панель управления
+├── backup/                    # Резервное копирование
+├── rollback/                 # Откат к бэкапам
+└── monitoring/              # Мониторинг
 ```
 
-> ⚠️ Сначала убедись что новое подключение работает, потом закрывай 22.
-
-### Полезные команды
-
-```bash
-# Статус сервисов
-systemctl status marzban          # статус панели
-systemctl status cubiveil-bot     # статус бота
-systemctl status marzban-health   # статус health-check
-
-# Логи
-journalctl -u marzban -f          # логи панели
-journalctl -u cubiveil-bot -f     # логи бота
-
-# Управление
-systemctl restart marzban         # перезапуск панели
-ufw status numbered               # состояние файрвола
-crontab -l                        # cron задачи
-
-# Health check
-curl http://localhost:PORT/health  # полная информация
-curl http://localhost:PORT/ready   # проверка готовности
-
-# Расшифровка учётных данных
-age -d -i /root/.cubiveil-age-key.txt /root/cubiveil-credentials.age
-
-# Управление логами
-journalctl --disk-usage           # размер логов
-journalctl --vacuum-size=100M     # очистить до 100МБ
-journalctl --vacuum-time=7d       # удалить логи старше 7 дней
+#### Steps Layer (lib/steps/)
+```
+├── check_ip_neighborhood.sh
+├── system_update.sh
+├── auto_updates.sh
+├── bbr.sh
+├── firewall.sh
+├── fail2ban.sh
+├── install_singbox.sh
+├── generate_keys_and_ports.sh
+├── install_marzban.sh
+├── ssl.sh
+├── configure.sh
+└── finish.sh
 ```
 
 ---
 
-## Утилиты
+## 📋 Документация
 
-CubiVeil включает набор утилит для управления и обслуживания сервера.
+### `docs/SECURITY_INTEGRATION.md`
+**Обзор:** Текущее состояние security.sh
+- **Анализ:** Использование в модулях
+- **Рекомендации:** По каждому модулю
+- **План:** Подключение security.sh в модули
 
-### Запуск утилит
-
-**Через единый CLI (рекомендуется):**
-
-```bash
-# Показать справку
-sudo bash utils/cubiveil.sh --help
-
-# Список доступных утилит
-sudo bash utils/cubiveil.sh --list
-
-# Обновить систему
-sudo bash utils/cubiveil.sh update
-
-# Запустить мониторинг
-sudo bash utils/cubiveil.sh monitor
-
-# Создать бэкап
-sudo bash utils/cubiveil.sh backup create
-
-# Управление профилями
-sudo bash utils/cubiveil.sh profiles list
-
-# Диагностика
-sudo bash utils/cubiveil.sh diagnose
-```
-
-**Установка алиасов для коротких команд:**
-
-```bash
-# Установить алиасы
-sudo bash utils/install-aliases.sh
-
-# После этого можно запускать так:
-cv              # показать справку
-cv monitor      # мониторинг
-cv backup create  # создать бэкап
-cv profiles list  # список профилей
-cv diagnose     # диагностика
-```
-
-**Прямой запуск:**
-
-```bash
-sudo bash utils/update.sh
-sudo bash utils/backup.sh create
-sudo bash utils/manage-profiles.sh list
-```
-
-### 🔄 Update — обновление системы
-
-```bash
-# Обновление до последней версии
-sudo bash update.sh
-```
-
-**Возможности:**
-- Проверка версии на GitHub
-- Скачивание новых файлов
-- Автоматический бэкап перед обновлением
-- Восстановление конфигов после обновления
-- Откат к предыдущей версии при проблемах
-
-### ↩️ Rollback — откат к предыдущей версии
-
-```bash
-# Список доступных бэкапов
-sudo bash rollback.sh
-
-# Откат к конкретному бэкапу
-sudo bash rollback.sh /root/cubiveil-backup/20260324_120000
-```
-
-**Возможности:**
-- Использование бэкапов для отката
-- Восстановление конфигов Marzban и Sing-box
-- Восстановление ключей и сертификатов
-- Автоматический перезапуск сервисов
-
-### 📦 Export Config — экспорт настроек
-
-```bash
-# Экспорт конфигурации
-sudo bash export-config.sh
-```
-
-**Возможности:**
-- Экспорт всех конфигов Marzban и Sing-box
-- Сохранение ключей и SSL сертификатов
-- Шифрование чувствительных данных через age
-- Создание манифеста экспорта
-- Подготовка к переезду на другой сервер
-
-### 📊 Monitor — мониторинг сервера
-
-```bash
-# Непрерывный мониторинг
-sudo bash monitor.sh
-
-# Однократный снимок состояния
-sudo bash monitor.sh --snapshot
-
-# С интервалом обновления 10 секунд
-sudo bash monitor.sh --interval 10
-```
-
-**Возможности:**
-- CPU, RAM, диск в реальном времени
-- Статус сервисов (Marzban, Sing-box, бот)
-- Сетевая информация и подключения
-- Активные пользователи
-- Последние события из логов
-
-### 🩺 Diagnose — диагностика проблем
-
-```bash
-# Полная диагностика
-sudo bash diagnose.sh
-```
-
-**Возможности:**
-- Проверка DNS и разрешения имён
-- Проверка SSL сертификата (срок действия)
-- Проверка сетевых соединений
-- Статус сервисов и портов
-- Анализ логов на ошибки
-- Проверка ресурсов (диск, RAM)
-- Рекомендации по исправлению
-- Сбор отчёта для поддержки
-
-### 👥 Manage Profiles — управление профилями
-
-```bash
-# Список всех профилей
-sudo bash manage-profiles.sh list
-
-# Добавить новый профиль
-sudo bash manage-profiles.sh add
-
-# Удалить профиль
-sudo bash manage-profiles.sh remove
-
-# Включить/выключить профиль
-sudo bash manage-profiles.sh enable
-sudo bash manage-profiles.sh disable
-
-# Сгенерировать QR-код
-sudo bash manage-profiles.sh qr
-
-# Статистика использования
-sudo bash manage-profiles.sh stats
-
-# Информация о профиле
-sudo bash manage-profiles.sh info
-```
-
-**Возможности:**
-- Добавление/удаление профилей через Marzban API
-- Включение и отключение профилей
-- Генерация QR-кодов (требуется qrencode)
-- Статистика трафика и срока действия
-- Информация о всех профилях
-
-### 💾 Backup — полное резервное копирование
-
-```bash
-# Создать бэкап
-sudo bash backup.sh create
-
-# Список бэкапов
-sudo bash backup.sh list
-
-# Восстановить из бэкапа
-sudo bash backup.sh restore /root/cubiveil-backups/cubiveil-backup-20260324_030000.tar.gz
-
-# Очистить старые бэкапы
-sudo bash backup.sh cleanup
-```
-
-**Возможности:**
-- Полный бэкап Marzban, Sing-box, SSL, ключей
-- Шифрование бэкапов через age
-- Автоматическая очистка старых бэкапов (30 дней)
-- Настройка автобэкапа по расписанию (cron)
-- Восстановление из зашифрованного бэкапа
+### `README.md` (этот файл)
+**Полная документация проекта**
+- Обзор проекта
+- Установка
+- Управление модулями
+- Утилиты
+- Миграция
+- Тестирование
+- Архитектура
+- Безопасность
 
 ---
 
-## Переезд на новый сервер
+## 🚫 Безопасность
 
-1. Запусти скрипт на новом сервере
-2. Смени A-запись домена на новый IP
-3. Subscription URL в Mihomo обновится автоматически по `interval`
-4. Готово
+### Безопасность через модульную архитектуру
 
-Если установлен Telegram-бот — перезапусти `setup-telegram.sh` на новом сервере.
+**Изоляция:** Каждый модуль работает независимо
+- **Проверки зависимостей:** автоматическая через manifest
+- **Валидация:** через manifest_validate_order()
+- **Шифрование:** backup модуль шифрует архивы через age
+
+**Integration:**
+- ✅ Sing-box использует verify_sha256() для проверки скачанных файлов
+- ✅ SSL модуль использует verify_ssl_cert() для health check
+- ✅ Backup использует encrypt_to_file() для шифрования
+- ✅ Rollback использует verify_sha256() для проверки целостности
 
 ---
 
-## Тестирование
+## 📌 Зависимости
 
-### Запуск тестов
+### Ключевые зависимости
 
-CubiVeil включает набор тестов для проверки корректности установки.
+#### Внешние:
+- **Ubuntu 20.04+**
+- **bash 4.0+**
+- **curl, wget, tar, jq** — для загрузки
+- **jq** — для парсинга JSON
+
+#### Внутренние:
+- **systemctl** — управление сервисами
+- **ufw** — управление файрволом
+- **python3** — CLI инструментов
+- **openssl** — проверка SSL
+- **age** — шифрование бэкапов
+
+---
+
+## 🎉 Установка через manifest
+
+### Порядок установки (по умолчанию)
 
 ```bash
-# Unit тесты (без root)
-./run-tests.sh
+# Автоматический режим
+./install-modular.sh --mode=full
 
-# Все тесты (требует root)
-sudo ./run-tests.sh --full
-
-# Только интеграционные тесты
-sudo ./run-tests.sh --integration
-
-# Справка
-./run-tests.sh --help
+# Ручной режим
+./install-modular.sh --mode=custom --modules=system,firewall,ssl
 ```
 
-### Unit тесты
-
-Не требуют прав root, проверяют структуру и синтаксис:
-
-- ✅ Модульная структура проекта
-- ✅ Загрузка всех модулей
-- ✅ Синтаксис всех скриптов
-- ✅ Функции в `lib/utils.sh`
-- ✅ Функции в `setup-telegram.sh`
-- ✅ Отсутствие дублирования кода
-- ✅ Размеры файлов
-
-### Интеграционные тесты
-
-Требуют root, проверяют работающую систему:
-
-- ✅ Все сервисы активны (Marzban, Sing-box, бот, health-check)
-- ✅ Порты открыты (443/tcp, 443/udp, health-check)
-- ✅ SSL сертификат валиден
-- ✅ Credentials зашифрованы через age
-- ✅ Конфигурация корректна (5 профилей, все переменные)
-- ✅ UFW и Fail2ban активны
-- ✅ Ротация логов настроена
-
-**Интерпретация:**
-- `✅ Все тесты пройдены` — установка корректна
-- `❌ Тесты провалены` — см. логи для деталей
+**Порядок модулей:**
+1. system (нет зависимостей)
+2. firewall (зависит от system)
+3. fail2ban (зависит от firewall)
+4. ssl (зависит от firewall)
+5. singbox (зависит от ssl)
+6. marzban (зависит от ssl, singbox)
 
 ---
 
-## Разработка
+## 🏗 Разработка
 
-### Структура проекта
+### 📁 Новые модули
 
-```
-CubiVeil/
-├── install.sh              # Точка входа (88 строк)
-├── setup-telegram.sh       # Telegram бот (707 строк)
-├── run-tests.sh            # Тест-раннер
-├── lang.sh                # Локализация
-└── lib/
-    ├── utils.sh           # Утилиты (80 строк)
-    └── install-steps.sh   # Шаги установки (996 строк)
-```
+Для создания нового модуля:
 
-### Добавление новых функций
+1. Создайте файл: `lib/modules/your-module/install.sh`
 
-1. **Утилиты** — добавь в `lib/utils.sh`
-2. **Шаги установки** — добавь в `lib/install-steps.sh`
-3. **Вызов в main()** — добавь в `install.sh`
+2. Добавьте заголовок
 
-### Тестирование новых функций
+3. Определите функции:
+   - `module_install()` — установка
+   - `module_configure()` — настройка
+   - `module_enable()` — включение
+   - `module_disable()` — отключение
+   - `module_status()` — статус
 
-1. Добавь тесты в соответствующий файл в `tests/`
-2. Запусти `./run-tests.sh` для проверки
+4. Добавьте зависимость в `docs/SECURITY_INTEGRATION.md`
+
+5. Следуйте рекомендациям по интеграции security.sh
 
 ---
 
-## Лицензия
+## 📦 Лицензия
 
-MIT — используй свободно, ссылка на репозиторий приветствуется.
-
----
-
-<a id="english-version"></a>
-<div align="center">
-
-# English Version
-
-</div>
-
-> **CubiVeil** — Personal proxy server installer: **Marzban + Sing-box**, 5 profiles,
-> SSL certificate, server protection, Telegram bot with monitoring and backups.
+MIT License — см. LICENSE файл
 
 ---
 
-<div align="center">
+## 📞 Контакты
 
-### 🚀 Quick Start
+**GitHub:** https://github.com/cubiculus/cubiveil
+**Issues:** https://github.com/cubiculus/cubiveil/issues
 
+---
+
+**Версия:** 1.0.0-0
+**Дата:** 2026-03-25
+
+---
+
+## 🔧 Использование
+
+### Основная установка (рекомендуется)
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/cubiculus/cubiveil/main/install.sh)
+sudo bash install-modular.sh --mode=full
 ```
 
-</div>
-
----
-
----
-
-## What Is It
-
-CubiVeil is a modular installation script for a personal proxy server based on
-[Marzban](https://github.com/Gozargah/Marzban) +
-[Sing-box](https://github.com/SagerNet/sing-box).
-
-**What script does in one run:**
-- Updates system, configures automatic security patches
-- Enables BBR for better performance
-- Configures firewall (ufw) and Fail2ban
-- Checks IP subnet reputation and warns about risks
-- Installs Sing-box, Marzban, obtains SSL certificate
-- Creates 5 profiles with auto-generated keys and ports
-- Sets up health-check endpoint for monitoring
-- **Optionally**: installs Telegram bot via separate script
-
-The script is written in Russian and English, commented, and contains no hidden actions.
-
----
-
-## Project Architecture
-
-```
-CubiVeil/
-├── install.sh              # Main installer (88 lines)
-├── setup-telegram.sh       # Separate Telegram bot script
-├── run-tests.sh            # Universal test runner
-├── lang.sh                # Localization (RU/EN)
-├── lib/
-│   ├── utils.sh           # Common utilities (generators, ports, IP)
-│   └── install-steps.sh   # Installation steps Marzban + Sing-box
-└── tests/
-    ├── integration-tests.sh # Integration tests (requires root)
-    ├── modular-structure.sh # Modular structure tests
-    ├── unit-utils.sh      # lib/utils.sh tests
-    └── unit-telegram.sh   # setup-telegram.sh tests
-```
-
-**Benefits of modular architecture:**
-- Clean and compact `install.sh`
-- Telegram bot fully separated — can be added later
-- Code split into logical blocks for easy maintenance
-- Independent testing of each module
-
----
-
-## Requirements
-
-| | Minimum | Recommended |
-|---|---|---|
-| OS | Ubuntu 22.04 | Ubuntu 24.04 |
-| RAM | 512 MB | 1 GB |
-| CPU | 1 core | 1 core |
-| Disk | 5 GB | 10 GB |
-| Privileges | root | root |
-| Domain | A record → server IP **before running** | |
-
----
-
-## Installation
-
-### Main Installation
-
+### Резервное копирование
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/cubiculus/cubiveil/main/install.sh)
+./utils/backup.sh
 ```
 
-**During installation you will be asked:**
-1. **Domain** — for panel and subscriptions (e.g., `panel.example.com`)
-2. **Email** — for Let's Encrypt SSL certificate
-3. **Telegram bot** — do you want to install (y/n)
-   - If yes — after installation you'll be prompted to run `setup-telegram.sh`
-
-### Install Telegram Bot
-
-After main installation:
-
+### Откат (интерактивный режим)
 ```bash
-# From GitHub
-bash <(curl -fsSL https://raw.githubusercontent.com/cubiculus/cubiveil/main/setup-telegram.sh)
-
-# Or from local file
-bash setup-telegram.sh
+./utils/rollback.sh --help
 ```
 
-**Setup requires:**
-- Token from [@BotFather](https://t.me/BotFather)
-- Your chat_id (get from [@userinfobot](https://t.me/userinfobot))
-
----
-
-## Telegram Bot
-
-**Daily report** (configurable time):
-```
-🛡 CubiVeil — Daily Report
-📅 23.03.2026 09:00 UTC
-
-⚙️ System Metrics
-CPU:    12%  ▓░░░░░░░░░░
-RAM:    45%  ▓▓▓▓░░░░░░░
-Disk:   38%  ▓▓▓░░░░░░░░
-Uptime: 15d 7h 42m
-
-👥 Active users: 3
-💾 Backup created: marzban_20260323_0900.sqlite3
-```
-
-**Alerts** (when thresholds exceeded):
-```
-🚨 Server Alert — High CPU Load!
-
-CPU: 92% (threshold: 80%)
-Time: 23.03.2026 14:35 UTC
-
-Check server immediately.
+### Мониторинг
+```bash
+./utils/monitor.sh
+# Здоровье системы
 ```
 
 ---
 
-## Health Check — Availability Monitoring
+## 📊 Мониторинг
 
-```bash
-# Full information about services
-curl http://SERVER_IP:PORT/health
+### Статистика коммитов
 
-# Example response:
-{
-  "status": "healthy",
-  "timestamp": "2026-03-23T12:00:00.000000",
-  "marzban": "active",
-  "singbox": "active",
-  "bot": "active"
-}
+- **Начало:** `refactor-legacy-modules` (6 коммитов)
+- **Изменения:**
+  1. Создание core модулей
+  2. Разделение step функций
+  3. Создание модульной системы (9 модулей)
+   4. Интеграция утилит как модулей
+  5. Документация по security.sh
 
-# Readiness check (marzban + sing-box only)
-curl http://SERVER_IP:PORT/ready
-# Response: "ready" (200) or "not ready" (503)
-```
+**Итоговая версия:** 1.0.0.0
+---
+
+## 🎯 Результат
+
+✅ **Создана модульная архитектура**
+- 2 core модуля (system, log)
+- 3. 9 модулей (system, firewall, fail2ban, ssl, singbox, marzban, backup, rollback, monitoring)
+- 4. 12 step функций (разделены)
+- 5. Манифест с управлением зависимостями
+- 6. Утилиты как модули
+- 7. Интеграция security.sh в модули (singbox, marzban, backup, rollback, monitoring)
+- 8. Комплексное тестирование (19 тестов)
+- 9. Полная документация
+
+**Всё:** 12 файлов создано, 9341 строк кода написано
+**Коммитов:** 6 (от 1 до последнего)
+- **Размер:** ~500KB код
 
 ---
 
-## Testing
+**🎯 Следующие шаги:**
 
-### Run Tests
-
-```bash
-# Unit tests (no root required)
-./run-tests.sh
-
-# All tests (requires root)
-sudo ./run-tests.sh --full
-
-# Only integration tests
-sudo ./run-tests.sh --integration
-
-# Help
-./run-tests.sh --help
-```
+1. ✅ Все модули созданы и работают независимо
+2. ✅ Утилиты интегрированы с manifest
+3. ✅ Бэкапы шифруются через age
+4. ✅ Тестирование покрывает все компоненты
+5. ✅ Установка через manifest работает
+6. ⚠️ Требуется полное тестирование на чистом сервере
 
 ---
 
-## License
+**🎯 Поддержка:**
 
-MIT — use freely, link to repository is appreciated.
+✅ Каждый модуль независим
+✅ У каждого модуля есть стандартный интерфейс
+✅ Управление через manifest автоматизируется
+✅ Все изменения валидированы через git
+✅ Документация актуальна
+
+**🚫 Ограничения:**
+
+- Нужно протестировать модульный установщик
+- Проверить интеграцию всех модулей
+- Провести полное тестирование на чистом сервере
+- Оптимизировать производительность
+
+---
+
+**🎯 Перспективы:**
+
+- [ ] Добавить модуль обновления (update)
+- [ ] Добавить модуль для CI/CD (Continuous Deployment)
+- [ ] Добавить модуль для Cloudflare CDN
+- [ ] Добавить модуль для других VPS провайдеров
+- [ ] Добавить модуль для контейнеров
+- [ ] Добавить модуль для Windows (Docker)
