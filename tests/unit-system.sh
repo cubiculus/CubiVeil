@@ -242,6 +242,8 @@ test_system_bbr_load_module() {
 test_system_bbr_create_sysctl_config() {
   info "Тестирование system_bbr_create_sysctl_config..."
 
+  # Mock cat для записи в файл
+  # shellcheck disable=SC2120
   cat() {
     if [[ "$*" == *">"* ]] || [[ $# -eq 0 ]]; then
       return 0
