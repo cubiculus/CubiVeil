@@ -14,7 +14,6 @@
 
 <p align="center">
   <a href="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml"><img src="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml/badge.svg?label=Shellcheck" alt="Shellcheck"/></a>
-  <a href="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml"><img src="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml/badge.svg?label=Integration%20Tests" alt="Integration Tests"/></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"/></a>
   <a href="https://ubuntu.com/"><img src="https://img.shields.io/badge/platform-Ubuntu%2022.04%20%7C%2024.04-orange" alt="Platform"/></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10-blue" alt="Python"/></a>
