@@ -37,6 +37,11 @@ ensure_file() {
     return 0
   fi
 
+  # Создаём директорию для файла если нужно
+  local file_dir
+  file_dir=$(dirname "$target_path")
+  mkdir -p "$file_dir"
+
   local url="${REPO_URL}/${file}"
   local curl_output
   if ! curl_output=$(curl -fsSL "$url" -o "$target_path" 2>&1); then
