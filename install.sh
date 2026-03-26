@@ -47,34 +47,31 @@ ensure_file() {
 
   local url="${REPO_URL}/${file}"
 
-  # Загружаем во временный файл сначала
-  local temp_file
-  if ! temp_file=$(mktemp -p "$file_dir" 2>&1); then
-    echo -e "\033[0;31m[✗]\033[0m Failed to create temp file in: $file_dir"
-    echo -e "\033[0;33m[!]\033[0m Error: $temp_file"
+  # Загружаем через stdout и перенаправляем в файл
+  local http_code
+
+  # Используем -w для получения HTTP кода и -o для записи
+  http_code=$(curl -sSL -w "%{http_code}" -o "$target_path" "$url" 2>&1)
+  local curl_exit=$?
+
+  if [[ $curl_exit -ne 0 ]]; then
+    echo -e "\033[0;31m[✗]\033[0m Failed to download: $file"
+    echo -e "\033[0;33m[!]\033[0m URL: $url"
+    echo -e "\033[0;33m[!]\033[0m Exit code: $curl_exit"
+    rm -f "$target_path"
     return 1
   fi
 
-  local curl_output
-  if ! curl_output=$(curl -fsSL "$url" -o "$temp_file" 2>&1); then
-    echo -e "\033[0;31m[✗]\033[0m Failed to download: $file"
-    echo -e "\033[0;33m[!]\033[0m URL: $url"
-    echo -e "\033[0;33m[!]\033[0m Error: $curl_output"
-    rm -f "$temp_file"
+  if [[ "$http_code" != "200" ]]; then
+    echo -e "\033[0;31m[✗]\033[0m HTTP error for $file: $http_code"
+    rm -f "$target_path"
     return 1
   fi
 
   # Проверка что файл не пустой
-  if [[ ! -s "$temp_file" ]]; then
+  if [[ ! -s "$target_path" ]]; then
     echo -e "\033[0;31m[✗]\033[0m Downloaded file is empty: $file"
-    rm -f "$temp_file"
-    return 1
-  fi
-
-  # Перемещаем в целевой файл
-  if ! mv "$temp_file" "$target_path" 2>&1; then
-    echo -e "\033[0;31m[✗]\033[0m Failed to move file to: $target_path"
-    rm -f "$temp_file"
+    rm -f "$target_path"
     return 1
   fi
 
