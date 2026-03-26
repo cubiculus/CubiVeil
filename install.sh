@@ -47,10 +47,8 @@ ensure_file() {
 
   local url="${REPO_URL}/${file}"
 
-  # Загружаем через stdout и перенаправляем в файл
+  # Загружаем напрямую в целевой файл
   local http_code
-
-  # Используем -w для получения HTTP кода и -o для записи
   http_code=$(curl -sSL -w "%{http_code}" -o "$target_path" "$url" 2>&1)
   local curl_exit=$?
 
