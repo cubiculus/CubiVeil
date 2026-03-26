@@ -47,25 +47,51 @@ ensure_file() {
 
   local url="${REPO_URL}/${file}"
 
+  # Отладка: проверяем что происходит
+  echo -e "\033[0;36m[debug]\033[0m Downloading: $file"
+  echo -e "\033[0;36m[debug]\033[0m URL: $url"
+  echo -e "\033[0;36m[debug]\033[0m Target: $target_path"
+  echo -e "\033[0;36m[debug]\033[0m Dir exists: $([[ -d "$file_dir" ]] && echo yes || echo no)"
+  echo -e "\033[0;36m[debug]\033[0m Dir writable: $([[ -w "$file_dir" ]] && echo yes || echo no)"
+
+  # Проверяем wget и curl
+  local wget_available="no"
+  local curl_available="no"
+  command -v wget &>/dev/null && wget_available="yes"
+  command -v curl &>/dev/null && curl_available="yes"
+  echo -e "\033[0;36m[debug]\033[0m wget available: $wget_available"
+  echo -e "\033[0;36m[debug]\033[0m curl available: $curl_available"
+
   # Используем wget если доступен, иначе curl
-  if command -v wget &>/dev/null; then
+  if [[ "$wget_available" == "yes" ]]; then
+    echo -e "\033[0;36m[debug]\033[0m Using wget..."
     if wget -q --timeout=30 -O "$target_path" "$url" 2>&1; then
       if [[ -s "$target_path" ]]; then
+        echo -e "\033[0;36m[debug]\033[0m wget success"
         return 0
       fi
+      echo -e "\033[0;36m[debug]\033[0m wget: file empty"
+    else
+      echo -e "\033[0;36m[debug]\033[0m wget failed"
     fi
-  else
-    # curl с большим таймаутом
-    if curl -fsSL --connect-timeout 10 --max-time 60 -o "$target_path" "$url" 2>&1; then
-      if [[ -s "$target_path" ]]; then
-        return 0
-      fi
-    fi
+    rm -f "$target_path"
   fi
 
-  rm -f "$target_path"
+  if [[ "$curl_available" == "yes" ]]; then
+    echo -e "\033[0;36m[debug]\033[0m Using curl..."
+    if curl -fsSL --connect-timeout 10 --max-time 60 -o "$target_path" "$url" 2>&1; then
+      if [[ -s "$target_path" ]]; then
+        echo -e "\033[0;36m[debug]\033[0m curl success"
+        return 0
+      fi
+      echo -e "\033[0;36m[debug]\033[0m curl: file empty"
+    else
+      echo -e "\033[0;36m[debug]\033[0m curl failed"
+    fi
+    rm -f "$target_path"
+  fi
+
   echo -e "\033[0;31m[✗]\033[0m Failed to download: $file"
-  echo -e "\033[0;33m[!]\033[0m URL: $url"
   return 1
 }
 
