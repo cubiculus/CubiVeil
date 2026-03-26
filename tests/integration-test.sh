@@ -60,11 +60,11 @@ test_result() {
 
   case "$result" in
   pass)
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
     echo "[PASS] $test_name" | tee -a "$TEST_LOG_FILE"
     ;;
   fail)
-    ((TESTS_FAILED++))
+    ((TESTS_FAILED++)) || true
     echo "[FAIL] $test_name" | tee -a "$TEST_LOG_FILE"
     if [[ -n "$message" ]]; then
       echo "       $message" | tee -a "$TEST_LOG_FILE"

@@ -71,7 +71,7 @@ test_file_exists() {
 
   if [[ -f "$MODULE_PATH" ]]; then
     pass "Rollback module: файл существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Rollback module: файл не найден"
   fi
@@ -83,7 +83,7 @@ test_syntax() {
 
   if bash -n "$MODULE_PATH" 2>/dev/null; then
     pass "Rollback module: синтаксис корректен"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Rollback module: синтаксическая ошибка"
   fi
@@ -98,7 +98,7 @@ test_shebang() {
 
   if [[ "$shebang" == "#!/bin/bash" ]]; then
     pass "Rollback module: корректный shebang"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Rollback module: некорректный shebang: $shebang"
   fi
@@ -115,7 +115,7 @@ test_rollback_init() {
   rollback_init
 
   pass "rollback_init: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir"
 }
@@ -137,7 +137,7 @@ test_rollback_list_backups() {
   rollback_list_backups || true
 
   pass "rollback_list_backups: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir"
 }
@@ -166,7 +166,7 @@ test_rollback_select_backup_mock() {
   rollback_select_backup 2>/dev/null || true
 
   pass "rollback_select_backup: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir"
 }
@@ -203,7 +203,7 @@ test_rollback_extract_backup() {
   rollback_extract_backup "${test_archive_dir}/test.tar.gz"
 
   pass "rollback_extract_backup: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir"
 }
@@ -225,7 +225,7 @@ test_rollback_verify_integrity() {
   rollback_verify_integrity
 
   pass "rollback_verify_integrity: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir"
 }
@@ -237,7 +237,7 @@ test_rollback_stop_services() {
   rollback_stop_services
 
   pass "rollback_stop_services: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: rollback_marzban_db ──────────────────────────────────
@@ -260,7 +260,7 @@ test_rollback_marzban_db() {
   rollback_marzban_db || true
 
   pass "rollback_marzban_db: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir" "$test_marzban_dir"
 }
@@ -287,7 +287,7 @@ test_rollback_marzban_config() {
   rollback_marzban_config || true
 
   pass "rollback_marzban_config: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir" "/opt/marzban"
 }
@@ -309,7 +309,7 @@ test_rollback_singbox_config() {
   rollback_singbox_config || true
 
   pass "rollback_singbox_config: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir" "/etc/sing-box"
 }
@@ -334,7 +334,7 @@ test_rollback_ssl_certs() {
   rollback_ssl_certs || true
 
   pass "rollback_ssl_certs: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir" "$test_ssl_dir"
 }
@@ -361,7 +361,7 @@ test_rollback_keys() {
   rollback_keys
 
   pass "rollback_keys: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir" "$test_marzban_dir"
 }
@@ -373,7 +373,7 @@ test_rollback_start_services() {
   rollback_start_services
 
   pass "rollback_start_services: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: rollback_full ────────────────────────────────────────
@@ -410,7 +410,7 @@ test_rollback_full_mock() {
   rollback_full || true
 
   pass "rollback_full: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir"
 }
@@ -442,7 +442,7 @@ test_rollback_latest_mock() {
   rollback_latest || true
 
   pass "rollback_latest: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir"
 }
@@ -454,7 +454,7 @@ test_module_install() {
   module_install
 
   pass "module_install: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: module_rollback ──────────────────────────────────────
@@ -467,7 +467,7 @@ test_module_rollback() {
   module_rollback
 
   pass "module_rollback: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: module_rollback_latest ───────────────────────────────
@@ -479,7 +479,7 @@ test_module_rollback_latest() {
   module_rollback_latest
 
   pass "module_rollback_latest: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: module_list ──────────────────────────────────────────
@@ -494,7 +494,7 @@ test_module_list() {
   module_list
 
   pass "module_list: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_archive_dir"
 }
@@ -533,7 +533,7 @@ test_all_functions_exist() {
 
   if [[ $found -eq ${#required_functions[@]} ]]; then
     pass "Все функции существуют ($found/${#required_functions[@]})"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Не все функции найдены ($found/${#required_functions[@]})"
   fi
@@ -545,7 +545,7 @@ test_config_variables() {
 
   if [[ -n "$BACKUP_DIR" ]] && [[ -n "$BACKUP_ARCHIVE_DIR" ]] && [[ -n "$ROLLBACK_TEMP_DIR" ]]; then
     pass "Конфигурационные переменные установлены"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Конфигурационные переменные не установлены"
   fi
@@ -566,7 +566,7 @@ test_verify_sha256_integration() {
   # Проверяем что verify_sha256 существует
   if declare -f verify_sha256 &>/dev/null; then
     pass "verify_sha256 функция доступна"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "verify_sha256 функция не найдена"
   fi

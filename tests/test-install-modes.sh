@@ -26,11 +26,11 @@ PLAIN='\033[0m'
 info() { echo -e "${CYAN}[INFO]${PLAIN} $*" >&2; }
 pass() {
   echo -e "${GREEN}[PASS]${PLAIN} $*" >&2
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 fail() {
   echo -e "${RED}[FAIL]${PLAIN} $*" >&2
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
 }
 warn() { echo -e "${YELLOW}[WARN]${PLAIN} $*" >&2; }
 

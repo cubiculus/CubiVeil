@@ -6,16 +6,17 @@ set -euo pipefail
 # ╚═══════════════════════════════════════════════════════════╝
 
 # ── Подключение унифицированных функций вывода ───────────────
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [[ -f "${SCRIPT_DIR}/output.sh" ]]; then
-  source "${SCRIPT_DIR}/output.sh"
+# Используем TEST_UTILS_DIR вместо SCRIPT_DIR чтобы не перезаписывать
+TEST_UTILS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "${TEST_UTILS_DIR}/output.sh" ]]; then
+  source "${TEST_UTILS_DIR}/output.sh"
 fi
 
 # ── Функции вывода ────────────────────────────────────────────
 pass() { echo -e "${GREEN}[PASS]${PLAIN} $1"; }
 fail() {
   echo -e "${RED}[FAIL]${PLAIN} $1"
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
 }
 warn() { echo -e "${YELLOW}[WARN]${PLAIN} $1"; }
 info() { echo -e "[INFO] $1"; }

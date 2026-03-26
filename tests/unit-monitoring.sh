@@ -47,7 +47,7 @@ test_file_exists() {
 
   if [[ -f "$MODULE_PATH" ]]; then
     pass "Monitoring module: файл существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Monitoring module: файл не найден"
   fi
@@ -59,7 +59,7 @@ test_syntax() {
 
   if bash -n "$MODULE_PATH" 2>/dev/null; then
     pass "Monitoring module: синтаксис корректен"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Monitoring module: синтаксическая ошибка"
   fi
@@ -74,7 +74,7 @@ test_shebang() {
 
   if [[ "$shebang" == "#!/bin/bash" ]]; then
     pass "Monitoring module: корректный shebang"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Monitoring module: некорректный shebang: $shebang"
   fi
@@ -91,7 +91,7 @@ test_monitor_init() {
   monitor_init
 
   pass "monitor_init: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_monitor_dir"
 }
@@ -103,7 +103,7 @@ test_monitor_check_services() {
   monitor_check_services || true
 
   pass "monitor_check_services: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: monitor_service_status ───────────────────────────────
@@ -116,7 +116,7 @@ test_monitor_service_status() {
   # Функция должна вернуть статус
   if [[ -n "$status" ]]; then
     pass "monitor_service_status: вернула статус '$status'"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "monitor_service_status: не вернула статус"
   fi
@@ -138,10 +138,10 @@ test_monitor_cpu() {
 
   if [[ -n "$cpu_usage" ]]; then
     pass "monitor_cpu: вернула значение '$cpu_usage'"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     pass "monitor_cpu: вызвана (может не работать в тесте)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -161,10 +161,10 @@ test_monitor_ram() {
 
   if [[ -n "$ram_usage" ]]; then
     pass "monitor_ram: вернула значение '$ram_usage'"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     pass "monitor_ram: вызвана (может не работать в тесте)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -183,10 +183,10 @@ test_monitor_disk() {
 
   if [[ -n "$disk_usage" ]]; then
     pass "monitor_disk: вернула значение '$disk_usage'"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     pass "monitor_disk: вызвана (может не работать в тесте)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -202,7 +202,7 @@ test_monitor_check_resources() {
   monitor_check_resources || true
 
   pass "monitor_check_resources: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: monitor_network_check ────────────────────────────────
@@ -217,7 +217,7 @@ test_monitor_network_check_mock() {
   monitor_network_check || true
 
   pass "monitor_network_check: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: monitor_external_ip ──────────────────────────────────
@@ -229,10 +229,10 @@ test_monitor_external_ip() {
 
   if [[ -n "$ip" ]]; then
     pass "monitor_external_ip: вернула IP '$ip'"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     pass "monitor_external_ip: вызвана (может не работать в тесте)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -243,7 +243,7 @@ test_monitor_check_ssl() {
   monitor_check_ssl || true
 
   pass "monitor_check_ssl: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: monitor_check_marzban_logs ───────────────────────────
@@ -259,7 +259,7 @@ test_monitor_check_marzban_logs() {
   monitor_check_marzban_logs || true
 
   pass "monitor_check_marzban_logs: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: monitor_check_singbox_logs ───────────────────────────
@@ -275,7 +275,7 @@ test_monitor_check_singbox_logs() {
   monitor_check_singbox_logs || true
 
   pass "monitor_check_singbox_logs: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: monitor_check_fail2ban_logs ──────────────────────────
@@ -292,7 +292,7 @@ test_monitor_check_fail2ban_logs() {
   monitor_check_fail2ban_logs || true
 
   pass "monitor_check_fail2ban_logs: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: monitor_health_check ─────────────────────────────────
@@ -310,7 +310,7 @@ test_monitor_health_check() {
   monitor_health_check || true
 
   pass "monitor_health_check: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: monitor_generate_report ──────────────────────────────
@@ -335,10 +335,10 @@ test_monitor_generate_report() {
   # Проверяем что файл отчёта создан
   if [[ -n "$report_file" ]]; then
     pass "monitor_generate_report: отчёт сгенерирован"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     pass "monitor_generate_report: вызвана"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   rm -rf "$test_monitor_dir"
@@ -351,7 +351,7 @@ test_module_install() {
   module_install
 
   pass "module_install: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: module_check ─────────────────────────────────────────
@@ -363,7 +363,7 @@ test_module_check() {
   module_check || true
 
   pass "module_check: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: module_check_services ────────────────────────────────
@@ -373,7 +373,7 @@ test_module_check_services() {
   module_check_services || true
 
   pass "module_check_services: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: module_check_resources ───────────────────────────────
@@ -387,7 +387,7 @@ test_module_check_resources() {
   module_check_resources || true
 
   pass "module_check_resources: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: module_check_ssl ─────────────────────────────────────
@@ -397,7 +397,7 @@ test_module_check_ssl() {
   module_check_ssl || true
 
   pass "module_check_ssl: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: module_report ────────────────────────────────────────
@@ -418,7 +418,7 @@ test_module_report() {
   module_report || true
 
   pass "module_report: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_monitor_dir"
 }
@@ -432,10 +432,10 @@ test_module_service_status() {
 
   if [[ -n "$status" ]]; then
     pass "module_service_status: вернула статус '$status'"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     pass "module_service_status: вызвана"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -477,7 +477,7 @@ test_all_functions_exist() {
 
   if [[ $found -eq ${#required_functions[@]} ]]; then
     pass "Все функции существуют ($found/${#required_functions[@]})"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Не все функции найдены ($found/${#required_functions[@]})"
   fi
@@ -489,7 +489,7 @@ test_config_variables() {
 
   if [[ -n "$MONITORING_LOG_DIR" ]] && [[ -n "$MONITORING_DATA_DIR" ]]; then
     pass "Конфигурационные переменные установлены"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Конфигурационные переменные не установлены"
   fi
@@ -498,7 +498,7 @@ test_config_variables() {
   if [[ -n "$ALERT_CPU_THRESHOLD" ]] && [[ -n "$ALERT_RAM_THRESHOLD" ]] &&
     [[ -n "$ALERT_DISK_THRESHOLD" ]] && [[ -n "$ALERT_UPTIME_THRESHOLD" ]]; then
     pass "Пороги алертов установлены"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Пороги алертов не установлены"
   fi
@@ -510,7 +510,7 @@ test_monitored_services_array() {
 
   if [[ ${#MONITORED_SERVICES[@]} -gt 0 ]]; then
     pass "MONITORED_SERVICES массив содержит ${#MONITORED_SERVICES[@]} сервисов"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
 
     # Проверяем наличие ключевых сервисов
     local has_marzban=false
@@ -527,12 +527,12 @@ test_monitored_services_array() {
 
     if [[ "$has_marzban" == "true" ]]; then
       pass "MONITORED_SERVICES содержит marzban"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     fi
 
     if [[ "$has_singbox" == "true" ]]; then
       pass "MONITORED_SERVICES содержит sing-box"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     fi
   else
     fail "MONITORED_SERVICES массив пуст"
@@ -546,21 +546,21 @@ test_threshold_values() {
   # Проверяем что пороги в разумных пределах
   if [[ $ALERT_CPU_THRESHOLD -ge 50 && $ALERT_CPU_THRESHOLD -le 95 ]]; then
     pass "ALERT_CPU_THRESHOLD в допустимых пределах ($ALERT_CPU_THRESHOLD%)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "ALERT_CPU_THRESHOLD вне допустимых пределов ($ALERT_CPU_THRESHOLD%)"
   fi
 
   if [[ $ALERT_RAM_THRESHOLD -ge 50 && $ALERT_RAM_THRESHOLD -le 95 ]]; then
     pass "ALERT_RAM_THRESHOLD в допустимых пределах ($ALERT_RAM_THRESHOLD%)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "ALERT_RAM_THRESHOLD вне допустимых пределов ($ALERT_RAM_THRESHOLD%)"
   fi
 
   if [[ $ALERT_DISK_THRESHOLD -ge 50 && $ALERT_DISK_THRESHOLD -le 95 ]]; then
     pass "ALERT_DISK_THRESHOLD в допустимых пределах ($ALERT_DISK_THRESHOLD%)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "ALERT_DISK_THRESHOLD вне допустимых пределов ($ALERT_DISK_THRESHOLD%)"
   fi

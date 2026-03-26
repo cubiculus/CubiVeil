@@ -29,7 +29,7 @@ test_utilities_exist() {
   for util in "${utilities[@]}"; do
     if [[ -f "${SCRIPT_DIR}/${util}" ]]; then
       pass "Утилита существует: $util"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "Утилита отсутствует: $util"
     fi
@@ -56,7 +56,7 @@ test_utilities_syntax() {
     if [[ -f "${SCRIPT_DIR}/${util}" ]]; then
       if bash -n "${SCRIPT_DIR}/${util}" 2>/dev/null; then
         pass "Синтаксис OK: $util"
-        ((TESTS_PASSED++))
+        ((TESTS_PASSED++)) || true
       else
         fail "Синтаксическая ошибка: $util"
       fi
@@ -86,7 +86,7 @@ test_shebang() {
 
     if [[ "$first_line" == "#!/bin/bash" ]]; then
       pass "Shebang OK: $util"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "Неверный shebang: $util ($first_line)"
     fi
@@ -112,7 +112,7 @@ test_safety_flags() {
   for util in "${utilities[@]}"; do
     if grep -q "set -euo pipefail" "${SCRIPT_DIR}/${util}" 2>/dev/null; then
       pass "Флаги безопасности: $util"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       warn "Нет флагов безопасности: $util"
     fi
@@ -139,7 +139,7 @@ test_localization() {
     # Проверка подключения lang.sh
     if grep -q 'source.*lang.sh\|source.*fallback.sh' "${SCRIPT_DIR}/${util}" 2>/dev/null; then
       pass "Локализация подключена: $util"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       warn "Локализация не подключена: $util"
     fi
@@ -165,7 +165,7 @@ test_root_check() {
   for util in "${utilities[@]}"; do
     if grep -qE 'EUID.*-ne.*0|root' "${SCRIPT_DIR}/${util}" 2>/dev/null; then
       pass "Проверка root: $util"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       warn "Нет проверки root: $util"
     fi
@@ -207,7 +207,7 @@ test_backup_functions() {
   for func in "${functions[@]}"; do
     if declare -f "$func" >/dev/null 2>&1; then
       pass "Функция существует: $func"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       # Функции могут быть недоступны из-за структуры скрипта
       info "Функция не проверена: $func (может быть локальной)"
@@ -233,7 +233,7 @@ test_profiles_functions() {
   for func in "${functions[@]}"; do
     if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/manage-profiles.sh" 2>/dev/null; then
       pass "Функция существует: $func"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "Функция отсутствует: $func"
     fi
@@ -259,7 +259,7 @@ test_monitor_functions() {
   for func in "${functions[@]}"; do
     if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/monitor.sh" 2>/dev/null; then
       pass "Функция существует: $func"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "Функция отсутствует: $func"
     fi
@@ -285,7 +285,7 @@ test_diagnose_functions() {
   for func in "${functions[@]}"; do
     if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/diagnose.sh" 2>/dev/null; then
       pass "Функция существует: $func"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "Функция отсутствует: $func"
     fi
@@ -307,7 +307,7 @@ test_export_functions() {
   for func in "${functions[@]}"; do
     if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/export-config.sh" 2>/dev/null; then
       pass "Функция существует: $func"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "Функция отсутствует: $func"
     fi
@@ -329,7 +329,7 @@ test_update_functions() {
   for func in "${functions[@]}"; do
     if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/update.sh" 2>/dev/null; then
       pass "Функция существует: $func"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "Функция отсутствует: $func"
     fi
@@ -353,7 +353,7 @@ test_rollback_functions() {
   for func in "${functions[@]}"; do
     if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/rollback.sh" 2>/dev/null; then
       pass "Функция существует: $func"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "Функция отсутствует: $func"
     fi
@@ -368,12 +368,12 @@ test_python_health_check() {
 
   if [[ -f "$health_check_file" ]]; then
     pass "health_check.py существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
 
     # Проверка синтаксиса Python
     if python3 -m py_compile "$health_check_file" 2>/dev/null; then
       pass "Синтаксис Python OK: health_check.py"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "Синтаксическая ошибка: health_check.py"
     fi
@@ -381,7 +381,7 @@ test_python_health_check() {
     # Проверка наличия классов
     if grep -q "class HealthChecker" "$health_check_file"; then
       pass "Класс HealthChecker существует"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "Класс HealthChecker не найден"
     fi
@@ -402,7 +402,7 @@ test_python_health_check() {
     for method in "${methods[@]}"; do
       if grep -q "def ${method}" "$health_check_file"; then
         pass "Метод существует: $method"
-        ((TESTS_PASSED++))
+        ((TESTS_PASSED++)) || true
       else
         fail "Метод не найден: $method"
       fi
@@ -420,12 +420,12 @@ test_bot_updated() {
 
   if [[ -f "$bot_file" ]]; then
     pass "bot.py существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
 
     # Проверка импорта health_check
     if grep -q "from health_check import HealthChecker" "$bot_file"; then
       pass "HealthChecker импортирован в bot.py"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "HealthChecker не импортирован в bot.py"
     fi
@@ -433,7 +433,7 @@ test_bot_updated() {
     # Проверка инициализации health checker
     if grep -q "self.health = HealthChecker()" "$bot_file"; then
       pass "HealthChecker инициализирован"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "HealthChecker не инициализирован"
     fi
@@ -441,7 +441,7 @@ test_bot_updated() {
     # Проверка health check в poll
     if grep -q "check_health_and_heal" "$bot_file"; then
       pass "Health check вызывается в poll"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "Health check не вызывается в poll"
     fi
@@ -458,7 +458,7 @@ test_commands_updated() {
 
   if [[ -f "$commands_file" ]]; then
     pass "commands.py существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
 
     # Проверка новых команд
     local commands=(
@@ -470,7 +470,7 @@ test_commands_updated() {
     for cmd in "${commands[@]}"; do
       if grep -q "\"$cmd\"" "$commands_file"; then
         pass "Команда существует: $cmd"
-        ((TESTS_PASSED++))
+        ((TESTS_PASSED++)) || true
       else
         fail "Команда не найдена: $cmd"
       fi
@@ -486,7 +486,7 @@ test_commands_updated() {
     for method in "${methods[@]}"; do
       if grep -q "def ${method}" "$commands_file"; then
         pass "Метод существует: $method"
-        ((TESTS_PASSED++))
+        ((TESTS_PASSED++)) || true
       else
         fail "Метод не найден: $method"
       fi
@@ -504,7 +504,7 @@ test_cli_manager() {
 
   if [[ -f "$cli_file" ]]; then
     pass "cubiveil.sh существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
 
     # Проверка команд
     local commands=(
@@ -522,7 +522,7 @@ test_cli_manager() {
       if grep -qE "${cmd}\|u\)|${cmd}\|rb\)|${cmd}\|exp\)" "$cli_file" ||
         grep -q "run_${cmd}" "$cli_file"; then
         pass "Команда существует: $cmd"
-        ((TESTS_PASSED++))
+        ((TESTS_PASSED++)) || true
       else
         fail "Команда не найдена: $cmd"
       fi
@@ -531,7 +531,7 @@ test_cli_manager() {
     # Проверка функции check_root
     if grep -q "check_root" "$cli_file"; then
       pass "Функция check_root существует"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "Функция check_root не найдена"
     fi
@@ -548,12 +548,12 @@ test_install_aliases() {
 
   if [[ -f "$aliases_file" ]]; then
     pass "install-aliases.sh существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
 
     # Проверка установки CLI
     if grep -q "/usr/local/bin/cubiveil" "$aliases_file"; then
       pass "CLI путь настроен"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "CLI путь не найден"
     fi
@@ -573,7 +573,7 @@ test_install_aliases() {
     for alias in "${aliases[@]}"; do
       if grep -q "$alias" "$aliases_file"; then
         pass "Алиас существует: $alias"
-        ((TESTS_PASSED++))
+        ((TESTS_PASSED++)) || true
       else
         warn "Алиас не найден: $alias"
       fi

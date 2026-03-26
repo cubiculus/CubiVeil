@@ -51,7 +51,7 @@ test_generator_edge_cases() {
   result1=$($gen_func 1)
   if [[ ${#result1} -eq 1 ]] && [[ "$result1" =~ ^[$pattern]$ ]]; then
     pass "$gen_func(1): минимальная длина"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "$gen_func(1): некорректный результат"
   fi
@@ -61,7 +61,7 @@ test_generator_edge_cases() {
   result0=$($gen_func 0)
   if [[ ${#result0} -eq 0 ]]; then
     pass "$gen_func(0): пустая строка"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "$gen_func(0): ожидалась пустая строка, получено '${result0}'"
   fi
@@ -71,7 +71,7 @@ test_generator_edge_cases() {
   result_large=$($gen_func 1000)
   if [[ ${#result_large} -eq 1000 ]] && [[ "$result_large" =~ ^[$pattern]+$ ]]; then
     pass "$gen_func(1000): большая длина корректна"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "$gen_func(1000): некорректная длина или символы"
   fi
@@ -82,7 +82,7 @@ test_generator_edge_cases() {
     result_case=$($gen_func 100)
     if [[ ! "$result_case" =~ [A-F] ]]; then
       pass "$gen_func: только lowercase символы"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       warn "$gen_func: обнаружены uppercase символы"
     fi
@@ -98,7 +98,7 @@ test_gen_random() {
   result=$(gen_random 10)
   if [[ ${#result} -eq 10 ]]; then
     pass "gen_random(10): длина = ${#result}"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "gen_random(10): ожидаемая длина 10, получено ${#result}"
   fi
@@ -106,7 +106,7 @@ test_gen_random() {
   # Проверка что только буквы и цифры
   if [[ "$result" =~ ^[a-zA-Z0-9]+$ ]]; then
     pass "gen_random(10): только буквы и цифры"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "gen_random(10): содержит недопустимые символы"
   fi
@@ -116,7 +116,7 @@ test_gen_random() {
   result2=$(gen_random 10)
   if [[ "$result" != "$result2" ]]; then
     pass "gen_random: разные вызовы дают разные результаты"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "gen_random: возможно, недостаточно случайности (вероятность коллизии)"
   fi
@@ -141,7 +141,7 @@ test_gen_random_edge_cases() {
   # Ожидаем ~36% цифр (10 из 62 символов), допускаем отклонение 20%
   if [[ $digit_count -ge 15 && $digit_count -le 55 ]]; then
     pass "gen_random: статистическая равномерность (цифры: $digit_count/100)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "gen_random: возможная неравномерность (цифры: $digit_count/100)"
   fi
@@ -156,7 +156,7 @@ test_gen_hex() {
   result=$(gen_hex 16)
   if [[ ${#result} -eq 16 ]]; then
     pass "gen_hex(16): длина = ${#result}"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "gen_hex(16): ожидаемая длина 16, получено ${#result}"
   fi
@@ -164,7 +164,7 @@ test_gen_hex() {
   # Проверка что только hex-символы
   if [[ "$result" =~ ^[a-f0-9]+$ ]]; then
     pass "gen_hex(16): только hex-символы (a-f, 0-9)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "gen_hex(16): содержит недопустимые символы"
   fi
@@ -189,7 +189,7 @@ test_gen_hex_edge_cases() {
   # Ожидаем ~40% цифр (10 из 16 символов), допускаем отклонение 25%
   if [[ $digit_count -ge 15 && $digit_count -le 65 ]]; then
     pass "gen_hex: статистическая равномерность (цифры: $digit_count/100)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "gen_hex: возможная неравномерность (цифры: $digit_count/100)"
   fi
@@ -204,7 +204,7 @@ test_gen_port() {
   result=$(gen_port)
   if [[ "$result" -ge 30000 && "$result" -le 62000 ]]; then
     pass "gen_port: $result в диапазоне 30000-62000"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "gen_port: $result вне диапазона 30000-62000"
   fi
@@ -214,7 +214,7 @@ test_gen_port() {
   result2=$(gen_port)
   if [[ "$result" != "$result2" ]]; then
     pass "gen_port: разные вызовы дают разные результаты"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "gen_port: возможно, недостаточно случайности"
   fi
@@ -234,7 +234,7 @@ test_unique_port() {
   # Проверка что порт уникален (не 443)
   if [[ "$port1" != 443 ]]; then
     pass "unique_port: сгенерирован уникальный порт $port1 (не в USED_PORTS)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "unique_port: сгенерирован порт из USED_PORTS"
   fi
@@ -248,7 +248,7 @@ test_unique_port() {
 
   if [[ "$port2" != "$port1" ]]; then
     pass "unique_port: сгенерирован другой порт $port2"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "unique_port: возможно, недостаточно уникальных портов"
   fi
@@ -256,7 +256,7 @@ test_unique_port() {
   # Проверка что оба порта в диапазоне
   if [[ "$port1" -ge 30000 && "$port1" -le 62000 && "$port2" -ge 30000 && "$port2" -le 62000 ]]; then
     pass "unique_port: все порты в диапазоне 30000-62000"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "unique_port: один из портов вне диапазона"
   fi
@@ -273,7 +273,7 @@ test_arch() {
   case "$result" in
   amd64 | arm64)
     pass "arch: поддерживаемая архитектура $result"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
     ;;
   *)
     warn "arch: неизвестная архитектура $result (может быть нормально для тестовой системы)"
@@ -293,7 +293,7 @@ test_get_server_ip() {
     # Проверка формата IPv4
     if [[ "$result" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
       pass "get_server_ip: получен валидный IP $result"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       warn "get_server_ip: получен IP в неожиданном формате: $result"
     fi
@@ -315,10 +315,10 @@ test_open_port_mock() {
   # Вызываем функцию
   if open_port 12345 tcp "Test port" 2>/dev/null; then
     pass "open_port: вызван без ошибок"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     pass "open_port: вызван (возможно с предупреждениями)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -334,7 +334,7 @@ test_open_port_edge_cases() {
   # Тест: минимальный порт (1)
   if open_port 1 tcp "Min port" 2>/dev/null; then
     pass "open_port: порт 1 открыт"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "open_port: порт 1 не открылся"
   fi
@@ -342,7 +342,7 @@ test_open_port_edge_cases() {
   # Тест: максимальный порт (65535)
   if open_port 65535 tcp "Max port" 2>/dev/null; then
     pass "open_port: порт 65535 открыт"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "open_port: порт 65535 не открылся"
   fi
@@ -350,7 +350,7 @@ test_open_port_edge_cases() {
   # Тест: стандартный HTTP порт (80)
   if open_port 80 tcp "HTTP" 2>/dev/null; then
     pass "open_port: порт 80 открыт"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "open_port: порт 80 не открылся"
   fi
@@ -358,7 +358,7 @@ test_open_port_edge_cases() {
   # Тест: стандартный HTTPS порт (443)
   if open_port 443 tcp "HTTPS" 2>/dev/null; then
     pass "open_port: порт 443 открыт"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "open_port: порт 443 не открылся"
   fi
@@ -366,7 +366,7 @@ test_open_port_edge_cases() {
   # Тест: UDP протокол
   if open_port 53 udp "DNS" 2>/dev/null; then
     pass "open_port: UDP порт 53 открыт"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "open_port: UDP порт 53 не открылся"
   fi
@@ -374,7 +374,7 @@ test_open_port_edge_cases() {
   # Тест: без комментария (только port и protocol)
   if open_port 8080 tcp 2>/dev/null; then
     pass "open_port: без комментария работает"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "open_port: без комментария не сработал"
   fi
@@ -382,7 +382,7 @@ test_open_port_edge_cases() {
   # Тест: с пустым комментарием
   if open_port 8081 tcp "" 2>/dev/null; then
     pass "open_port: с пустым комментарием работает"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "open_port: с пустым комментарием не сработал"
   fi
@@ -401,11 +401,11 @@ test_close_port_mock() {
   # Вызываем функцию
   if close_port 12345 tcp 2>/dev/null; then
     pass "close_port: вызван без ошибок"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     # close_port использует || true, так что ошибок не должно быть
     pass "close_port: вызван (возможно с предупреждениями)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -429,7 +429,7 @@ test_integration() {
   # Проверка что все данные сгенерированы
   if [[ ${#domain_name} -eq 20 && ${#sbox_short_id} -eq 8 && "$panel_port" -ge 30000 && "$sub_port" -ge 30000 ]]; then
     pass "Интеграция: все функции работают вместе"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Интеграция: одна из функций отработала некорректно"
   fi
@@ -437,7 +437,7 @@ test_integration() {
   # Проверка что порты уникальны
   if [[ "$panel_port" != "$sub_port" ]]; then
     pass "Интеграция: порты уникальны ($panel_port != $sub_port)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "Интеграция: порты совпадают (маловероятно)"
   fi
@@ -450,14 +450,14 @@ test_validate_domain() {
   # Валидные домены
   if validate_domain "example.com"; then
     pass "validate_domain: example.com - валиден"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "validate_domain: example.com - должен быть валиден"
   fi
 
   if validate_domain "sub.example.co.uk"; then
     pass "validate_domain: sub.example.co.uk - валиден"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "validate_domain: sub.example.co.uk - должен быть валиден"
   fi
@@ -465,21 +465,21 @@ test_validate_domain() {
   # Невалидные домены
   if ! validate_domain "localhost"; then
     pass "validate_domain: localhost - невалиден (защита от SSRF)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "validate_domain: localhost - должен быть невалиден"
   fi
 
   if ! validate_domain "example.local"; then
     pass "validate_domain: .local - невалиден (защита от SSRF)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "validate_domain: .local - должен быть невалиден"
   fi
 
   if ! validate_domain "192.168.1.1"; then
     pass "validate_domain: IP-адрес - невалиден (защита от SSRF)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "validate_domain: IP-адрес - должен быть невалиден"
   fi
@@ -491,14 +491,14 @@ test_validate_email() {
   # Валидные email
   if validate_email "test@example.com"; then
     pass "validate_email: test@example.com - валиден"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "validate_email: test@example.com - должен быть валиден"
   fi
 
   if validate_email "user.name+tag@domain.co.uk"; then
     pass "validate_email: user.name+tag@domain.co.uk - валиден"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "validate_email: user.name+tag@domain.co.uk - должен быть валиден"
   fi
@@ -506,14 +506,14 @@ test_validate_email() {
   # Невалидные email
   if ! validate_email "invalid"; then
     pass "validate_email: invalid - невалиден"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "validate_email: invalid - должен быть невалиден"
   fi
 
   if ! validate_email "@example.com"; then
     pass "validate_email: @example.com - невалиден"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "validate_email: @example.com - должен быть невалиден"
   fi

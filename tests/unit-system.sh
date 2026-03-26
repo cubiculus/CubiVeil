@@ -73,7 +73,7 @@ test_file_exists() {
 
   if [[ -f "$MODULE_PATH" ]]; then
     pass "System module: файл существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "System module: файл не найден"
   fi
@@ -85,7 +85,7 @@ test_syntax() {
 
   if bash -n "$MODULE_PATH" 2>/dev/null; then
     pass "System module: синтаксис корректен"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "System module: синтаксическая ошибка"
   fi
@@ -100,7 +100,7 @@ test_shebang() {
 
   if [[ "$shebang" == "#!/bin/bash" ]]; then
     pass "System module: корректный shebang"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "System module: некорректный shebang: $shebang"
   fi
@@ -122,14 +122,14 @@ test_system_setup_update_env() {
   # Проверяем что переменные установлены
   if [[ "${DEBIAN_FRONTEND:-}" == "noninteractive" ]]; then
     pass "system_setup_update_env: DEBIAN_FRONTEND установлен"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "system_setup_update_env: DEBIAN_FRONTEND не установлен"
   fi
 
   if [[ "${UCF_FORCE_CONFFOLD:-}" == "1" ]]; then
     pass "system_setup_update_env: UCF_FORCE_CONFFOLD установлен"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "system_setup_update_env: UCF_FORCE_CONFFOLD не установлен"
   fi
@@ -143,7 +143,7 @@ test_system_full_update() {
   system_full_update
 
   pass "system_full_update: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: system_quick_update ──────────────────────────────────
@@ -153,7 +153,7 @@ test_system_quick_update() {
   system_quick_update
 
   pass "system_quick_update: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: system_auto_updates_configure ────────────────────────
@@ -174,7 +174,7 @@ test_system_auto_updates_configure() {
   system_auto_updates_configure
 
   pass "system_auto_updates_configure: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: system_auto_updates_unattended_configure ─────────────
@@ -191,7 +191,7 @@ test_system_auto_updates_unattended_configure() {
   system_auto_updates_unattended_configure
 
   pass "system_auto_updates_unattended_configure: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: system_auto_updates_enable ───────────────────────────
@@ -201,7 +201,7 @@ test_system_auto_updates_enable() {
   system_auto_updates_enable
 
   pass "system_auto_updates_enable: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: system_auto_updates_setup ────────────────────────────
@@ -213,7 +213,7 @@ test_system_auto_updates_setup() {
   system_auto_updates_setup
 
   pass "system_auto_updates_setup: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: system_bbr_load_module ───────────────────────────────
@@ -233,7 +233,7 @@ test_system_bbr_load_module() {
   system_bbr_load_module
 
   pass "system_bbr_load_module: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf /tmp/test-modules-load.d
 }
@@ -254,7 +254,7 @@ test_system_bbr_create_sysctl_config() {
   system_bbr_create_sysctl_config
 
   pass "system_bbr_create_sysctl_config: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: system_bbr_apply_sysctl ──────────────────────────────
@@ -264,7 +264,7 @@ test_system_bbr_apply_sysctl() {
   system_bbr_apply_sysctl
 
   pass "system_bbr_apply_sysctl: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: system_bbr_setup ─────────────────────────────────────
@@ -274,7 +274,7 @@ test_system_bbr_setup() {
   system_bbr_setup
 
   pass "system_bbr_setup: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: system_bbr_check_status ──────────────────────────────
@@ -283,7 +283,7 @@ test_system_bbr_check_status() {
 
   if system_bbr_check_status; then
     pass "system_bbr_check_status: BBR активен"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "system_bbr_check_status: BBR не активен (может быть нормально)"
   fi
@@ -297,7 +297,7 @@ test_system_check_services() {
   system_check_services || true
 
   pass "system_check_services: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: system_restart_services ──────────────────────────────
@@ -307,7 +307,7 @@ test_system_restart_services() {
   system_restart_services
 
   pass "system_restart_services: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: system_install_base_dependencies ─────────────────────
@@ -317,7 +317,7 @@ test_system_install_base_dependencies() {
   system_install_base_dependencies
 
   pass "system_install_base_dependencies: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: module_install ───────────────────────────────────────
@@ -329,7 +329,7 @@ test_module_install() {
   module_install
 
   pass "module_install: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: module_configure ─────────────────────────────────────
@@ -341,7 +341,7 @@ test_module_configure() {
   module_configure
 
   pass "module_configure: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: module_enable ────────────────────────────────────────
@@ -351,7 +351,7 @@ test_module_enable() {
   module_enable
 
   pass "module_enable: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: module_disable ───────────────────────────────────────
@@ -361,7 +361,7 @@ test_module_disable() {
   module_disable
 
   pass "module_disable: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: module_update ────────────────────────────────────────
@@ -371,7 +371,7 @@ test_module_update() {
   module_update
 
   pass "module_update: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: module_status ────────────────────────────────────────
@@ -381,7 +381,7 @@ test_module_status() {
   module_status || true
 
   pass "module_status: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: module_quick_update ──────────────────────────────────
@@ -391,7 +391,7 @@ test_module_quick_update() {
   module_quick_update
 
   pass "module_quick_update: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: наличие всех основных функций ────────────────────────
@@ -433,7 +433,7 @@ test_all_functions_exist() {
 
   if [[ $found -eq ${#required_functions[@]} ]]; then
     pass "Все функции существуют ($found/${#required_functions[@]})"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Не все функции найдены ($found/${#required_functions[@]})"
   fi
@@ -449,7 +449,7 @@ test_functions_exported() {
     declare -f module_enable &>/dev/null &&
     declare -f module_disable &>/dev/null; then
     pass "Module interface функции экспортированы"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Module interface функции не найдены"
   fi

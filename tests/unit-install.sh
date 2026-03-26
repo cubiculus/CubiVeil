@@ -24,11 +24,11 @@ TESTS_FAILED=0
 info() { echo -e "${CYAN}[INFO]${PLAIN} $*" >&2; }
 pass() {
   echo -e "${GREEN}[PASS]${PLAIN} $*" >&2
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 fail() {
   echo -e "${RED}[FAIL]${PLAIN} $*" >&2
-  ((TESTS_FAILED++))
+  ((TESTS_FAILED++)) || true
 }
 warn() { echo -e "${YELLOW}[WARN]${PLAIN} $*" >&2; }
 
@@ -38,7 +38,7 @@ test_file_exists() {
 
   if [[ -f "${SCRIPT_DIR}/install.sh" ]]; then
     pass "install.sh: файл существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "install.sh: файл не найден"
   fi
@@ -50,7 +50,7 @@ test_syntax() {
 
   if bash -n "${SCRIPT_DIR}/install.sh" 2>/dev/null; then
     pass "install.sh: синтаксис корректен"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "install.sh: синтаксическая ошибка"
   fi
@@ -65,7 +65,7 @@ test_shebang() {
 
   if [[ "$shebang" == "#!/bin/bash" ]]; then
     pass "install.sh: корректный shebang"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "install.sh: некорректный shebang: $shebang"
   fi
@@ -77,7 +77,7 @@ test_strict_mode() {
 
   if grep -q "set -euo pipefail" "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: strict mode включён"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "install.sh: strict mode не включён"
   fi
@@ -90,7 +90,7 @@ test_module_loading() {
   # Проверка что lang.sh загружается
   if grep -q 'source.*lang.sh' "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: загружает lang.sh"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "install.sh: не загружает lang.sh"
   fi
@@ -98,7 +98,7 @@ test_module_loading() {
   # Проверка что lib/utils.sh загружается
   if grep -q 'source.*lib/utils.sh' "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: загружает lib/utils.sh"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "install.sh: не загружает lib/utils.sh"
   fi
@@ -106,7 +106,7 @@ test_module_loading() {
   # Проверка что lib/install-steps.sh загружается
   if grep -q 'source.*lib/install-steps.sh' "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: загружает lib/install-steps.sh"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "install.sh: не загружает lib/install-steps.sh"
   fi
@@ -119,7 +119,7 @@ test_main_function() {
   if grep -q "^main()" "${SCRIPT_DIR}/install.sh" ||
     grep -q "main() {" "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: функция main существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "install.sh: функция main не найдена"
   fi
@@ -133,7 +133,7 @@ test_main_call() {
     grep -q 'main "$1"' "${SCRIPT_DIR}/install.sh" ||
     grep -q 'main' "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: main вызывается"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "install.sh: main не вызывается"
   fi
@@ -172,7 +172,7 @@ test_module_functions_usage() {
 
   if [[ $found -ge 15 ]]; then
     pass "install.sh: использует функции из модулей ($found/${#required_functions[@]})"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "install.sh: недостаточно использует функции из модулей ($found/${#required_functions[@]})"
   fi
@@ -220,7 +220,7 @@ test_installation_steps_order() {
 
   if $correct_order; then
     pass "install.sh: последовательность шагов корректна"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "install.sh: возможная проблема с последовательностью шагов"
   fi
@@ -250,10 +250,10 @@ test_traffic_shaping_after_configure() {
 
   if [[ "$traffic_line" -eq "$expected_traffic_line" ]]; then
     pass "install.sh: step_traffic_shaping вызывается после step_configure (строки $configure_line → $traffic_line)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   elif [[ "$traffic_line" -gt "$configure_line" ]]; then
     pass "install.sh: step_traffic_shaping вызывается после step_configure (строки $configure_line → $traffic_line)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "install.sh: step_traffic_shaping должен вызываться после step_configure"
   fi
@@ -283,10 +283,10 @@ test_decoy_site_after_configure() {
 
   if [[ "$decoy_line" -eq "$expected_decoy_line" ]]; then
     pass "install.sh: step_decoy_site вызывается после step_configure (строки $configure_line → $decoy_line)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   elif [[ "$decoy_line" -gt "$configure_line" ]]; then
     pass "install.sh: step_decoy_site вызывается после step_configure (строки $configure_line → $decoy_line)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "install.sh: step_decoy_site должен вызываться после step_configure"
   fi
@@ -316,10 +316,10 @@ test_traffic_shaping_after_decoy_site() {
 
   if [[ "$traffic_line" -eq "$expected_traffic_line" ]]; then
     pass "install.sh: step_traffic_shaping вызывается после step_decoy_site (строки $decoy_line → $traffic_line)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   elif [[ "$traffic_line" -gt "$decoy_line" ]]; then
     pass "install.sh: step_traffic_shaping вызывается после step_decoy_site (строки $decoy_line → $traffic_line)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "install.sh: step_traffic_shaping должен вызываться после step_decoy_site"
   fi
@@ -333,7 +333,7 @@ test_error_handling() {
   if grep -q 'err "' "${SCRIPT_DIR}/install.sh" ||
     grep -q "err '" "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: использует функцию err для ошибок"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "install.sh: не использует функцию err"
   fi
@@ -343,7 +343,7 @@ test_error_handling() {
     grep -q "|| true" "${SCRIPT_DIR}/install.sh" ||
     grep -q "&&" "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: использует обработку ошибок"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "install.sh: не использует явную обработку ошибок"
   fi
@@ -356,7 +356,7 @@ test_lang_fallback() {
   # Проверка что есть fallback если lang.sh отсутствует
   if grep -A5 'if \[\[ -f.*lang.sh' "${SCRIPT_DIR}/install.sh" | grep -q "else\|fallback\|RED=\|GREEN="; then
     pass "install.sh: имеет fallback для lang.sh"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "install.sh: fallback для lang.sh не найден"
   fi
@@ -372,7 +372,7 @@ test_script_size() {
   # install.sh должен быть компактным (< 200 строк — хорошо)
   if [[ $line_count -lt 200 ]]; then
     pass "install.sh: компактный ($line_count строк)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   elif [[ $line_count -lt 500 ]]; then
     warn "install.sh: умеренного размера ($line_count строк)"
   else
@@ -389,7 +389,7 @@ test_comments() {
 
   if [[ $comment_count -ge 5 ]]; then
     pass "install.sh: достаточное количество комментариев ($comment_count)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "install.sh: мало комментариев ($comment_count)"
   fi
@@ -403,7 +403,7 @@ test_run_without_root() {
   # или проверяем что есть проверка на root
   if grep -q "check_root\|EUID\|root" "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: имеет проверку на root"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "install.sh: проверка на root не найдена"
   fi
@@ -415,7 +415,7 @@ test_ubuntu_check() {
 
   if grep -q "check_ubuntu\|ubuntu\|Ubuntu" "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: имеет проверку на Ubuntu"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "install.sh: проверка на Ubuntu не найдена"
   fi
@@ -434,7 +434,7 @@ test_environment_variables() {
 
   if [[ $env_deps -lt 10 ]]; then
     pass "install.sh: минимальные внешние зависимости ($env_deps)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "install.sh: много внешних зависимостей ($env_deps)"
   fi
@@ -447,7 +447,7 @@ test_telegram_integration() {
   # Проверка что install.sh упоминает setup-telegram.sh
   if grep -q "setup-telegram.sh" "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: упоминает setup-telegram.sh"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "install.sh: не упоминает setup-telegram.sh"
   fi
@@ -455,7 +455,7 @@ test_telegram_integration() {
   # Проверка что INSTALL_TG переменная используется
   if grep -q "INSTALL_TG" "${SCRIPT_DIR}/install.sh"; then
     pass "install.sh: использует INSTALL_TG переменную"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "install.sh: INSTALL_TG переменная не найдена"
   fi
@@ -512,7 +512,7 @@ test_dry_run_simulation() {
   # Пытаемся загрузить install.sh и проверить что main существует
   if bash -c "source ${SCRIPT_DIR}/install.sh 2>&1 && declare -f main >/dev/null" 2>/dev/null; then
     pass "install.sh: загружается и main существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     # Это может не сработать из-за интерактивности, поэтому warning
     warn "install.sh: загрузка может требовать интерактивности"
@@ -529,7 +529,7 @@ test_security_no_hardcoded_secrets() {
     fail "install.sh: возможны хардкодные секреты"
   else
     pass "install.sh: хардкодные секреты не найдены"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -550,7 +550,7 @@ test_quoting_usage() {
 
   if [[ $quoted_vars -gt 0 ]]; then
     pass "install.sh: использует кавычки для переменных ($quoted_vars)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "install.sh: переменные могут быть не в кавычках"
   fi

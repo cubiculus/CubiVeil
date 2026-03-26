@@ -189,7 +189,7 @@ test_prompt_inputs_mock() {
   # Проверяем что функция существует
   if declare -f prompt_inputs >/dev/null; then
     pass "Функция prompt_inputs существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Функция prompt_inputs отсутствует"
     return
@@ -203,19 +203,19 @@ test_prompt_inputs_mock() {
   # Проверка что есть валидация домена
   if echo "$func_source" | grep -q "DOMAIN"; then
     pass "prompt_inputs: работает с DOMAIN"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что есть валидация email
   if echo "$func_source" | grep -q "LE_EMAIL"; then
     pass "prompt_inputs: работает с LE_EMAIL"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что есть опция Telegram
   if echo "$func_source" | grep -q "INSTALL_TG"; then
     pass "prompt_inputs: работает с INSTALL_TG"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -226,7 +226,7 @@ test_step_check_ip_neighborhood() {
   # Проверяем что функция существует
   if declare -f step_check_ip_neighborhood >/dev/null; then
     pass "Функция step_check_ip_neighborhood существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Функция step_check_ip_neighborhood отсутствует"
     return
@@ -236,7 +236,7 @@ test_step_check_ip_neighborhood() {
   # Запускаем и проверяем что не падает
   if step_check_ip_neighborhood 2>/dev/null; then
     pass "step_check_ip_neighborhood: выполнилась без ошибок"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "step_check_ip_neighborhood: вернула ошибку (возможно ожидаемо)"
   fi
@@ -248,7 +248,7 @@ test_step_system_update() {
 
   if declare -f step_system_update >/dev/null; then
     pass "Функция step_system_update существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Функция step_system_update отсутствует"
     return
@@ -261,19 +261,19 @@ test_step_system_update() {
   # Проверка что есть apt-get update
   if echo "$func_source" | grep -q "apt-get update"; then
     pass "step_system_update: содержит apt-get update"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что устанавливаются пакеты
   if echo "$func_source" | grep -q "apt-get install"; then
     pass "step_system_update: содержит установку пакетов"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что есть DEBIAN_FRONTEND
   if echo "$func_source" | grep -q "DEBIAN_FRONTEND"; then
     pass "step_system_update: устанавливает DEBIAN_FRONTEND"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -283,7 +283,7 @@ test_step_auto_updates() {
 
   if declare -f step_auto_updates >/dev/null; then
     pass "Функция step_auto_updates существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Функция step_auto_updates отсутствует"
     return
@@ -295,19 +295,19 @@ test_step_auto_updates() {
   # Проверка что создаётся файл автообновлений
   if echo "$func_source" | grep -q "20auto-upgrades"; then
     pass "step_auto_updates: настраивает 20auto-upgrades"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что настраивается unattended-upgrades
   if echo "$func_source" | grep -q "50unattended-upgrades"; then
     pass "step_auto_updates: настраивает 50unattended-upgrades"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что сервис включается
   if echo "$func_source" | grep -q "systemctl enable unattended-upgrades"; then
     pass "step_auto_updates: включает сервис unattended-upgrades"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -317,7 +317,7 @@ test_step_bbr() {
 
   if declare -f step_bbr >/dev/null; then
     pass "Функция step_bbr существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Функция step_bbr отсутствует"
     return
@@ -329,19 +329,19 @@ test_step_bbr() {
   # Проверка что загружается модуль tcp_bbr
   if echo "$func_source" | grep -q "modprobe tcp_bbr"; then
     pass "step_bbr: загружает модуль tcp_bbr"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что создаётся sysctl конфиг
   if echo "$func_source" | grep -q "99-cubiveil.conf"; then
     pass "step_bbr: создаёт sysctl конфиг"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что применяется sysctl
   if echo "$func_source" | grep -q "sysctl -p"; then
     pass "step_bbr: применяет sysctl настройки"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -351,7 +351,7 @@ test_step_firewall() {
 
   if declare -f step_firewall >/dev/null; then
     pass "Функция step_firewall существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Функция step_firewall отсутствует"
     return
@@ -363,19 +363,19 @@ test_step_firewall() {
   # Проверка что сбрасывается ufw
   if echo "$func_source" | grep -q "ufw --force reset"; then
     pass "step_firewall: сбрасывает ufw"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что устанавливаются правила по умолчанию
   if echo "$func_source" | grep -q "ufw default deny incoming"; then
     pass "step_firewall: устанавливает deny incoming"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что используется open_port
   if echo "$func_source" | grep -q "open_port"; then
     pass "step_firewall: использует open_port"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -385,7 +385,7 @@ test_step_fail2ban() {
 
   if declare -f step_fail2ban >/dev/null; then
     pass "Функция step_fail2ban существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Функция step_fail2ban отсутствует"
     return
@@ -397,19 +397,19 @@ test_step_fail2ban() {
   # Проверка что создаётся jail конфиг
   if echo "$func_source" | grep -q "cubiveil.conf"; then
     pass "step_fail2ban: создаёт cubiveil.conf"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что настраивается SSH порт
   if echo "$func_source" | grep -q "SSH_PORT\|sshd_config"; then
     pass "step_fail2ban: читает SSH порт из конфига"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что сервис включается
   if echo "$func_source" | grep -q "systemctl enable fail2ban"; then
     pass "step_fail2ban: включает сервис fail2ban"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -419,7 +419,7 @@ test_step_install_singbox() {
 
   if declare -f step_install_singbox >/dev/null; then
     pass "Функция step_install_singbox существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Функция step_install_singbox отсутствует"
     return
@@ -431,19 +431,19 @@ test_step_install_singbox() {
   # Проверка что версия получается с GitHub
   if echo "$func_source" | grep -q "api.github.com.*sing-box"; then
     pass "step_install_singbox: получает версию с GitHub"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что используется curl для скачивания
   if echo "$func_source" | grep -q "curl.*sing-box"; then
     pass "step_install_singbox: скачивает sing-box"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что бинарник устанавливается в /usr/local/bin
   if echo "$func_source" | grep -q "/usr/local/bin/sing-box"; then
     pass "step_install_singbox: устанавливает в /usr/local/bin"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -453,7 +453,7 @@ test_step_generate_keys_and_ports() {
 
   if declare -f step_generate_keys_and_ports >/dev/null; then
     pass "Функция step_generate_keys_and_ports существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Функция step_generate_keys_and_ports отсутствует"
     return
@@ -465,25 +465,25 @@ test_step_generate_keys_and_ports() {
   # Проверка что генерируется Reality keypair
   if echo "$func_source" | grep -q "sing-box generate reality-keypair"; then
     pass "step_generate_keys_and_ports: генерирует Reality keypair"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что генерируются UUID
   if echo "$func_source" | grep -q "sing-box generate uuid"; then
     pass "step_generate_keys_and_ports: генерирует UUID"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что используются unique_port
   if echo "$func_source" | grep -q "unique_port"; then
     pass "step_generate_keys_and_ports: использует unique_port"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что есть CDN список для camouflage
   if echo "$func_source" | grep -q "CDN_LIST\|cloudflare\|google"; then
     pass "step_generate_keys_and_ports: имеет CDN список для camouflage"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -493,7 +493,7 @@ test_step_install_marzban() {
 
   if declare -f step_install_marzban >/dev/null; then
     pass "Функция step_install_marzban существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Функция step_install_marzban отсутствует"
     return
@@ -505,13 +505,13 @@ test_step_install_marzban() {
   # Проверка что используется официальный скрипт установки
   if echo "$func_source" | grep -q "Marzban/raw/master/script.sh"; then
     pass "step_install_marzban: использует официальный скрипт"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что есть проверка наличия скрипта
   if echo "$func_source" | grep -q "/opt/marzban/script.sh"; then
     pass "step_install_marzban: проверяет наличие скрипта"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -521,7 +521,7 @@ test_step_ssl() {
 
   if declare -f step_ssl >/dev/null; then
     pass "Функция step_ssl существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Функция step_ssl отсутствует"
     return
@@ -533,25 +533,25 @@ test_step_ssl() {
   # Проверка что устанавливается acme.sh
   if echo "$func_source" | grep -q "acme.sh"; then
     pass "step_ssl: использует acme.sh"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что открывается порт 80 для валидации
   if echo "$func_source" | grep -q "open_port 80"; then
     pass "step_ssl: открывает порт 80 для валидации"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что порт 80 закрывается после получения
   if echo "$func_source" | grep -q "close_port 80"; then
     pass "step_ssl: закрывает порт 80 после получения"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что сертификаты сохраняются в правильную директорию
   if echo "$func_source" | grep -q "/var/lib/marzban/certs"; then
     pass "step_ssl: сохраняет сертификаты в /var/lib/marzban/certs"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -573,7 +573,7 @@ test_step_ssl_dev() {
 
   if declare -f step_ssl_dev >/dev/null; then
     pass "Функция step_ssl_dev существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Функция step_ssl_dev отсутствует"
     return
@@ -585,31 +585,31 @@ test_step_ssl_dev() {
   # Проверка что используется openssl для генерации self-signed
   if echo "$func_source" | grep -q "openssl.*req.*-x509"; then
     pass "step_ssl_dev: использует openssl для self-signed"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что создаётся директория для сертификатов
   if echo "$func_source" | grep -q "mkdir -p.*certs"; then
     pass "step_ssl_dev: создаёт директорию для сертификатов"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что сертификат генерируется на 100 лет (36500 дней)
   if echo "$func_source" | grep -q "\-days 36500\|\-days 3650"; then
     pass "step_ssl_dev: длительный срок действия сертификата"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что используется dev.cubiveil.local по умолчанию
   if echo "$func_source" | grep -q "dev.cubiveil.local"; then
     pass "step_ssl_dev: использует dev.cubiveil.local по умолчанию"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что есть предупреждение о безопасности
   if echo "$func_source" | grep -q "WARNING\|security warning\|Browsers will show"; then
     pass "step_ssl_dev: показывает предупреждение о безопасности"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -630,14 +630,14 @@ test_step_ssl_dev_mode() {
 
   if echo "$func_source" | grep -q "DEV_MODE.*true\|DEV_MODE:-false"; then
     pass "step_ssl: проверяет DEV_MODE"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "step_ssl: не проверяет DEV_MODE"
   fi
 
   if echo "$func_source" | grep -q "step_ssl_dev"; then
     pass "step_ssl: вызывает step_ssl_dev в dev-режиме"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "step_ssl: не вызывает step_ssl_dev"
   fi
@@ -649,7 +649,7 @@ test_step_configure() {
 
   if declare -f step_configure >/dev/null; then
     pass "Функция step_configure существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Функция step_configure отсутствует"
     return
@@ -661,25 +661,25 @@ test_step_configure() {
   # Проверка что создаётся .env файл
   if echo "$func_source" | grep -q "/opt/marzban/.env"; then
     pass "step_configure: создаёт /opt/marzban/.env"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что создаётся шаблон sing-box
   if echo "$func_source" | grep -q "sing-box-template.json"; then
     pass "step_configure: создаёт sing-box-template.json"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что используется gen_random для паролей
   if echo "$func_source" | grep -q "gen_random"; then
     pass "step_configure: использует gen_random для паролей"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что есть 5 профилей в шаблоне
   if echo "$func_source" | grep -q "vless-reality-tcp\|vless-reality-grpc\|hysteria2\|trojan-ws-tls\|shadowsocks-2022"; then
     pass "step_configure: шаблон содержит 5 профилей"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -689,7 +689,7 @@ test_step_finish() {
 
   if declare -f step_finish >/dev/null; then
     pass "Функция step_finish существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Функция step_finish отсутствует"
     return
@@ -701,19 +701,19 @@ test_step_finish() {
   # Проверка что перезапускается marzban
   if echo "$func_source" | grep -q "systemctl restart marzban"; then
     pass "step_finish: перезапускает marzban"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что есть health-check
   if echo "$func_source" | grep -q "health_check\|health-check"; then
     pass "step_finish: настраивает health-check"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   # Проверка что есть проверка статуса сервиса
   if echo "$func_source" | grep -q "systemctl is-active"; then
     pass "step_finish: проверяет статус сервиса"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -741,7 +741,7 @@ test_all_steps_exist() {
   for step_func in "${required_steps[@]}"; do
     if declare -f "$step_func" >/dev/null; then
       pass "Шаг существует: $step_func"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "Шаг отсутствует: $step_func"
       ((missing++))
@@ -750,7 +750,7 @@ test_all_steps_exist() {
 
   if [[ $missing -eq 0 ]]; then
     pass "Все шаги установки присутствуют"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "Отсутствует $missing шагов установки"
   fi
@@ -769,7 +769,7 @@ test_localization_in_steps() {
       source=$(declare -f "$func")
       if echo "$source" | grep -q 'LANG_NAME.*==.*"Русский"\|LANG_NAME.*==.*"English"'; then
         pass "$func: поддерживает локализацию"
-        ((TESTS_PASSED++))
+        ((TESTS_PASSED++)) || true
         ((localized_steps++))
       else
         warn "$func: нет явной проверки LANG_NAME"
@@ -779,7 +779,7 @@ test_localization_in_steps() {
 
   if [[ $localized_steps -gt 0 ]]; then
     pass "Некоторые шаги поддерживают локализацию"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 

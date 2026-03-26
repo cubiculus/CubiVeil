@@ -83,3 +83,16 @@ jobs:
         test -f tests/integration-test.sh && echo "✓ integration-test.sh exists"
         test -f run-tests.sh && echo "✓ run-tests.sh exists"
         echo "Test scripts validated successfully"
+
+  shell-unit-tests:
+    runs-on: ubuntu-latest
+    needs: telegram-bot-tests
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run Shell Unit Tests
+      run: |
+        echo "Running shell unit tests..."
+        chmod +x run-tests.sh
+        ./run-tests.sh --unit

@@ -19,7 +19,7 @@ test_file_exists() {
 
   if [[ -f "${SCRIPT_DIR}/lang.sh" ]]; then
     pass "lang.sh: файл существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "lang.sh: файл не найден"
   fi
@@ -31,7 +31,7 @@ test_syntax() {
 
   if bash -n "${SCRIPT_DIR}/lang.sh" 2>/dev/null; then
     pass "lang.sh: синтаксис корректен"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "lang.sh: синтаксическая ошибка"
   fi
@@ -43,7 +43,7 @@ test_module_loading() {
 
   if bash -c "source ${SCRIPT_DIR}/lang.sh 2>&1" 2>/dev/null; then
     pass "lang.sh: загружается без ошибок"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "lang.sh: ошибка при загрузке"
   fi
@@ -59,7 +59,7 @@ test_default_language() {
 
   if [[ "$lang_name" == "Русский" || "$lang_name" == "English" ]]; then
     pass "Язык по умолчанию установлен: $lang_name"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Язык по умолчанию не установлен корректно: '$lang_name'"
   fi
@@ -71,7 +71,7 @@ test_select_language_function() {
 
   if bash -c "source ${SCRIPT_DIR}/lang.sh && declare -f select_language >/dev/null 2>&1" 2>/dev/null; then
     pass "Функция select_language существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Функция select_language отсутствует"
   fi
@@ -83,7 +83,7 @@ test_step_title_function() {
 
   if bash -c "source ${SCRIPT_DIR}/lang.sh && declare -f step_title >/dev/null 2>&1" 2>/dev/null; then
     pass "Функция step_title существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Функция step_title отсутствует"
   fi
@@ -95,7 +95,7 @@ test_get_str_function() {
 
   if bash -c "source ${SCRIPT_DIR}/lang.sh && declare -f get_str >/dev/null 2>&1" 2>/dev/null; then
     pass "Функция get_str существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "Функция get_str отсутствует (может быть опционально)"
   fi
@@ -116,7 +116,7 @@ test_colors_defined() {
 
   if [[ $defined -ge 5 ]]; then
     pass "Цвета определены: $defined из ${#colors[@]}"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Не все цвета определены: $defined из ${#colors[@]}"
   fi
@@ -137,7 +137,7 @@ test_output_functions() {
 
   if [[ $defined -eq ${#functions[@]} ]]; then
     pass "Все функции вывода определены: ${defined}"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Не все функции вывода определены: $defined из ${#functions[@]}"
   fi
@@ -165,7 +165,7 @@ test_en_strings() {
 
   if [[ $found -eq ${#en_strings[@]} ]]; then
     pass "Все EN строки найдены: $found"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "Не все EN строки найдены: $found из ${#en_strings[@]}"
   fi
@@ -193,7 +193,7 @@ test_ru_strings() {
 
   if [[ $found -eq ${#ru_strings[@]} ]]; then
     pass "Все RU строки найдены: $found"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "Не все RU строки найдены: $found из ${#ru_strings[@]}"
   fi
@@ -227,7 +227,7 @@ test_step_titles() {
 
   if [[ $found -ge 10 ]]; then
     pass "Заголовки шагов найдены: $found"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Не все заголовки шагов найдены: $found из ${#step_strings[@]}"
   fi
@@ -261,7 +261,7 @@ test_step_titles_ru() {
 
   if [[ $found -ge 10 ]]; then
     pass "Заголовки шагов RU найдены: $found"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "Не все заголовки шагов RU найдены: $found из ${#step_strings[@]}"
   fi
@@ -289,7 +289,7 @@ test_telegram_strings() {
 
   if [[ $found -ge 4 ]]; then
     pass "Telegram строки найдены: $found"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "Не все Telegram строки найдены: $found из ${#tg_strings[@]}"
   fi
@@ -317,7 +317,7 @@ test_final_messages() {
 
   if [[ $found -ge 4 ]]; then
     pass "Финальные сообщения найдены: $found"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "Не все финальные сообщения найдены: $found из ${#final_strings[@]}"
   fi
@@ -345,7 +345,7 @@ test_final_messages_ru() {
 
   if [[ $found -ge 4 ]]; then
     pass "Финальные сообщения RU найдены: $found"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "Не все финальные сообщения RU найдены: $found из ${#final_strings[@]}"
   fi
@@ -365,7 +365,7 @@ test_step_title_functionality() {
 
   if echo "$output" | grep -q "Step 1/12"; then
     pass "step_title: English формат корректен"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "step_title: English формат не найден в выводе"
   fi
@@ -379,7 +379,7 @@ test_step_title_functionality() {
 
   if echo "$output" | grep -q "Шаг 1/12"; then
     pass "step_title: Русский формат корректен"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "step_title: Русский формат не найден в выводе"
   fi
@@ -401,7 +401,7 @@ test_localization_completeness() {
     local threshold=$((en_count * 80 / 100))
     if [[ $ru_count -ge $threshold ]]; then
       pass "Полнота локализации: RU строки покрывают $((ru_count * 100 / en_count))% EN строк"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       warn "Полнота локализации: RU строки покрывают только $((ru_count * 100 / en_count))% EN строк"
     fi
@@ -420,7 +420,7 @@ test_no_empty_strings() {
 
   if [[ $empty_count -eq 0 ]]; then
     pass "Пустые строки локализации отсутствуют"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "Найдено пустых строк локализации: $empty_count"
   fi
@@ -437,7 +437,7 @@ test_escaping_correctness() {
 
   if [[ -z "$bad_lines" ]]; then
     pass "Экранирование кавычек корректно"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "Возможные проблемы с экранированием: $bad_lines"
   fi
@@ -449,7 +449,7 @@ test_check_root_function() {
 
   if bash -c "source ${SCRIPT_DIR}/lang.sh && declare -f check_root >/dev/null 2>&1" 2>/dev/null; then
     pass "Функция check_root существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "Функция check_root отсутствует"
   fi
@@ -461,7 +461,7 @@ test_check_ubuntu_function() {
 
   if bash -c "source ${SCRIPT_DIR}/lang.sh && declare -f check_ubuntu >/dev/null 2>&1" 2>/dev/null; then
     pass "Функция check_ubuntu существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "Функция check_ubuntu отсутствует"
   fi
@@ -473,7 +473,7 @@ test_print_banner_function() {
 
   if bash -c "source ${SCRIPT_DIR}/lang.sh && declare -f print_banner >/dev/null 2>&1" 2>/dev/null; then
     pass "Функция print_banner существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "Функция print_banner отсутствует"
   fi
@@ -493,7 +493,7 @@ test_integration_with_modules() {
 
   if echo "$result" | grep -q "OK"; then
     pass "Интеграция с lib/utils.sh успешна"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "Интеграция с lib/utils.sh可能有 проблемы: $result"
   fi

@@ -84,7 +84,7 @@ test_file_exists() {
 
   if [[ -f "$MODULE_PATH" ]]; then
     pass "Backup module: файл существует"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Backup module: файл не найден"
   fi
@@ -96,7 +96,7 @@ test_syntax() {
 
   if bash -n "$MODULE_PATH" 2>/dev/null; then
     pass "Backup module: синтаксис корректен"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Backup module: синтаксическая ошибка"
   fi
@@ -111,7 +111,7 @@ test_shebang() {
 
   if [[ "$shebang" == "#!/bin/bash" ]]; then
     pass "Backup module: корректный shebang"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Backup module: некорректный shebang: $shebang"
   fi
@@ -126,10 +126,10 @@ test_backup_init() {
   # Проверяем что директории созданы
   if [[ -d "$BACKUP_DIR" ]] || true; then
     pass "backup_init: вызвана без ошибок"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     pass "backup_init: вызвана (директории могут не создаться в тесте)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 }
 
@@ -147,7 +147,7 @@ test_backup_generate_encryption_key() {
 
   if [[ -n "$key" ]] && [[ ${#key} -ge 32 ]]; then
     pass "backup_generate_encryption_key: ключ сгенерирован (${#key} символов)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "backup_generate_encryption_key: ключ не сгенерирован"
   fi
@@ -155,7 +155,7 @@ test_backup_generate_encryption_key() {
   # Проверяем что файл ключа создан
   if [[ -f "${test_backup_dir}/backup-key.txt" ]]; then
     pass "backup_generate_encryption_key: файл ключа создан"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "backup_generate_encryption_key: файл ключа не создан"
   fi
@@ -180,7 +180,7 @@ test_backup_get_encryption_key() {
 
   if [[ -n "$key" ]]; then
     pass "backup_get_encryption_key: ключ получен"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "backup_get_encryption_key: ключ не получен"
   fi
@@ -196,7 +196,7 @@ test_backup_check_environment() {
   backup_check_environment || true
 
   pass "backup_check_environment: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: backup_stop_services ─────────────────────────────────
@@ -206,7 +206,7 @@ test_backup_stop_services() {
   backup_stop_services
 
   pass "backup_stop_services: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: backup_marzban_db ────────────────────────────────────
@@ -233,10 +233,10 @@ test_backup_marzban_db() {
   # Проверяем что бэкап создан
   if [[ -f "${test_backup_dir}/marzban-db.sqlite3" ]]; then
     pass "backup_marzban_db: бэкап БД создан"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     pass "backup_marzban_db: бэкап может не создаться в тесте"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   rm -rf "$test_backup_dir" "$test_marzban_dir"
@@ -260,7 +260,7 @@ test_backup_marzban_config() {
   backup_marzban_config
 
   pass "backup_marzban_config: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir" "$MARZBAN_ENV"
 }
@@ -279,7 +279,7 @@ test_backup_singbox_config() {
   backup_singbox_config
 
   pass "backup_singbox_config: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir"
 }
@@ -301,7 +301,7 @@ test_backup_ssl_certs() {
   backup_ssl_certs || true
 
   pass "backup_ssl_certs: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir" "$test_ssl_dir"
 }
@@ -323,7 +323,7 @@ test_backup_keys() {
   backup_keys
 
   pass "backup_keys: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir" "$CREDENTIALS_FILE" "$CREDENTIALS_KEY"
 }
@@ -353,7 +353,7 @@ test_backup_encrypt_archive() {
   backup_encrypt_archive "$test_archive" || true
 
   pass "backup_encrypt_archive: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir"
 }
@@ -377,10 +377,10 @@ test_backup_system_info() {
   # Проверяем что файл создан
   if [[ -f "${test_backup_dir}/system-info.txt" ]]; then
     pass "backup_system_info: файл создан"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     pass "backup_system_info: файл может не создаться в тесте"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   rm -rf "$test_backup_dir"
@@ -409,10 +409,10 @@ test_backup_create_archive() {
 
   if [[ $archive_count -gt 0 ]]; then
     pass "backup_create_archive: архив создан"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     pass "backup_create_archive: архив может не создаться в тесте"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   fi
 
   rm -rf "$test_backup_dir" "$test_archive_dir"
@@ -425,7 +425,7 @@ test_backup_start_services() {
   backup_start_services
 
   pass "backup_start_services: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: backup_cleanup_old ───────────────────────────────────
@@ -440,7 +440,7 @@ test_backup_cleanup_old() {
   backup_cleanup_old
 
   pass "backup_cleanup_old: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_archive_dir"
 }
@@ -467,7 +467,7 @@ test_backup_full() {
   backup_full || true
 
   pass "backup_full: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir" "$test_archive_dir" "$test_marzban_dir"
 }
@@ -479,7 +479,7 @@ test_module_install() {
   module_install
 
   pass "module_install: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 }
 
 # ── Тест: module_backup ────────────────────────────────────────
@@ -496,7 +496,7 @@ test_module_backup() {
   module_backup || true
 
   pass "module_backup: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir"
 }
@@ -517,7 +517,7 @@ test_module_quick_backup() {
   module_quick_backup
 
   pass "module_quick_backup: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir" "$test_archive_dir"
 }
@@ -534,7 +534,7 @@ test_module_list() {
   module_list
 
   pass "module_list: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_archive_dir"
 }
@@ -551,7 +551,7 @@ test_module_cleanup() {
   module_cleanup
 
   pass "module_cleanup: вызвана без ошибок"
-  ((TESTS_PASSED++))
+  ((TESTS_PASSED++)) || true
 
   rm -rf "$test_archive_dir"
 }
@@ -593,7 +593,7 @@ test_all_functions_exist() {
 
   if [[ $found -eq ${#required_functions[@]} ]]; then
     pass "Все функции существуют ($found/${#required_functions[@]})"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Не все функции найдены ($found/${#required_functions[@]})"
   fi
@@ -605,7 +605,7 @@ test_config_variables() {
 
   if [[ -n "$BACKUP_DIR" ]] && [[ -n "$BACKUP_RETENTION_DAYS" ]] && [[ -n "$BACKUP_ARCHIVE_DIR" ]]; then
     pass "Конфигурационные переменные установлены"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Конфигурационные переменные не установлены"
   fi

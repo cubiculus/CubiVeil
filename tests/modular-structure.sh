@@ -7,8 +7,9 @@
 set -euo pipefail
 
 # ── Подключение тестовых утилит ───────────────────────────────
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-source "${SCRIPT_DIR}/lib/test-utils.sh"
+# Используем уникальное имя переменной чтобы избежать перезаписи
+MODULAR_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "${MODULAR_SCRIPT_DIR}/lib/test-utils.sh"
 
 # ── Тест: структура директорий ───────────────────────────────
 test_directory_structure() {
@@ -21,9 +22,9 @@ test_directory_structure() {
   )
 
   for dir in "${dirs[@]}"; do
-    if [[ -d "${SCRIPT_DIR}/${dir}" ]]; then
+    if [[ -d "${MODULAR_SCRIPT_DIR}/${dir}" ]]; then
       pass "Директория существует: $dir"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "Директория отсутствует: $dir"
     fi
@@ -43,9 +44,9 @@ test_main_files() {
   )
 
   for file in "${files[@]}"; do
-    if [[ -f "${SCRIPT_DIR}/${file}" ]]; then
+    if [[ -f "${MODULAR_SCRIPT_DIR}/${file}" ]]; then
       pass "Файл существует: $file"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       warn "Файл отсутствует: $file"
     fi
@@ -62,9 +63,9 @@ test_lib_modules() {
   )
 
   for file in "${lib_files[@]}"; do
-    if [[ -f "${SCRIPT_DIR}/${file}" ]]; then
+    if [[ -f "${MODULAR_SCRIPT_DIR}/${file}" ]]; then
       pass "Модуль существует: $file"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "Модуль отсутствует: $file"
     fi
@@ -83,9 +84,9 @@ test_test_files() {
   )
 
   for file in "${test_files[@]}"; do
-    if [[ -f "${SCRIPT_DIR}/${file}" ]]; then
+    if [[ -f "${MODULAR_SCRIPT_DIR}/${file}" ]]; then
       pass "Тестовый файл существует: $file"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       warn "Тестовый файл отсутствует: $file"
     fi
@@ -109,10 +110,10 @@ test_all_syntax() {
   )
 
   for script in "${scripts[@]}"; do
-    if [[ -f "${SCRIPT_DIR}/${script}" ]]; then
-      if bash -n "${SCRIPT_DIR}/${script}" 2>/dev/null; then
+    if [[ -f "${MODULAR_SCRIPT_DIR}/${script}" ]]; then
+      if bash -n "${MODULAR_SCRIPT_DIR}/${script}" 2>/dev/null; then
         pass "Синтаксис OK: $script"
-        ((TESTS_PASSED++))
+        ((TESTS_PASSED++)) || true
       else
         fail "Синтаксическая ошибка: $script"
       fi
@@ -137,11 +138,11 @@ test_executable() {
   )
 
   for script in "${exec_scripts[@]}"; do
-    local script_path="${SCRIPT_DIR}/${script}"
+    local script_path="${MODULAR_SCRIPT_DIR}/${script}"
     if [[ -f "$script_path" ]]; then
       if [[ -x "$script_path" ]]; then
         pass "Исполнимый: $script"
-        ((TESTS_PASSED++))
+        ((TESTS_PASSED++)) || true
       else
         warn "Не исполнимый: $script (chmod +x может понадобиться)"
       fi
@@ -165,26 +166,26 @@ test_module_loading() {
   }
 
   # Проверка загрузки lib/utils.sh
-  if bash -c "source ${SCRIPT_DIR}/lib/utils.sh 2>&1"; then
+  if bash -c "source ${MODULAR_SCRIPT_DIR}/lib/utils.sh 2>&1"; then
     pass "Модуль загружается: lib/utils.sh"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Модуль не загружается: lib/utils.sh"
   fi
 
   # Проверка загрузки lib/install-steps.sh (зависит от utils.sh)
-  if bash -c "source ${SCRIPT_DIR}/lib/utils.sh && source ${SCRIPT_DIR}/lib/install-steps.sh 2>&1"; then
+  if bash -c "source ${MODULAR_SCRIPT_DIR}/lib/utils.sh && source ${MODULAR_SCRIPT_DIR}/lib/install-steps.sh 2>&1"; then
     pass "Модуль загружается: lib/install-steps.sh"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "Модуль не загружается: lib/install-steps.sh"
   fi
 
   # Проверка загрузки lang.sh
-  if [[ -f "${SCRIPT_DIR}/lang.sh" ]]; then
-    if bash -c "source ${SCRIPT_DIR}/lang.sh 2>&1"; then
+  if [[ -f "${MODULAR_SCRIPT_DIR}/lang.sh" ]]; then
+    if bash -c "source ${MODULAR_SCRIPT_DIR}/lang.sh 2>&1"; then
       pass "Модуль загружается: lang.sh"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       warn "Модуль не загружается: lang.sh"
     fi
@@ -207,7 +208,7 @@ test_utils_functions() {
   }
 
   # Загружаем модуль
-  source "${SCRIPT_DIR}/lib/utils.sh"
+  source "${MODULAR_SCRIPT_DIR}/lib/utils.sh"
 
   local functions=(
     "gen_random"
@@ -222,7 +223,7 @@ test_utils_functions() {
   for func in "${functions[@]}"; do
     if declare -f "$func" >/dev/null; then
       pass "Функция существует: $func"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "Функция отсутствует: $func"
     fi
@@ -248,8 +249,8 @@ test_install_steps_functions() {
   info() { echo "[INFO] $1"; }
 
   # Загружаем модули
-  source "${SCRIPT_DIR}/lib/utils.sh"
-  source "${SCRIPT_DIR}/lib/install-steps.sh"
+  source "${MODULAR_SCRIPT_DIR}/lib/utils.sh"
+  source "${MODULAR_SCRIPT_DIR}/lib/install-steps.sh"
 
   local functions=(
     "prompt_inputs"
@@ -270,7 +271,7 @@ test_install_steps_functions() {
   for func in "${functions[@]}"; do
     if declare -f "$func" >/dev/null; then
       pass "Функция существует: $func"
-      ((TESTS_PASSED++))
+      ((TESTS_PASSED++)) || true
     else
       fail "Функция отсутствует: $func"
     fi
@@ -282,25 +283,25 @@ test_code_duplication() {
   info "Тестирование отсутствия дублирования кода..."
 
   # Проверка что install.sh не содержит код Telegram бота
-  if ! grep -q 'cubiveil-bot' "${SCRIPT_DIR}/install.sh" 2>/dev/null; then
+  if ! grep -q 'cubiveil-bot' "${MODULAR_SCRIPT_DIR}/install.sh" 2>/dev/null; then
     pass "install.sh: не содержит код Telegram бота (правильно)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "install.sh: содержит код Telegram бота (дублирование!)"
   fi
 
   # Проверка что lib/utils.sh не содержит специфичный код установки
-  if ! grep -q 'step_' "${SCRIPT_DIR}/lib/utils.sh" 2>/dev/null; then
+  if ! grep -q 'step_' "${MODULAR_SCRIPT_DIR}/lib/utils.sh" 2>/dev/null; then
     pass "lib/utils.sh: не содержит функции step_* (правильно)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "lib/utils.sh: содержит функции step_* (возможное дублирование)"
   fi
 
   # Проверка что lib/install-steps.sh не содержит общие утилиты
-  if ! grep -q 'gen_random\|gen_hex\|gen_port' "${SCRIPT_DIR}/lib/install-steps.sh" 2>/dev/null; then
+  if ! grep -q 'gen_random\|gen_hex\|gen_port' "${MODULAR_SCRIPT_DIR}/lib/install-steps.sh" 2>/dev/null; then
     pass "lib/install-steps.sh: не содержит общие утилиты (правильно)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     warn "lib/install-steps.sh: содержит общие утилиты (возможное дублирование)"
   fi
@@ -312,11 +313,11 @@ test_file_sizes() {
 
   # Проверка что install.sh не слишком большой (рефакторинг удался)
   local install_size
-  install_size=$(wc -l <"${SCRIPT_DIR}/install.sh" 2>/dev/null || echo "0")
+  install_size=$(wc -l <"${MODULAR_SCRIPT_DIR}/install.sh" 2>/dev/null || echo "0")
 
   if [[ $install_size -lt 200 ]]; then
     pass "install.sh: компактный (${install_size} строк)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   elif [[ $install_size -lt 500 ]]; then
     warn "install.sh: умеренного размера (${install_size} строк)"
   else
@@ -325,22 +326,22 @@ test_file_sizes() {
 
   # Проверка что setup-telegram.sh имеет разумный размер
   local telegram_size
-  telegram_size=$(wc -l <"${SCRIPT_DIR}/setup-telegram.sh" 2>/dev/null || echo "0")
+  telegram_size=$(wc -l <"${MODULAR_SCRIPT_DIR}/setup-telegram.sh" 2>/dev/null || echo "0")
 
   if [[ $telegram_size -gt 0 ]]; then
     pass "setup-telegram.sh: содержит код (${telegram_size} строк)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "setup-telegram.sh: пуст или не найден"
   fi
 
   # Проверка что lib/utils.sh имеет разумный размер
   local utils_size
-  utils_size=$(wc -l <"${SCRIPT_DIR}/lib/utils.sh" 2>/dev/null || echo "0")
+  utils_size=$(wc -l <"${MODULAR_SCRIPT_DIR}/lib/utils.sh" 2>/dev/null || echo "0")
 
   if [[ $utils_size -gt 0 ]]; then
     pass "lib/utils.sh: содержит код (${utils_size} строк)"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "lib/utils.sh: пуст или не найден"
   fi
@@ -351,24 +352,24 @@ test_install_sh_integration() {
   info "Тестирование интеграции модулей в install.sh..."
 
   # Проверка что install.sh загружает модули
-  if grep -q 'source.*lib/utils.sh' "${SCRIPT_DIR}/install.sh"; then
+  if grep -q 'source.*lib/utils.sh' "${MODULAR_SCRIPT_DIR}/install.sh"; then
     pass "install.sh: загружает lib/utils.sh"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "install.sh: не загружает lib/utils.sh"
   fi
 
-  if grep -q 'source.*lib/install-steps.sh' "${SCRIPT_DIR}/install.sh"; then
+  if grep -q 'source.*lib/install-steps.sh' "${MODULAR_SCRIPT_DIR}/install.sh"; then
     pass "install.sh: загружает lib/install-steps.sh"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "install.sh: не загружает lib/install-steps.sh"
   fi
 
   # Проверка что install.sh использует функции из модулей
-  if grep -q 'prompt_inputs\|step_check_ip_neighborhood\|step_finish' "${SCRIPT_DIR}/install.sh"; then
+  if grep -q 'prompt_inputs\|step_check_ip_neighborhood\|step_finish' "${MODULAR_SCRIPT_DIR}/install.sh"; then
     pass "install.sh: использует функции из модулей"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
   else
     fail "install.sh: не использует функции из модулей"
   fi
@@ -383,7 +384,7 @@ main() {
   echo -e "${YELLOW}╚══════════════════════════════════════════════════════╝${PLAIN}"
   echo ""
 
-  info "Тестируемый проект: ${SCRIPT_DIR}"
+  info "Тестируемый проект: ${MODULAR_SCRIPT_DIR}"
   echo ""
 
   # ── Запуск тестов ─────────────────────────────────────────
