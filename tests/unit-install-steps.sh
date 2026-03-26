@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2178
 # ╔═══════════════════════════════════════════════════════════╗
 # ║      CubiVeil Unit Tests - lib/install-steps.sh           ║
 # ║      Тестирование функций установки                      ║
