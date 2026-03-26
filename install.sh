@@ -47,33 +47,38 @@ ensure_file() {
 
   local url="${REPO_URL}/${file}"
 
-  # Загружаем напрямую в целевой файл
-  local http_code
-  http_code=$(curl -sSL -w "%{http_code}" -o "$target_path" "$url" 2>&1)
-  local curl_exit=$?
-
-  if [[ $curl_exit -ne 0 ]]; then
-    echo -e "\033[0;31m[✗]\033[0m Failed to download: $file"
-    echo -e "\033[0;33m[!]\033[0m URL: $url"
-    echo -e "\033[0;33m[!]\033[0m Exit code: $curl_exit"
-    rm -f "$target_path"
-    return 1
+  # Пробуем curl с перенаправлением через cat
+  if curl -fsSL "$url" 2>/dev/null | cat > "$target_path" 2>&1; then
+    # Проверка что файл не пустой
+    if [[ -s "$target_path" ]]; then
+      return 0
+    fi
   fi
 
-  if [[ "$http_code" != "200" ]]; then
-    echo -e "\033[0;31m[✗]\033[0m HTTP error for $file: $http_code"
+  # Очистка если файл пустой
+  rm -f "$target_path"
+
+  # Пробуем wget как fallback
+  if command -v wget &>/dev/null; then
+    if wget -q -O "$target_path" "$url" 2>&1; then
+      if [[ -s "$target_path" ]]; then
+        return 0
+      fi
+    fi
     rm -f "$target_path"
-    return 1
   fi
 
-  # Проверка что файл не пустой
-  if [[ ! -s "$target_path" ]]; then
-    echo -e "\033[0;31m[✗]\033[0m Downloaded file is empty: $file"
-    rm -f "$target_path"
-    return 1
+  # Последняя попытка - curl напрямую
+  if curl -fsSL -o "$target_path" "$url" 2>&1; then
+    if [[ -s "$target_path" ]]; then
+      return 0
+    fi
   fi
+  rm -f "$target_path"
 
-  return 0
+  echo -e "\033[0;31m[✗]\033[0m Failed to download: $file"
+  echo -e "\033[0;33m[!]\033[0m URL: $url"
+  return 1
 }
 
 setup_remote_install() {
