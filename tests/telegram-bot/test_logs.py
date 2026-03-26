@@ -114,11 +114,11 @@ class TestLogsManager(unittest.TestCase):
     @patch('logs.subprocess.run')
     def test_search_logs_no_matches(self, mock_run):
         """Test searching logs with no matches"""
-        mock_run.return_value = MagicMock(
-            returncode=1,
-            stdout="",
-            stderr=""
-        )
+        # First call (journalctl) succeeds, second call (grep) returns 1 (no matches)
+        mock_run.side_effect = [
+            MagicMock(returncode=0, stdout="Some logs\n", stderr=""),
+            MagicMock(returncode=1, stdout="", stderr="")
+        ]
 
         success, logs = self.logs.search_logs("marzban", "xyz123notfound", 100)
 

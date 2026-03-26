@@ -66,7 +66,7 @@ class BackupManager:
             raise BackupError(f"Invalid database path: {self.db_path}")
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-        dst = f"{self.backup_dir}/marzban_{timestamp}.sqlite3"
+        dst = os.path.join(self.backup_dir, f"marzban_{timestamp}.sqlite3")
 
         try:
             # Create backup with metadata preservation
