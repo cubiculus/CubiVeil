@@ -49,7 +49,7 @@ ensure_file() {
 
   # Используем wget (работает стабильнее с process substitution)
   if command -v wget &>/dev/null; then
-    if wget -q --timeout=30 -O "$target_path" "$url" 2>&1; then
+    if wget -q --timeout=30 -O "$target_path" "$url"; then
       if [[ -s "$target_path" ]]; then
         return 0
       fi
@@ -59,7 +59,7 @@ ensure_file() {
 
   # Fallback на curl
   if command -v curl &>/dev/null; then
-    if curl -fsSL --connect-timeout 10 --max-time 60 -o "$target_path" "$url" 2>&1; then
+    if curl -fsSL --connect-timeout 10 --max-time 60 -o "$target_path" "$url"; then
       if [[ -s "$target_path" ]]; then
         return 0
       fi
