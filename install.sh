@@ -40,21 +40,41 @@ ensure_file() {
   # Создаём директорию для файла если нужно
   local file_dir
   file_dir=$(dirname "$target_path")
-  mkdir -p "$file_dir"
+  if ! mkdir -p "$file_dir" 2>&1; then
+    echo -e "\033[0;31m[✗]\033[0m Failed to create directory: $file_dir"
+    return 1
+  fi
 
   local url="${REPO_URL}/${file}"
+
+  # Загружаем во временный файл сначала
+  local temp_file
+  if ! temp_file=$(mktemp -p "$file_dir" 2>&1); then
+    echo -e "\033[0;31m[✗]\033[0m Failed to create temp file in: $file_dir"
+    echo -e "\033[0;33m[!]\033[0m Error: $temp_file"
+    return 1
+  fi
+
   local curl_output
-  if ! curl_output=$(curl -fsSL "$url" -o "$target_path" 2>&1); then
+  if ! curl_output=$(curl -fsSL "$url" -o "$temp_file" 2>&1); then
     echo -e "\033[0;31m[✗]\033[0m Failed to download: $file"
     echo -e "\033[0;33m[!]\033[0m URL: $url"
-    echo -e "\033[0;33m[!]\033[0m Target: $target_path"
     echo -e "\033[0;33m[!]\033[0m Error: $curl_output"
+    rm -f "$temp_file"
     return 1
   fi
 
   # Проверка что файл не пустой
-  if [[ ! -s "$target_path" ]]; then
+  if [[ ! -s "$temp_file" ]]; then
     echo -e "\033[0;31m[✗]\033[0m Downloaded file is empty: $file"
+    rm -f "$temp_file"
+    return 1
+  fi
+
+  # Перемещаем в целевой файл
+  if ! mv "$temp_file" "$target_path" 2>&1; then
+    echo -e "\033[0;31m[✗]\033[0m Failed to move file to: $target_path"
+    rm -f "$temp_file"
     return 1
   fi
 
