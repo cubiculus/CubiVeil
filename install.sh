@@ -235,6 +235,22 @@ if [[ "$DEV_MODE" == "true" && -z "$DOMAIN" ]]; then
   DOMAIN="$DEV_DOMAIN"
 fi
 
+# ── Проверка root и авто-перезапуск с sudo ─────────────────────
+# Если скрипт запущен не от root, перезапускаем с sudo
+if [[ $EUID -ne 0 ]]; then
+  # Сохраняем аргументы для перезапуска
+  ARGS=("$@")
+
+  # Загружаем файлы если нужно (для pipe/process substitution)
+  if is_curl_install && ! setup_remote_install; then
+    echo -e "\033[0;31m[✗]\033[0m Failed to prepare installation files"
+    exit 1
+  fi
+
+  # Перезапуск с sudo
+  exec sudo -E bash "$0" "${ARGS[@]}"
+fi
+
 # ── Подключение локализации ───────────────────────────────────
 if [[ -f "${INSTALL_SCRIPT_DIR}/lang.sh" ]]; then
   source "${INSTALL_SCRIPT_DIR}/lang.sh"
