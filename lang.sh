@@ -52,8 +52,8 @@ OK_DEV_DOMAIN_RU="Домен: {DOMAIN} (dev-режим)"
 PROMPT_DOMAIN="Domain for panel and subscriptions (e.g. panel.example.com):"
 PROMPT_DOMAIN_RU="Домен для панели и подписок (например panel.example.com):"
 
-PROMPT_EMAIL="Email for Let's Encrypt [admin@${DOMAIN}]:"
-PROMPT_EMAIL_RU="Email для Let's Encrypt [admin@${DOMAIN}]:"
+PROMPT_EMAIL="Email for Let's Encrypt [admin@DOMAIN]:"
+PROMPT_EMAIL_RU="Email для Let's Encrypt [admin@DOMAIN]:"
 
 PROMPT_TG_TOKEN="Telegram Bot Token (Enter to skip):"
 PROMPT_TG_TOKEN_RU="Telegram Bot Token (Enter — пропустить):"

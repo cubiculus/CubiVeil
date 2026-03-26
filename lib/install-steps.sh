@@ -166,7 +166,7 @@ prompt_inputs() {
   if [[ "$LANG_NAME" == "Русский" ]]; then
     prompt_email="  Email для Let's Encrypt [admin@${DOMAIN}]: "
   else
-    prompt_email="  $PROMPT_EMAIL "
+    prompt_email="  ${PROMPT_EMAIL//DOMAIN/${DOMAIN}} "
   fi
   read -rp "$prompt_email" LE_EMAIL
   LE_EMAIL="${LE_EMAIL// /}"
