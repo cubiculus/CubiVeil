@@ -47,35 +47,23 @@ ensure_file() {
 
   local url="${REPO_URL}/${file}"
 
-  # Пробуем curl с перенаправлением через cat
-  if curl -fsSL "$url" 2>/dev/null | cat > "$target_path" 2>&1; then
-    # Проверка что файл не пустой
-    if [[ -s "$target_path" ]]; then
-      return 0
-    fi
-  fi
-
-  # Очистка если файл пустой
-  rm -f "$target_path"
-
-  # Пробуем wget как fallback
+  # Используем wget если доступен, иначе curl
   if command -v wget &>/dev/null; then
-    if wget -q -O "$target_path" "$url" 2>&1; then
+    if wget -q --timeout=30 -O "$target_path" "$url" 2>&1; then
       if [[ -s "$target_path" ]]; then
         return 0
       fi
     fi
-    rm -f "$target_path"
-  fi
-
-  # Последняя попытка - curl напрямую
-  if curl -fsSL -o "$target_path" "$url" 2>&1; then
-    if [[ -s "$target_path" ]]; then
-      return 0
+  else
+    # curl с большим таймаутом
+    if curl -fsSL --connect-timeout 10 --max-time 60 -o "$target_path" "$url" 2>&1; then
+      if [[ -s "$target_path" ]]; then
+        return 0
+      fi
     fi
   fi
-  rm -f "$target_path"
 
+  rm -f "$target_path"
   echo -e "\033[0;31m[✗]\033[0m Failed to download: $file"
   echo -e "\033[0;33m[!]\033[0m URL: $url"
   return 1
