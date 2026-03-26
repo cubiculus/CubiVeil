@@ -175,28 +175,28 @@ STEP_TELEGRAM_RU="Шаг 12/12 — Telegram-бот"
 # ── Subnet check ──────────────────────────────────────────────
 # Примечание: SERVER_IP определяется динамически через get_server_ip()
 get_server_ip_info() {
-  local ip="${SERVER_IP:-$(get_server_ip 2>/dev/null)}"
+  local ip="${SERVER_IP:-[IP]}"
   echo "IP сервера: ${ip}"
 }
 get_server_ip_info_en() {
-  local ip="${SERVER_IP:-$(get_server_ip 2>/dev/null)}"
+  local ip="${SERVER_IP:-[IP]}"
   echo "Server IP: ${ip}"
 }
 
 INFO_CHECKING_NEIGHBORS="Checking neighboring IPs in /24 range..."
 INFO_CHECKING_NEIGHBORS_RU="Проверяю соседние адреса в диапазоне /24..."
 
-OK_SUBNET_CLEAN="In ${CHECKED} checked neighbor IPs — 0 VPN/hosting servers. Subnet is clean ✓"
-OK_SUBNET_CLEAN_RU="В ${CHECKED} проверенных соседних IP — 0 VPN/хостинг серверов. Подсеть чистая ✓"
+OK_SUBNET_CLEAN="In [CHECKED] checked neighbor IPs — 0 VPN/hosting servers. Subnet is clean ✓"
+OK_SUBNET_CLEAN_RU="В [CHECKED] проверенных соседних IP — 0 VPN/хостинг серверов. Подсеть чистая ✓"
 
-WARN_SUBNET_MODERATE="Detected ${VPN_COUNT} VPN/hosting servers in ${CHECKED} checked IPs — moderate risk"
-WARN_SUBNET_MODERATE_RU="Обнаружено ${VPN_COUNT} VPN/хостинг серверов в ${CHECKED} проверенных IP — риск умеренный"
+WARN_SUBNET_MODERATE="Detected [VPN_COUNT] VPN/hosting servers in [CHECKED] checked IPs — moderate risk"
+WARN_SUBNET_MODERATE_RU="Обнаружено [VPN_COUNT] VPN/хостинг серверов в [CHECKED] проверенных IP — риск умеренный"
 
 WARN_SUBNET_ADVICE="Advice: monitor stability, change provider if problems occur"
 WARN_SUBNET_ADVICE_RU="Совет: следи за стабильностью, при проблемах смени провайдера"
 
-WARN_SUBNET_HIGH="Detected ${VPN_COUNT} VPN/hosting servers in ${CHECKED} checked IPs — HIGH risk"
-WARN_SUBNET_HIGH_RU="Обнаружено ${VPN_COUNT} VPN/хостинг серверов в ${CHECKED} проверенных IP — риск ВЫСОКИЙ"
+WARN_SUBNET_HIGH="Detected [VPN_COUNT] VPN/hosting servers in [CHECKED] checked IPs — HIGH risk"
+WARN_SUBNET_HIGH_RU="Обнаружено [VPN_COUNT] VPN/хостинг серверов в [CHECKED] проверенных IP — риск ВЫСОКИЙ"
 
 WARN_SUBNET_LIKELY_BLOCKED="Subnet is likely well-known to blocking systems."
 WARN_SUBNET_LIKELY_BLOCKED_RU="Подсеть скорее всего хорошо известна системам блокировок."
@@ -219,8 +219,8 @@ OK_AUTO_UPDATES_CONFIGURED="Security auto-updates configured (no interactive dia
 OK_AUTO_UPDATES_CONFIGURED_RU="Автообновления security-патчей настроены (без интерактивных диалогов)"
 
 # ── BBR ───────────────────────────────────────────────────────
-OK_BBR="TCP congestion control: ${CURRENT}"
-OK_BBR_RU="TCP congestion control: ${CURRENT}"
+OK_BBR="TCP congestion control: [CURRENT]"
+OK_BBR_RU="TCP congestion control: [CURRENT]"
 
 # ── Firewall ──────────────────────────────────────────────────
 OK_FIREWALL="Firewall enabled: 22/tcp, 443/tcp, 443/udp"
@@ -230,25 +230,25 @@ WARN_SSH_PORT="SSH: after checking new port, close 22 → ufw delete allow 22/tc
 WARN_SSH_PORT_RU="SSH: после проверки нового порта закрой 22 → ufw delete allow 22/tcp"
 
 # ── Fail2ban ──────────────────────────────────────────────────
-OK_FAIL2BAN="Fail2ban: SSH protection on port ${SSH_PORT} (3 attempts → 24h ban)"
-OK_FAIL2BAN_RU="Fail2ban: SSH защита на порту ${SSH_PORT} (3 попытки → бан 24ч)"
+OK_FAIL2BAN="Fail2ban: SSH protection on port [SSH_PORT] (3 attempts → 24h ban)"
+OK_FAIL2BAN_RU="Fail2ban: SSH защита на порту [SSH_PORT] (3 попытки → бан 24ч)"
 
 # ── Sing-box ──────────────────────────────────────────────────
 INFO_GETTING_SINGBOX="Getting latest version from GitHub..."
 INFO_GETTING_SINGBOX_RU="Получаю последнюю версию с GitHub..."
 
-INFO_DOWNLOADING_SINGBOX="Downloading Sing-box ${SB_TAG}..."
-INFO_DOWNLOADING_SINGBOX_RU="Скачиваю Sing-box ${SB_TAG}..."
+INFO_DOWNLOADING_SINGBOX="Downloading Sing-box [SB_TAG]..."
+INFO_DOWNLOADING_SINGBOX_RU="Скачиваю Sing-box [SB_TAG]..."
 
-OK_SINGBOX_INSTALLED="Sing-box ${SB_TAG} ($(arch)) installed"
-OK_SINGBOX_INSTALLED_RU="Sing-box ${SB_TAG} ($(arch)) установлен"
+OK_SINGBOX_INSTALLED="Sing-box [SB_TAG] ($(arch)) installed"
+OK_SINGBOX_INSTALLED_RU="Sing-box [SB_TAG] ($(arch)) установлен"
 
 # ── Keys and ports ────────────────────────────────────────────
-OK_REALITY_GENERATED="Reality keypair generated, camouflage: ${REALITY_SNI}"
-OK_REALITY_GENERATED_RU="Reality keypair сгенерирован, camouflage: ${REALITY_SNI}"
+OK_REALITY_GENERATED="Reality keypair generated, camouflage: [REALITY_SNI]"
+OK_REALITY_GENERATED_RU="Reality keypair сгенерирован, camouflage: [REALITY_SNI]"
 
-OK_PORTS_GENERATED="Ports → Trojan:${TROJAN_PORT} SS:${SS_PORT} Panel:${PANEL_PORT} Subscription:${SUB_PORT}"
-OK_PORTS_GENERATED_RU="Порты → Trojan:${TROJAN_PORT} SS:${SS_PORT} Панель:${PANEL_PORT} Подписки:${SUB_PORT}"
+OK_PORTS_GENERATED="Ports → Trojan:[TROJAN_PORT] SS:[SS_PORT] Panel:[PANEL_PORT] Subscription:[SUB_PORT]"
+OK_PORTS_GENERATED_RU="Порты → Trojan:[TROJAN_PORT] SS:[SS_PORT] Панель:[PANEL_PORT] Подписки:[SUB_PORT]"
 
 # ── Marzban ───────────────────────────────────────────────────
 INFO_INSTALLING_MARZBAN="Installing Marzban..."
@@ -267,11 +267,11 @@ OK_MARZBAN_INSTALLED_RU="Marzban установлен"
 INFO_INSTALLING_ACME="Installing acme.sh..."
 INFO_INSTALLING_ACME_RU="Устанавливаю acme.sh..."
 
-INFO_REQUESTING_CERT="Requesting certificate for ${DOMAIN}..."
-INFO_REQUESTING_CERT_RU="Запрашиваю сертификат для ${DOMAIN}..."
+INFO_REQUESTING_CERT="Requesting certificate for [DOMAIN]..."
+INFO_REQUESTING_CERT_RU="Запрашиваю сертификат для [DOMAIN]..."
 
-ERR_CERT_FAILED="Failed to obtain certificate. Check A record: ${DOMAIN} → ${SERVER_IP}"
-ERR_CERT_FAILED_RU="Не удалось получить сертификат. Проверь A-запись: ${DOMAIN} → ${SERVER_IP}"
+ERR_CERT_FAILED="Failed to obtain certificate. Check A record: [DOMAIN] → [SERVER_IP]"
+ERR_CERT_FAILED_RU="Не удалось получить сертификат. Проверь A-запись: [DOMAIN] → [SERVER_IP]"
 
 OK_SSL_CONFIGURED="SSL certificate obtained, auto-renewal configured"
 OK_SSL_CONFIGURED_RU="SSL сертификат получен, автопродление настроено"
@@ -348,7 +348,7 @@ MSG_MSG_INSTALLING="Installing update..."
 MSG_MSG_SUCCESS="Update completed successfully"
 MSG_MSG_NO_UPDATE="No updates required"
 
-MSG_ERR_NOT_INSTALLED="CubiVeil not installed in ${CUBIVEIL_DIR}"
+MSG_ERR_NOT_INSTALLED="CubiVeil not installed in [CUBIVEIL_DIR]"
 MSG_ERR_DOWNLOAD_FAILED="Failed to download update files"
 MSG_ERR_BACKUP_FAILED="Failed to create backup"
 MSG_ERR_INSTALL_FAILED="Failed to install update"
@@ -372,7 +372,7 @@ MSG_MSG_INSTALLING_RU="Установка обновления..."
 MSG_MSG_SUCCESS_RU="Обновление успешно завершено"
 MSG_MSG_NO_UPDATE_RU="Обновлений не требуется"
 
-MSG_ERR_NOT_INSTALLED_RU="CubiVeil не установлен в ${CUBIVEIL_DIR}"
+MSG_ERR_NOT_INSTALLED_RU="CubiVeil не установлен в [CUBIVEIL_DIR]"
 MSG_ERR_DOWNLOAD_FAILED_RU="Не удалось загрузить файлы обновления"
 MSG_ERR_BACKUP_FAILED_RU="Не удалось создать бэкап"
 MSG_ERR_INSTALL_FAILED_RU="Не удалось установить обновление"
@@ -393,7 +393,7 @@ MSG_MSG_RESTORING="Restoring from backup..."
 MSG_MSG_RESTORED="Restored from backup"
 MSG_MSG_ROLLBACK_SUCCESS="Rollback completed successfully"
 
-MSG_ERR_NO_BACKUPS="No backups found in ${BACKUP_DIR}"
+MSG_ERR_NO_BACKUPS="No backups found in [BACKUP_DIR]"
 MSG_ERR_BACKUP_INVALID="Invalid backup: missing structure"
 MSG_ERR_RESTORE_FAILED="Failed to restore files"
 MSG_ERR_STOP_FAILED="Failed to stop services"
@@ -416,7 +416,7 @@ MSG_MSG_RESTORING_RU="Восстановление из бэкапа..."
 MSG_MSG_RESTORED_RU="Восстановлено из бэкапа"
 MSG_MSG_ROLLBACK_SUCCESS_RU="Откат успешно завершён"
 
-MSG_ERR_NO_BACKUPS_RU="Бэкапы не найдены в ${BACKUP_DIR}"
+MSG_ERR_NO_BACKUPS_RU="Бэкапы не найдены в [BACKUP_DIR]"
 MSG_ERR_BACKUP_INVALID_RU="Некорректный бэкап: отсутствует структура"
 MSG_ERR_RESTORE_FAILED_RU="Не удалось восстановить файлы"
 MSG_ERR_STOP_FAILED_RU="Не удалось остановить сервисы"
@@ -490,8 +490,8 @@ MSG_ERR_ROOT_REQUIRED="Root access required"
 MSG_ERR_ROOT_REQUIRED_RU="Требуется запуск от root"
 
 # shellcheck disable=SC2154
-MSG_ERR_COMMAND_REQUIRED="${cmd} required but not installed"
-MSG_ERR_COMMAND_REQUIRED_RU="Требуется ${cmd}, но он не установлен"
+MSG_ERR_COMMAND_REQUIRED="[cmd] required but not installed"
+MSG_ERR_COMMAND_REQUIRED_RU="Требуется [cmd], но он не установлен"
 
 # ── Utils messages ─────────────────────────────────────────────────
 MSG_ERR_NO_FREE_PORT="Failed to find free port after {MAX} attempts"
