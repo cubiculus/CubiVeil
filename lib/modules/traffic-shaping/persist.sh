@@ -3,6 +3,7 @@
 
 # ── Подключение зависимостей / Dependencies ─────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck disable=SC2034
 MODULE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]]; then
@@ -10,9 +11,6 @@ if [[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]]; then
 fi
 if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
   source "${SCRIPT_DIR}/lib/core/log.sh"
-fi
-if [[ -f "${SCRIPT_DIR}/lib/utils.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/utils.sh"
 fi
 
 # ── Константы / Constants ───────────────────────────────────
@@ -72,12 +70,12 @@ ts_generate_profile() {
   }
 
   # Уникальный "почерк" — генерируется один раз, не меняется
-  local jitter=$(( RANDOM % 16 + 5 ))       # 5–20 мс
-  local delay=$(( RANDOM % 7 + 2 ))         # 2–8 мс
-  local reorder_tenths=$(( RANDOM % 5 + 1 )) # 0.1–0.5%
+  local jitter=$((RANDOM % 16 + 5))        # 5–20 мс
+  local delay=$((RANDOM % 7 + 2))          # 2–8 мс
+  local reorder_tenths=$((RANDOM % 5 + 1)) # 0.1–0.5%
 
   mkdir -p /etc/cubiveil
-  cat > "$TS_CONFIG" <<EOF
+  cat >"$TS_CONFIG" <<EOF
 {
   "interface":       "${iface}",
   "delay_ms":        ${delay},
@@ -94,7 +92,7 @@ EOF
 
 ts_write_apply_script() {
   mkdir -p /usr/local/lib/cubiveil
-  cat > "$TS_APPLY_SCRIPT" <<'SCRIPT'
+  cat >"$TS_APPLY_SCRIPT" <<'SCRIPT'
 #!/bin/bash
 # CubiVeil tc-apply — вызывается systemd при каждой загрузке
 set -euo pipefail
@@ -122,7 +120,7 @@ SCRIPT
 # ── Systemd сервис ─────────────────────────────────────────────────
 
 ts_write_systemd_service() {
-  cat > "/etc/systemd/system/${TS_SERVICE}.service" <<EOF
+  cat >"/etc/systemd/system/${TS_SERVICE}.service" <<EOF
 [Unit]
 Description=CubiVeil Traffic Shaping (tc/netem)
 After=network.target

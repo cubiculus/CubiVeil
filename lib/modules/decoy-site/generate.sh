@@ -4,6 +4,7 @@
 
 # ── Подключение зависимостей / Dependencies ─────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck disable=SC2034
 MODULE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]]; then
@@ -12,14 +13,12 @@ fi
 if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
   source "${SCRIPT_DIR}/lib/core/log.sh"
 fi
-if [[ -f "${SCRIPT_DIR}/lib/utils.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/utils.sh"
-fi
 
 # ── Константы / Constants ───────────────────────────────────
 DECOY_WEBROOT="/var/www/decoy"
 DECOY_CONFIG="/etc/cubiveil/decoy.json"
 NGINX_CONF="/etc/nginx/sites-available/cubiveil-decoy"
+# shellcheck disable=SC2034
 MAX_FILE_SIZE_MB=500
 
 # ── Утилиты / Utilities ─────────────────────────────────────
@@ -28,7 +27,7 @@ MAX_FILE_SIZE_MB=500
 gen_range() {
   local min="$1"
   local max="$2"
-  echo $(( min + RANDOM % (max - min + 1) ))
+  echo $((min + RANDOM % (max - min + 1)))
 }
 
 # ── Профиль: выбор шаблона и генерация идентичности ─────────
@@ -52,7 +51,8 @@ decoy_generate_profile() {
   local site_name="${w1} ${w2}"
 
   # gen_hex из lib/utils.sh
-  local accent_color="#$(gen_hex 6)"
+  local accent_color
+  accent_color="#$(gen_hex 6)"
   local copyright_year
   copyright_year=$(date +%Y)
 
@@ -60,7 +60,7 @@ decoy_generate_profile() {
   local server_token="${server_tokens[$((RANDOM % 3))]}"
 
   mkdir -p /etc/cubiveil
-  cat > "$DECOY_CONFIG" <<EOF
+  cat >"$DECOY_CONFIG" <<EOF
 {
   "template":       "${template}",
   "site_name":      "${site_name}",
@@ -92,18 +92,18 @@ EOF
 
 decoy_build_webroot() {
   local template site_name accent_color copyright_year
-  template=$(jq -r '.template'         "$DECOY_CONFIG")
-  site_name=$(jq -r '.site_name'       "$DECOY_CONFIG")
+  template=$(jq -r '.template' "$DECOY_CONFIG")
+  site_name=$(jq -r '.site_name' "$DECOY_CONFIG")
   accent_color=$(jq -r '.accent_color' "$DECOY_CONFIG")
   copyright_year=$(jq -r '.copyright_year' "$DECOY_CONFIG")
 
   mkdir -p "${DECOY_WEBROOT}/files"
 
-  _generate_html   "$template" "$site_name" "$accent_color" "$copyright_year"
+  _generate_html "$template" "$site_name" "$accent_color" "$copyright_year"
   _generate_images "$accent_color"
-  _generate_docs               # PDF документы
-  _generate_video              # MP4/MP3 файлы
-  _generate_aux    "$site_name"
+  _generate_docs  # PDF документы
+  _generate_video # MP4/MP3 файлы
+  _generate_aux "$site_name"
 
   find "$DECOY_WEBROOT" -type f -exec chmod 644 {} \;
   find "$DECOY_WEBROOT" -type d -exec chmod 755 {} \;
@@ -119,18 +119,18 @@ decoy_build_webroot() {
 _generate_html() {
   local template="$1" site_name="$2" accent_color="$3" copyright_year="$4"
   sed \
-    -e "s|{{SITE_NAME}}|${site_name}|g"           \
-    -e "s|{{ACCENT_COLOR}}|${accent_color}|g"     \
+    -e "s|{{SITE_NAME}}|${site_name}|g" \
+    -e "s|{{ACCENT_COLOR}}|${accent_color}|g" \
     -e "s|{{COPYRIGHT_YEAR}}|${copyright_year}|g" \
-    "${MODULE_DIR}/templates/${template}.html"     \
-    > "${DECOY_WEBROOT}/index.html"
+    "${MODULE_DIR}/templates/${template}.html" \
+    >"${DECOY_WEBROOT}/index.html"
 }
 
 # Изображения — генерация через ImageMagick или заглушки
 _generate_images() {
   local accent_color="$1"
   local fcount
-  fcount=$(gen_range 3 5)   # 3–5 файлов
+  fcount=$(gen_range 3 5) # 3–5 файлов
 
   for _ in $(seq 1 "$fcount"); do
     local fname seed
@@ -142,8 +142,8 @@ _generate_images() {
       convert -size 4000x3000 \
         "plasma:#${seed}-${accent_color:1}" \
         -quality 88 \
-        "${DECOY_WEBROOT}/files/${fname}" 2>/dev/null || \
-      dd if=/dev/urandom of="${DECOY_WEBROOT}/files/${fname}" bs=1M count=10 status=none
+        "${DECOY_WEBROOT}/files/${fname}" 2>/dev/null ||
+        dd if=/dev/urandom of="${DECOY_WEBROOT}/files/${fname}" bs=1M count=10 status=none
     else
       # Fallback: случайные данные 5-15 MB
       local size
@@ -156,7 +156,7 @@ _generate_images() {
 # PDF документы — генерация нужного размера
 _generate_docs() {
   local count
-  count=$(gen_range 1 2)  # 1-2 файла
+  count=$(gen_range 1 2) # 1-2 файла
 
   for i in $(seq 1 "$count"); do
     local fname
@@ -210,18 +210,18 @@ _generate_docs() {
         printf '2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n'
         printf '3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R>>endobj\n'
         printf 'xref\n0 4\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n193\n%%%%EOF\n'
-      } > "${DECOY_WEBROOT}/files/${fname}"
+      } >"${DECOY_WEBROOT}/files/${fname}"
     fi
 
     # Дополняем файл до нужного размера (target_size MB)
     local current_size
     current_size=$(stat -c%s "${DECOY_WEBROOT}/files/${fname}" 2>/dev/null || echo "0")
-    local current_mb=$(( current_size / 1048576 ))
+    local current_mb=$((current_size / 1048576))
 
     if [[ $current_mb -lt $target_size ]]; then
-      local add_mb=$(( target_size - current_mb ))
+      local add_mb=$((target_size - current_mb))
       # Добавляем случайные данные в конец PDF (будут проигнорированы читалками)
-      dd if=/dev/urandom bs=1M count="$add_mb" status=none >> "${DECOY_WEBROOT}/files/${fname}" 2>/dev/null || true
+      dd if=/dev/urandom bs=1M count="$add_mb" status=none >>"${DECOY_WEBROOT}/files/${fname}" 2>/dev/null || true
     fi
   done
 }
@@ -237,7 +237,7 @@ _generate_video() {
   if command -v ffmpeg &>/dev/null; then
     # Генерируем короткое видео с градиентом
     local duration
-    duration=$(gen_range 30 120)  # 30-120 секунд
+    duration=$(gen_range 30 120) # 30-120 секунд
 
     ffmpeg -f lavfi -i "color=c=black:s=1280x720:d=${duration}" \
       -c:v libx264 -tune stillimage -crf 23 -pix_fmt yuv420p \
@@ -249,17 +249,17 @@ _generate_video() {
   if [[ ! -f "${DECOY_WEBROOT}/files/${fname_mp4}" ]]; then
     # Создаем заглушку MP4 (минимальный валидный заголовок)
     # TODO: полноценная генерация MP4 без ffmpeg
-    printf '\x00\x00\x00\x1cftypisom\x00\x00\x02\x00isomiso2mp41' > "${DECOY_WEBROOT}/files/${fname_mp4}"
+    printf '\x00\x00\x00\x1cftypisom\x00\x00\x02\x00isomiso2mp41' >"${DECOY_WEBROOT}/files/${fname_mp4}"
   fi
 
   # Дополняем до нужного размера
   local current_size
   current_size=$(stat -c%s "${DECOY_WEBROOT}/files/${fname_mp4}" 2>/dev/null || echo "0")
-  local current_mb=$(( current_size / 1048576 ))
+  local current_mb=$((current_size / 1048576))
 
   if [[ $current_mb -lt $mp4_size ]]; then
-    local add_mb=$(( mp4_size - current_mb ))
-    dd if=/dev/urandom bs=1M count="$add_mb" status=none >> "${DECOY_WEBROOT}/files/${fname_mp4}" 2>/dev/null || true
+    local add_mb=$((mp4_size - current_mb))
+    dd if=/dev/urandom bs=1M count="$add_mb" status=none >>"${DECOY_WEBROOT}/files/${fname_mp4}" 2>/dev/null || true
   fi
 
   # MP3 файл: 10-50 MB (реалистично для аудио)
@@ -271,7 +271,7 @@ _generate_video() {
   if command -v ffmpeg &>/dev/null; then
     # Генерируем тишину/белый шум
     local audio_duration
-    audio_duration=$(gen_range 120 600)  # 2-10 минут
+    audio_duration=$(gen_range 120 600) # 2-10 минут
 
     ffmpeg -f lavfi -i "anullsrc=r=44100:cl=stereo" \
       -t "$audio_duration" \
@@ -283,16 +283,16 @@ _generate_video() {
   if [[ ! -f "${DECOY_WEBROOT}/files/${fname_mp3}" ]]; then
     # TODO: полноценная генерация MP3 без ffmpeg
     # Заглушка: ID3 тег + случайные данные
-    printf 'ID3\x03\x00\x00\x00\x00\x00\x00' > "${DECOY_WEBROOT}/files/${fname_mp3}"
+    printf 'ID3\x03\x00\x00\x00\x00\x00\x00' >"${DECOY_WEBROOT}/files/${fname_mp3}"
   fi
 
   # Дополняем до нужного размера
   current_size=$(stat -c%s "${DECOY_WEBROOT}/files/${fname_mp3}" 2>/dev/null || echo "0")
-  current_mb=$(( current_size / 1048576 ))
+  current_mb=$((current_size / 1048576))
 
   if [[ $current_mb -lt $mp3_size ]]; then
-    local add_mb=$(( mp3_size - current_mb ))
-    dd if=/dev/urandom bs=1M count="$add_mb" status=none >> "${DECOY_WEBROOT}/files/${fname_mp3}" 2>/dev/null || true
+    local add_mb=$((mp3_size - current_mb))
+    dd if=/dev/urandom bs=1M count="$add_mb" status=none >>"${DECOY_WEBROOT}/files/${fname_mp3}" 2>/dev/null || true
   fi
 }
 
@@ -302,17 +302,17 @@ _generate_aux() {
 
   # robots.txt — случайные Disallow
   local disallow=("/admin/" "/api/" "/backup/" "/private/"
-                  "/internal/" "/config/" "/data/" "/uploads/" "/tmp/")
+    "/internal/" "/config/" "/data/" "/uploads/" "/tmp/")
   local count
   count=$(gen_range 2 4)
   {
     echo "User-agent: *"
     for p in "${disallow[@]:0:$count}"; do echo "Disallow: ${p}"; done
-  } > "${DECOY_WEBROOT}/robots.txt"
+  } >"${DECOY_WEBROOT}/robots.txt"
 
   # sitemap.xml — 3–7 фиктивных путей
   local fake=("/about" "/services" "/contact" "/docs"
-              "/team" "/pricing" "/faq" "/news" "/blog")
+    "/team" "/pricing" "/faq" "/news" "/blog")
   local scount
   scount=$(gen_range 3 7)
   {
@@ -322,7 +322,7 @@ _generate_aux() {
       echo "  <url><loc>https://${DOMAIN:-localhost}${p}</loc></url>"
     done
     echo '</urlset>'
-  } > "${DECOY_WEBROOT}/sitemap.xml"
+  } >"${DECOY_WEBROOT}/sitemap.xml"
 
   # favicon.ico через ImageMagick или минимальный fallback
   local accent_color
@@ -330,8 +330,8 @@ _generate_aux() {
   if command -v convert &>/dev/null; then
     convert -size 32x32 "xc:${accent_color}" \
       -define icon:auto-resize=32,16 \
-      "${DECOY_WEBROOT}/favicon.ico" 2>/dev/null || \
-    _write_minimal_ico "${DECOY_WEBROOT}/favicon.ico"
+      "${DECOY_WEBROOT}/favicon.ico" 2>/dev/null ||
+      _write_minimal_ico "${DECOY_WEBROOT}/favicon.ico"
   else
     _write_minimal_ico "${DECOY_WEBROOT}/favicon.ico"
   fi
@@ -341,12 +341,12 @@ _generate_aux() {
 _write_minimal_ico() {
   local output="$1"
   # ICO header + BMP 32x32 + маска
-  printf '\x00\x00\x01\x00\x01\x00\x20\x20\x00\x00\x01\x00\x20\x00' > "$output"
-  printf '\x28\x00\x00\x00\x20\x00\x00\x00\x40\x00\x00\x00\x01\x00' >> "$output"
-  printf '\x20\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00' >> "$output"
-  printf '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' >> "$output"
+  printf '\x00\x00\x01\x00\x01\x00\x20\x20\x00\x00\x01\x00\x20\x00' >"$output"
+  printf '\x28\x00\x00\x00\x20\x00\x00\x00\x40\x00\x00\x00\x01\x00' >>"$output"
+  printf '\x20\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00' >>"$output"
+  printf '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' >>"$output"
   # Прозрачность (маска)
-  dd if=/dev/zero bs=1024 count=1 status=none >> "$output" 2>/dev/null
+  dd if=/dev/zero bs=1024 count=1 status=none >>"$output" 2>/dev/null
 }
 
 # ── Nginx конфигурация ───────────────────────────────────────
@@ -369,14 +369,14 @@ decoy_write_nginx_conf() {
   local referrer="${referrer_opts[$((RANDOM % 3))]}"
 
   sed \
-    -e "s|{{DOMAIN}}|${DOMAIN:-_}|g"          \
-    -e "s|{{WEBROOT}}|${DECOY_WEBROOT}|g"     \
-    -e "s|{{CERT_FILE}}|${cert_file}|g"       \
-    -e "s|{{KEY_FILE}}|${key_file}|g"         \
+    -e "s|{{DOMAIN}}|${DOMAIN:-_}|g" \
+    -e "s|{{WEBROOT}}|${DECOY_WEBROOT}|g" \
+    -e "s|{{CERT_FILE}}|${cert_file}|g" \
+    -e "s|{{KEY_FILE}}|${key_file}|g" \
     -e "s|{{SERVER_TOKEN}}|${server_token}|g" \
-    -e "s|{{REFERRER_POLICY}}|${referrer}|g"  \
-    "${MODULE_DIR}/nginx.conf.tpl"             \
-    > "$NGINX_CONF"
+    -e "s|{{REFERRER_POLICY}}|${referrer}|g" \
+    "${MODULE_DIR}/nginx.conf.tpl" \
+    >"$NGINX_CONF"
 
   chmod 640 "$NGINX_CONF"
   log_info "Nginx конфиг записан: ${NGINX_CONF}"

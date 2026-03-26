@@ -16,14 +16,21 @@ fi
 # ── Mock зависимостей ─────────────────────────────────────────
 # shellcheck disable=SC2034
 LANG_NAME="English"
+# shellcheck disable=SC2034
 SERVER_IP="1.2.3.4"
+# shellcheck disable=SC2034
 DOMAIN=""
+# shellcheck disable=SC2034
 LE_EMAIL=""
 # shellcheck disable=SC2034
 INSTALL_TG="n"
+# shellcheck disable=SC2034
 TROJAN_PORT=""
+# shellcheck disable=SC2034
 SS_PORT=""
+# shellcheck disable=SC2034
 PANEL_PORT=""
+# shellcheck disable=SC2034
 SUB_PORT=""
 # shellcheck disable=SC2034
 REALITY_PRIVATE_KEY=""
@@ -31,6 +38,7 @@ REALITY_PRIVATE_KEY=""
 REALITY_PUBLIC_KEY=""
 # shellcheck disable=SC2034
 REALITY_SHORT_ID=""
+# shellcheck disable=SC2034
 REALITY_SNI=""
 # shellcheck disable=SC2034
 UUID_VLESS_TCP=""
@@ -738,13 +746,14 @@ test_all_steps_exist() {
   )
 
   local missing=0
+  local step_func
   for step_func in "${required_steps[@]}"; do
     if declare -f "$step_func" >/dev/null; then
       pass "Шаг существует: $step_func"
       ((TESTS_PASSED++)) || true
     else
       fail "Шаг отсутствует: $step_func"
-      ((missing++))
+      ((missing++)) || true
     fi
   done
 

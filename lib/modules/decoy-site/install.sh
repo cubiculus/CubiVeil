@@ -58,7 +58,10 @@ module_enable() {
   log_step "decoy_enable" "Запуск сайта-прикрытия"
   rm -f /etc/nginx/sites-enabled/default
   ln -sf "$NGINX_CONF" "$NGINX_ENABLED"
-  nginx -t >/dev/null 2>&1 || { log_error "Ошибка конфигурации nginx"; return 1; }
+  nginx -t >/dev/null 2>&1 || {
+    log_error "Ошибка конфигурации nginx"
+    return 1
+  }
   systemctl enable nginx >/dev/null 2>&1
   systemctl reload nginx
 
@@ -67,7 +70,7 @@ module_enable() {
   rotation_enabled=$(jq -r '.rotation.enabled' "$DECOY_CONFIG" 2>/dev/null || echo "true")
   if [[ "$rotation_enabled" == "true" ]]; then
     systemctl enable "${DECOY_ROTATE_TIMER}.timer" >/dev/null 2>&1
-    systemctl start  "${DECOY_ROTATE_TIMER}.timer"
+    systemctl start "${DECOY_ROTATE_TIMER}.timer"
     log_success "Ротация файлов активирована (~3 часа)"
   else
     log_info "Ротация файлов отключена (rotation.enabled = false)"
@@ -79,7 +82,7 @@ module_enable() {
 module_disable() {
   rm -f "$NGINX_ENABLED"
   systemctl reload nginx 2>/dev/null || true
-  systemctl stop    "${DECOY_ROTATE_TIMER}.timer" 2>/dev/null || true
+  systemctl stop "${DECOY_ROTATE_TIMER}.timer" 2>/dev/null || true
   systemctl disable "${DECOY_ROTATE_TIMER}.timer" 2>/dev/null || true
   log_info "Сайт-прикрытие отключён"
 }

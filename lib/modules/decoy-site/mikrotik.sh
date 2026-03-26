@@ -5,6 +5,7 @@
 
 # ── Подключение зависимостей / Dependencies ─────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck disable=SC2034
 MODULE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]]; then
@@ -12,9 +13,6 @@ if [[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]]; then
 fi
 if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
   source "${SCRIPT_DIR}/lib/core/log.sh"
-fi
-if [[ -f "${SCRIPT_DIR}/lib/utils.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/utils.sh"
 fi
 
 # ── Константы / Constants ───────────────────────────────────
@@ -27,11 +25,11 @@ _generate_session_block() {
   local window_name="$1"
   local session_count="$2"
   local speed_bps="$3"
-  local files=("$4")  # массив файлов
+  local files=("$4") # массив файлов
 
   for i in $(seq 1 "$session_count"); do
-    local action_type=$(( RANDOM % 100 ))
-    local delay=$(( RANDOM % 40 + 5 ))  # 5-45 секунд между запросами
+    local action_type=$((RANDOM % 100))
+    local delay=$((RANDOM % 40 + 5)) # 5-45 секунд между запросами
 
     # HEAD запрос (15% шанс)
     if [[ $action_type -lt 15 ]]; then
@@ -51,7 +49,7 @@ _generate_session_block() {
     # GET файл (77% шанс)
     else
       local file
-      file="${files[$(( RANDOM % ${#files[@]} ))]}"
+      file="${files[$((RANDOM % ${#files[@]}))]}"
       echo "  :delay ${delay}s"
       echo "  /tool fetch url=\"https://${DOMAIN}/files/${file}\" \
         dst-path=\"/cv-tmp-${window_name}-${i}.bin\" \
@@ -66,7 +64,7 @@ _generate_session_block() {
 decoy_print_mikrotik_script() {
   # Читаем параметры поведения из decoy.json
   local speed_min session_files
-  speed_min=$(jq -r '.behavior.speed_kbps_min'  "$DECOY_CONFIG" 2>/dev/null || echo "200")
+  speed_min=$(jq -r '.behavior.speed_kbps_min' "$DECOY_CONFIG" 2>/dev/null || echo "200")
   session_files=$(jq -r '.behavior.session_files' "$DECOY_CONFIG" 2>/dev/null || echo "3")
 
   # Получаем список файлов из webroot
@@ -82,21 +80,21 @@ decoy_print_mikrotik_script() {
   # Временны́е окна из decoy.json
   # morning: 07–09, day: 12–15, evening: 18–23
   # Случайные минуты внутри окна для непредсказуемости
-  local m_morning=$(( RANDOM % 59 ))
-  local m_day=$(( RANDOM % 59 ))
-  local m_evening=$(( RANDOM % 59 ))
-  local h_morning=$(( RANDOM % 3 + 7 ))    # 7, 8 или 9
-  local h_day=$(( RANDOM % 4 + 12 ))       # 12–15
-  local h_evening=$(( RANDOM % 6 + 18 ))   # 18–23
+  local m_morning=$((RANDOM % 59))
+  local m_day=$((RANDOM % 59))
+  local m_evening=$((RANDOM % 59))
+  local h_morning=$((RANDOM % 3 + 7))  # 7, 8 или 9
+  local h_day=$((RANDOM % 4 + 12))     # 12–15
+  local h_evening=$((RANDOM % 6 + 18)) # 18–23
 
   # Форматируем время для RouterOS: HH:MM:00
   local t_morning t_day t_evening
-  printf -v t_morning  "%02d:%02d:00" "$h_morning"  "$m_morning"
-  printf -v t_day      "%02d:%02d:00" "$h_day"      "$m_day"
-  printf -v t_evening  "%02d:%02d:00" "$h_evening"  "$m_evening"
+  printf -v t_morning "%02d:%02d:00" "$h_morning" "$m_morning"
+  printf -v t_day "%02d:%02d:00" "$h_day" "$m_day"
+  printf -v t_evening "%02d:%02d:00" "$h_evening" "$m_evening"
 
   # limit-bytes-per-second для RouterOS (переводим KB/s → bytes/s)
-  local speed_bps=$(( speed_min * 1024 ))
+  local speed_bps=$((speed_min * 1024))
 
   # Генерируем блоки сессий для каждого окна
   local session_block_morning session_block_day session_block_evening

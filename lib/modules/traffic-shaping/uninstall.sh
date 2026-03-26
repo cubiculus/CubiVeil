@@ -16,14 +16,14 @@ ts_uninstall() {
   log_step "ts_uninstall" "Удаление traffic-shaping"
 
   # Останавливаем и удаляем сервис
-  systemctl stop    "${TS_SERVICE}" 2>/dev/null || true
+  systemctl stop "${TS_SERVICE}" 2>/dev/null || true
   systemctl disable "${TS_SERVICE}" 2>/dev/null || true
   rm -f "/etc/systemd/system/${TS_SERVICE}.service"
   systemctl daemon-reload
 
   # Удаляем tc-правила
   local iface
-  iface=$(jq -r '.interface' "$TS_CONFIG" 2>/dev/null || \
+  iface=$(jq -r '.interface' "$TS_CONFIG" 2>/dev/null ||
     ip route show default | awk '/default/ {print $5}' | head -1)
   if [[ -n "$iface" ]]; then
     tc qdisc del dev "$iface" root 2>/dev/null || true

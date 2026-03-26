@@ -493,9 +493,9 @@ test_step_decoy_site_calls_module_functions() {
   local func_content
   func_content=$(declare -f step_decoy_site 2>/dev/null || echo "")
 
-  if [[ "$func_content" == *"module_install"* ]] && \
-     [[ "$func_content" == *"module_configure"* ]] && \
-     [[ "$func_content" == *"module_enable"* ]]; then
+  if [[ "$func_content" == *"module_install"* ]] &&
+    [[ "$func_content" == *"module_configure"* ]] &&
+    [[ "$func_content" == *"module_enable"* ]]; then
     pass "step_decoy_site: вызывает module_install, module_configure, module_enable"
   else
     fail "step_decoy_site: не вызывает все функции модуля"
@@ -572,9 +572,9 @@ test_step_traffic_shaping_calls_module_functions() {
   local func_content
   func_content=$(declare -f step_traffic_shaping 2>/dev/null || echo "")
 
-  if [[ "$func_content" == *"module_install"* ]] && \
-     [[ "$func_content" == *"module_configure"* ]] && \
-     [[ "$func_content" == *"module_enable"* ]]; then
+  if [[ "$func_content" == *"module_install"* ]] &&
+    [[ "$func_content" == *"module_configure"* ]] &&
+    [[ "$func_content" == *"module_enable"* ]]; then
     pass "step_traffic_shaping: вызывает module_install, module_configure, module_enable"
   else
     fail "step_traffic_shaping: не вызывает все функции модуля"
@@ -669,9 +669,9 @@ test_step_finish_mikrotik_script() {
   local func_content
   func_content=$(declare -f step_finish 2>/dev/null || echo "")
 
-  if [[ "$func_content" == *"decoy_print_mikrotik_script"* ]] && \
-     [[ "$func_content" == *"decoy-site"* ]] && \
-     [[ "$func_content" == *"source"* ]]; then
+  if [[ "$func_content" == *"decoy_print_mikrotik_script"* ]] &&
+    [[ "$func_content" == *"decoy-site"* ]] &&
+    [[ "$func_content" == *"source"* ]]; then
     pass "step_finish: вызывает decoy_print_mikrotik_script и загружает модуль"
   else
     fail "step_finish: не вызывает decoy_print_mikrotik_script или не загружает модуль"
@@ -687,8 +687,8 @@ test_step_finish_checks_decoy_config() {
   local func_content
   func_content=$(declare -f step_finish 2>/dev/null || echo "")
 
-  if [[ "$func_content" == *"/etc/cubiveil/decoy.json"* ]] || \
-     [[ "$func_content" == *"decoy.json"* ]]; then
+  if [[ "$func_content" == *"/etc/cubiveil/decoy.json"* ]] ||
+    [[ "$func_content" == *"decoy.json"* ]]; then
     pass "step_finish: проверяет наличие /etc/cubiveil/decoy.json"
   else
     fail "step_finish: не проверяет наличие decoy.json"

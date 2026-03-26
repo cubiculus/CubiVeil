@@ -105,9 +105,9 @@ systemctl() {
   # is-active возвращает статус для проверок
   if [[ "$*" == *"is-active"* ]]; then
     if [[ "$*" == *"nginx"* ]]; then
-      return 0  # nginx активен
+      return 0 # nginx активен
     elif [[ "$*" == *"cubiveil-decoy-rotate.timer"* ]]; then
-      return 0  # таймер активен
+      return 0 # таймер активен
     fi
     return 1
   fi
@@ -170,7 +170,7 @@ awk() {
   elif [[ "$*" == *"'{print \$1}'"* ]] || [[ "$*" == *'{print $1}'* ]]; then
     echo "0"
   elif [[ "$*" == *"NR==2"* ]]; then
-    echo "100"  # для df -m (свободное место)
+    echo "100" # для df -m (свободное место)
   else
     echo "value"
   fi
@@ -178,11 +178,11 @@ awk() {
 grep() {
   # Для проверки активности сервиса
   if [[ "$*" == *"-q"* ]]; then
-    return 0  # всегда находим
+    return 0 # всегда находим
   fi
   # Для подсчета (-c) возвращаем число
   if [[ "$*" == *"-c"* ]]; then
-    echo "5"  # Возвращаем 5 совпадений
+    echo "5" # Возвращаем 5 совпадений
     return 0
   fi
   echo "match"
@@ -194,7 +194,7 @@ gen_hex() {
   local length="${1:-6}"
   # Возвращаем валидную hex строку
   local result=""
-  for ((i=0; i<length; i++)); do
+  for ((i = 0; i < length; i++)); do
     result+="a"
   done
   echo "$result"
@@ -202,14 +202,16 @@ gen_hex() {
 gen_random() {
   local length="${1:-16}"
   local result=""
-  for ((i=0; i<length; i++)); do
+  for ((i = 0; i < length; i++)); do
     result+="X"
   done
   echo "$result"
 }
 
 # Mock для DOMAIN и DEV_MODE
+# shellcheck disable=SC2034
 DOMAIN="example.com"
+# shellcheck disable=SC2034
 DEV_MODE="false"
 
 # Переопределяем пути для тестов
@@ -258,7 +260,7 @@ test_shebang() {
 
   for file in "$MODULE_PATH" "$GENERATE_PATH" "$ROTATE_PATH" "$MIKROTIK_PATH"; do
     local shebang
-    read -r shebang < "$file"
+    read -r shebang <"$file"
 
     if [[ "$shebang" == "#!/bin/bash" ]]; then
       pass "$(basename "$file"): корректный shebang"
@@ -283,7 +285,8 @@ test_templates_exist() {
       ((TESTS_PASSED++)) || true
     else
       fail "${template}: шаблон не найден"
-      all_found=false
+      # shellcheck disable=SC2034
+      local all_found=false
     fi
   done
 }
@@ -339,11 +342,11 @@ test_decoy_generate_profile() {
 
   # Проверяем наличие обязательных полей
   if grep -q '"template"' "$DECOY_CONFIG" &&
-     grep -q '"site_name"' "$DECOY_CONFIG" &&
-     grep -q '"accent_color"' "$DECOY_CONFIG" &&
-     grep -q '"server_token"' "$DECOY_CONFIG" &&
-     grep -q '"rotation"' "$DECOY_CONFIG" &&
-     grep -q '"behavior"' "$DECOY_CONFIG"; then
+    grep -q '"site_name"' "$DECOY_CONFIG" &&
+    grep -q '"accent_color"' "$DECOY_CONFIG" &&
+    grep -q '"server_token"' "$DECOY_CONFIG" &&
+    grep -q '"rotation"' "$DECOY_CONFIG" &&
+    grep -q '"behavior"' "$DECOY_CONFIG"; then
     pass "decoy_generate_profile: все поля присутствуют"
     ((TESTS_PASSED++)) || true
   else
@@ -374,7 +377,7 @@ test_decoy_build_webroot() {
   DECOY_CONFIG="${test_config_dir}/decoy.json"
 
   # Создаём тестовый конфиг
-  cat > "$DECOY_CONFIG" <<EOF
+  cat >"$DECOY_CONFIG" <<EOF
 {
   "template": "portal",
   "site_name": "Test Site",
@@ -416,7 +419,7 @@ test_decoy_write_nginx_conf() {
   DECOY_CONFIG="${test_config_dir}/decoy.json"
 
   # Создаём тестовый конфиг
-  cat > "$DECOY_CONFIG" <<EOF
+  cat >"$DECOY_CONFIG" <<EOF
 {
   "template": "portal",
   "site_name": "Test Site",
@@ -462,7 +465,7 @@ test_decoy_write_rotate_timer() {
   DECOY_CONFIG="${test_config_dir}/decoy.json"
 
   # Создаём тестовый конфиг
-  cat > "$DECOY_CONFIG" <<EOF
+  cat >"$DECOY_CONFIG" <<EOF
 {
   "template": "portal",
   "site_name": "Test Site",
@@ -519,7 +522,7 @@ test_decoy_rotate_once() {
   DECOY_CONFIG="${test_config_dir}/decoy.json"
 
   # Создаём тестовый конфиг
-  cat > "$DECOY_CONFIG" <<EOF
+  cat >"$DECOY_CONFIG" <<EOF
 {
   "template": "portal",
   "site_name": "Test Site",
@@ -654,7 +657,7 @@ test_all_functions_exist() {
   local found=0
   for func in "${required_functions[@]}"; do
     if declare -f "$func" &>/dev/null; then
-      ((found++)) || true  # || true чтобы избежать exit с set -e
+      ((found++)) || true # || true чтобы избежать exit с set -e
     fi
   done
 
@@ -676,7 +679,7 @@ test_decoy_json_has_last_rotated_at() {
   DECOY_CONFIG="${test_config_dir}/decoy.json"
 
   # Создаём тестовый конфиг
-  cat > "$DECOY_CONFIG" <<EOF
+  cat >"$DECOY_CONFIG" <<EOF
 {
   "template": "portal",
   "site_name": "Test Site",
@@ -726,7 +729,7 @@ test_generate_session_block() {
   DECOY_CONFIG="${test_config_dir}/decoy.json"
 
   # Создаём тестовый конфиг
-  cat > "$DECOY_CONFIG" <<EOF
+  cat >"$DECOY_CONFIG" <<EOF
 {
   "template": "portal",
   "site_name": "Test Site",
@@ -756,6 +759,7 @@ EOF
   touch "${test_webroot}/files/test2.jpg"
 
   # Mock для DOMAIN
+  # shellcheck disable=SC2034
   DOMAIN="example.com"
 
   # Вызываем функцию
@@ -794,7 +798,7 @@ test_mikrotik_has_sessions() {
   DECOY_CONFIG="${test_config_dir}/decoy.json"
 
   # Создаём тестовый конфиг
-  cat > "$DECOY_CONFIG" <<EOF
+  cat >"$DECOY_CONFIG" <<EOF
 {
   "template": "portal",
   "site_name": "Test Site",
@@ -824,6 +828,7 @@ EOF
   touch "${test_webroot}/files/test2.jpg"
 
   # Mock для DOMAIN
+  # shellcheck disable=SC2034
   DOMAIN="example.com"
 
   # Вызываем функцию и ловим вывод

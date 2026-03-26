@@ -5,6 +5,7 @@
 
 # ── Подключение зависимостей / Dependencies ─────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck disable=SC2034
 MODULE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]]; then
@@ -12,9 +13,6 @@ if [[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]]; then
 fi
 if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
   source "${SCRIPT_DIR}/lib/core/log.sh"
-fi
-if [[ -f "${SCRIPT_DIR}/lib/utils.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/utils.sh"
 fi
 
 # ── Константы / Constants ───────────────────────────────────
@@ -70,12 +68,12 @@ decoy_rotate_once() {
     new_file="${DECOY_WEBROOT}/files/$(gen_hex 8).jpg"
     seed=$(gen_hex 6)
     if convert -size 4000x3000 \
-        "plasma:#${seed}-${accent_color:1}" \
-        -quality 88 "$new_file" 2>/dev/null; then
+      "plasma:#${seed}-${accent_color:1}" \
+      -quality 88 "$new_file" 2>/dev/null; then
       rm -f "$old_file"
       chown www-data:www-data "$new_file"
       chmod 644 "$new_file"
-      replaced=$(( replaced + 1 ))
+      replaced=$((replaced + 1))
       log_info "Ротация: заменён $(basename "$old_file") → $(basename "$new_file")"
     fi
   done
@@ -84,7 +82,7 @@ decoy_rotate_once() {
   local timestamp
   timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
   local tmp_file="${DECOY_CONFIG}.tmp"
-  if jq ".rotation.last_rotated_at = \"${timestamp}\"" "$DECOY_CONFIG" > "$tmp_file" 2>/dev/null; then
+  if jq ".rotation.last_rotated_at = \"${timestamp}\"" "$DECOY_CONFIG" >"$tmp_file" 2>/dev/null; then
     mv "$tmp_file" "$DECOY_CONFIG"
     chmod 600 "$DECOY_CONFIG"
     log_info "Timestamp ротации обновлён: ${timestamp}"
@@ -100,7 +98,7 @@ decoy_rotate_once() {
 
 # Скрипт для systemd — обёртка для ротации
 decoy_write_rotate_service() {
-  cat > "/etc/systemd/system/${DECOY_ROTATE_TIMER}.service" <<EOF
+  cat >"/etc/systemd/system/${DECOY_ROTATE_TIMER}.service" <<EOF
 [Unit]
 Description=CubiVeil Decoy Site File Rotation
 After=network.target
@@ -116,7 +114,7 @@ EOF
 # Скрипт применения ротации
 decoy_write_rotate_script() {
   mkdir -p /usr/local/lib/cubiveil
-  cat > "/usr/local/lib/cubiveil/decoy-rotate.sh" <<'SCRIPT'
+  cat >"/usr/local/lib/cubiveil/decoy-rotate.sh" <<'SCRIPT'
 #!/bin/bash
 # CubiVeil decoy-rotate — вызывается systemd для ротации файлов
 set -euo pipefail
@@ -150,7 +148,7 @@ decoy_write_rotate_timer() {
   decoy_write_rotate_script
 
   # Timer с рандомизацией ±30 мин для непредсказуемости
-  cat > "/etc/systemd/system/${DECOY_ROTATE_TIMER}.timer" <<EOF
+  cat >"/etc/systemd/system/${DECOY_ROTATE_TIMER}.timer" <<EOF
 [Unit]
 Description=CubiVeil Decoy Rotation Timer (~${interval_hours}h)
 

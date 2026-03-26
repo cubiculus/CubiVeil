@@ -81,7 +81,7 @@ jq() {
       local key="${filter#*.}"
       key="${key%%\[*}"
       local result
-      result=$(grep -o "\"$key\"[[:space:]]*:[[:space:]]*[^,}]*" "$file" 2>/dev/null | \
+      result=$(grep -o "\"$key\"[[:space:]]*:[[:space:]]*[^,}]*" "$file" 2>/dev/null |
         sed 's/.*:[[:space:]]*//' | tr -d '"' | head -1)
       echo "${result:-}"
     fi
@@ -165,12 +165,13 @@ test_files_exist() {
   info "Тестирование наличия файлов модуля..."
 
   local all_found=true
-
+  local file
   for file in "$MODULE_PATH" "$PERSIST_PATH" "$UNINSTALL_PATH"; do
     if [[ -f "$file" ]]; then
       pass "$(basename "$file"): файл существует"
     else
       fail "$(basename "$file"): файл не найден"
+      # shellcheck disable=SC2034
       all_found=false
     fi
   done
@@ -195,7 +196,7 @@ test_shebang() {
 
   for file in "$MODULE_PATH" "$PERSIST_PATH" "$UNINSTALL_PATH"; do
     local shebang
-    read -r shebang < "$file"
+    read -r shebang <"$file"
 
     if [[ "$shebang" == "#!/bin/bash" ]]; then
       pass "$(basename "$file"): корректный shebang"
@@ -214,8 +215,8 @@ test_ts_generate_profile() {
 
   # Временно заменяем heredoc на echo для теста
   # Сохраняем оригинальную функцию
-  local original_ts_generate_profile
-  original_ts_generate_profile=$(declare -f ts_generate_profile 2>/dev/null || echo "")
+  local _original_ts_generate_profile
+  _original_ts_generate_profile=$(declare -f ts_generate_profile 2>/dev/null || echo "")
 
   # Переопределяем функцию для использования echo вместо heredoc
   ts_generate_profile() {
@@ -232,15 +233,15 @@ test_ts_generate_profile() {
     }
 
     # Уникальный "почерк" — генерируется один раз, не меняется
-    local jitter=$(( RANDOM % 16 + 5 ))       # 5–20 мс
-    local delay=$(( RANDOM % 7 + 2 ))         # 2–8 мс
-    local reorder_tenths=$(( RANDOM % 5 + 1 )) # 0.1–0.5%
+    local jitter=$((RANDOM % 16 + 5))        # 5–20 мс
+    local delay=$((RANDOM % 7 + 2))          # 2–8 мс
+    local reorder_tenths=$((RANDOM % 5 + 1)) # 0.1–0.5%
 
     mkdir -p /etc/cubiveil
 
     # Используем printf вместо heredoc
     printf '{\n  "interface":       "%s",\n  "delay_ms":        %s,\n  "jitter_ms":       %s,\n  "reorder_percent": "0.%s",\n  "generated_at":    "%s"\n}\n' \
-      "$iface" "$delay" "$jitter" "$reorder_tenths" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$TS_CONFIG"
+      "$iface" "$delay" "$jitter" "$reorder_tenths" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >"$TS_CONFIG"
 
     chmod 600 "$TS_CONFIG"
     log_info "Профиль TC: iface=${iface} delay=${delay}ms jitter=${jitter}ms reorder=0.${reorder_tenths}%"
@@ -258,10 +259,10 @@ test_ts_generate_profile() {
 
   # Проверяем наличие обязательных полей
   if grep -q '"interface"' "$TS_CONFIG" &&
-     grep -q '"delay_ms"' "$TS_CONFIG" &&
-     grep -q '"jitter_ms"' "$TS_CONFIG" &&
-     grep -q '"reorder_percent"' "$TS_CONFIG" &&
-     grep -q '"generated_at"' "$TS_CONFIG"; then
+    grep -q '"delay_ms"' "$TS_CONFIG" &&
+    grep -q '"jitter_ms"' "$TS_CONFIG" &&
+    grep -q '"reorder_percent"' "$TS_CONFIG" &&
+    grep -q '"generated_at"' "$TS_CONFIG"; then
     pass "ts_generate_profile: все поля присутствуют"
   else
     fail "ts_generate_profile: не все поля присутствуют"
@@ -300,7 +301,7 @@ test_ts_write_apply_script() {
   info "Тестирование ts_write_apply_script..."
 
   # Создаём тестовый конфиг используя printf
-  printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' > "$TS_CONFIG"
+  printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' >"$TS_CONFIG"
 
   local script_dir="/tmp/test-cubiveil-script-$$"
   mkdir -p "$script_dir"
@@ -319,7 +320,7 @@ test_ts_write_systemd_service() {
   info "Тестирование ts_write_systemd_service..."
 
   # Создаём тестовый конфиг используя printf
-  printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' > "$TS_CONFIG"
+  printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' >"$TS_CONFIG"
 
   export TS_SERVICE="cubiveil-tc"
   export TS_APPLY_SCRIPT="/usr/local/lib/cubiveil/tc-apply.sh"
@@ -450,7 +451,7 @@ test_ts_check_compatibility() {
   info "Тестирование ts_check_compatibility..."
 
   # Создаём тестовый конфиг используя printf
-  printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' > "$TS_CONFIG"
+  printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' >"$TS_CONFIG"
 
   # Mock для tc (возвращает пустой вывод = нет существующих qdisc)
   tc() { return 0; }
@@ -477,7 +478,7 @@ test_ts_check_compatibility_detects_qdisc() {
   info "Тестирование обнаружения существующих qdisc..."
 
   # Создаём тестовый конфиг
-  printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' > "$TS_CONFIG"
+  printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' >"$TS_CONFIG"
 
   # Mock для tc (возвращает существующие qdisc)
   tc() {
@@ -503,10 +504,12 @@ test_ts_check_compatibility_detects_qdisc() {
       # Это read -rp с prompt
       REPLY="n"
       # Для совместимости с set -u
-      cont="n"
+      # shellcheck disable=SC2034
+      local cont="n"
     else
       REPLY=""
-      cont=""
+      # shellcheck disable=SC2034
+      local cont=""
     fi
   }
 
@@ -533,7 +536,7 @@ test_ts_check_compatibility_docker_lxc() {
   info "Тестирование проверки Docker/LXC..."
 
   # Создаём тестовый конфиг
-  printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' > "$TS_CONFIG"
+  printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' >"$TS_CONFIG"
 
   # Mock для tc (возвращает qdisc)
   tc() {
@@ -570,7 +573,7 @@ test_ts_check_compatibility_non_interactive() {
   info "Тестирование ts_check_compatibility в неинтерактивном режиме..."
 
   # Создаём тестовый конфиг
-  printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' > "$TS_CONFIG"
+  printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' >"$TS_CONFIG"
   export DRY_RUN="true"
 
   # Mock для tc (возвращает существующие qdisc)
