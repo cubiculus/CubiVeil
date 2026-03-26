@@ -38,10 +38,22 @@ ensure_file() {
   fi
 
   local url="${REPO_URL}/${file}"
-  if ! curl -fsSL "$url" -o "$target_path" 2>/dev/null; then
+  local curl_output
+  if ! curl_output=$(curl -fsSL "$url" -o "$target_path" 2>&1); then
     echo -e "\033[0;31m[✗]\033[0m Failed to download: $file"
+    echo -e "\033[0;33m[!]\033[0m URL: $url"
+    echo -e "\033[0;33m[!]\033[0m Target: $target_path"
+    echo -e "\033[0;33m[!]\033[0m Error: $curl_output"
     return 1
   fi
+
+  # Проверка что файл не пустой
+  if [[ ! -s "$target_path" ]]; then
+    echo -e "\033[0;31m[✗]\033[0m Downloaded file is empty: $file"
+    return 1
+  fi
+
+  return 0
 }
 
 setup_remote_install() {
