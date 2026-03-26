@@ -63,6 +63,13 @@ setup_remote_install() {
 
   TEMP_DIR=$(mktemp -d -t cubiveil.XXXXXX)
 
+  # Создаём необходимые поддиректории
+  mkdir -p "$TEMP_DIR/lib"
+  mkdir -p "$TEMP_DIR/lib/steps"
+  mkdir -p "$TEMP_DIR/lib/modules/decoy-site/templates"
+  mkdir -p "$TEMP_DIR/lib/modules/traffic-shaping"
+  mkdir -p "$TEMP_DIR/lib/core"
+
   # Загружаем основные файлы
   local files=(
     "lang.sh"
@@ -85,7 +92,6 @@ setup_remote_install() {
   done
 
   # Загружаем файлы из lib/steps/
-  mkdir -p "$TEMP_DIR/lib/steps"
   local steps_files=(
     "lib/steps/install-steps-main.sh"
   )
@@ -98,7 +104,6 @@ setup_remote_install() {
   done
 
   # Загружаем модули из lib/modules/decoy-site/
-  mkdir -p "$TEMP_DIR/lib/modules/decoy-site/templates"
   local modules_files=(
     "lib/modules/decoy-site/install.sh"
     "lib/modules/decoy-site/mikrotik.sh"
@@ -120,7 +125,6 @@ setup_remote_install() {
   done
 
   # Загружаем файлы из lib/core/
-  mkdir -p "$TEMP_DIR/lib/core"
   local core_files=(
     "lib/core/log.sh"
     "lib/core/system.sh"
