@@ -349,7 +349,7 @@ run_installation() {
     for module in "${INSTALL_MODULES[@]}"; do
       local info
       info=$(manifest_get_info "$module")
-      IFS='|' read -r type deps desc <<<"$info"
+      IFS='|' read -r _ _ desc <<<"$info"
       echo "  ✓ $module - $desc"
     done
 
@@ -388,7 +388,7 @@ run_installation() {
   for module in "${INSTALL_MODULES[@]}"; do
     local info
     info=$(manifest_get_info "$module")
-    IFS='|' read -r type deps desc <<<"$info"
+    IFS='|' read -r _ _ desc <<<"$info"
     echo "  ✓ $module - $desc"
   done
 

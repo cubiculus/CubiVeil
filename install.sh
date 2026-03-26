@@ -9,7 +9,130 @@
 set -eo pipefail
 
 INSTALL_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT_DIR="$INSTALL_SCRIPT_DIR"
+
+# ── Автозагрузка файлов при запуске через curl ───────────────
+# Если скрипт запущен через curl (путь содержит /dev/fd),
+# загружаем необходимые файлы из репозитория во временную директорию
+REPO_URL="https://raw.githubusercontent.com/cubiculus/cubiveil/main"
+TEMP_DIR=""
+
+cleanup_temp() {
+  if [[ -n "$TEMP_DIR" && -d "$TEMP_DIR" ]]; then
+    rm -rf "$TEMP_DIR"
+  fi
+}
+
+trap cleanup_temp EXIT
+
+is_curl_install() {
+  [[ "$INSTALL_SCRIPT_DIR" == /dev/fd* ]]
+}
+
+ensure_file() {
+  local file="$1"
+  local target_dir="$2"
+  local target_path="${target_dir}/${file}"
+
+  if [[ -f "$target_path" ]]; then
+    return 0
+  fi
+
+  local url="${REPO_URL}/${file}"
+  if ! curl -fsSL "$url" -o "$target_path" 2>/dev/null; then
+    echo -e "\033[0;31m[✗]\033[0m Failed to download: $file"
+    return 1
+  fi
+}
+
+setup_remote_install() {
+  if ! is_curl_install; then
+    return 0
+  fi
+
+  TEMP_DIR=$(mktemp -d -t cubiveil.XXXXXX)
+
+  # Загружаем основные файлы
+  local files=(
+    "lang.sh"
+    "lib/fallback.sh"
+    "lib/common.sh"
+    "lib/utils.sh"
+    "lib/install-steps.sh"
+    "lib/output.sh"
+    "lib/security.sh"
+    "lib/i18n.sh"
+    "lib/validation.sh"
+    "lib/manifest.sh"
+  )
+
+  for file in "${files[@]}"; do
+    if ! ensure_file "$file" "$TEMP_DIR"; then
+      echo -e "\033[0;31m[✗]\033[0m Critical file missing: $file"
+      return 1
+    fi
+  done
+
+  # Загружаем файлы из lib/steps/
+  mkdir -p "$TEMP_DIR/lib/steps"
+  local steps_files=(
+    "lib/steps/install-steps-main.sh"
+  )
+
+  for file in "${steps_files[@]}"; do
+    if ! ensure_file "$file" "$TEMP_DIR"; then
+      echo -e "\033[0;31m[✗]\033[0m Critical file missing: $file"
+      return 1
+    fi
+  done
+
+  # Загружаем модули из lib/modules/decoy-site/
+  mkdir -p "$TEMP_DIR/lib/modules/decoy-site/templates"
+  local modules_files=(
+    "lib/modules/decoy-site/install.sh"
+    "lib/modules/decoy-site/mikrotik.sh"
+    "lib/modules/decoy-site/generate.sh"
+    "lib/modules/decoy-site/rotate.sh"
+    "lib/modules/decoy-site/nginx.conf.tpl"
+    "lib/modules/decoy-site/templates/admin.html"
+    "lib/modules/decoy-site/templates/dashboard.html"
+    "lib/modules/decoy-site/templates/portal.html"
+    "lib/modules/decoy-site/templates/storage.html"
+    "lib/modules/traffic-shaping/install.sh"
+    "lib/modules/traffic-shaping/persist.sh"
+    "lib/modules/traffic-shaping/uninstall.sh"
+  )
+
+  for file in "${modules_files[@]}"; do
+    # Не считаем критичной ошибкой отсутствие модулей
+    ensure_file "$file" "$TEMP_DIR" || true
+  done
+
+  # Загружаем файлы из lib/core/
+  mkdir -p "$TEMP_DIR/lib/core"
+  local core_files=(
+    "lib/core/log.sh"
+    "lib/core/system.sh"
+  )
+
+  for file in "${core_files[@]}"; do
+    ensure_file "$file" "$TEMP_DIR" || true
+  done
+
+  INSTALL_SCRIPT_DIR="$TEMP_DIR"
+  return 0
+}
+
+# Инициализация удалённой установки
+if ! setup_remote_install; then
+  echo -e "\033[0;31m[✗]\033[0m Failed to prepare installation files"
+  echo ""
+  echo "Please use one of these options:"
+  echo "  1) Clone repository: git clone https://github.com/cubiculus/cubiveil.git && cd cubiveil"
+  echo "  2) Download install script only:"
+  echo "     curl -fsSL https://raw.githubusercontent.com/cubiculus/cubiveil/main/install.sh -o install.sh"
+  echo "     chmod +x install.sh && ./install.sh --dev"
+  exit 1
+fi
 
 # ── Переменные-заглушки для локализации ──────────────────────
 # Определяем переменные до загрузки lang.sh чтобы избежать ошибок
@@ -221,7 +344,9 @@ main() {
     echo "  9.  Marzban installation"
     echo "  10. SSL certificate (Let's Encrypt or self-signed)"
     echo "  11. Configuration"
-    echo "  12. Finish"
+    echo "  12. Decoy site installation"
+    echo "  13. Traffic shaping configuration"
+    echo "  14. Finish"
     echo ""
 
     if [[ "$DEV_MODE" == "true" ]]; then
@@ -260,7 +385,18 @@ main() {
 
   # Реальная установка
   prompt_inputs
-  step_check_ip_neighborhood
+
+  # Проверка подсети (только не в dev режиме)
+  if [[ "$DEV_MODE" != "true" ]]; then
+    step_check_ip_neighborhood
+  else
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+      echo -e "${YELLOW}  [DEV MODE] Проверка подсети пропущена${PLAIN}"
+    else
+      echo -e "${YELLOW}  [DEV MODE] Subnet check skipped${PLAIN}"
+    fi
+  fi
+
   step_system_update
   step_auto_updates
   step_bbr
@@ -271,6 +407,8 @@ main() {
   step_install_marzban
   step_ssl
   step_configure
+  step_decoy_site
+  step_traffic_shaping
   step_finish
 }
 

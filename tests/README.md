@@ -18,6 +18,10 @@ sudo ./run-tests.sh --full
 
 # Только интеграционные тесты (требует root)
 sudo ./run-tests.sh --integration
+
+# Тесты Telegram-бота (Python)
+cd telegram-bot
+python3 run_tests.py
 ```
 
 ---
@@ -36,7 +40,18 @@ tests/
 ├── test-install-modes.sh     # Тесты режимов --dev и --dry-run
 ├── unit-lang.sh              # Unit-тесты lang.sh (локализация)
 ├── unit-install.sh           # Unit-тесты install.sh
-└── unit-telegram.sh          # Unit-тесты setup-telegram.sh
+├── unit-telegram.sh          # Unit-тесты setup-telegram.sh
+├── unit-decoy-site.sh        # Unit-тесты decoy-site модуля
+├── unit-traffic-shaping.sh   # Unit-тесты traffic-shaping модуля
+└── telegram-bot/             # Python тесты Telegram-бота
+    ├── run_tests.py          # Test runner
+    ├── test_keyboards.py     # 16 тестов inline клавиатур
+    ├── test_logs.py          # 13 тестов логов
+    ├── test_profiles.py      # 13 тестов Marzban API
+    ├── test_backup.py        # 13 тестов бэкапов
+    ├── test_metrics.py       # 9 тестов метрик
+    ├── test_commands.py      # 22 тестов команд
+    └── test_telegram_client.py # 12 тестов Telegram API
 ```
 
 ---
@@ -453,8 +468,19 @@ sudo bash tests/integration-test.sh
 | lang.sh | unit-lang.sh | ✅ EN/RU строки, функции, локализация |
 | install.sh | unit-install.sh | ✅ Структура, модули, обработка ошибок |
 | setup-telegram.sh | unit-telegram.sh | ✅ Python бот, systemd, cron, валидация |
+| lib/modules/decoy-site/ | unit-decoy-site.sh | ✅ Генерация контента, ротация, MikroTik скрипт |
+| lib/modules/traffic-shaping/ | unit-traffic-shaping.sh | ✅ TC/netem правила, персистентность |
 | Модульная структура | modular-structure.sh | ✅ Архитектура, зависимости |
 | Установленная система | integration-test.sh | ✅ Сервисы, сеть, безопасность |
+| **Telegram Bot (Python)** | | |
+| └─ keyboards.py | test_keyboards.py | ✅ 16 тестов: все inline клавиатуры |
+| └─ profiles.py | test_profiles.py | ✅ 13 тестов: Marzban API client |
+| └─ logs.py | test_logs.py | ✅ 13 тестов: модуль логов |
+| └─ backup.py | test_backup.py | ✅ 13 тестов: управление бэкапами |
+| └─ metrics.py | test_metrics.py | ✅ 9 тестов: сбор метрик |
+| └─ commands.py | test_commands.py | ✅ 22 тестов: обработчик команд |
+| └─ telegram_client.py | test_telegram_client.py | ✅ 12 тестов: Telegram API client |
+| **ВСЕГО** | **98 тестов** | ✅ **100% проходят** |
 
 ---
 

@@ -4,7 +4,7 @@ Metrics Collection Module
 Collects system metrics: CPU, RAM, disk, uptime, active users
 """
 
-import subprocess
+import subprocess  # nosec B404
 import sqlite3
 import os
 import time
@@ -122,7 +122,7 @@ class MetricsCollector:
         Returns tuple: (used_gb, total_gb, used_percent)
         """
         try:
-            result = subprocess.run(
+            result = subprocess.run(  # nosec B607, B603
                 ["df", "-BG", "/"],
                 capture_output=True,
                 text=True,

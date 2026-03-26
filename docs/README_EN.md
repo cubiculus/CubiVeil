@@ -15,6 +15,7 @@
 <p align="center">
   <a href="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml"><img src="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml/badge.svg?label=Shellcheck" alt="Shellcheck"/></a>
   <a href="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml"><img src="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml/badge.svg?label=Integration%20Tests" alt="Integration Tests"/></a>
+  <a href="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml"><img src="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml/badge.svg?label=Telegram%20Bot%20Tests" alt="Telegram Bot Tests"/></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"/></a>
   <a href="https://ubuntu.com/"><img src="https://img.shields.io/badge/platform-Ubuntu%2022.04%20%7C%2024.04-orange" alt="Platform"/></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10-blue" alt="Python"/></a>
@@ -34,7 +35,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/cubiculus/cubiveil/main/inst
 
 ## 📋 About
 
-**CubiVeil** is a comprehensive solution for deploying and managing proxy infrastructure based on **Marzban** and **Sing-box** on Ubuntu servers.
+**CubiVeil** is a comprehensive solution for deploying and managing infrastructure based on **Marzban** and **Sing-box** on Ubuntu servers.
 
 The project provides:
 - 🚀 Automated installation of all components
@@ -43,6 +44,8 @@ The project provides:
 - 💾 Automatic backup
 - 🤖 Telegram bot for server management
 - 🛠 Utility suite for maintenance
+- 🎭 Decoy site with realistic traffic generation (decoy-site)
+- 🌐 Traffic shaping for unique server "fingerprint"
 
 ## ⚡ Quick Start
 
@@ -145,10 +148,12 @@ Simulation mode will show what actions would be performed, which modules would b
 | Component | Description |
 |-----------|----------|
 | **Marzban** | User and subscription management panel |
-| **Sing-box** | Proxy core with modern protocol support |
+| **Sing-box** | Core with modern protocol support |
 | **Fail2ban** | Brute-force attack protection |
 | **UFW** | Firewall |
 | **Let's Encrypt** | SSL certificates |
+| **Decoy Site** | Decoy website with realistic traffic generation |
+| **Traffic Shaping** | Network parameter control for unique "fingerprint" |
 
 ### Utilities
 
@@ -206,12 +211,19 @@ bash setup-telegram.sh
 #### Users
 - `/users` — list all users
 - `/qr <username>` — QR code for connection
+- `/traffic <username>` — traffic usage
+- `/subscription <username>` — subscription link
 
 #### Management
 - `/restart <service>` — restart service
 - `/update` — check for updates
 - `/export` — export configuration
 - `/diagnose` — full diagnostics
+- `/enable <username>` — enable profile
+- `/disable <username>` — disable profile
+- `/extend <username> <days>` — extend profile
+- `/reset <username>` — reset traffic
+- `/create <username>` — create new profile
 
 #### Logs
 - `/logs <service> [lines]` — service logs

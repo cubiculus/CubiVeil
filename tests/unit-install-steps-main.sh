@@ -439,6 +439,164 @@ test_step_configure() {
   fi
 }
 
+# ── Тест: step_decoy_site существует ─────────────────────────
+test_step_decoy_site() {
+  info "Тестирование функции step_decoy_site..."
+
+  load_module
+
+  if declare -f step_decoy_site >/dev/null; then
+    pass "step_decoy_site: функция существует"
+  else
+    fail "step_decoy_site: функция не найдена"
+  fi
+}
+
+# ── Тест: step_decoy_site проверяет наличие модуля ───────────
+test_step_decoy_site_checks_module() {
+  info "Тестирование проверки наличия модуля в step_decoy_site..."
+
+  load_module
+
+  local func_content
+  func_content=$(declare -f step_decoy_site 2>/dev/null || echo "")
+
+  if [[ "$func_content" == *"decoy-site"* ]] && [[ "$func_content" == *"-f"* ]]; then
+    pass "step_decoy_site: проверяет наличие модуля"
+  else
+    fail "step_decoy_site: не проверяет наличие модуля"
+  fi
+}
+
+# ── Тест: step_decoy_site загружает модуль ───────────────────
+test_step_decoy_site_sources_module() {
+  info "Тестирование загрузки модуля в step_decoy_site..."
+
+  load_module
+
+  local func_content
+  func_content=$(declare -f step_decoy_site 2>/dev/null || echo "")
+
+  if [[ "$func_content" == *"source"* ]] && [[ "$func_content" == *"install.sh"* ]]; then
+    pass "step_decoy_site: загружает install.sh модуля"
+  else
+    fail "step_decoy_site: не загружает install.sh модуля"
+  fi
+}
+
+# ── Тест: step_decoy_site вызывает функции модуля ────────────
+test_step_decoy_site_calls_module_functions() {
+  info "Тестирование вызова функций модуля в step_decoy_site..."
+
+  load_module
+
+  local func_content
+  func_content=$(declare -f step_decoy_site 2>/dev/null || echo "")
+
+  if [[ "$func_content" == *"module_install"* ]] && \
+     [[ "$func_content" == *"module_configure"* ]] && \
+     [[ "$func_content" == *"module_enable"* ]]; then
+    pass "step_decoy_site: вызывает module_install, module_configure, module_enable"
+  else
+    fail "step_decoy_site: не вызывает все функции модуля"
+  fi
+}
+
+# ── Тест: step_decoy_site поддерживает локализацию ───────────
+test_step_decoy_site_localization() {
+  info "Тестирование локализации в step_decoy_site..."
+
+  load_module
+
+  local func_content
+  func_content=$(declare -f step_decoy_site 2>/dev/null || echo "")
+
+  if [[ "$func_content" == *"LANG_NAME"* ]] || [[ "$func_content" == *"Русский"* ]]; then
+    pass "step_decoy_site: поддерживает локализацию"
+  else
+    warn "step_decoy_site: может не поддерживать локализацию"
+  fi
+}
+
+# ── Тест: step_traffic_shaping существует ────────────────────
+test_step_traffic_shaping() {
+  info "Тестирование функции step_traffic_shaping..."
+
+  load_module
+
+  if declare -f step_traffic_shaping >/dev/null; then
+    pass "step_traffic_shaping: функция существует"
+  else
+    fail "step_traffic_shaping: функция не найдена"
+  fi
+}
+
+# ── Тест: step_traffic_shaping проверяет наличие модуля ──────
+test_step_traffic_shaping_exists() {
+  info "Тестирование проверки наличия модуля в step_traffic_shaping..."
+
+  load_module
+
+  local func_content
+  func_content=$(declare -f step_traffic_shaping 2>/dev/null || echo "")
+
+  if [[ "$func_content" == *"traffic-shaping"* ]] && [[ "$func_content" == *"-f"* ]]; then
+    pass "step_traffic_shaping: проверяет наличие модуля"
+  else
+    fail "step_traffic_shaping: не проверяет наличие модуля"
+  fi
+}
+
+# ── Тест: step_traffic_shaping загружает модуль ──────────────
+test_step_traffic_shaping_sources_module() {
+  info "Тестирование загрузки модуля в step_traffic_shaping..."
+
+  load_module
+
+  local func_content
+  func_content=$(declare -f step_traffic_shaping 2>/dev/null || echo "")
+
+  if [[ "$func_content" == *"source"* ]] && [[ "$func_content" == *"install.sh"* ]]; then
+    pass "step_traffic_shaping: загружает install.sh модуля"
+  else
+    fail "step_traffic_shaping: не загружает install.sh модуля"
+  fi
+}
+
+# ── Тест: step_traffic_shaping вызывает функции модуля ───────
+test_step_traffic_shaping_calls_module_functions() {
+  info "Тестирование вызова функций модуля в step_traffic_shaping..."
+
+  load_module
+
+  local func_content
+  func_content=$(declare -f step_traffic_shaping 2>/dev/null || echo "")
+
+  if [[ "$func_content" == *"module_install"* ]] && \
+     [[ "$func_content" == *"module_configure"* ]] && \
+     [[ "$func_content" == *"module_enable"* ]]; then
+    pass "step_traffic_shaping: вызывает module_install, module_configure, module_enable"
+  else
+    fail "step_traffic_shaping: не вызывает все функции модуля"
+  fi
+}
+
+# ── Тест: step_traffic_shaping поддерживает локализацию ──────
+test_step_traffic_shaping_localization() {
+  info "Тестирование локализации в step_traffic_shaping..."
+
+  load_module
+
+  local func_content
+  func_content=$(declare -f step_traffic_shaping 2>/dev/null || echo "")
+
+  if [[ "$func_content" == *"LANG_NAME"* ]] || [[ "$func_content" == *"Русский"* ]]; then
+    pass "step_traffic_shaping: поддерживает локализацию"
+  else
+    warn "step_traffic_shaping: может не поддерживать локализацию"
+  fi
+}
+
 # ── Тест: step_finish существует ─────────────────────────────
 test_step_finish() {
   info "Тестирование функции step_finish..."
@@ -502,6 +660,41 @@ test_step_finish_ssl_warning() {
   fi
 }
 
+# ── Тест: step_finish вызывает decoy_print_mikrotik_script ───
+test_step_finish_mikrotik_script() {
+  info "Тестирование step_finish: вызов decoy_print_mikrotik_script..."
+
+  load_module
+
+  local func_content
+  func_content=$(declare -f step_finish 2>/dev/null || echo "")
+
+  if [[ "$func_content" == *"decoy_print_mikrotik_script"* ]] && \
+     [[ "$func_content" == *"decoy-site"* ]] && \
+     [[ "$func_content" == *"source"* ]]; then
+    pass "step_finish: вызывает decoy_print_mikrotik_script и загружает модуль"
+  else
+    fail "step_finish: не вызывает decoy_print_mikrotik_script или не загружает модуль"
+  fi
+}
+
+# ── Тест: step_finish проверяет наличие decoy.json ───────────
+test_step_finish_checks_decoy_config() {
+  info "Тестирование step_finish: проверка наличия decoy.json..."
+
+  load_module
+
+  local func_content
+  func_content=$(declare -f step_finish 2>/dev/null || echo "")
+
+  if [[ "$func_content" == *"/etc/cubiveil/decoy.json"* ]] || \
+     [[ "$func_content" == *"decoy.json"* ]]; then
+    pass "step_finish: проверяет наличие /etc/cubiveil/decoy.json"
+  else
+    fail "step_finish: не проверяет наличие decoy.json"
+  fi
+}
+
 # ── Тест: все step_ функции экспортированы ───────────────────
 test_all_steps_exported() {
   info "Тестирование экспорта всех step_ функций..."
@@ -521,6 +714,8 @@ test_all_steps_exported() {
     "step_ssl"
     "step_ssl_dev"
     "step_configure"
+    "step_decoy_site"
+    "step_traffic_shaping"
     "step_finish"
   )
 
@@ -585,10 +780,22 @@ main() {
   test_step_ssl_dev_generates_cert
   test_step_ssl_dev_creates_dir
   test_step_configure
+  test_step_decoy_site
+  test_step_decoy_site_checks_module
+  test_step_decoy_site_sources_module
+  test_step_decoy_site_calls_module_functions
+  test_step_decoy_site_localization
+  test_step_traffic_shaping
+  test_step_traffic_shaping_exists
+  test_step_traffic_shaping_sources_module
+  test_step_traffic_shaping_calls_module_functions
+  test_step_traffic_shaping_localization
   test_step_finish
   test_step_finish_shows_url
   test_step_finish_dev_warning
   test_step_finish_ssl_warning
+  test_step_finish_mikrotik_script
+  test_step_finish_checks_decoy_config
 
   # Дополнительные тесты
   test_all_steps_exported

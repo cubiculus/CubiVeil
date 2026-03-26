@@ -5,12 +5,13 @@ CubiVeil Telegram Bot - Main Module
 - Alerts when thresholds are exceeded
 - Interactive commands only for authorized chat_id
 - Health checks: connection speed, profile status, auto-heal
+- Inline keyboards and menus
 """
 
 import os
 import json
 import time
-import subprocess
+import subprocess  # nosec B404
 import sqlite3
 import shutil
 from datetime import datetime
@@ -22,6 +23,7 @@ from backup import BackupManager
 from alert_state import AlertStateManager
 from commands import CommandHandler
 from health_check import HealthChecker
+from logs import LogsManager
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Constants / Константы
@@ -107,6 +109,7 @@ class CubiVeilBot:
         self.backup = BackupManager(self.db_path, self.backup_dir)
         self.alert_state = AlertStateManager()
         self.health = HealthChecker()
+        self.logs = LogsManager()
         self.commands = CommandHandler(
             self.telegram,
             self.metrics,
@@ -115,7 +118,8 @@ class CubiVeilBot:
             self.alert_cpu,
             self.alert_ram,
             self.alert_disk,
-            self.health
+            self.health,
+            self.logs
         )
 
     def _validate_threshold(self, value):
@@ -127,8 +131,32 @@ class CubiVeilBot:
         self.telegram.send(
             f"{STATUS_ICON_OK} <b>CubiVeil Bot started</b>\n"
             f"Alerts: CPU>{self.alert_cpu}% RAM>{self.alert_ram}% Disk>{self.alert_disk}%\n"
-            "Send /help"
+            "Send /help or use menu below",
+            reply_markup=self._build_main_menu_json()
         )
+
+    def _build_main_menu_json(self):
+        """Build main menu inline keyboard JSON"""
+        return {
+            "inline_keyboard": [
+                [
+                    {"text": "📊 Status", "callback_data": "main_status"},
+                    {"text": "📈 Monitor", "callback_data": "main_monitor"}
+                ],
+                [
+                    {"text": "💾 Backup", "callback_data": "main_backup"},
+                    {"text": "👥 Users", "callback_data": "main_users"}
+                ],
+                [
+                    {"text": "📋 Logs", "callback_data": "main_logs"},
+                    {"text": "🏥 Health", "callback_data": "main_health"}
+                ],
+                [
+                    {"text": "👤 Profiles", "callback_data": "main_profiles"},
+                    {"text": "⚙️ Settings", "callback_data": "main_settings"}
+                ]
+            ]
+        }
 
     def send_daily_report(self):
         """Send daily report with metrics and backup"""
@@ -227,8 +255,42 @@ class CubiVeilBot:
                 "━━━━━━━━━━━━━━━\n" + "\n".join(alerts)
             )
 
+    def _get_updates(self, offset: int) -> tuple:
+        """
+        Get updates from Telegram API
+        Returns tuple: (updates_list, new_offset)
+        """
+        url = (f"https://api.telegram.org/bot{self.token}/getUpdates"
+               f"?offset={offset}&timeout={REQUEST_TIMEOUT}&allowed_updates=[\"message\",\"callback_query\"]")
+
+        response = self.telegram._make_request(url)
+        data = json.loads(response)
+
+        updates = data.get("result", [])
+        return updates, offset
+
+    def _process_message(self, message: dict):
+        """Process incoming message"""
+        # Strict authorization - only own chat_id
+        if str(message.get("chat", {}).get("id", "")) != str(self.chat_id):
+            return
+
+        text = message.get("text", "")
+        chat_id = message.get("chat", {}).get("id")
+        if text.startswith("/"):
+            self.commands.handle(text, str(chat_id))
+
+    def _process_callback(self, callback_query: dict):
+        """Process callback query (inline button press)"""
+        # Strict authorization
+        chat = callback_query.get("message", {}).get("chat", {})
+        if str(chat.get("id", "")) != str(self.chat_id):
+            return
+
+        self.commands.handle_callback(callback_query)
+
     def poll(self):
-        """Poll Telegram API for messages"""
+        """Poll Telegram API for messages and callbacks"""
         self.send_startup_message()
         offset = 0
         last_health_check = 0
@@ -242,23 +304,24 @@ class CubiVeilBot:
                     self.check_health_and_heal()
                     last_health_check = current_time
 
-                url = (f"https://api.telegram.org/bot{self.token}/getUpdates"
-                       f"?offset={offset}&timeout={REQUEST_TIMEOUT}&allowed_updates=[\"message\"]")
+                # Get updates
+                updates, offset = self._get_updates(offset)
 
-                response = self.telegram._make_request(url)
-                data = json.loads(response)
+                for update in updates:
+                    # Update offset
+                    update_id = update.get("update_id", 0)
+                    if update_id >= offset:
+                        offset = update_id + 1
 
-                for update in data.get("result", []):
-                    offset = update["update_id"] + 1
-                    message = update.get("message", {})
+                    # Process message
+                    message = update.get("message")
+                    if message:
+                        self._process_message(message)
 
-                    # Strict authorization - only own chat_id
-                    if str(message.get("chat", {}).get("id", "")) != str(self.chat_id):
-                        continue
-
-                    text = message.get("text", "")
-                    if text.startswith("/"):
-                        self.commands.handle(text)
+                    # Process callback query
+                    callback_query = update.get("callback_query")
+                    if callback_query:
+                        self._process_callback(callback_query)
 
             except Exception as e:
                 print(f"[bot] poll error: {e}")

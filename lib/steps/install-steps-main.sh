@@ -797,6 +797,78 @@ EOF
   fi
 }
 
+# ── Decoy Site Installation ──────────────────────────────────────
+step_decoy_site() {
+  local step_title
+  if [[ "$LANG_NAME" == "Русский" ]]; then
+    step_title="Установка сайта-прикрытия"
+  else
+    step_title="Decoy Site Installation"
+  fi
+  step "$step_title"
+
+  local decoy_module_dir="${SCRIPT_DIR}/../modules/decoy-site"
+  if [[ ! -f "${decoy_module_dir}/install.sh" ]]; then
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+      warn "Модуль decoy-site не найден, пропускаем"
+    else
+      warn "Decoy site module not found, skipping"
+    fi
+    return 0
+  fi
+
+  # Загружаем модуль decoy-site
+  source "${decoy_module_dir}/install.sh"
+
+  # Выполняем шаги установки
+  module_install
+  module_configure
+  module_enable
+
+  if [[ "$LANG_NAME" == "Русский" ]]; then
+    ok "Сайт-прикрытие установлен на https://${DOMAIN:-dev.cubiveil.local}"
+    warn "MikroTik скрипт будет показан в конце установки"
+  else
+    ok "Decoy site installed on https://${DOMAIN:-dev.cubiveil.local}"
+    warn "MikroTik script will be shown at the end of installation"
+  fi
+}
+
+# ── Traffic Shaping Installation ────────────────────────────────
+step_traffic_shaping() {
+  local step_title
+  if [[ "$LANG_NAME" == "Русский" ]]; then
+    step_title="Настройка shaping трафика"
+  else
+    step_title="Traffic Shaping Configuration"
+  fi
+  step "$step_title"
+
+  local ts_module_dir="${SCRIPT_DIR}/../modules/traffic-shaping"
+  if [[ ! -f "${ts_module_dir}/install.sh" ]]; then
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+      warn "Модуль traffic-shaping не найден, пропускаем"
+    else
+      warn "Traffic shaping module not found, skipping"
+    fi
+    return 0
+  fi
+
+  # Загружаем модуль traffic-shaping
+  source "${ts_module_dir}/install.sh"
+
+  # Выполняем шаги установки
+  module_install
+  module_configure
+  module_enable
+
+  if [[ "$LANG_NAME" == "Русский" ]]; then
+    ok "Traffic shaping активирован с уникальным профилем"
+  else
+    ok "Traffic shaping activated with unique profile"
+  fi
+}
+
 # ── Завершение / Finish ──────────────────────────────────────
 step_finish() {
   echo ""
@@ -868,4 +940,41 @@ step_finish() {
 
   echo "══════════════════════════════════════════════════════════"
   echo ""
+
+  # Вывод MikroTik скрипта если decoy-site установлен
+  if [[ -f "/etc/cubiveil/decoy.json" ]]; then
+    local decoy_module_dir
+    decoy_module_dir="${SCRIPT_DIR}/../modules/decoy-site"
+    if [[ -f "${decoy_module_dir}/install.sh" ]]; then
+      if [[ "$LANG_NAME" == "Русский" ]]; then
+        echo "MikroTik RouterOS скрипт (decoy-site):"
+        echo "══════════════════════════════════════════════════════════"
+      else
+        echo "MikroTik RouterOS script (decoy-site):"
+        echo "══════════════════════════════════════════════════════════"
+      fi
+
+      source "${decoy_module_dir}/install.sh"
+      decoy_print_mikrotik_script
+
+      echo "══════════════════════════════════════════════════════════"
+      echo ""
+
+      if [[ "$LANG_NAME" == "Русский" ]]; then
+        echo "Для настройки MikroTik:"
+        echo "  1. Скопируйте скрипт выше (Ctrl+A, Ctrl+C)"
+        echo "  2. Откройте Terminal в MikroTik Winbox/WebFig"
+        echo "  3. Вставьте скрипт целиком (Ctrl+V)"
+        echo "  4. Проверьте: /system scheduler print"
+        echo ""
+      else
+        echo "To configure MikroTik:"
+        echo "  1. Copy the script above (Ctrl+A, Ctrl+C)"
+        echo "  2. Open Terminal in MikroTik Winbox/WebFig"
+        echo "  3. Paste the entire script (Ctrl+V)"
+        echo "  4. Verify: /system scheduler print"
+        echo ""
+      fi
+    fi
+  fi
 }

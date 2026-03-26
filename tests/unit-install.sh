@@ -4,10 +4,33 @@
 # ║        Тестирование главной точки входа                  ║
 # ╚═══════════════════════════════════════════════════════════╝
 
-set -euo pipefail
+# Strict mode отключен для совместимости с mock-функциями
 
 # ── Путь к проекту ───────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# ── Цвета ────────────────────────────────────────────────────
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
+PLAIN='\033[0m'
+
+# ── Счётчик тестов ───────────────────────────────────────────
+TESTS_PASSED=0
+TESTS_FAILED=0
+
+# ── Mock функций вывода ──────────────────────────────────────
+info() { echo -e "${CYAN}[INFO]${PLAIN} $*" >&2; }
+pass() {
+  echo -e "${GREEN}[PASS]${PLAIN} $*" >&2
+  ((TESTS_PASSED++))
+}
+fail() {
+  echo -e "${RED}[FAIL]${PLAIN} $*" >&2
+  ((TESTS_FAILED++))
+}
+warn() { echo -e "${YELLOW}[WARN]${PLAIN} $*" >&2; }
 
 # ── Тест: файл существует ───────────────────────────────────────
 test_file_exists() {
@@ -135,6 +158,8 @@ test_module_functions_usage() {
     "step_install_marzban"
     "step_ssl"
     "step_configure"
+    "step_decoy_site"
+    "step_traffic_shaping"
     "step_finish"
   )
 
@@ -198,6 +223,105 @@ test_installation_steps_order() {
     ((TESTS_PASSED++))
   else
     warn "install.sh: возможная проблема с последовательностью шагов"
+  fi
+}
+
+# ── Тест: step_traffic_shaping после step_configure ───────────
+test_traffic_shaping_after_configure() {
+  info "Тестирование последовательности step_configure → step_traffic_shaping..."
+
+  # Находим номера строк вызова step_configure и step_traffic_shaping
+  local configure_line traffic_line
+  configure_line=$(grep -n '^  step_configure$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
+  traffic_line=$(grep -n '^  step_traffic_shaping$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
+
+  if [[ "$configure_line" -eq 0 ]]; then
+    fail "install.sh: step_configure не найден"
+    return
+  fi
+
+  if [[ "$traffic_line" -eq 0 ]]; then
+    fail "install.sh: step_traffic_shaping не найден"
+    return
+  fi
+
+  # Проверяем что step_traffic_shaping вызывается сразу после step_configure
+  local expected_traffic_line=$((configure_line + 2))
+
+  if [[ "$traffic_line" -eq "$expected_traffic_line" ]]; then
+    pass "install.sh: step_traffic_shaping вызывается после step_configure (строки $configure_line → $traffic_line)"
+    ((TESTS_PASSED++))
+  elif [[ "$traffic_line" -gt "$configure_line" ]]; then
+    pass "install.sh: step_traffic_shaping вызывается после step_configure (строки $configure_line → $traffic_line)"
+    ((TESTS_PASSED++))
+  else
+    fail "install.sh: step_traffic_shaping должен вызываться после step_configure"
+  fi
+}
+
+# ── Тест: step_decoy_site после step_configure ────────────────
+test_decoy_site_after_configure() {
+  info "Тестирование последовательности step_configure → step_decoy_site..."
+
+  # Находим номера строк вызова step_configure и step_decoy_site
+  local configure_line decoy_line
+  configure_line=$(grep -n '^  step_configure$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
+  decoy_line=$(grep -n '^  step_decoy_site$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
+
+  if [[ "$configure_line" -eq 0 ]]; then
+    fail "install.sh: step_configure не найден"
+    return
+  fi
+
+  if [[ "$decoy_line" -eq 0 ]]; then
+    fail "install.sh: step_decoy_site не найден"
+    return
+  fi
+
+  # Проверяем что step_decoy_site вызывается сразу после step_configure
+  local expected_decoy_line=$((configure_line + 2))
+
+  if [[ "$decoy_line" -eq "$expected_decoy_line" ]]; then
+    pass "install.sh: step_decoy_site вызывается после step_configure (строки $configure_line → $decoy_line)"
+    ((TESTS_PASSED++))
+  elif [[ "$decoy_line" -gt "$configure_line" ]]; then
+    pass "install.sh: step_decoy_site вызывается после step_configure (строки $configure_line → $decoy_line)"
+    ((TESTS_PASSED++))
+  else
+    fail "install.sh: step_decoy_site должен вызываться после step_configure"
+  fi
+}
+
+# ── Тест: step_traffic_shaping после step_decoy_site ──────────
+test_traffic_shaping_after_decoy_site() {
+  info "Тестирование последовательности step_decoy_site → step_traffic_shaping..."
+
+  # Находим номера строк вызова step_decoy_site и step_traffic_shaping
+  local decoy_line traffic_line
+  decoy_line=$(grep -n '^  step_decoy_site$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
+  traffic_line=$(grep -n '^  step_traffic_shaping$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
+
+  if [[ "$decoy_line" -eq 0 ]]; then
+    fail "install.sh: step_decoy_site не найден"
+    return
+  fi
+
+  if [[ "$traffic_line" -eq 0 ]]; then
+    fail "install.sh: step_traffic_shaping не найден"
+    return
+  fi
+
+  # Проверяем что step_traffic_shaping вызывается сразу после step_decoy_site
+  local expected_traffic_line=$((decoy_line + 2))
+
+  if [[ "$traffic_line" -eq "$expected_traffic_line" ]]; then
+    pass "install.sh: step_traffic_shaping вызывается после step_decoy_site (строки $decoy_line → $traffic_line)"
+    ((TESTS_PASSED++))
+  elif [[ "$traffic_line" -gt "$decoy_line" ]]; then
+    pass "install.sh: step_traffic_shaping вызывается после step_decoy_site (строки $decoy_line → $traffic_line)"
+    ((TESTS_PASSED++))
+  else
+    fail "install.sh: step_traffic_shaping должен вызываться после step_decoy_site"
   fi
 }
 
@@ -469,6 +593,15 @@ main() {
   echo ""
 
   test_installation_steps_order
+  echo ""
+
+  test_traffic_shaping_after_configure
+  echo ""
+
+  test_decoy_site_after_configure
+  echo ""
+
+  test_traffic_shaping_after_decoy_site
   echo ""
 
   test_error_handling

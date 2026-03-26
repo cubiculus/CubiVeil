@@ -15,6 +15,7 @@
 <p align="center">
   <a href="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml"><img src="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml/badge.svg?label=Shellcheck" alt="Shellcheck"/></a>
   <a href="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml"><img src="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml/badge.svg?label=Integration%20Tests" alt="Integration Tests"/></a>
+  <a href="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml"><img src="https://github.com/cubiculus/CubiVeil/actions/workflows/ci.yml/badge.svg?label=Telegram%20Bot%20Tests" alt="Telegram Bot Tests"/></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"/></a>
   <a href="https://ubuntu.com/"><img src="https://img.shields.io/badge/platform-Ubuntu%2022.04%20%7C%2024.04-orange" alt="Platform"/></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10-blue" alt="Python"/></a>
@@ -34,7 +35,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/cubiculus/cubiveil/main/inst
 
 ## 📋 О проекте
 
-**CubiVeil** — это комплексное решение для развёртывания и управления прокси-инфраструктурой на базе **Marzban** и **Sing-box** на серверах Ubuntu.
+**CubiVeil** — это комплексное решение для развёртывания и управления инфраструктурой на базе **Marzban** и **Sing-box** на серверах Ubuntu.
 
 Проект предоставляет:
 - 🚀 Автоматическую установку всех компонентов
@@ -43,6 +44,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/cubiculus/cubiveil/main/inst
 - 💾 Автоматическое резервное копирование
 - 🤖 Telegram-бот для управления сервером
 - 🛠 Набор утилит для обслуживания
+- 🎭 Сайт-прикрытие с генерацией трафика (decoy-site)
+- 🌐 Traffic shaping для уникального "почерка" сервера
 
 ## ⚡ Быстрый старт
 
@@ -145,10 +148,12 @@ sudo bash install-modular.sh --dry-run
 | Компонент | Описание |
 |-----------|----------|
 | **Marzban** | Панель управления пользователями и подписками |
-| **Sing-box** | Ядро прокси с поддержкой современных протоколов |
+| **Sing-box** | Ядро с поддержкой современных протоколов |
 | **Fail2ban** | Защита от брутфорс-атак |
 | **UFW** | Межсетевой экран |
 | **Let's Encrypt** | SSL-сертификаты |
+| **Decoy Site** | Сайт-прикрытие с генерацией реалистичного трафика |
+| **Traffic Shaping** | Управление сетевыми параметрами для уникального "почерка" |
 
 ### Утилиты
 
@@ -206,12 +211,19 @@ bash setup-telegram.sh
 #### Пользователи
 - `/users` — список всех пользователей
 - `/qr <username>` — QR-код для подключения
+- `/traffic <username>` — расход трафика
+- `/subscription <username>` — ссылка на подписку
 
 #### Управление
 - `/restart <service>` — перезапустить сервис
 - `/update` — проверить обновления
 - `/export` — экспорт конфигурации
 - `/diagnose` — полная диагностика
+- `/enable <username>` — включить профиль
+- `/disable <username>` — отключить профиль
+- `/extend <username> <days>` — продлить профиль
+- `/reset <username>` — сбросить трафик
+- `/create <username>` — создать новый профиль
 
 #### Логи
 - `/logs <service> [lines]` — логи сервиса

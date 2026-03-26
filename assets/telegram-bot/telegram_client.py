@@ -2,6 +2,10 @@
 """
 Telegram Client Module
 Handles communication with Telegram Bot API
+- Send messages with inline keyboards
+- Send files/documents
+- Typing status
+- Callback query answering
 """
 
 import urllib.request
@@ -21,6 +25,10 @@ TELEGRAM_API_BASE = "https://api.telegram.org"
 TELEGRAM_GET_ME_ENDPOINT = "/getMe"
 TELEGRAM_SEND_MESSAGE_ENDPOINT = "/sendMessage"
 TELEGRAM_SEND_DOCUMENT_ENDPOINT = "/sendDocument"
+TELEGRAM_SEND_CHAT_ACTION_ENDPOINT = "/sendChatAction"
+TELEGRAM_ANSWER_CALLBACK_ENDPOINT = "/answerCallbackQuery"
+TELEGRAM_EDIT_MESSAGE_ENDPOINT = "/editMessageText"
+TELEGRAM_EDIT_MESSAGE_REPLY_MARKUP_ENDPOINT = "/editMessageReplyMarkup"
 
 # Timeouts in seconds / Таймауты в секундах
 DEFAULT_REQUEST_TIMEOUT = 10
@@ -32,6 +40,9 @@ MULTIPART_BOUNDARY = "CubiVeilBoundary"
 CONTENT_TYPE_HTML = "HTML"
 CONTENT_TYPE_OCTET_STREAM = "application/octet-stream"
 CONTENT_TYPE_MULTIPART_FORM_DATA = "multipart/form-data"
+
+# Chat actions / Действия чата
+CHAT_ACTION_TYPING = "typing"
 
 
 class TelegramClient:
@@ -49,7 +60,7 @@ class TelegramClient:
         """
         try:
             url = f"{self.base_url}{TELEGRAM_GET_ME_ENDPOINT}"
-            with urllib.request.urlopen(url, timeout=DEFAULT_REQUEST_TIMEOUT) as response:
+            with urllib.request.urlopen(url, timeout=DEFAULT_REQUEST_TIMEOUT) as response:  # nosec B310
                 data = json.loads(response.read().decode())
                 if data.get("ok"):
                     result = data.get("result", {})
@@ -78,22 +89,35 @@ class TelegramClient:
         """Make HTTP request to Telegram API"""
         try:
             if data:
-                with urllib.request.urlopen(url, data, timeout=timeout) as response:
+                with urllib.request.urlopen(url, data, timeout=timeout) as response:  # nosec B310
                     return response.read().decode()
             else:
-                with urllib.request.urlopen(url, timeout=timeout) as response:
+                with urllib.request.urlopen(url, timeout=timeout) as response:  # nosec B310
                     return response.read().decode()
         except urllib.error.URLError as e:
             raise Exception(f"Telegram API request failed: {e}")
 
-    def send(self, text, parse_mode=CONTENT_TYPE_HTML):
-        """Send text message to chat"""
+    def send(self, text, parse_mode=CONTENT_TYPE_HTML, reply_markup=None):
+        """
+        Send text message to chat
+        Args:
+            text: Message text (HTML supported)
+            parse_mode: Parse mode (HTML or Markdown)
+            reply_markup: Inline keyboard JSON dict (optional)
+        """
         url = f"{self.base_url}{TELEGRAM_SEND_MESSAGE_ENDPOINT}"
-        data = urllib.parse.urlencode({
+
+        params = {
             "chat_id": self.chat_id,
             "text": text,
             "parse_mode": parse_mode
-        }).encode()
+        }
+
+        # Add reply markup if provided
+        if reply_markup:
+            params["reply_markup"] = json.dumps(reply_markup)
+
+        data = urllib.parse.urlencode(params).encode()
 
         try:
             self._make_request(url, data)
@@ -136,3 +160,93 @@ class TelegramClient:
             conn.getresponse()
         except Exception as e:
             print(f"[bot] Error sending file: {e}")
+
+    def send_chat_action(self, action=CHAT_ACTION_TYPING):
+        """
+        Send chat action (typing, etc.)
+        Args:
+            action: Chat action (typing, upload_photo, etc.)
+        """
+        url = f"{self.base_url}{TELEGRAM_SEND_CHAT_ACTION_ENDPOINT}"
+        data = urllib.parse.urlencode({
+            "chat_id": self.chat_id,
+            "action": action
+        }).encode()
+
+        try:
+            self._make_request(url, data)
+        except Exception as e:
+            print(f"[bot] Error sending chat action: {e}")
+
+    def answer_callback(self, callback_query_id, text=None, show_alert=False):
+        """
+        Answer callback query (remove loading state)
+        Args:
+            callback_query_id: ID of callback query
+            text: Notification text (optional)
+            show_alert: Show as alert (True) or notification (False)
+        """
+        url = f"{self.base_url}{TELEGRAM_ANSWER_CALLBACK_ENDPOINT}"
+        data = urllib.parse.urlencode({
+            "callback_query_id": callback_query_id,
+            "text": text or "",
+            "show_alert": str(show_alert).lower()
+        }).encode()
+
+        try:
+            self._make_request(url, data)
+        except Exception as e:
+            print(f"[bot] Error answering callback: {e}")
+
+    def edit_message_text(self, chat_id, message_id, text, parse_mode=CONTENT_TYPE_HTML, reply_markup=None):
+        """
+        Edit message text
+        Args:
+            chat_id: Chat ID
+            message_id: Message ID to edit
+            text: New text
+            parse_mode: Parse mode
+            reply_markup: New inline keyboard (optional)
+        """
+        url = f"{self.base_url}{TELEGRAM_EDIT_MESSAGE_ENDPOINT}"
+
+        params = {
+            "chat_id": chat_id,
+            "message_id": message_id,
+            "text": text,
+            "parse_mode": parse_mode
+        }
+
+        # Add reply markup if provided
+        if reply_markup:
+            params["reply_markup"] = json.dumps(reply_markup)
+
+        data = urllib.parse.urlencode(params).encode()
+
+        try:
+            self._make_request(url, data)
+        except Exception as e:
+            print(f"[bot] Error editing message: {e}")
+
+    def edit_message_reply_markup(self, chat_id, message_id, reply_markup):
+        """
+        Edit message reply markup (inline keyboard) only
+        Args:
+            chat_id: Chat ID
+            message_id: Message ID to edit
+            reply_markup: New inline keyboard
+        """
+        url = f"{self.base_url}{TELEGRAM_EDIT_MESSAGE_REPLY_MARKUP_ENDPOINT}"
+
+        params = {
+            "chat_id": chat_id,
+            "message_id": message_id,
+            "reply_markup": json.dumps(reply_markup)
+        }
+
+        data = urllib.parse.urlencode(params).encode()
+
+        try:
+            self._make_request(url, data)
+        except Exception as e:
+            print(f"[bot] Error editing reply markup: {e}")

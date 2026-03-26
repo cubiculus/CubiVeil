@@ -62,6 +62,7 @@ run_unit_tests() {
     "unit-backup.sh:Backup module"
     "unit-rollback.sh:Rollback module"
     "unit-monitoring.sh:Monitoring module"
+    "unit-traffic-shaping.sh:Traffic Shaping module"
   )
 
   for test_info in "${unit_tests[@]}"; do

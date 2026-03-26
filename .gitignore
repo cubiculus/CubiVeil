@@ -36,8 +36,6 @@ backups/
 __pycache__/
 *.pyc
 .pytest_cache/
-ssh_connect.py
-AUTO-INSTALL.md
 venv/
 env/
 ENV/
@@ -90,6 +88,9 @@ node_modules/
 
 # --- Claude ---
 .claude/
+
+# --- Markdown artifacts ---
+MD/
 
 # --- Exports and diagnostics ---
 /root/cubiveil-export/

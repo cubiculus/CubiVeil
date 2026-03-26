@@ -8,7 +8,7 @@ Health Check Module
 - Alert notifications
 """
 
-import subprocess
+import subprocess  # nosec B404
 import time
 import json
 import os
@@ -80,8 +80,8 @@ class HealthChecker:
                     for line in f:
                         if line.startswith("HEALTH_CHECK_PORT="):
                             return int(line.split("=")[1].strip())
-        except Exception:
-            pass
+        except Exception:  # nosec B110
+            logger.debug("Failed to get health check port, using default")
         return DEFAULT_HEALTH_CHECK_PORT  # Default fallback
 
     def check_connection_speed(self, target: str = "https://www.google.com",
@@ -99,7 +99,7 @@ class HealthChecker:
 
         try:
             start = time.time()
-            subprocess.run(
+            subprocess.run(  # nosec B607, B603
                 ["curl", "-sf", "--max-time", str(timeout), "-o", "/dev/null", target],
                 capture_output=True,
                 timeout=timeout + 5,
@@ -229,7 +229,7 @@ class HealthChecker:
 
         try:
             # Check if service is active
-            active_result = subprocess.run(
+            active_result = subprocess.run(  # nosec B607, B603
                 ["systemctl", "is-active", service_name],
                 capture_output=True,
                 text=True,
@@ -238,7 +238,7 @@ class HealthChecker:
             result["active"] = active_result.returncode == 0
 
             # Check if service is running
-            running_result = subprocess.run(
+            running_result = subprocess.run(  # nosec B607, B603
                 ["systemctl", "is-running", service_name],
                 capture_output=True,
                 text=True,
@@ -271,7 +271,7 @@ class HealthChecker:
         }
 
         try:
-            response = subprocess.run(
+            response = subprocess.run(  # nosec B607, B603
                 ["curl", "-sf", "--max-time", "10",
                  f"http://localhost:{self.health_check_port}/health"],
                 capture_output=True,
@@ -326,7 +326,7 @@ class HealthChecker:
 
         try:
             logger.info(f"Restarting {service_name}...")
-            subprocess.run(
+            subprocess.run(  # nosec B607, B603
                 ["systemctl", "restart", service_name],
                 capture_output=True,
                 timeout=SERVICE_RESTART_TIMEOUT,
@@ -337,7 +337,7 @@ class HealthChecker:
             time.sleep(3)
 
             # Verify restart
-            status = subprocess.run(
+            status = subprocess.run(  # nosec B607, B603
                 ["systemctl", "is-active", service_name],
                 capture_output=True,
                 text=True,

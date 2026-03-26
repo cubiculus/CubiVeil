@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{SITE_NAME}} Administration</title>
+    <link rel="icon" href="/favicon.ico">
+    <style>
+        :root {
+            --accent: {{ACCENT_COLOR}};
+            --bg-dark: #121218;
+            --bg-panel: #1e1e28;
+            --text-light: #f0f0f0;
+            --text-muted: #7a7a8a;
+            --border: #333340;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--bg-panel);
+            padding: 1.5rem;
+            border-right: 1px solid var(--border);
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar ul { list-style: none; }
+        .sidebar li {
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .sidebar a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .sidebar a:hover { color: var(--accent); }
+
+        .content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 2rem;
+            max-width: 1200px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .header h1 { color: var(--accent); }
+        .status {
+            padding: 0.3rem 0.8rem;
+            background: #2d6a4f;
+            border-radius: 3px;
+            font-size: 0.85rem;
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            padding: 1.5rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        .panel h3 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 0.7rem;
+            margin-bottom: 0.8rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-light);
+        }
+        .login-form input:focus { border-color: var(--accent); outline: none; }
+        .login-form button {
+            width: 100%;
+            padding: 0.7rem;
+            background: var(--accent);
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        .stat-box {
+            text-align: center;
+            padding: 1rem;
+            background: var(--bg-dark);
+            border-radius: 4px;
+        }
+        .stat-box .num { font-size: 1.8rem; font-weight: bold; color: var(--accent); }
+        .stat-box .label { font-size: 0.85rem; color: var(--text-muted); }
+
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td {
+            text-align: left;
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .table th { color: var(--text-muted); font-weight: normal; font-size: 0.9rem; }
+        .table a { color: var(--accent); text-decoration: none; }
+
+        .footer {
+            margin-top: 3rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .footer a { color: var(--accent); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo">{{SITE_NAME}}</div>
+        <ul>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/users">Users</a></li>
+            <li><a href="/files/">Files</a></li>
+            <li><a href="/audit">Audit Log</a></li>
+            <li><a href="/settings">Settings</a></li>
+            <li><a href="/backup">Backup</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </aside>
+
+    <div class="content">
+        <div class="header">
+            <h1>System Administration</h1>
+            <span class="status">● Online</span>
+        </div>
+
+        <div class="panel">
+            <h3>Authentication Required</h3>
+            <form class="login-form" action="#" method="post">
+                <input type="text" placeholder="Administrator username" required>
+                <input type="password" placeholder="Password" required>
+                <button type="submit">Access Control Panel</button>
+            </form>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="num">1,893</div>
+                <div class="label">Total Users</div>
+            </div>
+            <div class="stat-box">
+                <div class="num">347</div>
+                <div class="label">Active Sessions</div>
+            </div>
+            <div class="stat-box">
+                <div class="num">99.9%</div>
+                <div class="label">Uptime</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>Recent Activity</h3>
+            <table class="table">
+                <thead>
+                    <tr><th>User</th><th>Action</th><th>Time</th><th>Details</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>admin_01</td><td>File upload</td><td>2 min ago</td><td><a href="/files/document.pdf">document.pdf</a></td></tr>
+                    <tr><td>user_2847</td><td>Download</td><td>5 min ago</td><td><a href="/files/report.pdf">report.pdf</a></td></tr>
+                    <tr><td>admin_01</td><td>User creation</td><td>12 min ago</td><td>user_2848</td></tr>
+                    <tr><td>user_1923</td><td>Login</td><td>18 min ago</td><td>192.168.1.45</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            <p>&copy; {{COPYRIGHT_YEAR}} {{SITE_NAME}}. All rights reserved.</p>
+            <p><a href="/sitemap.xml">Sitemap</a></p>
+        </div>
+    </div>
+</body>
+</html>
