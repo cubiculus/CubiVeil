@@ -8,7 +8,14 @@
 
 set -eo pipefail
 
-INSTALL_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Определяем путь к скрипту
+# При запуске через pipe (curl | bash) BASH_SOURCE[0] = "-s"
+if [[ "${BASH_SOURCE[0]}" == "-s" || ! -f "${BASH_SOURCE[0]}" ]]; then
+  # Запуск через pipe - используем временную директорию
+  INSTALL_SCRIPT_DIR=""
+else
+  INSTALL_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+fi
 
 # ── Автозагрузка файлов при запуске через curl ───────────────
 # Если скрипт запущен через curl (путь содержит /dev/fd),
@@ -25,7 +32,8 @@ cleanup_temp() {
 trap cleanup_temp EXIT
 
 is_curl_install() {
-  [[ "$INSTALL_SCRIPT_DIR" == /dev/fd* ]]
+  # Запуск через process substitution (/dev/fd) или pipe (INSTALL_SCRIPT_DIR пуст)
+  [[ "$INSTALL_SCRIPT_DIR" == /dev/fd* || -z "$INSTALL_SCRIPT_DIR" ]]
 }
 
 ensure_file() {
