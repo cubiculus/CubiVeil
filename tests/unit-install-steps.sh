@@ -729,7 +729,6 @@ test_step_finish() {
 test_all_steps_exist() {
   info "Тестирование наличия всех шагов установки..."
 
-  # shellcheck disable=SC2178
   local required_steps=(
     "prompt_inputs"
     "step_check_ip_neighborhood"
@@ -747,6 +746,7 @@ test_all_steps_exist() {
   )
 
   local missing=0
+  # shellcheck disable=SC2178
   for step_func in "${required_steps[@]}"; do
     if declare -f "$step_func" >/dev/null; then
       pass "Шаг существует: $step_func"

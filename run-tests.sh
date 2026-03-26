@@ -74,15 +74,15 @@ run_unit_tests() {
 
     if [[ -f "$test_path" ]]; then
       if bash "$test_path"; then
-        ((TOTAL_PASSED++))
+        ((TOTAL_PASSED++)) || true
         echo -e "${GREEN}✓ $test_name пройден${PLAIN}"
       else
-        ((TOTAL_FAILED++))
+        ((TOTAL_FAILED++)) || true
         echo -e "${RED}✗ $test_name провален${PLAIN}"
       fi
     else
       echo -e "${RED}✗ $test_name не найден: $test_path${PLAIN}"
-      ((TOTAL_FAILED++))
+      ((TOTAL_FAILED++)) || true
     fi
     echo ""
   done
@@ -96,10 +96,10 @@ run_unit_via_integration() {
   echo ""
 
   if bash "$TESTS_DIR/integration-test.sh" . unit; then
-    ((TOTAL_PASSED++))
+    ((TOTAL_PASSED++)) || true
     echo -e "${GREEN}✓ Unit тесты пройдены${PLAIN}"
   else
-    ((TOTAL_FAILED++))
+    ((TOTAL_FAILED++)) || true
     echo -e "${RED}✗ Unit тесты провалены${PLAIN}"
   fi
 }
@@ -120,10 +120,10 @@ run_integration_tests() {
   echo ""
 
   if bash "$TESTS_DIR/integration-test.sh"; then
-    ((TOTAL_PASSED++))
+    ((TOTAL_PASSED++)) || true
     echo -e "${GREEN}✓ Интеграционные тесты пройдены${PLAIN}"
   else
-    ((TOTAL_FAILED++))
+    ((TOTAL_FAILED++)) || true
     echo -e "${RED}✗ Интеграционные тесты провалены${PLAIN}"
   fi
 }
@@ -205,6 +205,13 @@ main() {
   # ── Итоги ─────────────────────────────────────────────────
   print_section "Итоги"
   print_test_summary
+
+  # Явный выход с успехом если все тесты пройдены
+  if [[ ${TOTAL_FAILED:-0} -eq 0 ]]; then
+    exit 0
+  else
+    exit 1
+  fi
 }
 
 main "$@"
