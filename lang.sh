@@ -129,8 +129,8 @@ OK_DOMAIN_RU="Домен:"
 OK_EMAIL="Email:"
 OK_EMAIL_RU="Email:"
 
-OK_TG_CONFIGURED="Telegram: configured (report at ${REPORT_TIME} UTC)"
-OK_TG_CONFIGURED_RU="Telegram: настроен (отчёт в ${REPORT_TIME} UTC)"
+OK_TG_CONFIGURED="Telegram: configured (report at [REPORT_TIME] UTC)"
+OK_TG_CONFIGURED_RU="Telegram: настроен (отчёт в [REPORT_TIME] UTC)"
 
 WARN_TG_SKIPPED="Telegram: skipped (can be added later)"
 WARN_TG_SKIPPED_RU="Telegram: пропущен (можно добавить позже)"
