@@ -72,10 +72,11 @@ singbox_get_version() {
     local api_response
     api_response=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases/latest" 2>/dev/null || echo "{}")
     SB_TAG=$(echo "$api_response" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-    [[ -z "$SB_TAG" ]] && err "Не удалось получить версию Sing-box с GitHub"
+    [[ -z "$SB_TAG" ]] && err "Не удалось получить версию Sing-box с GitHub. API response: $api_response"
 
     SB_VER="${SB_TAG#v}"
     SB_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz"
+    info "SB_TAG=$SB_TAG, SB_VER=$SB_VER, arch=$(arch), SB_URL=$SB_URL"
 
     # Получаем SHA256
     local SHA_URL
