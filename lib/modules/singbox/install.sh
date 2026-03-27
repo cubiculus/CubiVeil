@@ -44,6 +44,8 @@ SINGBOX_SERVICE="sing-box"
 singbox_get_version() {
   log_step "singbox_get_version" "Getting Sing-box version from GitHub"
 
+  echo "DEBUG: singbox_get_version called"
+
   local CACHE_DIR="/tmp/cubiveil-cache"
   local CACHE_FILE="${CACHE_DIR}/singbox-version.json"
   local CACHE_MAX_AGE=3600 # 1 час
