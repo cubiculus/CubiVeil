@@ -85,7 +85,7 @@ _log_write() {
 
 # Логирование уровня DEBUG
 log_debug() {
-  [[ "$LOG_LEVEL" != "DEBUG" ]] && return 0
+  [[ "$CUBIVEIL_LOG_LEVEL" != "DEBUG" ]] && return 0
   _log_write "DEBUG" "$*"
 }
 
@@ -329,12 +329,12 @@ log_rotate() {
 
 # Режим отладки
 debug_on() {
-  LOG_LEVEL="DEBUG"
+  CUBIVEIL_LOG_LEVEL="DEBUG"
   log_info "Debug mode enabled"
 }
 
 debug_off() {
-  LOG_LEVEL="INFO"
+  CUBIVEIL_LOG_LEVEL="INFO"
   log_info "Debug mode disabled"
 }
 
