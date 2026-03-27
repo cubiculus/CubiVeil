@@ -182,6 +182,7 @@ singbox_install_binary() {
 
 # Основная установка
 singbox_install() {
+  echo "DEBUG: singbox_install called"
   log_step "singbox_install" "Installing Sing-box module"
 
   # Проверяем, установлен ли Sing-box
