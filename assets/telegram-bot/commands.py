@@ -8,6 +8,7 @@ import subprocess  # nosec B404
 import json
 import time
 import re
+import os
 import logging
 from typing import Optional, Dict, Any
 from collections import defaultdict
@@ -91,6 +92,12 @@ COMMAND_QR = "/qr"
 COMMAND_TRAFFIC = "/traffic"
 COMMAND_SUBSCRIPTION = "/subscription"
 COMMAND_CREATE = "/create"
+COMMAND_DIAGNOSE = "/diagnose"
+COMMAND_UPDATE = "/update"
+COMMAND_ROLLBACK = "/rollback"
+COMMAND_EXPORT_CONFIG = "/export"
+COMMAND_IMPORT_CONFIG = "/import"
+COMMAND_INSTALL_ALIASES = "/install_aliases"
 
 # Progress bar settings / Настройки прогресс-бара
 PROGRESS_BAR_WIDTH = 10
@@ -200,6 +207,109 @@ class CommandHandler:
         filled = int(min(pct, 100) / 100 * width)
         return PROGRESS_BAR_FILLED * filled + PROGRESS_BAR_EMPTY * (width - filled)
 
+    def _run_shell_utility(self, args, description):
+        """Run utils/*.sh script and send brief output to Telegram"""
+        self.telegram.send(f"⏳ {description}...")
+
+        try:
+            result = subprocess.run(  # nosec B603: args are hardcoded script paths
+                args,
+                capture_output=True,
+                text=True,
+                timeout=900,
+                check=False
+            )
+
+            output = (result.stdout or result.stderr or "(no output)").strip()
+            if len(output) > 3000:
+                output = output[:2900] + "\n... (output truncated)"
+
+            if result.returncode == 0:
+                self.telegram.send(f"✅ {description} completed.\n<code>{output}</code>")
+            else:
+                self.telegram.send(
+                    f"❌ {description} failed (exit code {result.returncode}).\n<code>{output}</code>"
+                )
+
+        except subprocess.TimeoutExpired:
+            self.telegram.send(f"❌ {description} timed out (15m)")
+        except Exception as e:
+            self.telegram.send(f"❌ {description} error: {str(e)}")
+
+    def _diagnose(self):
+        """Run diagnose utility and send report path"""
+        script = "/usr/local/bin/cubiveil/utils/diagnose.sh"
+        # Fallback to repo path
+        if not os.path.exists(script):
+            script = "/opt/cubiveil/utils/diagnose.sh"
+
+        if not os.path.exists(script):
+            script = "./utils/diagnose.sh"
+
+        # Start diagnose and keep last report location known
+        self._run_shell_utility(["bash", script], "Diagnostics")
+
+    def _update(self):
+        """Run update utility"""
+        script = "/usr/local/bin/cubiveil/utils/update.sh"
+        if not os.path.exists(script):
+            script = "/opt/cubiveil/utils/update.sh"
+        if not os.path.exists(script):
+            script = "./utils/update.sh"
+
+        self._run_shell_utility(["bash", script], "Update")
+
+    def _rollback(self, command):
+        """Run rollback utility with optional target"""
+        script = "/usr/local/bin/cubiveil/utils/rollback.sh"
+        if not os.path.exists(script):
+            script = "/opt/cubiveil/utils/rollback.sh"
+        if not os.path.exists(script):
+            script = "./utils/rollback.sh"
+
+        args = ["bash", script]
+        params = command.strip().split()[1:]
+        if params:
+            args += params
+
+        self._run_shell_utility(args, "Rollback")
+
+    def _export_config(self):
+        """Run export-config utility"""
+        script = "/usr/local/bin/cubiveil/utils/export-config.sh"
+        if not os.path.exists(script):
+            script = "/opt/cubiveil/utils/export-config.sh"
+        if not os.path.exists(script):
+            script = "./utils/export-config.sh"
+
+        self._run_shell_utility(["bash", script], "Export config")
+
+    def _import_config(self, command):
+        """Run import-config utility with path"""
+        script = "/usr/local/bin/cubiveil/utils/import-config.sh"
+        if not os.path.exists(script):
+            script = "/opt/cubiveil/utils/import-config.sh"
+        if not os.path.exists(script):
+            script = "./utils/import-config.sh"
+
+        params = command.strip().split()[1:]
+        if not params:
+            self.telegram.send("⚠️ Usage: /import <path_to_exported_config>")
+            return
+
+        args = ["bash", script] + params
+        self._run_shell_utility(args, "Import config")
+
+    def _install_aliases(self):
+        """Run install-aliases utility"""
+        script = "/usr/local/bin/cubiveil/utils/install-aliases.sh"
+        if not os.path.exists(script):
+            script = "/opt/cubiveil/utils/install-aliases.sh"
+        if not os.path.exists(script):
+            script = "./utils/install-aliases.sh"
+
+        self._run_shell_utility(["bash", script], "Install aliases")
+
     # ═══════════════════════════════════════════════════════════════════════════
     # Command Handlers / Обработчики команд
     # ═══════════════════════════════════════════════════════════════════════════
@@ -253,6 +363,18 @@ class CommandHandler:
             self._set_ram(command)
         elif cmd == COMMAND_SET_DISK:
             self._set_disk(command)
+        elif cmd == COMMAND_DIAGNOSE:
+            self._diagnose()
+        elif cmd == COMMAND_UPDATE:
+            self._update()
+        elif cmd == COMMAND_ROLLBACK:
+            self._rollback(command)
+        elif cmd == COMMAND_EXPORT_CONFIG:
+            self._export_config()
+        elif cmd == COMMAND_IMPORT_CONFIG:
+            self._import_config(command)
+        elif cmd == COMMAND_INSTALL_ALIASES:
+            self._install_aliases()
         # Profile commands
         elif cmd == COMMAND_ENABLE:
             self._enable_command(command)
@@ -621,8 +743,13 @@ class CommandHandler:
             "/speedtest — Connection test\n"
             "/profiles — Profiles management\n"
             "/settings — Bot settings\n"
-            "/help    — This help\n\n"
-            "<b>Direct Commands:</b>\n"
+            "/diagnose — Full diagnostics report\n"
+            "/update — Update CubiVeil\n"
+            "/rollback <backup> — Roll back CubiVeil\n"
+            "/export — Export configuration\n"
+            "/import <path> — Import configuration\n"
+            "\n"
+            "<b>Direct Commands:</b>\n"            "<b>Direct Commands:</b>\n"
             "/logs &lt;service&gt; [lines] — Service logs\n"
             "/set_cpu &lt;percent&gt; — CPU threshold\n"
             "/set_ram &lt;percent&gt; — RAM threshold\n"

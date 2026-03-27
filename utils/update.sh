@@ -75,9 +75,8 @@ UTIL_FILES=(
   "update.sh"
   "rollback.sh"
   "export-config.sh"
+  "import-config.sh"
   "install-aliases.sh"
-  "manage-profiles.sh"
-  "cubiveil.sh"
   "diagnose.sh"
 )
 

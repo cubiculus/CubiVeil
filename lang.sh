@@ -7,7 +7,8 @@
 
 set -euo pipefail
 
-# Выбери язык / Select language:
+# ── Язык по умолчанию / Default language ─────────────────────
+# Раскомментируй нужную строку / Uncomment the line you need:
 # LANG_NAME="English"
 LANG_NAME="Русский"
 
@@ -507,3 +508,127 @@ MSG_ERR_INVALID_PORT_RU="Невалидный порт: {PORT}"
 
 MSG_ERR_UNKNOWN_ARCH="Unknown architecture: {ARCH}"
 MSG_ERR_UNKNOWN_ARCH_RU="Неизвестная архитектура: {ARCH}"
+
+# ── Install script messages ─────────────────────────────────────────
+MSG_SELECT_LANGUAGE="Select language / Выберите язык:"
+MSG_SELECT_LANGUAGE_RU="Выберите язык:"
+
+MSG_OPTION_RU="Русский"
+MSG_OPTION_EN="English"
+
+MSG_INVALID_CHOICE="Invalid choice"
+MSG_INVALID_CHOICE_RU="Неверный выбор"
+
+MSG_PRE_INSTALL_SETUP="Pre-installation setup"
+MSG_PRE_INSTALL_SETUP_RU="Настройка перед установкой"
+
+MSG_BROWSERS_SECURITY_WARNING="Browsers will show a security warning"
+MSG_BROWSERS_SECURITY_WARNING_RU="Браузеры покажут предупреждение о безопасности"
+
+MSG_DO_NOT_USE_PRODUCTION="Do not use in production!"
+MSG_DO_NOT_USE_PRODUCTION_RU="Не используйте в production!"
+
+MSG_DNS_A_RECORD_HINT="Make sure the domain A record already points to this server."
+MSG_DNS_A_RECORD_HINT_RU="Убедитесь, что A-запись домена уже указывает на этот сервер."
+
+MSG_LE_DNS_CHECK="Let's Encrypt will check DNS — install will fail without a valid A record."
+MSG_LE_DNS_CHECK_RU="Let's Encrypt проверит DNS — установка упадёт без правильной A-записи."
+
+MSG_PROMPT_DOMAIN="Domain for panel (e.g. panel.example.com):"
+MSG_PROMPT_DOMAIN_RU="Домен для панели (например panel.example.com):"
+
+MSG_CANNOT_RESOLVE_DOMAIN="Cannot resolve {DOMAIN}. Check your A record."
+MSG_CANNOT_RESOLVE_DOMAIN_RU="Не удалось разрешить {DOMAIN}. Проверьте A-запись."
+
+MSG_CONTINUE_DESPITE_ERROR="Continue despite the error? (y/n):"
+MSG_CONTINUE_DESPITE_ERROR_RU="Продолжить несмотря на ошибку? (y/n):"
+
+MSG_A_RECORD_MISMATCH="A record {DOMAIN} → {RESOLVED}, but server IP: {SERVER_IP}"
+MSG_A_RECORD_MISMATCH_RU="A-запись {DOMAIN} → {RESOLVED}, но IP сервера: {SERVER_IP}"
+
+MSG_CONTINUE_DESPITE_MISMATCH="Continue despite the mismatch? (y/n):"
+MSG_CONTINUE_DESPITE_MISMATCH_RU="Продолжить несмотря на несоответствие? (y/n):"
+
+MSG_PROMPT_EMAIL="Email for Let's Encrypt [admin@{DOMAIN}]:"
+MSG_PROMPT_EMAIL_RU="Email для Let's Encrypt [admin@{DOMAIN}]:"
+
+MSG_INVALID_EMAIL="Invalid email. Example: admin@{DOMAIN}"
+MSG_INVALID_EMAIL_RU="Некорректный email. Пример: admin@{DOMAIN}"
+
+MSG_PROMPT_TELEGRAM="Install Telegram bot for monitoring and control? (y/n):"
+MSG_PROMPT_TELEGRAM_RU="Установить Telegram-бот для мониторинга и управления? (y/n):"
+
+MSG_TELEGRAM_WILL_BE_INSTALLED="Telegram bot will be installed after main components"
+MSG_TELEGRAM_WILL_BE_INSTALLED_RU="Telegram-бот будет установлен после основных компонентов"
+
+MSG_STEP_1_8_SYSTEM="Step 1/8 — System update and base configuration"
+MSG_STEP_1_8_SYSTEM_RU="Шаг 1/8 — Обновление системы и базовые настройки"
+
+MSG_STEP_2_8_FIREWALL="Step 2/8 — Firewall (UFW)"
+MSG_STEP_2_8_FIREWALL_RU="Шаг 2/8 — Файрвол (UFW)"
+
+MSG_STEP_3_8_FAIL2BAN="Step 3/8 — Fail2ban"
+MSG_STEP_3_8_FAIL2BAN_RU="Шаг 3/8 — Fail2ban"
+
+MSG_STEP_4_8_SINGBOX="Step 4/8 — Sing-box"
+MSG_STEP_4_8_SINGBOX_RU="Шаг 4/8 — Sing-box"
+
+MSG_STEP_5_8_SSL="Step 5/8 — SSL certificate"
+MSG_STEP_5_8_SSL_RU="Шаг 5/8 — SSL сертификат"
+
+MSG_STEP_6_8_MARZBAN="Step 6/8 — Marzban"
+MSG_STEP_6_8_MARZBAN_RU="Шаг 6/8 — Marzban"
+
+MSG_STEP_7_8_DECOY="Step 7/8 — Decoy site"
+MSG_STEP_7_8_DECOY_RU="Шаг 7/8 — Сайт-прикрытие (decoy)"
+
+MSG_STEP_8_8_TRAFFIC="Step 8/8 — Traffic shaping"
+MSG_STEP_8_8_TRAFFIC_RU="Шаг 8/8 — Traffic shaping"
+
+MSG_STEP_9_9_TELEGRAM="Step 9/9 — Telegram bot"
+MSG_STEP_9_9_TELEGRAM_RU="Шаг 9/9 — Telegram-бот"
+
+MSG_MODULE_NOT_FOUND="Module not found, skipping: {NAME}"
+MSG_MODULE_NOT_FOUND_RU="Модуль не найден, пропускаем: {NAME}"
+
+MSG_DRY_RUN_WOULD_RUN="[DRY-RUN] Would run: {NAME}"
+MSG_DRY_RUN_WOULD_RUN_RU="[DRY-RUN] Запустил бы: {NAME}"
+
+MSG_PORTS_GENERATED="Ports → Trojan:{TROJAN} SS:{SS} Panel:{PANEL} Subscription:{SUB}"
+MSG_PORTS_GENERATED_RU="Порты → Trojan:{TROJAN} SS:{SS} Панель:{PANEL} Подписки:{SUB}"
+
+MSG_DRY_RUN_TITLE="[DRY-RUN] Installation plan / План установки"
+MSG_DRY_RUN_TITLE_RU="[DRY-RUN] План установки"
+
+MSG_DRY_RUN_NO_CHANGES="[DRY-RUN] No changes were made to the system."
+MSG_DRY_RUN_NO_CHANGES_RU="[DRY-RUN] Никаких изменений в систему не внесено."
+
+MSG_INSTALLED_SUCCESSFULLY="installed successfully! 🎉"
+MSG_INSTALLED_SUCCESSFULLY_RU="установлен успешно! 🎉"
+
+MSG_NEXT_STEP_CREATE_USERS="1. Log in to panel → create users"
+MSG_NEXT_STEP_CREATE_USERS_RU="1. Зайдите в панель → создайте пользователей"
+
+MSG_NEXT_STEP_SUBSCRIPTION="2. Copy Subscription URL to your client"
+MSG_NEXT_STEP_SUBSCRIPTION_RU="2. Subscription URL скопируйте в Mihomo/клиент"
+
+MSG_NEXT_STEP_SSH="3. Change SSH port, close 22 in UFW"
+MSG_NEXT_STEP_SSH_RU="3. Смените SSH порт, закройте 22 в UFW"
+
+MSG_NEXT_STEP_TELEGRAM="4. Setup Telegram bot: bash setup-telegram.sh"
+MSG_NEXT_STEP_TELEGRAM_RU="4. Установите Telegram-бот: bash setup-telegram.sh"
+
+MSG_MIKROTIK_SCRIPT="MikroTik RouterOS script (decoy-site):"
+MSG_MIKROTIK_SCRIPT_RU="MikroTik RouterOS скрипт (decoy-site):"
+
+MSG_FAILED_DOWNLOAD="Failed to download: {FILE}"
+MSG_FAILED_DOWNLOAD_RU="Не удалось загрузить: {FILE}"
+
+MSG_CRITICAL_FILE_MISSING="Critical file missing: {FILE}"
+MSG_CRITICAL_FILE_MISSING_RU="Критический файл отсутствует: {FILE}"
+
+MSG_CLONE_AND_RUN="Clone the repo and run manually:"
+MSG_CLONE_AND_RUN_RU="Склонируйте репозиторий и запустите вручную:"
+
+MSG_FAILED_PREPARE="Failed to prepare installation files"
+MSG_FAILED_PREPARE_RU="Не удалось подготовить файлы установки"

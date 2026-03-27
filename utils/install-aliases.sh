@@ -28,18 +28,15 @@ source "${PROJECT_DIR}/lib/output.sh" || {
 }
 
 # ── Константы ─────────────────────────────────────────────────
-CUBIVEIL_CLI="/usr/local/bin/cubiveil"
 ALIASES_FILE="/etc/bash_aliases.d/cubiveil"
 
 # ── Локализация ───────────────────────────────────────────────
 declare -A MSG=(
   [TITLE]="CubiVeil — Install Aliases"
-  [INSTALLING_CLI]="Установка CLI..."
   [INSTALLING_ALIASES]="Установка алиасов..."
-  [SUCCESS_CLI]="✓ CLI установлен в"
   [SUCCESS_ALIASES]="✓ Алиасы установлены в"
   [SUCCESS]="Готово! Теперь вы можете запускать утилиты так:"
-  [EXAMPLE]="  cubiveil monitor"
+  [EXAMPLE]="  cv-monitor"
   [REQUIRES_ROOT]="Требуется запуск от root"
   [ERR_INSTALL]="Не удалось установить"
 )
@@ -55,30 +52,15 @@ step_check_environment() {
     err "$(msg REQUIRES_ROOT)"
   fi
 
-  # Проверка что cubiveil.sh существует
-  if [[ ! -f "${PROJECT_DIR}/utils/cubiveil.sh" ]]; then
-    err "cubiveil.sh не найден"
-  fi
+  # Проверка что основные утилиты существуют
+  local required_utils=("backup.sh" "update.sh" "rollback.sh" "monitor.sh" "diagnose.sh")
+  for util in "${required_utils[@]}"; do
+    if [[ ! -f "${PROJECT_DIR}/utils/${util}" ]]; then
+      err "utils/${util} не найден"
+    fi
+  done
 
   success "Окружение проверено"
-}
-
-# ══════════════════════════════════════════════════════════════
-# Установка CLI в /usr/local/bin
-# ══════════════════════════════════════════════════════════════
-
-step_install_cli() {
-  info "$(msg INSTALLING_CLI)..."
-
-  # Создаём symlink
-  ln -sf "${PROJECT_DIR}/utils/cubiveil.sh" "${CUBIVEIL_CLI}"
-  chmod +x "${CUBIVEIL_CLI}"
-
-  if [[ -x "${CUBIVEIL_CLI}" ]]; then
-    success "$(msg SUCCESS_CLI) ${CUBIVEIL_CLI}"
-  else
-    err "$(msg ERR_INSTALL) ${CUBIVEIL_CLI}"
-  fi
 }
 
 # ══════════════════════════════════════════════════════════════
@@ -92,16 +74,16 @@ step_install_aliases() {
   mkdir -p "$(dirname "${ALIASES_FILE}")"
 
   # Создаём файл с алиасами
-  cat >"${ALIASES_FILE}" <<'EOF'
+  cat >"${ALIASES_FILE}" <<EOF
 # CubiVeil Aliases
-alias cv='cubiveil'
-alias cv-update='cubiveil update'
-alias cv-rollback='cubiveil rollback'
-alias cv-export='cubiveil export'
-alias cv-monitor='cubiveil monitor'
-alias cv-diagnose='cubiveil diagnose'
-alias cv-profiles='cubiveil profiles'
-alias cv-backup='cubiveil backup'
+# Прямые алиасы на утилиты
+alias cv-monitor='sudo bash ${PROJECT_DIR}/utils/monitor.sh'
+alias cv-backup='sudo bash ${PROJECT_DIR}/utils/backup.sh'
+alias cv-update='sudo bash ${PROJECT_DIR}/utils/update.sh'
+alias cv-rollback='sudo bash ${PROJECT_DIR}/utils/rollback.sh'
+alias cv-export='sudo bash ${PROJECT_DIR}/utils/export-config.sh'
+alias cv-import='sudo bash ${PROJECT_DIR}/utils/import-config.sh'
+alias cv-diagnose='sudo bash ${PROJECT_DIR}/utils/diagnose.sh'
 EOF
 
   chmod 644 "${ALIASES_FILE}"
@@ -137,12 +119,10 @@ step_finish() {
   success "$(msg SUCCESS)"
   echo ""
   echo "  $(msg EXAMPLE)"
-  echo "  cv monitor"
-  echo "  cv backup create"
-  echo "  cv profiles list"
-  echo ""
-  echo "  Или с полным путём:"
-  echo "  sudo cubiveil monitor"
+  echo "  cv-monitor"
+  echo "  cv-backup"
+  echo "  cv-update"
+  echo "  cv-rollback"
   echo ""
   info "Для применения алиасов в новых сессиях:"
   echo "  source /root/.bashrc"
@@ -157,7 +137,6 @@ main() {
   select_language
 
   step_check_environment
-  step_install_cli
   step_install_aliases
   step_finish
 }

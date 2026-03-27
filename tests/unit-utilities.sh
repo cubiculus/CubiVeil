@@ -1,7 +1,7 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║        CubiVeil Unit Tests - New Utilities                ║
-# ║        Тестирование новых утилит                         ║
+# ║        CubiVeil Unit Tests - Utilities                    ║
+# ║        Тестирование утилит                                 ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 set -euo pipefail
@@ -10,19 +10,18 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${SCRIPT_DIR}/lib/test-utils.sh"
 
-# ── Тест: наличие новых утилит ───────────────────────────────
+# ── Тест: наличие утилит ───────────────────────────────
 test_utilities_exist() {
-  info "Тестирование наличия новых утилит..."
+  info "Тестирование наличия утилит..."
 
   local utilities=(
     "utils/update.sh"
     "utils/rollback.sh"
     "utils/export-config.sh"
+    "utils/import-config.sh"
     "utils/monitor.sh"
     "utils/diagnose.sh"
-    "utils/manage-profiles.sh"
     "utils/backup.sh"
-    "utils/cubiveil.sh"
     "utils/install-aliases.sh"
   )
 
@@ -44,11 +43,10 @@ test_utilities_syntax() {
     "utils/update.sh"
     "utils/rollback.sh"
     "utils/export-config.sh"
+    "utils/import-config.sh"
     "utils/monitor.sh"
     "utils/diagnose.sh"
-    "utils/manage-profiles.sh"
     "utils/backup.sh"
-    "utils/cubiveil.sh"
     "utils/install-aliases.sh"
   )
 
@@ -72,11 +70,10 @@ test_shebang() {
     "utils/update.sh"
     "utils/rollback.sh"
     "utils/export-config.sh"
+    "utils/import-config.sh"
     "utils/monitor.sh"
     "utils/diagnose.sh"
-    "utils/manage-profiles.sh"
     "utils/backup.sh"
-    "utils/cubiveil.sh"
     "utils/install-aliases.sh"
   )
 
@@ -101,11 +98,10 @@ test_safety_flags() {
     "utils/update.sh"
     "utils/rollback.sh"
     "utils/export-config.sh"
+    "utils/import-config.sh"
     "utils/monitor.sh"
     "utils/diagnose.sh"
-    "utils/manage-profiles.sh"
     "utils/backup.sh"
-    "utils/cubiveil.sh"
     "utils/install-aliases.sh"
   )
 
@@ -127,11 +123,10 @@ test_localization() {
     "utils/update.sh"
     "utils/rollback.sh"
     "utils/export-config.sh"
+    "utils/import-config.sh"
     "utils/monitor.sh"
     "utils/diagnose.sh"
-    "utils/manage-profiles.sh"
     "utils/backup.sh"
-    "utils/cubiveil.sh"
     "utils/install-aliases.sh"
   )
 
@@ -154,11 +149,10 @@ test_root_check() {
     "utils/update.sh"
     "utils/rollback.sh"
     "utils/export-config.sh"
+    "utils/import-config.sh"
     "utils/monitor.sh"
     "utils/diagnose.sh"
-    "utils/manage-profiles.sh"
     "utils/backup.sh"
-    "utils/cubiveil.sh"
     "utils/install-aliases.sh"
   )
 
@@ -211,31 +205,6 @@ test_backup_functions() {
     else
       # Функции могут быть недоступны из-за структуры скрипта
       info "Функция не проверена: $func (может быть локальной)"
-    fi
-  done
-}
-
-# ── Тест: функции в manage-profiles.sh ───────────────────────
-test_profiles_functions() {
-  info "Тестирование функций в manage-profiles.sh..."
-
-  local functions=(
-    "list_profiles"
-    "add_profile"
-    "remove_profile"
-    "enable_profile"
-    "disable_profile"
-    "generate_qr"
-    "show_stats"
-    "show_profile_info"
-  )
-
-  for func in "${functions[@]}"; do
-    if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/manage-profiles.sh" 2>/dev/null; then
-      pass "Функция существует: $func"
-      ((TESTS_PASSED++)) || true
-    else
-      fail "Функция отсутствует: $func"
     fi
   done
 }
@@ -493,50 +462,6 @@ test_commands_updated() {
     done
   else
     fail "commands.py не найден"
-  fi
-}
-
-# ── Тест: CLI менеджер утилит ────────────────────────────────
-test_cli_manager() {
-  info "Тестирование cubiveil.sh (CLI менеджер)..."
-
-  local cli_file="${SCRIPT_DIR}/utils/cubiveil.sh"
-
-  if [[ -f "$cli_file" ]]; then
-    pass "cubiveil.sh существует"
-    ((TESTS_PASSED++)) || true
-
-    # Проверка команд
-    local commands=(
-      "update"
-      "rollback"
-      "export"
-      "monitor"
-      "diagnose"
-      "profiles"
-      "backup"
-      "help"
-    )
-
-    for cmd in "${commands[@]}"; do
-      if grep -qE "${cmd}\|u\)|${cmd}\|rb\)|${cmd}\|exp\)" "$cli_file" ||
-        grep -q "run_${cmd}" "$cli_file"; then
-        pass "Команда существует: $cmd"
-        ((TESTS_PASSED++)) || true
-      else
-        fail "Команда не найдена: $cmd"
-      fi
-    done
-
-    # Проверка функции check_root
-    if grep -q "check_root" "$cli_file"; then
-      pass "Функция check_root существует"
-      ((TESTS_PASSED++)) || true
-    else
-      fail "Функция check_root не найдена"
-    fi
-  else
-    fail "cubiveil.sh не найден"
   fi
 }
 

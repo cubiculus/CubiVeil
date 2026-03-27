@@ -69,10 +69,12 @@ setup_remote_install() {
     "$TEMP_DIR/lib/modules/marzban" \
     "$TEMP_DIR/lib/modules/backup" \
     "$TEMP_DIR/lib/modules/rollback" \
-    "$TEMP_DIR/lib/modules/monitoring"
+    "$TEMP_DIR/lib/modules/monitoring" \
+    "$TEMP_DIR/assets/telegram-bot"
 
   local files=(
     "lang.sh"
+    "setup-telegram.sh"
     "lib/fallback.sh" "lib/common.sh" "lib/utils.sh"
     "lib/output.sh" "lib/security.sh" "lib/i18n.sh"
     "lib/validation.sh" "lib/manifest.sh"
@@ -98,6 +100,16 @@ setup_remote_install() {
     "lib/modules/traffic-shaping/install.sh"
     "lib/modules/traffic-shaping/persist.sh"
     "lib/modules/traffic-shaping/uninstall.sh"
+    "assets/telegram-bot/bot.py"
+    "assets/telegram-bot/telegram_client.py"
+    "assets/telegram-bot/metrics.py"
+    "assets/telegram-bot/backup.py"
+    "assets/telegram-bot/alert_state.py"
+    "assets/telegram-bot/commands.py"
+    "assets/telegram-bot/health_check.py"
+    "assets/telegram-bot/logs.py"
+    "assets/telegram-bot/keyboards.py"
+    "assets/telegram-bot/profiles.py"
   )
   for f in "${files[@]}"; do
     ensure_file "$f" "$TEMP_DIR" || {
@@ -126,6 +138,7 @@ DEV_DOMAIN="dev.cubiveil.local"
 DOMAIN=""
 INSTALL_DECOY="true"
 INSTALL_TRAFFIC_SHAPING="true"
+INSTALL_TELEGRAM=""
 
 # Переменные, которые будут заполнены в prompt_inputs()
 LE_EMAIL=""
@@ -159,6 +172,7 @@ _parse_args_early() {
     --domain=*) DOMAIN="${1#*=}" ;;
     --no-decoy) INSTALL_DECOY="false" ;;
     --no-traffic-shaping) INSTALL_TRAFFIC_SHAPING="false" ;;
+    --telegram) INSTALL_TELEGRAM="true" ;;
     --help | -h)
       _usage
       exit 0
@@ -181,6 +195,7 @@ Options:
   --domain=NAME         Set domain (default in dev mode: ${DEV_DOMAIN})
   --no-decoy            Skip decoy-site installation
   --no-traffic-shaping  Skip traffic-shaping module
+  --telegram            Install Telegram bot (will prompt for config)
   --help, -h            Show this help
 
 Examples:
@@ -188,6 +203,7 @@ Examples:
   sudo bash install.sh --dev
   sudo bash install.sh --dev --dry-run
   sudo bash install.sh --domain=panel.example.com
+  sudo bash install.sh --telegram
 EOF
 }
 
@@ -222,9 +238,9 @@ source "${INSTALL_SCRIPT_DIR}/lib/i18n.sh" || { err "Cannot load lib/i18n.sh"; }
 
 _select_language() {
   echo ""
-  echo "Select language / Выберите язык:"
-  echo "  1) Русский"
-  echo "  2) English"
+  echo "$(get_str MSG_SELECT_LANGUAGE)"
+  echo "  1) $(get_str MSG_OPTION_RU)"
+  echo "  2) $(get_str MSG_OPTION_EN)"
   echo ""
   while true; do
     read -rp "  Enter choice [1-2]: " _lc
@@ -237,7 +253,7 @@ _select_language() {
       LANG_NAME="English"
       return
       ;;
-    *) echo "  Invalid choice / Неверный выбор" ;;
+    *) echo "  $(get_str MSG_INVALID_CHOICE)" ;;
     esac
   done
 }
@@ -261,9 +277,7 @@ _print_banner() {
 
 prompt_inputs() {
   local _step_label
-  [[ "$LANG_NAME" == "Русский" ]] &&
-    _step_label="Настройка перед установкой" ||
-    _step_label="Pre-installation setup"
+  _step_label="$(get_str MSG_PRE_INSTALL_SETUP)"
   step "$_step_label"
 
   # ── DEV MODE ──────────────────────────────────────────────
@@ -271,13 +285,13 @@ prompt_inputs() {
     [[ -z "$DOMAIN" ]] && DOMAIN="$DEV_DOMAIN"
     LE_EMAIL="admin@${DOMAIN}"
     if [[ "$LANG_NAME" == "Русский" ]]; then
-      info "DEV-режим: самоподписной SSL, домен: ${DOMAIN}"
-      warn "Браузеры покажут предупреждение о безопасности"
-      warn "Не используйте в production!"
+      info "$(get_str INFO_DEV_MODE_RU)"
+      warn "$(get_str MSG_BROWSERS_SECURITY_WARNING_RU)"
+      warn "$(get_str MSG_DO_NOT_USE_PRODUCTION_RU)"
     else
-      info "DEV mode: self-signed SSL, domain: ${DOMAIN}"
-      warn "Browsers will show a security warning"
-      warn "Do not use in production!"
+      info "$(get_str INFO_DEV_MODE)"
+      warn "$(get_str MSG_BROWSERS_SECURITY_WARNING)"
+      warn "$(get_str MSG_DO_NOT_USE_PRODUCTION)"
     fi
     echo ""
     ok "Domain:  $DOMAIN"
@@ -288,11 +302,11 @@ prompt_inputs() {
 
   # ── PRODUCTION MODE ───────────────────────────────────────
   if [[ "$LANG_NAME" == "Русский" ]]; then
-    warn "Убедитесь, что A-запись домена уже указывает на этот сервер."
-    warn "Let's Encrypt проверит DNS — установка упадёт без правильной A-записи."
+    warn "$(get_str MSG_DNS_A_RECORD_HINT_RU)"
+    warn "$(get_str MSG_LE_DNS_CHECK_RU)"
   else
-    warn "Make sure the domain A record already points to this server."
-    warn "Let's Encrypt will check DNS — install will fail without a valid A record."
+    warn "$(get_str MSG_DNS_A_RECORD_HINT)"
+    warn "$(get_str MSG_LE_DNS_CHECK)"
   fi
   echo ""
 
@@ -302,25 +316,23 @@ prompt_inputs() {
   # Домен
   while true; do
     local _pdomain
-    [[ "$LANG_NAME" == "Русский" ]] &&
-      _pdomain="  Домен для панели (например panel.example.com): " ||
-      _pdomain="  Domain for panel (e.g. panel.example.com): "
+    _pdomain="$(get_str MSG_PROMPT_DOMAIN)"
     read -rp "$_pdomain" DOMAIN
     DOMAIN="${DOMAIN// /}"
 
     if [[ -z "$DOMAIN" ]]; then
       if [[ "$LANG_NAME" == "Русский" ]]; then
-        warn "Домен не может быть пустым"
+        warn "$(get_str WARN_DOMAIN_EMPTY_RU)"
       else
-        warn "Domain cannot be empty"
+        warn "$(get_str WARN_DOMAIN_EMPTY)"
       fi
       continue
     fi
     if ! validate_domain "$DOMAIN"; then
       if [[ "$LANG_NAME" == "Русский" ]]; then
-        warn "Некорректный формат домена. Пример: panel.example.com"
+        warn "$(get_str WARN_DOMAIN_FORMAT_RU)"
       else
-        warn "Invalid domain format. Example: panel.example.com"
+        warn "$(get_str WARN_DOMAIN_FORMAT)"
       fi
       continue
     fi
@@ -333,20 +345,30 @@ prompt_inputs() {
     _resolved=$(dig +short "$DOMAIN" A 2>/dev/null | head -1)
     if [[ -z "$_resolved" ]]; then
       if [[ "$LANG_NAME" == "Русский" ]]; then
-        warn "Не удалось разрешить $DOMAIN. Проверьте A-запись."
-        read -rp "  Продолжить несмотря на ошибку? (y/n): " _cont
+        warn "$(get_str MSG_CANNOT_RESOLVE_DOMAIN_RU | sed "s/{DOMAIN}/$DOMAIN/g")"
+        read -rp "  $(get_str MSG_CONTINUE_DESPITE_ERROR_RU) " _cont
       else
-        warn "Cannot resolve $DOMAIN. Check your A record."
-        read -rp "  Continue despite the error? (y/n): " _cont
+        warn "$(get_str MSG_CANNOT_RESOLVE_DOMAIN | sed "s/{DOMAIN}/$DOMAIN/g")"
+        read -rp "  $(get_str MSG_CONTINUE_DESPITE_ERROR) " _cont
       fi
       [[ "$_cont" =~ ^[yY]$ ]] || continue
     elif [[ -n "$SERVER_IP" && "$_resolved" != "$SERVER_IP" ]]; then
       if [[ "$LANG_NAME" == "Русский" ]]; then
-        warn "A-запись $DOMAIN → $_resolved, но IP сервера: $SERVER_IP"
-        read -rp "  Продолжить несмотря на несоответствие? (y/n): " _cont
+        local _mismatch_msg
+        _mismatch_msg="$(get_str MSG_A_RECORD_MISMATCH_RU)"
+        _mismatch_msg="${_mismatch_msg//\{DOMAIN\}/$DOMAIN}"
+        _mismatch_msg="${_mismatch_msg//\{RESOLVED\}/$_resolved}"
+        _mismatch_msg="${_mismatch_msg//\{SERVER_IP\}/$SERVER_IP}"
+        warn "$_mismatch_msg"
+        read -rp "  $(get_str MSG_CONTINUE_DESPITE_MISMATCH_RU) " _cont
       else
-        warn "A record $DOMAIN → $_resolved, but server IP: $SERVER_IP"
-        read -rp "  Continue despite the mismatch? (y/n): " _cont
+        local _mismatch_msg_en
+        _mismatch_msg_en="$(get_str MSG_A_RECORD_MISMATCH)"
+        _mismatch_msg_en="${_mismatch_msg_en//\{DOMAIN\}/$DOMAIN}"
+        _mismatch_msg_en="${_mismatch_msg_en//\{RESOLVED\}/$_resolved}"
+        _mismatch_msg_en="${_mismatch_msg_en//\{SERVER_IP\}/$SERVER_IP}"
+        warn "$_mismatch_msg_en"
+        read -rp "  $(get_str MSG_CONTINUE_DESPITE_MISMATCH) " _cont
       fi
       [[ "$_cont" =~ ^[yY]$ ]] || continue
     fi
@@ -355,18 +377,21 @@ prompt_inputs() {
 
   # Email
   local _pemail
-  [[ "$LANG_NAME" == "Русский" ]] &&
-    _pemail="  Email для Let's Encrypt [admin@${DOMAIN}]: " ||
-    _pemail="  Email for Let's Encrypt [admin@${DOMAIN}]: "
+  local _domain_placeholder="${DOMAIN}"
+  if [[ "$LANG_NAME" == "Русский" ]]; then
+    _pemail="$(get_str MSG_PROMPT_EMAIL_RU | sed "s/{DOMAIN}/$_domain_placeholder/g")"
+  else
+    _pemail="$(get_str MSG_PROMPT_EMAIL | sed "s/{DOMAIN}/$_domain_placeholder/g")"
+  fi
   read -rp "$_pemail" LE_EMAIL
   LE_EMAIL="${LE_EMAIL// /}"
   [[ -z "$LE_EMAIL" ]] && LE_EMAIL="admin@${DOMAIN}"
 
   while ! validate_email "$LE_EMAIL"; do
     if [[ "$LANG_NAME" == "Русский" ]]; then
-      warn "Некорректный email. Пример: admin@${DOMAIN}"
+      warn "$(get_str MSG_INVALID_EMAIL_RU | sed "s/{DOMAIN}/$_domain_placeholder/g")"
     else
-      warn "Invalid email. Example: admin@${DOMAIN}"
+      warn "$(get_str MSG_INVALID_EMAIL | sed "s/{DOMAIN}/$_domain_placeholder/g")"
     fi
     read -rp "$_pemail" LE_EMAIL
     LE_EMAIL="${LE_EMAIL// /}"
@@ -376,6 +401,29 @@ prompt_inputs() {
   echo ""
   ok "Domain:  $DOMAIN"
   ok "Email:   $LE_EMAIL"
+  echo ""
+
+  # ── Telegram bot ───────────────────────────────────────────
+  if [[ -z "$INSTALL_TELEGRAM" ]]; then
+    local _ptg
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+      _ptg="$(get_str MSG_PROMPT_TELEGRAM_RU)"
+    else
+      _ptg="$(get_str MSG_PROMPT_TELEGRAM)"
+    fi
+    read -rp "$_ptg" _tg_choice
+    if [[ "$_tg_choice" =~ ^[yY]$ ]]; then
+      INSTALL_TELEGRAM="true"
+      if [[ "$LANG_NAME" == "Русский" ]]; then
+        info "$(get_str MSG_TELEGRAM_WILL_BE_INSTALLED_RU)"
+      else
+        info "$(get_str MSG_TELEGRAM_WILL_BE_INSTALLED)"
+      fi
+    else
+      INSTALL_TELEGRAM="false"
+    fi
+  fi
+
   echo ""
 }
 
@@ -425,36 +473,28 @@ run_module() {
 
 _step_system() {
   local _label
-  [[ "$LANG_NAME" == "Русский" ]] &&
-    _label="Шаг 1/8 — Обновление системы и базовые настройки" ||
-    _label="Step 1/8 — System update and base configuration"
+  _label="$(get_str MSG_STEP_1_8_SYSTEM)"
   step "$_label"
   run_module "system"
 }
 
 _step_firewall() {
   local _label
-  [[ "$LANG_NAME" == "Русский" ]] &&
-    _label="Шаг 2/8 — Файрвол (UFW)" ||
-    _label="Step 2/8 — Firewall (UFW)"
+  _label="$(get_str MSG_STEP_2_8_FIREWALL)"
   step "$_label"
   run_module "firewall"
 }
 
 _step_fail2ban() {
   local _label
-  [[ "$LANG_NAME" == "Русский" ]] &&
-    _label="Шаг 3/8 — Fail2ban" ||
-    _label="Step 3/8 — Fail2ban"
+  _label="$(get_str MSG_STEP_3_8_FAIL2BAN)"
   step "$_label"
   run_module "fail2ban"
 }
 
 _step_singbox() {
   local _label
-  [[ "$LANG_NAME" == "Русский" ]] &&
-    _label="Шаг 4/8 — Sing-box" ||
-    _label="Step 4/8 — Sing-box"
+  _label="$(get_str MSG_STEP_4_8_SINGBOX)"
   step "$_label"
 
   # Генерируем ключи и порты до установки, чтобы модуль SSL/Marzban их видел
@@ -464,18 +504,14 @@ _step_singbox() {
 
 _step_ssl() {
   local _label
-  [[ "$LANG_NAME" == "Русский" ]] &&
-    _label="Шаг 5/8 — SSL сертификат" ||
-    _label="Step 5/8 — SSL certificate"
+  _label="$(get_str MSG_STEP_5_8_SSL)"
   step "$_label"
   run_module "ssl"
 }
 
 _step_marzban() {
   local _label
-  [[ "$LANG_NAME" == "Русский" ]] &&
-    _label="Шаг 6/8 — Marzban" ||
-    _label="Step 6/8 — Marzban"
+  _label="$(get_str MSG_STEP_6_8_MARZBAN)"
   step "$_label"
   run_module "marzban"
 }
@@ -483,9 +519,7 @@ _step_marzban() {
 _step_decoy() {
   [[ "$INSTALL_DECOY" != "true" ]] && return 0
   local _label
-  [[ "$LANG_NAME" == "Русский" ]] &&
-    _label="Шаг 7/8 — Сайт-прикрытие (decoy)" ||
-    _label="Step 7/8 — Decoy site"
+  _label="$(get_str MSG_STEP_7_8_DECOY)"
   step "$_label"
   run_module "decoy-site"
 }
@@ -493,11 +527,27 @@ _step_decoy() {
 _step_traffic_shaping() {
   [[ "$INSTALL_TRAFFIC_SHAPING" != "true" ]] && return 0
   local _label
-  [[ "$LANG_NAME" == "Русский" ]] &&
-    _label="Шаг 8/8 — Traffic shaping" ||
-    _label="Step 8/8 — Traffic shaping"
+  _label="$(get_str MSG_STEP_8_8_TRAFFIC)"
   step "$_label"
   run_module "traffic-shaping"
+}
+
+_step_telegram() {
+  [[ "$INSTALL_TELEGRAM" != "true" ]] && return 0
+  local _label
+  _label="$(get_str MSG_STEP_9_9_TELEGRAM)"
+  step "$_label"
+
+  # Запускаем setup-telegram.sh
+  local _setup_script="${INSTALL_SCRIPT_DIR}/setup-telegram.sh"
+  if [[ -f "$_setup_script" ]]; then
+    # shellcheck disable=SC1090
+    source "$_setup_script"
+    # Вызываем функцию telegram_main если она существует
+    declare -f telegram_main >/dev/null && telegram_main
+  else
+    warn "Telegram bot setup script not found: $_setup_script"
+  fi
 }
 
 # ══════════════════════════════════════════════════════════════
@@ -543,12 +593,23 @@ EOF
   REALITY_SNI="www.microsoft.com"
   export TROJAN_PORT SS_PORT PANEL_PORT SUB_PORT REALITY_SNI
 
+  local _ports_msg
   if [[ "$LANG_NAME" == "Русский" ]]; then
-    ok "Reality keypair сгенерирован, camouflage: ${REALITY_SNI}"
-    ok "Порты → Trojan:${TROJAN_PORT} SS:${SS_PORT} Панель:${PANEL_PORT} Подписки:${SUB_PORT}"
+    _ports_msg="$(get_str MSG_PORTS_GENERATED_RU)"
+    _ports_msg="${_ports_msg//\{TROJAN\}/$TROJAN_PORT}"
+    _ports_msg="${_ports_msg//\{SS\}/$SS_PORT}"
+    _ports_msg="${_ports_msg//\{PANEL\}/$PANEL_PORT}"
+    _ports_msg="${_ports_msg//\{SUB\}/$SUB_PORT}"
+    ok "$(get_str OK_REALITY_GENERATED_RU | sed "s/\[REALITY_SNI\]/$REALITY_SNI/g")"
+    ok "$_ports_msg"
   else
-    ok "Reality keypair generated, camouflage: ${REALITY_SNI}"
-    ok "Ports → Trojan:${TROJAN_PORT} SS:${SS_PORT} Panel:${PANEL_PORT} Subscription:${SUB_PORT}"
+    _ports_msg="$(get_str MSG_PORTS_GENERATED)"
+    _ports_msg="${_ports_msg//\{TROJAN\}/$TROJAN_PORT}"
+    _ports_msg="${_ports_msg//\{SS\}/$SS_PORT}"
+    _ports_msg="${_ports_msg//\{PANEL\}/$PANEL_PORT}"
+    _ports_msg="${_ports_msg//\{SUB\}/$SUB_PORT}"
+    ok "$(get_str OK_REALITY_GENERATED | sed "s/\[REALITY_SNI\]/$REALITY_SNI/g")"
+    ok "$_ports_msg"
   fi
 }
 
@@ -559,7 +620,7 @@ EOF
 _dry_run_plan() {
   echo ""
   echo "══════════════════════════════════════════════════════════"
-  echo "  [DRY-RUN] Installation plan / План установки"
+  echo "  $(get_str MSG_DRY_RUN_TITLE)"
   echo "══════════════════════════════════════════════════════════"
   echo ""
   local _steps=(
@@ -572,6 +633,7 @@ _dry_run_plan() {
   )
   [[ "$INSTALL_DECOY" == "true" ]] && _steps+=("decoy-site      — decoy website")
   [[ "$INSTALL_TRAFFIC_SHAPING" == "true" ]] && _steps+=("traffic-shaping — tc/netem fingerprint")
+  [[ "$INSTALL_TELEGRAM" == "true" ]] && _steps+=("telegram        — Telegram bot setup")
 
   local _i=1
   for _s in "${_steps[@]}"; do
@@ -595,7 +657,7 @@ _dry_run_plan() {
   check_ubuntu
   echo -e "\033[0;32m  [DRY-RUN] Environment checks: OK\033[0m"
   echo ""
-  echo "  [DRY-RUN] No changes were made to the system."
+  echo "  $(get_str MSG_DRY_RUN_NO_CHANGES)"
   echo ""
 }
 
@@ -607,9 +669,9 @@ _print_finish() {
   echo ""
   echo "══════════════════════════════════════════════════════════"
   if [[ "$LANG_NAME" == "Русский" ]]; then
-    echo "  ✅ CubiVeil установлен успешно! 🎉"
+    echo "  ✅ CubiVeil $(get_str MSG_INSTALLED_SUCCESSFULLY_RU)"
   else
-    echo "  ✅ CubiVeil installed successfully! 🎉"
+    echo "  ✅ CubiVeil $(get_str MSG_INSTALLED_SUCCESSFULLY)"
   fi
   echo "══════════════════════════════════════════════════════════"
   echo ""
@@ -618,33 +680,37 @@ _print_finish() {
   local _sub_url="https://${DOMAIN}:${SUB_PORT:-8081}/subscription"
 
   if [[ "$LANG_NAME" == "Русский" ]]; then
-    echo "  URL панели:     ${_panel_url}"
-    echo "  URL подписки:   ${_sub_url}"
+    echo "  $(get_str SUCCESS_PANEL_URL_RU)     ${_panel_url}"
+    echo "  $(get_str SUCCESS_SUBSCRIPTION_URL_RU)   ${_sub_url}"
     echo ""
-    echo "  Профили: Trojan · Shadowsocks · VLESS · VMess · Hysteria2"
+    echo "  $(get_str SUCCESS_PROFILES_RU) Trojan · Shadowsocks · VLESS · VMess · Hysteria2"
     echo ""
     [[ "$DEV_MODE" == "true" ]] &&
-      warn "⚠  DEV-режим: самоподписной SSL — браузеры покажут предупреждение"
+      warn "⚠  $(get_str MSG_BROWSERS_SECURITY_WARNING_RU)"
     echo ""
-    echo "  Следующие шаги:"
-    echo "    1. Зайдите в панель → создайте пользователей"
-    echo "    2. Subscription URL скопируйте в Mihomo/клиент"
-    echo "    3. Смените SSH порт, закройте 22 в UFW"
-    echo "    4. Установите Telegram-бот: bash setup-telegram.sh"
+    echo "  $(get_str NEXT_STEPS_RU)"
+    echo "    $(get_str MSG_NEXT_STEP_CREATE_USERS_RU)"
+    echo "    $(get_str MSG_NEXT_STEP_SUBSCRIPTION_RU)"
+    echo "    $(get_str MSG_NEXT_STEP_SSH_RU)"
+    if [[ "$INSTALL_TELEGRAM" != "true" ]]; then
+      echo "    $(get_str MSG_NEXT_STEP_TELEGRAM_RU)"
+    fi
   else
-    echo "  Panel URL:        ${_panel_url}"
-    echo "  Subscription URL: ${_sub_url}"
+    echo "  $(get_str SUCCESS_PANEL_URL)        ${_panel_url}"
+    echo "  $(get_str SUCCESS_SUBSCRIPTION_URL) ${_sub_url}"
     echo ""
-    echo "  Profiles: Trojan · Shadowsocks · VLESS · VMess · Hysteria2"
+    echo "  $(get_str SUCCESS_PROFILES) Trojan · Shadowsocks · VLESS · VMess · Hysteria2"
     echo ""
     [[ "$DEV_MODE" == "true" ]] &&
-      warn "⚠  DEV mode: self-signed SSL — browsers will show a warning"
+      warn "⚠  $(get_str MSG_BROWSERS_SECURITY_WARNING)"
     echo ""
-    echo "  Next steps:"
-    echo "    1. Log in to panel → create users"
-    echo "    2. Copy Subscription URL to your client"
-    echo "    3. Change SSH port, close 22 in UFW"
-    echo "    4. Setup Telegram bot: bash setup-telegram.sh"
+    echo "  $(get_str NEXT_STEPS)"
+    echo "    $(get_str MSG_NEXT_STEP_CREATE_USERS)"
+    echo "    $(get_str MSG_NEXT_STEP_SUBSCRIPTION)"
+    echo "    $(get_str MSG_NEXT_STEP_SSH)"
+    if [[ "$INSTALL_TELEGRAM" != "true" ]]; then
+      echo "    $(get_str MSG_NEXT_STEP_TELEGRAM)"
+    fi
   fi
 
   # MikroTik скрипт (если decoy установлен)
@@ -653,9 +719,11 @@ _print_finish() {
     if [[ -f "$_mikrotik_mod" ]]; then
       echo ""
       echo "══════════════════════════════════════════════════════════"
-      [[ "$LANG_NAME" == "Русский" ]] &&
-        echo "  MikroTik RouterOS скрипт (decoy-site):" ||
-        echo "  MikroTik RouterOS script (decoy-site):"
+      if [[ "$LANG_NAME" == "Русский" ]]; then
+        echo "  $(get_str MSG_MIKROTIK_SCRIPT_RU)"
+      else
+        echo "  $(get_str MSG_MIKROTIK_SCRIPT)"
+      fi
       echo "══════════════════════════════════════════════════════════"
       # shellcheck disable=SC1090
       source "$_mikrotik_mod"
@@ -710,6 +778,7 @@ main() {
   _step_marzban
   _step_decoy
   _step_traffic_shaping
+  _step_telegram
 
   _print_finish
 }

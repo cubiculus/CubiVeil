@@ -6,15 +6,15 @@
 
 ```
 utils/
-├── cubiveil.sh        # CLI менеджер (единая точка входа)
 ├── install-aliases.sh # Установка алиасов для команд
 ├── update.sh          # Обновление системы
 ├── rollback.sh        # Откат к предыдущей версии
 ├── export-config.sh   # Экспорт конфигурации
+├── import-config.sh   # Импорт конфигурации
 ├── monitor.sh         # Мониторинг сервера
 ├── diagnose.sh        # Диагностика проблем
-├── manage-profiles.sh # Управление профилями
-└── backup.sh          # Резервное копирование
+├── backup.sh          # Резервное копирование
+└── README.md          # Этот файл
 ```
 
 ## 🚀 Быстрый старт
@@ -26,40 +26,27 @@ sudo bash utils/install-aliases.sh
 ```
 
 После установки используйте короткие команды:
-- `cv` — справка
-- `cv monitor` — мониторинг
-- `cv backup create` — бэкап
-- `cv profiles list` — профили
-- `cv diagnose` — диагностика
-
-### Прямой запуск через CLI
-
-```bash
-sudo bash utils/cubiveil.sh <команда> [аргументы]
-```
+- `cv-monitor` — мониторинг
+- `cv-backup` — бэкап
+- `cv-update` — обновление
+- `cv-rollback` — откат
+- `cv-export` — экспорт конфигурации
+- `cv-import` — импорт конфигурации
+- `cv-diagnose` — диагностика
 
 ### Прямой запуск скриптов
 
 ```bash
 sudo bash utils/update.sh
-sudo bash utils/backup.sh create
+sudo bash utils/backup.sh
+sudo bash utils/monitor.sh
 ```
 
 ## 📖 Описание утилит
 
-### cubiveil.sh — CLI менеджер
-
-Единая точка доступа ко всем утилитам.
-
-```bash
-sudo bash utils/cubiveil.sh --help   # справка
-sudo bash utils/cubiveil.sh --list   # список команд
-sudo bash utils/cubiveil.sh update   # обновить
-```
-
 ### install-aliases.sh — установка алиасов
 
-Устанавливает CLI в `/usr/local/bin/cubiveil` и добавляет алиасы.
+Устанавливает алиасы для удобного запуска утилит.
 
 ```bash
 sudo bash utils/install-aliases.sh
@@ -91,6 +78,14 @@ sudo bash utils/rollback.sh /path/to/backup  # конкретный бэкап
 sudo bash utils/export-config.sh
 ```
 
+### import-config.sh — импорт
+
+Импорт конфигурации после экспорта.
+
+```bash
+sudo bash utils/import-config.sh /path/to/export
+```
+
 ### monitor.sh — мониторинг
 
 Мониторинг сервера в реальном времени.
@@ -109,29 +104,45 @@ sudo bash utils/monitor.sh -i 10        # интервал 10с
 sudo bash utils/diagnose.sh
 ```
 
-### manage-profiles.sh — профили
-
-Управление профилями прокси.
-
-```bash
-sudo bash utils/manage-profiles.sh list      # список
-sudo bash utils/manage-profiles.sh add       # добавить
-sudo bash utils/manage-profiles.sh remove    # удалить
-sudo bash utils/manage-profiles.sh enable    # включить
-sudo bash utils/manage-profiles.sh disable   # выключить
-sudo bash utils/manage-profiles.sh qr        # QR-код
-sudo bash utils/manage-profiles.sh stats     # статистика
-```
-
 ### backup.sh — бэкап
 
-Полное резервное копирование.
+Полное резервное копирование (Marzban + Sing-box + CubiVeil).
 
 ```bash
+sudo bash utils/backup.sh           # меню бэкапа
 sudo bash utils/backup.sh create    # создать
 sudo bash utils/backup.sh list      # список
-sudo bash utils/backup.sh restore <файл>  # восстановить
+sudo bash utils/backup.sh restore   # восстановить
 sudo bash utils/backup.sh cleanup   # очистка
+```
+
+## 🔧 Управление профилями
+
+Для управления профилями используйте **Telegram-бота** (рекомендуется) или Marzban CLI:
+
+### Через Telegram-бота
+
+После установки бота (`bash setup-telegram.sh`) доступны команды:
+- `/profiles` — список профилей
+- `/create` — создать профиль
+- `/enable` — включить профиль
+- `/disable` — отключить профиль
+- `/extend` — продлить профиль
+- `/qr` — QR-код для подключения
+- `/traffic` — статистика трафика
+- `/subscription` — ссылка на подписку
+
+### Через Marzban CLI
+
+```bash
+# Список пользователей
+marzban-cli user list
+
+# Создать пользователя
+marzban-cli user create --username myuser --expire 30 --data-limit 100
+
+# Удалить пользователя
+marzban-cli user delete myuser
 ```
 
 ## 🔧 Технические детали
@@ -147,7 +158,7 @@ sudo bash utils/backup.sh cleanup   # очистка
 
 - **root** — все утилиты требуют прав root
 - **bash 4.0+** — используются ассоциативные массивы
-- **age** — для шифрования (опционально)
+- **age** — для шифрования (опционально, требуется для export-config.sh)
 
 ### Безопасность
 
