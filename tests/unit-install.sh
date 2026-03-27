@@ -464,9 +464,9 @@ test_dry_run_simulation() {
   select_language() { :; }
   print_banner() { :; }
   prompt_inputs() {
-    DOMAIN="test.example.com"
-    LE_EMAIL="test@example.com"
-    INSTALL_TG="n"
+    export DOMAIN="test.example.com"
+    export LE_EMAIL="test@example.com"
+    export INSTALL_TG="n"
   }
   step_check_ip_neighborhood() { :; }
   step_system_update() { :; }

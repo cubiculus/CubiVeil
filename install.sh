@@ -45,8 +45,8 @@ ensure_file() {
     rm -f "$target_path"
   fi
   if command -v curl &>/dev/null; then
-    curl -fsSL --connect-timeout 10 --max-time 60 -o "$target_path" "$url" \
-      && [[ -s "$target_path" ]] && return 0
+    curl -fsSL --connect-timeout 10 --max-time 60 -o "$target_path" "$url" &&
+      [[ -s "$target_path" ]] && return 0
     rm -f "$target_path"
   fi
   echo -e "\033[0;31m[✗]\033[0m Failed to download: $file"
@@ -100,7 +100,10 @@ setup_remote_install() {
     "lib/modules/traffic-shaping/uninstall.sh"
   )
   for f in "${files[@]}"; do
-    ensure_file "$f" "$TEMP_DIR" || { echo "[✗] Critical file missing: $f"; return 1; }
+    ensure_file "$f" "$TEMP_DIR" || {
+      echo "[✗] Critical file missing: $f"
+      return 1
+    }
   done
   INSTALL_SCRIPT_DIR="$TEMP_DIR"
 }
@@ -151,13 +154,16 @@ cmd="${cmd:-}"
 _parse_args_early() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --dev)              DEV_MODE="true" ;;
-      --dry-run)          DRY_RUN="true" ;;
-      --domain=*)         DOMAIN="${1#*=}" ;;
-      --no-decoy)         INSTALL_DECOY="false" ;;
-      --no-traffic-shaping) INSTALL_TRAFFIC_SHAPING="false" ;;
-      --help|-h)          _usage; exit 0 ;;
-      *)                  ;;
+    --dev) DEV_MODE="true" ;;
+    --dry-run) DRY_RUN="true" ;;
+    --domain=*) DOMAIN="${1#*=}" ;;
+    --no-decoy) INSTALL_DECOY="false" ;;
+    --no-traffic-shaping) INSTALL_TRAFFIC_SHAPING="false" ;;
+    --help | -h)
+      _usage
+      exit 0
+      ;;
+    *) ;;
     esac
     shift
   done
@@ -198,14 +204,17 @@ fi
 # Загрузка библиотек
 # ══════════════════════════════════════════════════════════════
 
-source "${INSTALL_SCRIPT_DIR}/lib/fallback.sh"   2>/dev/null || true
-source "${INSTALL_SCRIPT_DIR}/lang.sh"           2>/dev/null || true
-source "${INSTALL_SCRIPT_DIR}/lib/output.sh"     || { echo "[✗] Cannot load lib/output.sh"; exit 1; }
-source "${INSTALL_SCRIPT_DIR}/lib/common.sh"     || { err "Cannot load lib/common.sh"; }
-source "${INSTALL_SCRIPT_DIR}/lib/utils.sh"      || { err "Cannot load lib/utils.sh"; }
+source "${INSTALL_SCRIPT_DIR}/lib/fallback.sh" 2>/dev/null || true
+source "${INSTALL_SCRIPT_DIR}/lang.sh" 2>/dev/null || true
+source "${INSTALL_SCRIPT_DIR}/lib/output.sh" || {
+  echo "[✗] Cannot load lib/output.sh"
+  exit 1
+}
+source "${INSTALL_SCRIPT_DIR}/lib/common.sh" || { err "Cannot load lib/common.sh"; }
+source "${INSTALL_SCRIPT_DIR}/lib/utils.sh" || { err "Cannot load lib/utils.sh"; }
 source "${INSTALL_SCRIPT_DIR}/lib/validation.sh" || { err "Cannot load lib/validation.sh"; }
-source "${INSTALL_SCRIPT_DIR}/lib/security.sh"   || { err "Cannot load lib/security.sh"; }
-source "${INSTALL_SCRIPT_DIR}/lib/i18n.sh"       || { err "Cannot load lib/i18n.sh"; }
+source "${INSTALL_SCRIPT_DIR}/lib/security.sh" || { err "Cannot load lib/security.sh"; }
+source "${INSTALL_SCRIPT_DIR}/lib/i18n.sh" || { err "Cannot load lib/i18n.sh"; }
 
 # ══════════════════════════════════════════════════════════════
 # Выбор языка / Language selection
@@ -220,9 +229,15 @@ _select_language() {
   while true; do
     read -rp "  Enter choice [1-2]: " _lc
     case "$_lc" in
-      1) LANG_NAME="Русский"; return ;;
-      2) LANG_NAME="English"; return ;;
-      *) echo "  Invalid choice / Неверный выбор" ;;
+    1)
+      LANG_NAME="Русский"
+      return
+      ;;
+    2)
+      LANG_NAME="English"
+      return
+      ;;
+    *) echo "  Invalid choice / Неверный выбор" ;;
     esac
   done
 }
@@ -246,9 +261,9 @@ _print_banner() {
 
 prompt_inputs() {
   local _step_label
-  [[ "$LANG_NAME" == "Русский" ]] \
-    && _step_label="Настройка перед установкой" \
-    || _step_label="Pre-installation setup"
+  [[ "$LANG_NAME" == "Русский" ]] &&
+    _step_label="Настройка перед установкой" ||
+    _step_label="Pre-installation setup"
   step "$_step_label"
 
   # ── DEV MODE ──────────────────────────────────────────────
@@ -287,9 +302,9 @@ prompt_inputs() {
   # Домен
   while true; do
     local _pdomain
-    [[ "$LANG_NAME" == "Русский" ]] \
-      && _pdomain="  Домен для панели (например panel.example.com): " \
-      || _pdomain="  Domain for panel (e.g. panel.example.com): "
+    [[ "$LANG_NAME" == "Русский" ]] &&
+      _pdomain="  Домен для панели (например panel.example.com): " ||
+      _pdomain="  Domain for panel (e.g. panel.example.com): "
     read -rp "$_pdomain" DOMAIN
     DOMAIN="${DOMAIN// /}"
 
@@ -340,9 +355,9 @@ prompt_inputs() {
 
   # Email
   local _pemail
-  [[ "$LANG_NAME" == "Русский" ]] \
-    && _pemail="  Email для Let's Encrypt [admin@${DOMAIN}]: " \
-    || _pemail="  Email for Let's Encrypt [admin@${DOMAIN}]: "
+  [[ "$LANG_NAME" == "Русский" ]] &&
+    _pemail="  Email для Let's Encrypt [admin@${DOMAIN}]: " ||
+    _pemail="  Email for Let's Encrypt [admin@${DOMAIN}]: "
   read -rp "$_pemail" LE_EMAIL
   LE_EMAIL="${LE_EMAIL// /}"
   [[ -z "$LE_EMAIL" ]] && LE_EMAIL="admin@${DOMAIN}"
@@ -395,13 +410,13 @@ run_module() {
     return 0
   fi
 
-  declare -f module_install  >/dev/null && module_install
+  declare -f module_install >/dev/null && module_install
   declare -f module_configure >/dev/null && module_configure
-  declare -f module_enable   >/dev/null && module_enable
+  declare -f module_enable >/dev/null && module_enable
 
   # Сбрасываем функции модуля, чтобы следующий модуль не унаследовал
   unset -f module_install module_configure module_enable module_disable \
-           module_update module_remove module_status module_health_check 2>/dev/null || true
+    module_update module_remove module_status module_health_check 2>/dev/null || true
 }
 
 # ══════════════════════════════════════════════════════════════
@@ -410,36 +425,36 @@ run_module() {
 
 _step_system() {
   local _label
-  [[ "$LANG_NAME" == "Русский" ]] \
-    && _label="Шаг 1/8 — Обновление системы и базовые настройки" \
-    || _label="Step 1/8 — System update and base configuration"
+  [[ "$LANG_NAME" == "Русский" ]] &&
+    _label="Шаг 1/8 — Обновление системы и базовые настройки" ||
+    _label="Step 1/8 — System update and base configuration"
   step "$_label"
   run_module "system"
 }
 
 _step_firewall() {
   local _label
-  [[ "$LANG_NAME" == "Русский" ]] \
-    && _label="Шаг 2/8 — Файрвол (UFW)" \
-    || _label="Step 2/8 — Firewall (UFW)"
+  [[ "$LANG_NAME" == "Русский" ]] &&
+    _label="Шаг 2/8 — Файрвол (UFW)" ||
+    _label="Step 2/8 — Firewall (UFW)"
   step "$_label"
   run_module "firewall"
 }
 
 _step_fail2ban() {
   local _label
-  [[ "$LANG_NAME" == "Русский" ]] \
-    && _label="Шаг 3/8 — Fail2ban" \
-    || _label="Step 3/8 — Fail2ban"
+  [[ "$LANG_NAME" == "Русский" ]] &&
+    _label="Шаг 3/8 — Fail2ban" ||
+    _label="Step 3/8 — Fail2ban"
   step "$_label"
   run_module "fail2ban"
 }
 
 _step_singbox() {
   local _label
-  [[ "$LANG_NAME" == "Русский" ]] \
-    && _label="Шаг 4/8 — Sing-box" \
-    || _label="Step 4/8 — Sing-box"
+  [[ "$LANG_NAME" == "Русский" ]] &&
+    _label="Шаг 4/8 — Sing-box" ||
+    _label="Step 4/8 — Sing-box"
   step "$_label"
 
   # Генерируем ключи и порты до установки, чтобы модуль SSL/Marzban их видел
@@ -449,18 +464,18 @@ _step_singbox() {
 
 _step_ssl() {
   local _label
-  [[ "$LANG_NAME" == "Русский" ]] \
-    && _label="Шаг 5/8 — SSL сертификат" \
-    || _label="Step 5/8 — SSL certificate"
+  [[ "$LANG_NAME" == "Русский" ]] &&
+    _label="Шаг 5/8 — SSL сертификат" ||
+    _label="Step 5/8 — SSL certificate"
   step "$_label"
   run_module "ssl"
 }
 
 _step_marzban() {
   local _label
-  [[ "$LANG_NAME" == "Русский" ]] \
-    && _label="Шаг 6/8 — Marzban" \
-    || _label="Step 6/8 — Marzban"
+  [[ "$LANG_NAME" == "Русский" ]] &&
+    _label="Шаг 6/8 — Marzban" ||
+    _label="Step 6/8 — Marzban"
   step "$_label"
   run_module "marzban"
 }
@@ -468,9 +483,9 @@ _step_marzban() {
 _step_decoy() {
   [[ "$INSTALL_DECOY" != "true" ]] && return 0
   local _label
-  [[ "$LANG_NAME" == "Русский" ]] \
-    && _label="Шаг 7/8 — Сайт-прикрытие (decoy)" \
-    || _label="Step 7/8 — Decoy site"
+  [[ "$LANG_NAME" == "Русский" ]] &&
+    _label="Шаг 7/8 — Сайт-прикрытие (decoy)" ||
+    _label="Step 7/8 — Decoy site"
   step "$_label"
   run_module "decoy-site"
 }
@@ -478,9 +493,9 @@ _step_decoy() {
 _step_traffic_shaping() {
   [[ "$INSTALL_TRAFFIC_SHAPING" != "true" ]] && return 0
   local _label
-  [[ "$LANG_NAME" == "Русский" ]] \
-    && _label="Шаг 8/8 — Traffic shaping" \
-    || _label="Step 8/8 — Traffic shaping"
+  [[ "$LANG_NAME" == "Русский" ]] &&
+    _label="Шаг 8/8 — Traffic shaping" ||
+    _label="Step 8/8 — Traffic shaping"
   step "$_label"
   run_module "traffic-shaping"
 }
@@ -498,8 +513,8 @@ _generate_keys_and_ports() {
   # Reality keypair
   local _private_key=""
   if [[ -x "/usr/local/bin/sing-box" ]]; then
-    _private_key=$(/usr/local/bin/sing-box generate reality-keypair 2>/dev/null \
-      | grep "PrivateKey:" | awk '{print $2}' || true)
+    _private_key=$(/usr/local/bin/sing-box generate reality-keypair 2>/dev/null |
+      grep "PrivateKey:" | awk '{print $2}' || true)
   fi
   [[ -z "$_private_key" ]] && _private_key=$(generate_secure_key 32 2>/dev/null || openssl rand -base64 32)
 
@@ -555,8 +570,8 @@ _dry_run_plan() {
     "ssl      — Let's Encrypt or self-signed"
     "marzban  — panel installation and configuration"
   )
-  [[ "$INSTALL_DECOY" == "true" ]]             && _steps+=("decoy-site      — decoy website")
-  [[ "$INSTALL_TRAFFIC_SHAPING" == "true" ]]   && _steps+=("traffic-shaping — tc/netem fingerprint")
+  [[ "$INSTALL_DECOY" == "true" ]] && _steps+=("decoy-site      — decoy website")
+  [[ "$INSTALL_TRAFFIC_SHAPING" == "true" ]] && _steps+=("traffic-shaping — tc/netem fingerprint")
 
   local _i=1
   for _s in "${_steps[@]}"; do
@@ -608,7 +623,7 @@ _print_finish() {
     echo ""
     echo "  Профили: Trojan · Shadowsocks · VLESS · VMess · Hysteria2"
     echo ""
-    [[ "$DEV_MODE" == "true" ]] && \
+    [[ "$DEV_MODE" == "true" ]] &&
       warn "⚠  DEV-режим: самоподписной SSL — браузеры покажут предупреждение"
     echo ""
     echo "  Следующие шаги:"
@@ -622,7 +637,7 @@ _print_finish() {
     echo ""
     echo "  Profiles: Trojan · Shadowsocks · VLESS · VMess · Hysteria2"
     echo ""
-    [[ "$DEV_MODE" == "true" ]] && \
+    [[ "$DEV_MODE" == "true" ]] &&
       warn "⚠  DEV mode: self-signed SSL — browsers will show a warning"
     echo ""
     echo "  Next steps:"
@@ -638,9 +653,9 @@ _print_finish() {
     if [[ -f "$_mikrotik_mod" ]]; then
       echo ""
       echo "══════════════════════════════════════════════════════════"
-      [[ "$LANG_NAME" == "Русский" ]] \
-        && echo "  MikroTik RouterOS скрипт (decoy-site):" \
-        || echo "  MikroTik RouterOS script (decoy-site):"
+      [[ "$LANG_NAME" == "Русский" ]] &&
+        echo "  MikroTik RouterOS скрипт (decoy-site):" ||
+        echo "  MikroTik RouterOS script (decoy-site):"
       echo "══════════════════════════════════════════════════════════"
       # shellcheck disable=SC1090
       source "$_mikrotik_mod"
