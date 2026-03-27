@@ -73,7 +73,8 @@ singbox_get_version() {
 
     local api_response
     api_response=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases/latest" 2>/dev/null || echo "{}")
-    SB_TAG=$(jq -r '.tag_name' <<< "$api_response" 2>/dev/null || echo "")
+    echo "DEBUG: api_response='$api_response'"
+    SB_TAG=$(jq -r '.tag_name' <<< "$api_response" 2>/dev/null || echo "$api_response" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "\([^"]*\)".*/\1/' || echo "")
     echo "DEBUG: SB_TAG extracted: '$SB_TAG'"
     info "DEBUG: api_response length=${#api_response}, SB_TAG='$SB_TAG'"
     # Temporary fix: hardcode tag if extraction fails
