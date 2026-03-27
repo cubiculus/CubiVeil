@@ -36,13 +36,23 @@ backups/
 __pycache__/
 *.pyc
 .pytest_cache/
+.mypy_cache/
 venv/
 env/
 ENV/
+.venv/
+
+# --- Cache directories ---
+.cache/
 
 # --- Pre-commit ---
 .pre-commit-cache/
 .secrets.baseline
+.pre-commit-config.yaml.local
+
+# --- ShellCheck ---
+.shellcheckrc
+.shellcheckrc.local
 
 # --- IDE ---
 .vscode/
@@ -68,6 +78,11 @@ sing-box*
 # --- Test artifacts ---
 tests/coverage/
 *.coverage
+tests/*.tmp
+tests/*.bak
+
+# --- Debug artifacts ---
+*.debug
 
 # --- Docker ---
 .dockerignore
@@ -79,6 +94,14 @@ node_modules/
 *.o
 *.a
 *.exe
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# --- Rust ---
+target/
+Cargo.lock
 
 # --- System files on server ---
 /etc/systemd/system/cubiveil-bot.service
@@ -91,6 +114,10 @@ node_modules/
 
 # --- Markdown artifacts ---
 MD/
+
+# --- Documentation build ---
+docs/_build/
+docs/build/
 
 # --- Exports and diagnostics ---
 /root/cubiveil-export/
