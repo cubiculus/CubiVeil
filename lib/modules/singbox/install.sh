@@ -72,6 +72,7 @@ singbox_get_version() {
     local api_response
     api_response=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases/latest" 2>/dev/null || echo "{}")
     SB_TAG=$(echo "$api_response" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "\([^"]*\)".*/\1/')
+    echo "DEBUG: SB_TAG extracted: '$SB_TAG'"
     info "DEBUG: api_response length=${#api_response}, SB_TAG='$SB_TAG'"
     [[ -z "$SB_TAG" ]] && err "Не удалось получить версию Sing-box с GitHub. API response: $api_response"
 
