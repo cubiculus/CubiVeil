@@ -88,6 +88,7 @@ singbox_get_version() {
   else
     SB_VER="${SB_TAG#v}"
     SB_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz"
+    info "Using cached: SB_TAG=$SB_TAG, SB_VER=$SB_VER, arch=$(arch), SB_URL=$SB_URL"
   fi
 
   echo "${SB_TAG}|${SB_VER}|${SB_URL}|${SB_SHA256}"
