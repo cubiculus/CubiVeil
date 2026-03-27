@@ -102,14 +102,6 @@ test_module_loading() {
   else
     fail "install.sh: не загружает lib/utils.sh"
   fi
-
-  # Проверка что lib/install-steps.sh загружается
-  if grep -q 'source.*lib/install-steps.sh' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: загружает lib/install-steps.sh"
-    ((TESTS_PASSED++)) || true
-  else
-    fail "install.sh: не загружает lib/install-steps.sh"
-  fi
 }
 
 # ── Тест: функция main существует ─────────────────────────────
@@ -507,7 +499,6 @@ test_dry_run_simulation() {
 
   # Загружаем модули
   source "${SCRIPT_DIR}/lib/utils.sh" 2>/dev/null || true
-  source "${SCRIPT_DIR}/lib/install-steps.sh" 2>/dev/null || true
 
   # Пытаемся загрузить install.sh и проверить что main существует
   if bash -c "source ${SCRIPT_DIR}/install.sh 2>&1 && declare -f main >/dev/null" 2>/dev/null; then

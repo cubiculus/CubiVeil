@@ -113,24 +113,6 @@ sudo bash install.sh --dev --domain=mytest.local
 sudo bash install.sh --help
 ```
 
-### Модульная установка
-
-Для выбора компонентов:
-
-```bash
-sudo bash install-modular.sh
-```
-
-#### Dry-run режим
-
-Для тестирования установки без внесения изменений в систему:
-
-```bash
-sudo bash install-modular.sh --dry-run
-```
-
-Режим симуляции покажет, какие действия будут выполнены, какие модули установлены и настроены, но не внесёт никаких изменений в систему.
-
 ## 📦 Компоненты
 
 ### Основные
@@ -283,21 +265,47 @@ cubiveil/
 │       └── ...
 ├── lib/
 │   ├── core/
+│   │   ├── log.sh
+│   │   └── system.sh
 │   ├── modules/
+│   │   ├── backup/
+│   │   ├── decoy-site/
+│   │   ├── fail2ban/
+│   │   ├── firewall/
+│   │   ├── marzban/
+│   │   ├── monitoring/
+│   │   ├── rollback/
+│   │   ├── singbox/
+│   │   ├── ssl/
+│   │   ├── system/
+│   │   └── traffic-shaping/
 │   ├── common.sh
+│   ├── fallback.sh
 │   ├── i18n.sh
 │   ├── install-steps.sh
-│   └── ...
+│   ├── output.sh
+│   ├── security.sh
+│   ├── utils.sh
+│   └── validation.sh
 ├── utils/
 │   ├── cubiveil.sh
+│   ├── install-aliases.sh
+│   ├── update.sh
+│   ├── rollback.sh
+│   ├── export-config.sh
+│   ├── import-config.sh
 │   ├── monitor.sh
-│   ├── backup.sh
 │   ├── diagnose.sh
-│   └── ...
+│   ├── manage-profiles.sh
+│   ├── backup.sh
+│   └── README.md
 ├── tests/
+├── .github/workflows/
+│   └── ci.yml
 ├── install.sh
-├── install-modular.sh
 ├── setup-telegram.sh
+├── lang.sh
+├── run-tests.sh
 └── README.md
 ```
 

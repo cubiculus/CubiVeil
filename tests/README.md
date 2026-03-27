@@ -35,11 +35,9 @@ tests/
 ├── integration-test.sh       # Интеграционные тесты
 ├── modular-structure.sh      # Тесты модульной архитектуры
 ├── unit-utils.sh             # Unit-тесты lib/utils.sh
-├── unit-install-steps.sh     # Unit-тесты lib/install-steps.sh
-├── unit-install-steps-main.sh # Unit-тесты lib/steps/install-steps-main.sh
+├── unit-install.sh           # Unit-тесты install.sh
 ├── test-install-modes.sh     # Тесты режимов --dev и --dry-run
 ├── unit-lang.sh              # Unit-тесты lang.sh (локализация)
-├── unit-install.sh           # Unit-тесты install.sh
 ├── unit-telegram.sh          # Unit-тесты setup-telegram.sh
 ├── unit-decoy-site.sh        # Unit-тесты decoy-site модуля
 ├── unit-traffic-shaping.sh   # Unit-тесты traffic-shaping модуля
@@ -80,34 +78,7 @@ bash tests/unit-utils.sh
 
 ---
 
-### 2. lib/install-steps.sh (`unit-install-steps.sh`)
-
-Тестирует функции установки:
-
-| Функция | Проверки |
-|---------|----------|
-| `prompt_inputs()` | Наличие валидации домена, email, Telegram опции |
-| `step_check_ip_neighborhood()` | Проверка репутации подсети |
-| `step_system_update()` | apt-get update, DEBIAN_FRONTEND, пакеты |
-| `step_auto_updates()` | 20auto-upgrades, 50unattended-upgrades, systemctl |
-| `step_bbr()` | modprobe tcp_bbr, sysctl конфиг |
-| `step_firewall()` | ufw reset, правила по умолчанию, open_port |
-| `step_fail2ban()` | cubiveil.conf, SSH порт, systemctl |
-| `step_install_singbox()` | GitHub API, скачивание, установка в /usr/local/bin |
-| `step_generate_keys_and_ports()` | Reality keypair, UUID, unique_port, CDN camouflage |
-| `step_install_marzban()` | Официальный скрипт, проверка наличия |
-| `step_ssl()` | acme.sh, порт 80, сертификаты в /var/lib/marzban/certs |
-| `step_configure()` | .env файл, sing-box-template.json, 5 профилей |
-| `step_finish()` | restart marzban, health-check, проверка статуса |
-
-**Запуск:**
-```bash
-bash tests/unit-install-steps.sh
-```
-
----
-
-### 3. lang.sh (`unit-lang.sh`)
+### 2. lang.sh (`unit-lang.sh`)
 
 Тестирует локализацию EN/RU:
 
@@ -159,27 +130,7 @@ bash tests/unit-install.sh
 
 ---
 
-### 5. lib/steps/install-steps-main.sh (`unit-install-steps-main.sh`)
-
-Тестирует основные шаги установки из нового модуля:
-
-| Категория | Проверки |
-|-----------|----------|
-| **Базовые** | Наличие файла, синтаксис |
-| **Функции шагов** | Все 13 step_* функций существуют |
-| **step_ssl_dev** | Генерация self-signed SSL через openssl, директория /var/lib/marzban/certs, срок действия 100 лет |
-| **step_ssl** | Проверка DEV_MODE, вызов step_ssl_dev в dev-режиме |
-| **step_finish** | Отображение URL панели, предупреждения о dev-режиме и self-signed SSL |
-| **Локализация** | Поддержка EN/RU в функциях |
-
-**Запуск:**
-```bash
-bash tests/unit-install-steps-main.sh
-```
-
----
-
-### 6. install.sh режимы (`test-install-modes.sh`)
+### 3. install.sh режимы (`test-install-modes.sh`)
 
 Тестирует режимы --dev и --dry-run:
 
@@ -200,7 +151,7 @@ bash tests/test-install-modes.sh
 
 ---
 
-### 7. setup-telegram.sh (`unit-telegram.sh`)
+### 4. setup-telegram.sh (`unit-telegram.sh`)
 
 Тестирует скрипт установки Telegram бота:
 
@@ -462,11 +413,9 @@ sudo bash tests/integration-test.sh
 | Модуль | Файл теста | Покрытие |
 |--------|-----------|----------|
 | lib/utils.sh | unit-utils.sh | ✅ gen_random, gen_hex, gen_port, unique_port, open_port, arch, get_server_ip |
-| lib/install-steps.sh | unit-install-steps.sh | ✅ Все 13 функций установки |
-| lib/steps/install-steps-main.sh | unit-install-steps-main.sh | ✅ Все step_* функции, step_ssl_dev, dev-режим |
+| install.sh | unit-install.sh | ✅ Структура, модули, обработка ошибок |
 | install.sh режимы | test-install-modes.sh | ✅ --dev, --dry-run, аргументы, usage |
 | lang.sh | unit-lang.sh | ✅ EN/RU строки, функции, локализация |
-| install.sh | unit-install.sh | ✅ Структура, модули, обработка ошибок |
 | setup-telegram.sh | unit-telegram.sh | ✅ Python бот, systemd, cron, валидация |
 | lib/modules/decoy-site/ | unit-decoy-site.sh | ✅ Генерация контента, ротация, MikroTik скрипт |
 | lib/modules/traffic-shaping/ | unit-traffic-shaping.sh | ✅ TC/netem правила, персистентность |

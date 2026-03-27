@@ -121,24 +121,6 @@ sudo bash install.sh --dev --domain=mytest.local
 sudo bash install.sh --help
 ```
 
-### Modular Installation
-
-To select specific components:
-
-```bash
-sudo bash install-modular.sh
-```
-
-#### Dry-run Mode
-
-To test installation without making system changes:
-
-```bash
-sudo bash install-modular.sh --dry-run
-```
-
-Simulation mode will show what actions would be performed, which modules would be installed and configured, but won't make any changes to the system.
-
 ## 📦 Components
 
 ### Core
@@ -291,21 +273,47 @@ cubiveil/
 │       └── ...
 ├── lib/
 │   ├── core/
+│   │   ├── log.sh
+│   │   └── system.sh
 │   ├── modules/
+│   │   ├── backup/
+│   │   ├── decoy-site/
+│   │   ├── fail2ban/
+│   │   ├── firewall/
+│   │   ├── marzban/
+│   │   ├── monitoring/
+│   │   ├── rollback/
+│   │   ├── singbox/
+│   │   ├── ssl/
+│   │   ├── system/
+│   │   └── traffic-shaping/
 │   ├── common.sh
+│   ├── fallback.sh
 │   ├── i18n.sh
 │   ├── install-steps.sh
-│   └── ...
+│   ├── output.sh
+│   ├── security.sh
+│   ├── utils.sh
+│   └── validation.sh
 ├── utils/
 │   ├── cubiveil.sh
+│   ├── install-aliases.sh
+│   ├── update.sh
+│   ├── rollback.sh
+│   ├── export-config.sh
+│   ├── import-config.sh
 │   ├── monitor.sh
-│   ├── backup.sh
 │   ├── diagnose.sh
-│   └── ...
+│   ├── manage-profiles.sh
+│   ├── backup.sh
+│   └── README.md
 ├── tests/
+├── .github/workflows/
+│   └── ci.yml
 ├── install.sh
-├── install-modular.sh
 ├── setup-telegram.sh
+├── lang.sh
+├── run-tests.sh
 └── README.md
 ```
 
