@@ -98,13 +98,13 @@ step_check_environment() {
   fi
 
   if [[ ! -d "${CUBIVEIL_DIR}" ]]; then
-    err "$(eval echo "$(get_str "MSG_ERR_NOT_INSTALLED")")"
+    err "$(get_str "MSG_ERR_NOT_INSTALLED")"
   fi
 
   # Проверка зависимостей
   for cmd in curl git age; do
     if ! command -v "$cmd" &>/dev/null; then
-      err "$(eval echo "$(get_str "MSG_ERR_COMMAND_REQUIRED")")"
+      err "$(get_str "MSG_ERR_COMMAND_REQUIRED")"
     fi
   done
 
@@ -292,23 +292,23 @@ step_install_update() {
     # Копируем основные файлы
     for file in "${ROOT_FILES[@]}"; do
       if [[ -f "${TEMP_DIR}/${file}" ]]; then
-        cp "${TEMP_DIR}/${file}" "${SCRIPT_DIR}/${file}"
+        cp "${TEMP_DIR}/${file}" "${PROJECT_DIR}/${file}"
       fi
     done
 
     # Копируем lib
     if [[ -d "${TEMP_DIR}/lib" ]]; then
-      cp -rp "${TEMP_DIR}/lib/"* "${SCRIPT_DIR}/lib/" 2>/dev/null || true
+      cp -rp "${TEMP_DIR}/lib/"* "${PROJECT_DIR}/lib/" 2>/dev/null || true
     fi
 
     # Копируем тесты
     if [[ -d "${TEMP_DIR}/tests" ]]; then
-      cp -rp "${TEMP_DIR}/tests/"* "${SCRIPT_DIR}/tests/" 2>/dev/null || true
+      cp -rp "${TEMP_DIR}/tests/"* "${PROJECT_DIR}/tests/" 2>/dev/null || true
     fi
 
     # Копируем утилиты
     if [[ -d "${TEMP_DIR}/utils" ]]; then
-      cp -rp "${TEMP_DIR}/utils/"* "${SCRIPT_DIR}/utils/" 2>/dev/null || true
+      cp -rp "${TEMP_DIR}/utils/"* "${PROJECT_DIR}/utils/" 2>/dev/null || true
     fi
 
     # Обновляем .version

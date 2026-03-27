@@ -240,9 +240,10 @@ log_module() {
   _log_write "INFO" "[${module}] ${message}"
 }
 
-# Логирование выполнения шага
+# Логирование выполнения шага (с контекстом)
 # Использование: log_step "step_name" "message"
-log_step() {
+# Примечание: существует также log_step(msg) без контекста для совместимости
+log_step_with_context() {
   local step_name="$1"
   shift
   local message="$*"

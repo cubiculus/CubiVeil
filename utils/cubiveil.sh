@@ -204,7 +204,8 @@ run_backup() {
 # ── Основная функция ──────────────────────────────────────────
 
 main() {
-  select_language
+  # select_language больше не нужен — язык уже выбран при sourcing lang.sh
+  # LANG_NAME уже установлен в "Русский" по умолчанию
 
   local command="${1:-help}"
   shift || true

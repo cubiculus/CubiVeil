@@ -222,7 +222,7 @@ step_check_ssl() {
 
     # Проверяем через curl с доменом
     if [[ -n "$domain" ]]; then
-      if curl -sfk --max-time 10 "https://${domain}" &>/dev/null; then
+      if curl -sf --max-time 10 "https://${domain}" &>/dev/null; then
         success "HTTPS соединение с ${domain} работает"
         is_valid=true
       else

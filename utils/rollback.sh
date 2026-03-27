@@ -38,7 +38,7 @@ step_check_environment() {
   fi
 
   if [[ ! -d "${BACKUP_DIR}" ]]; then
-    err "$(eval echo "$(get_str "MSG_ERR_NO_BACKUPS")")"
+    err "$(get_str "MSG_ERR_NO_BACKUPS")"
   fi
 
   success "$(get_str "MSG_INFO_ENV_CHECKED")"
@@ -59,7 +59,7 @@ step_select_backup() {
   done < <(find "${BACKUP_DIR}" -maxdepth 1 -mindepth 1 -type d -print0 2>/dev/null | sort -z -r)
 
   if [[ ${#backups[@]} -eq 0 ]]; then
-    err "$(eval echo "$(get_str "MSG_ERR_NO_BACKUPS")")"
+    err "$(get_str "MSG_ERR_NO_BACKUPS")"
   fi
 
   info "$(get_str "MSG_MSG_AVAILABLE_BACKUPS"):"

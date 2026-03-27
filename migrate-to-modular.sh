@@ -4,7 +4,7 @@
 # ║          github.com/cubiculus/cubiveil                    ║
 # ╚═══════════════════════════════════════════════════════════╝
 
-set -e
+set -euo pipefail
 
 # ── Подключение зависимостей / Dependencies ─────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

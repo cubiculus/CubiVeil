@@ -47,17 +47,17 @@ step_check_environment() {
 
   # Проверка что Marzban установлен
   if [[ ! -f /opt/marzban/.env ]]; then
-    err "$(lmsg ERR_MARZBAN_NOT_FOUND)" "ERR_MARZBAN_NOT_FOUND_RU"
+    err "$(get_str ERR_MARZBAN_NOT_FOUND ERR_MARZBAN_NOT_FOUND_RU)"
   fi
 
   # Проверка Python3
   if ! command -v python3 &>/dev/null; then
-    err "$(lmsg ERR_PYTHON3_NOT_FOUND)" "ERR_PYTHON3_NOT_FOUND_RU"
+    err "$(get_str ERR_PYTHON3_NOT_FOUND ERR_PYTHON3_NOT_FOUND_RU)"
   fi
 
   # Проверка curl
   if ! command -v curl &>/dev/null; then
-    err "$(lmsg ERR_CURL_NOT_FOUND)" "ERR_CURL_NOT_FOUND_RU"
+    err "$(get_str ERR_CURL_NOT_FOUND ERR_CURL_NOT_FOUND_RU)"
   fi
 
   ok "Окружение проверено"
@@ -117,6 +117,10 @@ step_prompt_telegram_config() {
     [[ -z "$REPORT_TIME" ]] && REPORT_TIME="09:00"
   done
 
+  # Парсинг REPORT_TIME для cron
+  REPORT_HOUR=$(echo "$REPORT_TIME" | cut -d: -f1)
+  REPORT_MIN=$(echo "$REPORT_TIME" | cut -d: -f2)
+
   echo ""
   local info_alerts
   local prompt_cpu
@@ -138,7 +142,12 @@ step_prompt_telegram_config() {
   [[ -z "$ALERT_DISK" ]] && ALERT_DISK=90
 
   echo ""
-  ok "$(get_setup_str OK_TG_CONFIGURED_RU)" && ok "$(get_setup_str OK_TG_CONFIGURED_SHORT_RU)" || ok "$(get_setup_str OK_TG_CONFIGURED)" && ok "$(get_setup_str OK_TG_CONFIGURED_SHORT)"
+  ok "$(get_setup_str OK_TG_CONFIGURED_RU)"
+  ok "$(get_setup_str OK_TG_CONFIGURED_SHORT_RU)"
+  if [[ "$LANG_NAME" != "Русский" ]]; then
+    ok "$(get_setup_str OK_TG_CONFIGURED)"
+    ok "$(get_setup_str OK_TG_CONFIGURED_SHORT)"
+  fi
 }
 
 # ══════════════════════════════════════════════════════════════

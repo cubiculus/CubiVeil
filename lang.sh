@@ -5,6 +5,8 @@
 # ║                   EN / RU strings                         ║
 # ╚═══════════════════════════════════════════════════════════╝
 
+set -euo pipefail
+
 # Выбери язык / Select language:
 # LANG_NAME="English"
 LANG_NAME="Русский"

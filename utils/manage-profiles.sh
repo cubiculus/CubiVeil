@@ -115,7 +115,7 @@ get_admin_token() {
   token=$(curl -sf -X POST "https://${base_url}/api/token" \
     -H "Content-Type: application/x-www-form-urlencoded" \
     -d "username=${username}&password=${password}" \
-    --insecure 2>/dev/null | python3 -c "import sys,json; print(json.load(sys.stdin).get('access_token',''))" 2>/dev/null || echo "")
+    2>/dev/null | python3 -c "import sys,json; print(json.load(sys.stdin).get('access_token',''))" 2>/dev/null || echo "")
 
   if [[ -z "$token" ]]; then
     err "Не удалось получить токен доступа"
@@ -150,7 +150,7 @@ list_profiles() {
   local users
   users=$(curl -sf -X GET "${api_url}/api/users" \
     -H "Authorization: Bearer ${token}" \
-    --insecure 2>/dev/null || echo '{"users":[],"total":0}')
+    2>/dev/null || echo '{"users":[],"total":0}')
 
   local total
   total=$(echo "$users" | python3 -c "import sys,json; print(json.load(sys.stdin).get('total',0))" 2>/dev/null || echo "0")
@@ -240,7 +240,6 @@ add_profile() {
   response=$(curl -sf -X POST "${api_url}/api/user" \
     -H "Authorization: Bearer ${token}" \
     -H "Content-Type: application/json" \
-    --insecure \
     -d "{
       \"username\": \"${username}\",
       \"status\": \"active\",
@@ -302,7 +301,7 @@ remove_profile() {
   local curl_status
   response=$(curl -sf -X DELETE "${api_url}/api/user/${username}" \
     -H "Authorization: Bearer ${token}" \
-    --insecure 2>/dev/null || echo "")
+    2>/dev/null || echo "")
   curl_status=$?
 
   if [[ -n "$response" ]] || [[ $curl_status -eq 0 ]]; then
@@ -338,7 +337,6 @@ enable_profile() {
   response=$(curl -sf -X PUT "${api_url}/api/user/${username}" \
     -H "Authorization: Bearer ${token}" \
     -H "Content-Type: application/json" \
-    --insecure \
     -d '{"status": "active"}' 2>/dev/null || echo "")
 
   if [[ -n "$response" ]]; then
@@ -374,7 +372,6 @@ disable_profile() {
   response=$(curl -sf -X PUT "${api_url}/api/user/${username}" \
     -H "Authorization: Bearer ${token}" \
     -H "Content-Type: application/json" \
-    --insecure \
     -d '{"status": "disabled"}' 2>/dev/null || echo "")
 
   if [[ -n "$response" ]]; then
@@ -410,7 +407,7 @@ generate_qr() {
   local user_data
   user_data=$(curl -sf -X GET "${api_url}/api/user/${username}" \
     -H "Authorization: Bearer ${token}" \
-    --insecure 2>/dev/null || echo "")
+    2>/dev/null || echo "")
 
   if [[ -z "$user_data" ]]; then
     err "${MSG[ERR_USER_NOT_FOUND]}"
@@ -478,7 +475,7 @@ show_stats() {
     local user_data
     user_data=$(curl -sf -X GET "${api_url}/api/user/${username}" \
       -H "Authorization: Bearer ${token}" \
-      --insecure 2>/dev/null || echo "")
+      2>/dev/null || echo "")
 
     if [[ -z "$user_data" ]]; then
       err "${MSG[ERR_USER_NOT_FOUND]}"
@@ -520,7 +517,7 @@ print(f'  Создан: {created_at}')
     local stats
     stats=$(curl -sf -X GET "${api_url}/api/users" \
       -H "Authorization: Bearer ${token}" \
-      --insecure 2>/dev/null || echo '{"users":[],"total":0}')
+      2>/dev/null || echo '{"users":[],"total":0}')
 
     echo ""
     echo "$stats" | python3 -c "
@@ -573,7 +570,7 @@ show_profile_info() {
   local user_data
   user_data=$(curl -sf -X GET "${api_url}/api/user/${username}" \
     -H "Authorization: Bearer ${token}" \
-    --insecure 2>/dev/null || echo "")
+    2>/dev/null || echo "")
 
   if [[ -z "$user_data" ]]; then
     err "${MSG[ERR_USER_NOT_FOUND]}"

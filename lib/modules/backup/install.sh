@@ -347,7 +347,7 @@ backup_system_info() {
     echo "CubiVeil Backup Information"
     echo "Generated: $(date '+%Y-%m-%d %H:%M:%S')"
     echo "Hostname: $(hostname)"
-    echo "IP Address: $(get_server_ip 2>/dev/null || echo "unknown")"
+    echo "IP Address: $(get_external_ip 2>/dev/null || echo "unknown")"
     echo "Ubuntu Version: $(grep 'VERSION=' /etc/os-release 2>/dev/null | cut -d= -f2 | tr -d '"')"
     echo "Kernel: $(uname -r)"
     echo ""
@@ -524,7 +524,7 @@ module_enable() {
   fi
 
   # Создаём cron job для ежедневного бэкапа
-  local cron_job="0 2 * * * /bin/bash -c 'cd ${SCRIPT_DIR} && source lib/modules/backup/install.sh && backup_full >> /var/log/cubiveil/backup-cron.log 2>&1'"
+  local cron_job="0 2 * * * /bin/bash -c 'cd /opt/cubiveil && source lib/modules/backup/install.sh && backup_full >> /var/log/cubiveil/backup-cron.log 2>&1'"
 
   if ! crontab -l 2>/dev/null | grep -q "backup_full"; then
     (

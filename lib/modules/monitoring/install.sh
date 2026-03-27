@@ -211,7 +211,7 @@ monitor_network_check() {
 # Получение внешнего IP
 monitor_external_ip() {
   local ip
-  ip=$(get_server_ip 2>/dev/null)
+  ip=$(get_external_ip 2>/dev/null)
 
   if [[ -n "$ip" ]]; then
     echo "$ip"
@@ -479,10 +479,10 @@ module_enable() {
   fi
 
   # Создаём cron job для почасовой проверки здоровья
-  local health_job="0 * * * * /bin/bash -c 'cd ${SCRIPT_DIR} && source lib/modules/monitoring/install.sh && monitor_health_check >> /var/log/cubiveil/monitoring-health.log 2>&1'"
+  local health_job="0 * * * * /bin/bash -c 'cd /opt/cubiveil && source lib/modules/monitoring/install.sh && monitor_health_check >> /var/log/cubiveil/monitoring-health.log 2>&1'"
 
   # Создаём cron job для ежедневного отчёта
-  local report_job="0 6 * * * /bin/bash -c 'cd ${SCRIPT_DIR} && source lib/modules/monitoring/install.sh && monitor_generate_report >> /var/log/cubiveil/monitoring-report.log 2>&1'"
+  local report_job="0 6 * * * /bin/bash -c 'cd /opt/cubiveil && source lib/modules/monitoring/install.sh && monitor_generate_report >> /var/log/cubiveil/monitoring-report.log 2>&1'"
 
   local jobs_added=0
 

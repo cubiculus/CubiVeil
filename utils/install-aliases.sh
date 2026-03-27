@@ -56,7 +56,7 @@ step_check_environment() {
   fi
 
   # Проверка что cubiveil.sh существует
-  if [[ ! -f "${SCRIPT_DIR}/cubiveil.sh" ]]; then
+  if [[ ! -f "${PROJECT_DIR}/utils/cubiveil.sh" ]]; then
     err "cubiveil.sh не найден"
   fi
 
@@ -71,7 +71,7 @@ step_install_cli() {
   info "$(msg INSTALLING_CLI)..."
 
   # Создаём symlink
-  ln -sf "${SCRIPT_DIR}/cubiveil.sh" "${CUBIVEIL_CLI}"
+  ln -sf "${PROJECT_DIR}/utils/cubiveil.sh" "${CUBIVEIL_CLI}"
   chmod +x "${CUBIVEIL_CLI}"
 
   if [[ -x "${CUBIVEIL_CLI}" ]]; then

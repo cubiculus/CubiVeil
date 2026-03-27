@@ -30,9 +30,31 @@ is_root() {
   [[ $EUID -eq 0 ]]
 }
 
+# Проверка root с выходом при ошибке
+check_root() {
+  if ! is_root; then
+    if [[ "${LANG_NAME:-}" == "Русский" ]]; then
+      err "Скрипт требует прав root. Запустите с sudo"
+    else
+      err "Script requires root privileges. Run with sudo"
+    fi
+  fi
+}
+
 # Проверка Ubuntu без выхода (возвращает 0/1)
 is_ubuntu() {
   grep -qi "ubuntu" /etc/os-release
+}
+
+# Проверка Ubuntu с выходом при ошибке
+check_ubuntu() {
+  if ! is_ubuntu; then
+    if [[ "${LANG_NAME:-}" == "Русский" ]]; then
+      err "Этот скрипт предназначен только для Ubuntu"
+    else
+      err "This script is designed for Ubuntu only"
+    fi
+  fi
 }
 
 # ── Утилиты / Utilities ──────────────────────────────────────

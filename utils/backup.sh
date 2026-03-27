@@ -6,19 +6,20 @@
 
 # ── Подключение зависимостей / Dependencies ─────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "${SCRIPT_DIR}")"
 
 # Подключаем core модули
-if [[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/core/system.sh"
+if [[ -f "${PROJECT_DIR}/lib/core/system.sh" ]]; then
+  source "${PROJECT_DIR}/lib/core/system.sh"
 fi
 
-if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/core/log.sh"
+if [[ -f "${PROJECT_DIR}/lib/core/log.sh" ]]; then
+  source "${PROJECT_DIR}/lib/core/log.sh"
 fi
 
 # Подключаем backup модуль
-if [[ -f "${SCRIPT_DIR}/lib/modules/backup/install.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/modules/backup/install.sh"
+if [[ -f "${PROJECT_DIR}/lib/modules/backup/install.sh" ]]; then
+  source "${PROJECT_DIR}/lib/modules/backup/install.sh"
 fi
 
 # ── Баннер / Banner ────────────────────────────────────────

@@ -6,7 +6,7 @@
 # ║           Marzban + Sing-box | 5 profiles                 ║
 # ╚═══════════════════════════════════════════════════════════╝
 
-set -eo pipefail
+set -euo pipefail
 
 # Определяем путь к скрипту
 # При запуске через pipe (curl | bash) BASH_SOURCE[0] = "-s"
@@ -269,9 +269,41 @@ source "${INSTALL_SCRIPT_DIR}/lib/install-steps.sh" || {
   err "Не удалось загрузить lib/install-steps.sh"
 }
 
+# ── Обработка аргументов / Argument Parsing (полная)
 # ══════════════════════════════════════════════════════════════
-# Обработка аргументов / Argument Parsing (полная)
-# ══════════════════════════════════════════════════════════════
+
+# Флаги установки
+INSTALL_DECOY="${INSTALL_DECOY:-true}"
+
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+    --dev)
+      DEV_MODE="true"
+      shift
+      ;;
+    --dry-run)
+      DRY_RUN="true"
+      shift
+      ;;
+    --domain=*)
+      DOMAIN="${1#*=}"
+      shift
+      ;;
+    --no-decoy)
+      INSTALL_DECOY="false"
+      shift
+      ;;
+    --help | -h)
+      usage
+      exit 0
+      ;;
+    *)
+      err "Unknown option: $1"
+      ;;
+    esac
+  done
+}
 
 usage() {
   cat <<EOF
@@ -285,6 +317,7 @@ Options:
   --dry-run       Simulate installation without making changes
                   Shows what would be done without modifying the system
   --domain=NAME   Set domain name (default in dev mode: \${DEV_DOMAIN})
+  --no-decoy      Skip decoy site installation
   --help, -h      Show this help message
 
 Examples:
@@ -293,6 +326,7 @@ Examples:
   \$0 --dev --domain=test  # Dev mode with custom domain
   \$0 --dry-run            # Dry-run mode (simulation)
   \$0 --dev --dry-run      # Dev mode dry-run (test dev installation)
+  \$0 --no-decoy           # Skip decoy site installation
 
 Dev Mode Features:
   - Self-signed SSL certificate (valid for 100 years)
@@ -358,6 +392,9 @@ warn() {
 }
 
 main() {
+  # Обработка аргументов командной строки
+  parse_args "$@"
+
   # В dry-run режиме выбираем язык автоматически
   if [[ "$DRY_RUN" == "true" ]]; then
     LANG_NAME="Русский"
@@ -463,7 +500,18 @@ main() {
   step_install_marzban
   step_ssl
   step_configure
-  step_decoy_site
+
+  # Decoy site installation (опционально)
+  if [[ "$INSTALL_DECOY" == "true" ]]; then
+    step_decoy_site
+  else
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+      info "Decoy site пропущен (--no-decoy)"
+    else
+      info "Decoy site skipped (--no-decoy)"
+    fi
+  fi
+
   step_traffic_shaping
   step_finish
 }

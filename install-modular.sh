@@ -6,10 +6,15 @@
 # ║  Модульный установщик с использованием manifest           ║
 # ╚═══════════════════════════════════════════════════════════╝
 
-set -e
+set -euo pipefail
 
 # ── Подключение зависимостей / Dependencies ─────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Подключаем common.sh для check_root и check_ubuntu
+if [[ -f "${SCRIPT_DIR}/lib/common.sh" ]]; then
+  source "${SCRIPT_DIR}/lib/common.sh"
+fi
 
 # Подключаем core модули
 if [[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]]; then
@@ -23,11 +28,6 @@ fi
 # Подключаем manifest
 if [[ -f "${SCRIPT_DIR}/lib/manifest.sh" ]]; then
   source "${SCRIPT_DIR}/lib/manifest.sh"
-fi
-
-# Подключаем install-steps (новый модульный)
-if [[ -f "${SCRIPT_DIR}/lib/install-steps-new.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/install-steps-new.sh"
 fi
 
 # Подключаем utils

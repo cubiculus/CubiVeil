@@ -119,23 +119,5 @@ arch() {
   esac
 }
 
-get_server_ip() {
-  local ip
-  local urls=(
-    "https://api4.ipify.org"
-    "https://ipv4.icanhazip.com"
-    "https://4.ident.me"
-  )
-
-  # Последовательные запросы с таймаутом
-  for url in "${urls[@]}"; do
-    ip=$(curl -sf --max-time 4 "$url" 2>/dev/null | tr -d '[:space:]')
-    if [[ -n "$ip" ]]; then
-      echo "$ip"
-      return 0
-    fi
-  done
-
-  echo ""
-  return 1
-}
+# get_server_ip() удалена — используйте get_external_ip() из lib/common.sh
+# Это дублирование было удалено для поддержания DRY
