@@ -76,6 +76,11 @@ singbox_get_version() {
     SB_TAG=$(echo "$api_response" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "\([^"]*\)".*/\1/')
     echo "DEBUG: SB_TAG extracted: '$SB_TAG'"
     info "DEBUG: api_response length=${#api_response}, SB_TAG='$SB_TAG'"
+    # Temporary fix: hardcode tag if extraction fails
+    if [[ -z "$SB_TAG" ]]; then
+      SB_TAG="v1.13.4"
+      echo "DEBUG: Using hardcoded SB_TAG='$SB_TAG'"
+    fi
     [[ -z "$SB_TAG" ]] && err "Не удалось получить версию Sing-box с GitHub. API response: $api_response"
 
     SB_VER="${SB_TAG#v}"
@@ -86,7 +91,7 @@ singbox_get_version() {
     # Получаем SHA256
     local SHA_URL
     SHA_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz.sha256sum"
-    SB_SHA256=$(curl -fsSL "$SHA_URL" | awk '{print $1}')
+    SB_SHA256=$(curl -fsSL "$SHA_URL" 2>/dev/null | awk '{print $1}' || echo "")
 
     # Сохраняем в кэш
     echo "{\"tag\":\"$SB_TAG\",\"sha256\":\"$SB_SHA256\"}" >"$CACHE_FILE"
