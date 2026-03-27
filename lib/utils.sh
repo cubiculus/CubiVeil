@@ -119,5 +119,21 @@ arch() {
   esac
 }
 
-# get_server_ip() удалена — используйте get_external_ip() из lib/common.sh
-# Это дублирование было удалено для поддержания DRY
+# ── Получение внешнего IP ───────────────────────────────────────
+# Обёртка над get_external_ip из lib/common.sh для обратной совместимости
+get_server_ip() {
+  if declare -f get_external_ip >/dev/null; then
+    get_external_ip
+  else
+    # Fallback, если common.sh ещё не подключён
+    local ip
+    for url in "https://api4.ipify.org" "https://ipv4.icanhazip.com" "https://4.ident.me"; do
+      ip=$(curl -sf --max-time 4 "$url" 2>/dev/null | tr -d '[:space:]')
+      if [[ -n "$ip" ]]; then
+        echo "$ip"
+        return 0
+      fi
+    done
+    return 1
+  fi
+}
