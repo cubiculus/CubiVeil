@@ -14,6 +14,8 @@
 
 set -euo pipefail
 
+echo "DEBUG: BASH_SOURCE=${BASH_SOURCE[0]}" # debug
+
 # ── Определение корневой директории ─────────────────────────
 # При запуске через curl/pipe BASH_SOURCE[0] == "-s"
 if [[ "${BASH_SOURCE[0]}" == "-s" || ! -f "${BASH_SOURCE[0]}" ]]; then
@@ -142,7 +144,7 @@ INSTALL_TELEGRAM=""
 
 # Переменные, которые будут заполнены в prompt_inputs()
 LE_EMAIL=""
-LANG_NAME="Русский"
+LANG_NAME="${LANG_NAME:-Русский}"
 SERVER_IP=""
 
 # Заглушки для lang.sh (переменные используются до загрузки строк)
@@ -181,6 +183,11 @@ _parse_args_early() {
     esac
     shift
   done
+
+  # Set default language to English in dev mode
+  if [[ "$DEV_MODE" == "true" ]]; then
+    LANG_NAME="English"
+  fi
 }
 
 _usage() {
@@ -227,6 +234,7 @@ source "${INSTALL_SCRIPT_DIR}/lib/output.sh" || {
   exit 1
 }
 source "${INSTALL_SCRIPT_DIR}/lib/common.sh" || { err "Cannot load lib/common.sh"; }
+source "${INSTALL_SCRIPT_DIR}/lib/core/log.sh" || { err "Cannot load lib/core/log.sh"; }
 source "${INSTALL_SCRIPT_DIR}/lib/utils.sh" || { err "Cannot load lib/utils.sh"; }
 source "${INSTALL_SCRIPT_DIR}/lib/validation.sh" || { err "Cannot load lib/validation.sh"; }
 source "${INSTALL_SCRIPT_DIR}/lib/security.sh" || { err "Cannot load lib/security.sh"; }
@@ -748,10 +756,20 @@ main() {
     return 0
   fi
 
-  # Выбор языка
-  _select_language
+  # Выбор языка (если переменная задана, пропускаем)
+  if [[ -n "${LANG_NAME:-}" ]]; then
+    echo "Language установлено: ${LANG_NAME}"
+  else
+    _select_language
+  fi
 
   _print_banner
+
+  # Инициализация логов
+  if [[ -z "${CUBIVEIL_LOG_FILE:-}" ]]; then
+    CUBIVEIL_LOG_FILE="/var/log/cubiveil/install.log"
+  fi
+  log_init "$CUBIVEIL_LOG_FILE"
 
   # Сообщение о режиме
   if [[ "$DEV_MODE" == "true" ]]; then
