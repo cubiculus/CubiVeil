@@ -101,6 +101,7 @@ singbox_download() {
   log_step "singbox_download" "Downloading Sing-box ${sb_tag}"
 
   info "Скачиваю Sing-box ${sb_tag}..."
+  echo "DEBUG: sb_url='$sb_url'"
   curl -fLo /tmp/sing-box.tar.gz "$sb_url" || err "Не удалось скачать Sing-box"
 }
 
