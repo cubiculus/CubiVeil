@@ -155,9 +155,12 @@ ssl_generate() {
   # Добавляем домен
   certbot_opts+=(-d "$domain")
 
-  # Генерируем сертификат
-  if ! "${certbot_opts[@]}" >/dev/null 2>&1; then
+  # Генерируем сертификат с логированием вывода
+  log_info "Running: ${certbot_opts[*]}"
+  local certbot_output
+  if ! certbot_output=$("${certbot_opts[@]}" 2>&1); then
     log_error "Failed to generate SSL certificate for ${domain}"
+    log_error "Certbot output: ${certbot_output}"
 
     # Закрываем порт 80
     if [[ -f "${SCRIPT_DIR}/lib/modules/firewall/install.sh" ]]; then
