@@ -2,206 +2,226 @@
 # ╔═══════════════════════════════════════════════════════════╗
 # ║          CubiVeil — Sing-box Module                       ║
 # ║          github.com/cubiculus/cubiveil                    ║
-# ║                                                           ║
-# ║  Модуль управления Sing-box                               ║
-# ║  - Установка Sing-box                                     ║
-# ║  - Управление версиями                                    ║
-# ║  - Настройка конфигурации                                 ║
 # ╚═══════════════════════════════════════════════════════════╝
 
-# ── Подключение зависимостей / Dependencies ─────────────────
+# ── Подключение зависимостей ─────────────────────────────────
+# SCRIPT_DIR вычисляется относительно самого модуля
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
-# Подключаем core модули
-if [[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/core/system.sh"
-fi
+[[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]] && source "${SCRIPT_DIR}/lib/core/system.sh"
+[[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]   && source "${SCRIPT_DIR}/lib/core/log.sh"
+[[ -f "${SCRIPT_DIR}/lib/utils.sh" ]]      && source "${SCRIPT_DIR}/lib/utils.sh"
+[[ -f "${SCRIPT_DIR}/lib/security.sh" ]]   && source "${SCRIPT_DIR}/lib/security.sh"
 
-if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/core/log.sh"
-fi
-
-# Подключаем utils
-if [[ -f "${SCRIPT_DIR}/lib/utils.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/utils.sh"
-fi
-
-# Подключаем security
-if [[ -f "${SCRIPT_DIR}/lib/security.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/security.sh"
-fi
-
-# ── Конфигурация / Configuration ────────────────────────────
-
-SINGBOX_INSTALL_DIR="/usr/local/bin"
-SINGBOX_BINARY="${SINGBOX_INSTALL_DIR}/sing-box"
+# ── Конфигурация ─────────────────────────────────────────────
+SINGBOX_BINARY="/usr/local/bin/sing-box"
 SINGBOX_CONFIG_DIR="/etc/sing-box"
 SINGBOX_SERVICE="sing-box"
 
-# ── Установка / Installation ────────────────────────────────
+# ══════════════════════════════════════════════════════════════
+# ВАЖНО: singbox_get_version() возвращает данные через stdout.
+# Все сообщения (info/warn/log/debug) ОБЯЗАНЫ идти в stderr >&2,
+# иначе вызывающий код version_info=$(singbox_get_version)
+# поймает мусор вместо "tag|ver|url|sha256".
+# ══════════════════════════════════════════════════════════════
 
-# Получение версии Sing-box с GitHub API (с кэшированием)
 singbox_get_version() {
-  log_step "singbox_get_version" "Getting Sing-box version from GitHub"
-
-  echo "DEBUG: singbox_get_version called"
-
   local CACHE_DIR="/tmp/cubiveil-cache"
   local CACHE_FILE="${CACHE_DIR}/singbox-version.json"
-  local CACHE_MAX_AGE=3600 # 1 час
+  local CACHE_MAX_AGE=3600
 
   mkdir -p "$CACHE_DIR"
 
-  local SB_TAG SB_VER SB_URL SB_SHA256
-  local use_cache=false
+  local SB_TAG="" SB_VER="" SB_URL="" SB_SHA256=""
 
-  # Проверяем кэш
+  # ── Кэш ───────────────────────────────────────────────────
   if [[ -f "$CACHE_FILE" ]]; then
     local cache_age
-    cache_age=$(($(date +%s) - $(stat -c %Y "$CACHE_FILE")))
+    cache_age=$(( $(date +%s) - $(stat -c %Y "$CACHE_FILE") ))
     if [[ $cache_age -lt $CACHE_MAX_AGE ]]; then
-      use_cache=true
-      info "Использую кэшированную версию Sing-box..."
-      SB_TAG=$(jq -r '.tag' "$CACHE_FILE" 2>/dev/null)
-      SB_SHA256=$(jq -r '.sha256' "$CACHE_FILE" 2>/dev/null)
+      SB_TAG=$(jq -r '.tag'    "$CACHE_FILE" 2>/dev/null || true)
+      SB_SHA256=$(jq -r '.sha256' "$CACHE_FILE" 2>/dev/null || true)
+      if [[ -n "$SB_TAG" && "$SB_TAG" != "null" ]]; then
+        info "Using cached Sing-box version: $SB_TAG" >&2
+        SB_VER="${SB_TAG#v}"
+        SB_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz"
+        # Единственная строка в stdout — данные
+        echo "${SB_TAG}|${SB_VER}|${SB_URL}|${SB_SHA256}"
+        return 0
+      fi
     fi
   fi
 
-  # Запрос к GitHub API если кэш устарел или отсутствует
-  if [[ "$use_cache" == "false" ]]; then
-    info "Получаю последнюю версию с GitHub..."
+  # ── GitHub API ────────────────────────────────────────────
+  info "Getting latest Sing-box version from GitHub..." >&2
 
-    local api_response
-    api_response=$(curl -s "https://api.github.com/repos/SagerNet/sing-box/releases/latest" 2>/dev/null || echo "{}")
-    echo "DEBUG: api_response='$api_response'"
-    SB_TAG=$(jq -r '.tag_name' <<< "$api_response" 2>/dev/null || echo "$api_response" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "\([^"]*\)".*/\1/' || echo "")
-    echo "DEBUG: SB_TAG extracted: '$SB_TAG'"
-    info "DEBUG: api_response length=${#api_response}, SB_TAG='$SB_TAG'"
-    # Temporary fix: hardcode tag if extraction fails
-    if [[ -z "$SB_TAG" ]]; then
-      SB_TAG="v1.13.4"
-      echo "DEBUG: Using hardcoded SB_TAG='$SB_TAG'"
-    fi
-    [[ -z "$SB_TAG" ]] && err "Не удалось получить версию Sing-box с GitHub. API response: $api_response"
+  local api_response
+  api_response=$(curl -sf --max-time 15 \
+    "https://api.github.com/repos/SagerNet/sing-box/releases/latest" 2>/dev/null || true)
 
-    SB_VER="${SB_TAG#v}"
-    SB_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz"
-    info "SB_TAG='$SB_TAG', SB_VER='$SB_VER', arch='$(arch)', SB_URL='$SB_URL'"
-    info "SB_TAG=$SB_TAG, SB_VER=$SB_VER, arch=$(arch), SB_URL=$SB_URL"
-
-    # Получаем SHA256
-    local SHA_URL
-    SHA_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz.sha256sum"
-    SB_SHA256=$(curl -fsSL "$SHA_URL" 2>/dev/null | awk '{print $1}' || echo "")
-
-    # Сохраняем в кэш
-    echo "{\"tag\":\"$SB_TAG\",\"sha256\":\"$SB_SHA256\"}" >"$CACHE_FILE"
-  else
-    SB_VER="${SB_TAG#v}"
-    SB_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-$(arch).tar.gz"
-    info "Using cached: SB_TAG=$SB_TAG, SB_VER=$SB_VER, arch=$(arch), SB_URL=$SB_URL"
+  # Парсим tag через jq (предпочтительно) или grep
+  if command -v jq &>/dev/null; then
+    SB_TAG=$(echo "$api_response" | jq -r '.tag_name // empty' 2>/dev/null || true)
+  fi
+  if [[ -z "$SB_TAG" ]]; then
+    SB_TAG=$(echo "$api_response" | grep '"tag_name"' | head -1 \
+      | sed 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/' || true)
   fi
 
-  echo "DEBUG: Final values - SB_TAG='$SB_TAG', SB_VER='$SB_VER', SB_URL='$SB_URL', SB_SHA256='$SB_SHA256'"
+  # Fallback: последний тег напрямую через git ls-remote
+  if [[ -z "$SB_TAG" ]]; then
+    warn "GitHub API failed, trying git ls-remote..." >&2
+    SB_TAG=$(git ls-remote --tags --refs \
+      "https://github.com/SagerNet/sing-box.git" 2>/dev/null \
+      | awk '{print $2}' | grep -v '\^{}' | grep '/v' \
+      | sort -V | tail -1 | sed 's|refs/tags/||' || true)
+  fi
+
+  if [[ -z "$SB_TAG" ]]; then
+    err "Cannot get Sing-box version from GitHub" >&2
+    return 1
+  fi
+
+  SB_VER="${SB_TAG#v}"
+  local _arch
+  _arch=$(arch)
+  SB_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-${_arch}.tar.gz"
+
+  info "Sing-box latest: ${SB_TAG} (${_arch})" >&2
+
+  # SHA256
+  local SHA_URL
+  SHA_URL="https://github.com/SagerNet/sing-box/releases/download/${SB_TAG}/sing-box-${SB_VER}-linux-${_arch}.tar.gz.sha256sum"
+  SB_SHA256=$(curl -fsSL --max-time 15 "$SHA_URL" 2>/dev/null | awk '{print $1}' || true)
+  if [[ -z "$SB_SHA256" ]]; then
+    warn "Could not fetch SHA256 checksum, will skip verification" >&2
+  fi
+
+  # Кэшируем
+  echo "{\"tag\":\"$SB_TAG\",\"sha256\":\"$SB_SHA256\"}" >"$CACHE_FILE"
+
+  # Единственная строка в stdout — данные
   echo "${SB_TAG}|${SB_VER}|${SB_URL}|${SB_SHA256}"
 }
 
-# Загрузка Sing-box
+# ── Загрузка ──────────────────────────────────────────────────
 singbox_download() {
   local sb_tag="$1"
   local sb_url="$2"
 
   log_step "singbox_download" "Downloading Sing-box ${sb_tag}"
 
-  info "Скачиваю Sing-box ${sb_tag}..."
-  echo "DEBUG: sb_url='$sb_url'"
-  curl -fLo /tmp/sing-box.tar.gz "$sb_url" || err "Не удалось скачать Sing-box"
-}
-
-# Проверка GPG подписи
-singbox_verify_gpg() {
-  local sb_tag="$1"
-
-  log_step "singbox_verify_gpg" "Verifying GPG signature"
-
-  local SIG_URL
-  local GPG_VERIFIED=false
-
-  SIG_URL="https://github.com/SagerNet/sing-box/releases/download/${sb_tag}/sing-box-${sb_tag#v}-linux-$(arch).tar.gz.sig"
-
-  if command -v gpg &>/dev/null; then
-    info "Пытаюсь получить GPG подпись..."
-    if curl -fsSL "$SIG_URL" -o /tmp/sing-box.tar.gz.sig 2>/dev/null; then
-      info "GPG подпись получена, проверяю..."
-      # Импортируем ключ SagerNet если не импортирован
-      if ! gpg --list-keys "SagerNet" &>/dev/null; then
-        gpg --keyserver keyserver.ubuntu.com --recv-keys "A6D6C9C0A6B5A6E0E6E0E6E0E6E0E6E0E6E0" 2>/dev/null || true
-      fi
-      # Пробуем проверить подпись
-      if gpg --verify /tmp/sing-box.tar.gz.sig /tmp/sing-box.tar.gz 2>/dev/null; then
-        GPG_VERIFIED=true
-        ok "GPG подпись подтверждена"
-      else
-        warn "GPG проверка не пройдена — использую fallback на SHA256"
-      fi
-      rm -f /tmp/sing-box.tar.gz.sig
-    fi
+  if [[ -z "$sb_url" ]]; then
+    err "Sing-box download URL is empty (singbox_get_version failed?)"
   fi
 
-  echo "$GPG_VERIFIED"
+  info "Downloading Sing-box ${sb_tag}..."
+  if ! curl -fL --max-time 300 --progress-bar -o /tmp/sing-box.tar.gz "$sb_url"; then
+    err "Failed to download Sing-box from: $sb_url"
+  fi
+
+  log_success "Downloaded: /tmp/sing-box.tar.gz"
 }
 
-# Проверка SHA256
+# ── GPG проверка ──────────────────────────────────────────────
+singbox_verify_gpg() {
+  local sb_tag="$1"
+  local gpg_verified="false"
+
+  if ! command -v gpg &>/dev/null; then
+    echo "$gpg_verified"
+    return 0
+  fi
+
+  local SIG_URL
+  SIG_URL="https://github.com/SagerNet/sing-box/releases/download/${sb_tag}/sing-box-${sb_tag#v}-linux-$(arch).tar.gz.sig"
+
+  if curl -fsSL --max-time 15 "$SIG_URL" -o /tmp/sing-box.tar.gz.sig 2>/dev/null; then
+    if ! gpg --list-keys "SagerNet" &>/dev/null; then
+      gpg --keyserver keyserver.ubuntu.com --recv-keys \
+        "A6D6C9C0A6B5A6E0E6E0E6E0E6E0E6E0E6E0" 2>/dev/null || true
+    fi
+    if gpg --verify /tmp/sing-box.tar.gz.sig /tmp/sing-box.tar.gz 2>/dev/null; then
+      gpg_verified="true"
+      ok "GPG signature verified"
+    else
+      warn "GPG verification failed — falling back to SHA256"
+    fi
+    rm -f /tmp/sing-box.tar.gz.sig
+  fi
+
+  echo "$gpg_verified"
+}
+
+# ── SHA256 проверка ───────────────────────────────────────────
 singbox_verify_sha256() {
   local sb_sha256="$1"
   local gpg_verified="$2"
 
-  log_step "singbox_verify_sha256" "Verifying SHA256 checksum"
-
-  if [[ -n "$sb_sha256" ]]; then
-    info "Проверяю SHA256 контрольную сумму..."
-
-    # Используем функцию verify_sha256 из security.sh
-    if ! verify_sha256 /tmp/sing-box.tar.gz "$sb_sha256"; then
-      rm -f /tmp/sing-box.tar.gz
-      err "SHA256 проверка не пройдена"
-    fi
-
-    if [[ "$gpg_verified" != "true" ]]; then
-      ok "SHA256 проверка пройдена"
-    fi
-  else
-    warn "Не удалось получить SHA256 контрольную сумму, продолжаем без проверки"
-  fi
-}
-
-# Установка Sing-box
-singbox_install_binary() {
-  log_step "singbox_install_binary" "Installing Sing-box binary"
-
-  tar -xzf /tmp/sing-box.tar.gz -C /tmp
-  mv /tmp/sing-box-*/sing-box "$SINGBOX_BINARY"
-  chmod +x "$SINGBOX_BINARY"
-  rm -rf /tmp/sing-box*
-
-  log_debug "Sing-box binary installed to $SINGBOX_BINARY"
-}
-
-# Основная установка
-singbox_install() {
-  echo "DEBUG: singbox_install called"
-  log_step "singbox_install" "Installing Sing-box module"
-
-  # Проверяем, установлен ли Sing-box
-  if [[ -x "$SINGBOX_BINARY" ]]; then
-    log_info "Sing-box already installed at $SINGBOX_BINARY"
+  if [[ -z "$sb_sha256" ]]; then
+    warn "No SHA256 checksum available, skipping verification"
     return 0
   fi
 
+  info "Verifying SHA256..."
+  if ! verify_sha256 /tmp/sing-box.tar.gz "$sb_sha256"; then
+    rm -f /tmp/sing-box.tar.gz
+    err "SHA256 verification failed"
+  fi
+
+  [[ "$gpg_verified" != "true" ]] && ok "SHA256 verified"
+}
+
+# ── Установка бинарника ───────────────────────────────────────
+singbox_install_binary() {
+  log_step "singbox_install_binary" "Installing Sing-box binary"
+
+  local _arch
+  _arch=$(arch)
+
+  # Распаковываем во временную папку
+  local tmp_extract
+  tmp_extract=$(mktemp -d)
+  tar -xzf /tmp/sing-box.tar.gz -C "$tmp_extract"
+
+  # Ищем бинарник (имя директории зависит от версии)
+  local binary
+  binary=$(find "$tmp_extract" -name "sing-box" -type f | head -1)
+  if [[ -z "$binary" ]]; then
+    rm -rf "$tmp_extract" /tmp/sing-box.tar.gz
+    err "sing-box binary not found in archive"
+  fi
+
+  mv "$binary" "$SINGBOX_BINARY"
+  chmod +x "$SINGBOX_BINARY"
+  rm -rf "$tmp_extract" /tmp/sing-box.tar.gz
+
+  log_success "Installed: $SINGBOX_BINARY"
+}
+
+# ── Полная установка ──────────────────────────────────────────
+singbox_install() {
+  log_step "singbox_install" "Installing Sing-box"
+
+  if [[ -x "$SINGBOX_BINARY" ]]; then
+    local cur_ver
+    cur_ver=$("$SINGBOX_BINARY" version 2>/dev/null | head -1 || echo "unknown")
+    log_info "Sing-box already installed: $cur_ver"
+    return 0
+  fi
+
+  # version_info содержит ТОЛЬКО "tag|ver|url|sha256" — никаких лишних строк
   local version_info
   version_info=$(singbox_get_version)
 
-  IFS='|' read -r sb_tag sb_ver sb_url sb_sha256 <<<"$version_info"
+  # Разбираем
+  local sb_tag sb_ver sb_url sb_sha256
+  IFS='|' read -r sb_tag sb_ver sb_url sb_sha256 <<< "$version_info"
+
+  # Дополнительная проверка что URL не пустой
+  if [[ -z "$sb_url" ]]; then
+    err "Sing-box URL is empty after parsing version info: '$version_info'"
+  fi
 
   singbox_download "$sb_tag" "$sb_url"
 
@@ -209,71 +229,44 @@ singbox_install() {
   gpg_verified=$(singbox_verify_gpg "$sb_tag")
 
   singbox_verify_sha256 "$sb_sha256" "$gpg_verified"
-
   singbox_install_binary
 
-  log_success "Sing-box ${sb_tag} ($(arch)) установлен"
+  log_success "Sing-box ${sb_tag} installed"
 }
 
-# ── Настройка / Configuration ───────────────────────────────
-
-# Создание директории конфигурации
+# ── Конфигурация ──────────────────────────────────────────────
 singbox_configure_dirs() {
-  log_step "singbox_configure_dirs" "Creating configuration directories"
-
-  mkdir -p "$SINGBOX_CONFIG_DIR"
-  mkdir -p "/var/lib/sing-box"
-
-  log_debug "Configuration directories created"
+  mkdir -p "$SINGBOX_CONFIG_DIR" "/var/lib/sing-box"
 }
 
-# Настройка конфигурации
-# Примечание: Sing-box конфигурация управляется Marzban
 singbox_configure() {
   log_step "singbox_configure" "Configuring Sing-box"
-
   singbox_configure_dirs
 
-  # Создаём базовый конфиг если его нет
   if [[ ! -f "$SINGBOX_CONFIG_DIR/config.json" ]]; then
-    cat >"$SINGBOX_CONFIG_DIR/config.json" <<EOF
+    cat >"$SINGBOX_CONFIG_DIR/config.json" <<'EOF'
 {
-  "log": {
-    "level": "warn",
-    "timestamp": false
-  },
+  "log": { "level": "warn", "timestamp": false },
   "inbounds": [],
   "outbounds": [
     { "type": "direct", "tag": "direct" },
-    { "type": "block", "tag": "block" }
+    { "type": "block",  "tag": "block"  }
   ],
-  "route": {
-    "rules": [],
-    "final": "direct"
-  }
+  "route": { "rules": [], "final": "direct" }
 }
 EOF
-    log_debug "Created basic Sing-box configuration"
   fi
 
   log_success "Sing-box configured"
 }
 
-# ── Управление сервисом / Service Management ────────────────
-
-# Создание системного пользователя singbox
+# ── Управление сервисом ───────────────────────────────────────
 singbox_create_user() {
-  if ! id -u singbox >/dev/null 2>&1; then
-    useradd -r -s /usr/sbin/nologin singbox
-  fi
-  log_debug "Sing-box system user created"
+  id -u singbox &>/dev/null || useradd -r -s /usr/sbin/nologin singbox
 }
 
-# Создание systemd сервиса для Sing-box
 singbox_create_service() {
-  log_step "singbox_create_service" "Creating Sing-box systemd service"
-
-  # Создаём системного пользователя если нужно
+  log_step "singbox_create_service" "Creating systemd service"
   singbox_create_user
 
   cat >/etc/systemd/system/sing-box.service <<EOF
@@ -285,7 +278,7 @@ After=network.target
 Type=simple
 User=singbox
 WorkingDirectory=/etc/sing-box
-ExecStart=$SINGBOX_BINARY run -c $SINGBOX_CONFIG_DIR/config.json
+ExecStart=${SINGBOX_BINARY} run -c ${SINGBOX_CONFIG_DIR}/config.json
 Restart=on-failure
 RestartSec=5s
 LimitNOFILE=65536
@@ -294,56 +287,30 @@ LimitNOFILE=65536
 WantedBy=multi-user.target
 EOF
 
-  # Установка прав на директорию конфигурации
-  chown -R singbox:singbox /etc/sing-box
-
+  chown -R singbox:singbox "$SINGBOX_CONFIG_DIR"
   svc_daemon_reload
-
-  log_debug "Sing-box systemd service created"
 }
 
-# Включение Sing-box
 singbox_enable() {
   log_step "singbox_enable" "Enabling Sing-box"
-
-  # Создаём сервис если нужно
-  if [[ ! -f "/etc/systemd/system/sing-box.service" ]]; then
-    singbox_create_service
-  fi
-
-  svc_enable "$SINGBOX_SERVICE"
-  svc_start "$SINGBOX_SERVICE"
-
+  [[ ! -f "/etc/systemd/system/sing-box.service" ]] && singbox_create_service
+  svc_enable  "$SINGBOX_SERVICE"
+  svc_start   "$SINGBOX_SERVICE"
   log_success "Sing-box enabled and started"
 }
 
-# Отключение Sing-box
 singbox_disable() {
-  log_step "singbox_disable" "Disabling Sing-box"
-
-  svc_stop "$SINGBOX_SERVICE"
+  svc_stop    "$SINGBOX_SERVICE" || true
   svc_disable "$SINGBOX_SERVICE" 2>/dev/null || true
-
-  log_success "Sing-box disabled"
 }
 
-# ── Утилиты / Utilities ────────────────────────────────────
-
-# Получение текущей версии
-singbox_get_current_version() {
-  if [[ -x "$SINGBOX_BINARY" ]]; then
-    "$SINGBOX_BINARY" version 2>/dev/null || echo "unknown"
-  else
-    echo "not installed"
-  fi
+singbox_reload() {
+  svc_active "$SINGBOX_SERVICE" && svc_restart "$SINGBOX_SERVICE" || true
 }
 
-# Проверка статуса
 singbox_status() {
   if svc_active "$SINGBOX_SERVICE"; then
-    local version
-    version=$(singbox_get_current_version)
-    log_success "Sing-box is active (version: ${version})"
+    log_success "Sing-box is active"
     return 0
   else
     log_warn "Sing-box is not active"
@@ -351,110 +318,45 @@ singbox_status() {
   fi
 }
 
-# Перезагрузка конфигурации
-singbox_reload() {
-  log_step "singbox_reload" "Reloading Sing-box configuration"
-
-  if svc_active "$SINGBOX_SERVICE"; then
-    svc_restart "$SINGBOX_SERVICE"
-    log_success "Sing-box configuration reloaded"
-  else
-    log_warn "Sing-box is not running, cannot reload"
-  fi
+singbox_remove() {
+  svc_stop "$SINGBOX_SERVICE" 2>/dev/null || true
+  rm -f "/etc/systemd/system/sing-box.service"
+  svc_daemon_reload
+  rm -f "$SINGBOX_BINARY"
+  log_success "Sing-box removed"
 }
 
-# ── Обновление / Update ─────────────────────────────────────
-
-# Обновление до последней версии
 singbox_update() {
-  log_step "singbox_update" "Updating Sing-box"
-
-  local current_version
-  current_version=$(singbox_get_current_version)
-
-  log_info "Current version: ${current_version}"
+  local cur_ver
+  cur_ver=$("$SINGBOX_BINARY" version 2>/dev/null | head -1 || echo "unknown")
 
   local version_info
   version_info=$(singbox_get_version)
 
-  IFS='|' read -r sb_tag sb_ver sb_url sb_sha256 <<<"$version_info"
-  # shellcheck disable=SC2034
-  sb_ver="$sb_ver"
+  local sb_tag sb_ver sb_url sb_sha256
+  IFS='|' read -r sb_tag sb_ver sb_url sb_sha256 <<< "$version_info"
 
-  log_info "Latest version: ${sb_tag}"
-
-  # Проверяем, нужно ли обновление
-  if [[ "$current_version" == "$sb_tag" ]]; then
-    log_info "Sing-box is already up to date"
+  if [[ "$cur_ver" == *"$sb_tag"* ]]; then
+    log_info "Sing-box already up to date: $sb_tag"
     return 0
   fi
 
-  info "Updating Sing-box to ${sb_tag}..."
-
-  # Останавливаем сервис
-  if svc_active "$SINGBOX_SERVICE"; then
-    svc_stop "$SINGBOX_SERVICE"
-  fi
-
-  # Загружаем и устанавливаем
+  svc_active "$SINGBOX_SERVICE" && svc_stop "$SINGBOX_SERVICE"
   singbox_download "$sb_tag" "$sb_url"
-
   local gpg_verified
   gpg_verified=$(singbox_verify_gpg "$sb_tag")
-
   singbox_verify_sha256 "$sb_sha256" "$gpg_verified"
-
   singbox_install_binary
-
-  # Запускаем сервис
-  if svc_enabled "$SINGBOX_SERVICE"; then
-    svc_start "$SINGBOX_SERVICE"
-  fi
-
-  log_success "Sing-box updated to ${sb_tag}"
+  svc_enabled "$SINGBOX_SERVICE" && svc_start "$SINGBOX_SERVICE"
+  log_success "Sing-box updated to $sb_tag"
 }
 
-# ── Удаление / Removal ───────────────────────────────────────
-
-# Удаление Sing-box
-singbox_remove() {
-  log_step "singbox_remove" "Removing Sing-box"
-
-  # Останавливаем сервис
-  if svc_active "$SINGBOX_SERVICE"; then
-    svc_stop "$SINGBOX_SERVICE"
-  fi
-
-  # Удаляем сервис
-  if [[ -f "/etc/systemd/system/sing-box.service" ]]; then
-    rm -f "/etc/systemd/system/sing-box.service"
-    svc_daemon_reload
-  fi
-
-  # Удаляем бинарник
-  rm -f "$SINGBOX_BINARY"
-
-  # Оставляем конфигурацию на случай восстановления
-
-  log_success "Sing-box removed"
-}
-
-# ── Модульный интерфейс / Module Interface ─────────────────
-
-# Стандартный интерфейс модуля
-module_install() { singbox_install; }
-module_configure() { singbox_configure; }
-module_enable() { singbox_enable; }
-module_disable() { singbox_disable; }
-
-# Обновление модуля
-module_update() { singbox_update; }
-
-# Удаление модуля
-module_remove() { singbox_remove; }
-
-# Статус модуля
-module_status() { singbox_status; }
-
-# Перезагрузка модуля
-module_reload() { singbox_reload; }
+# ── Модульный интерфейс ───────────────────────────────────────
+module_install()  { singbox_install; }
+module_configure(){ singbox_configure; }
+module_enable()   { singbox_enable; }
+module_disable()  { singbox_disable; }
+module_update()   { singbox_update; }
+module_remove()   { singbox_remove; }
+module_status()   { singbox_status; }
+module_reload()   { singbox_reload; }
