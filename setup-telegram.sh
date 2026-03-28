@@ -115,8 +115,20 @@ step_check_environment() {
     err "$(get_tg_str ERR_ROOT_TG_RU)"
   fi
 
-  # Проверка что Marzban установлен
-  if [[ ! -f /opt/marzban/.env ]]; then
+  # Проверка что Marzban установлен (Docker-контейнер или .env файл)
+  # .env находится в /var/lib/marzban/, а не в /opt/marzban/
+  local _marzban_ok=false
+  if [[ -f /var/lib/marzban/.env ]]; then
+    _marzban_ok=true
+  elif [[ -f /opt/marzban/.env ]]; then
+    _marzban_ok=true
+  fi
+  # Дополнительная проверка Docker-контейнера
+  if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -qE '^marzban'; then
+    _marzban_ok=true
+  fi
+
+  if [[ "$_marzban_ok" != "true" ]]; then
     err "$(get_tg_str ERR_MARZBAN_NOT_FOUND_TG_RU)"
   fi
 
