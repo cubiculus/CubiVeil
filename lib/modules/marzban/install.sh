@@ -112,10 +112,14 @@ marzban_install() {
   fi
 
   # Запускаем установку с выводом ошибок
-  if ! bash "$MARZBAN_INSTALL_SCRIPT" install --yes 2>&1; then
+  # Marzban installer не поддерживает --yes, поэтому используем автоматический режим через env
+  export MARZBAN_TELEGRAM_ENABLED=0
+  export MARZBAN_USERS_ENABLED=0
+
+  if ! bash "$MARZBAN_INSTALL_SCRIPT" install 2>&1; then
     log_error "Marzban installation failed"
     log_warn "You can install Marzban manually later:"
-    log_warn "  bash $MARZBAN_INSTALL_SCRIPT install --yes"
+    log_warn "  bash $MARZBAN_INSTALL_SCRIPT install"
     log_warn "  Or check logs: journalctl -u marzban -n 50"
     rm -f "$MARZBAN_INSTALL_SCRIPT"
     return 1 # Это ошибка — Marzban критически важен
