@@ -135,8 +135,13 @@ marzban_install() {
   export MARZBAN_TELEGRAM_ENABLED=0
   export MARZBAN_USERS_ENABLED=0
 
-  log_info "Running Marzban installation (background)..."
-  echo "y" | bash "$MARZBAN_INSTALL_SCRIPT" install 2>&1 &
+  # Перенаправляем вывод установщика в файл — не наследовать pipe родителя
+  local _marzban_log="/var/log/cubiveil/marzban-install.log"
+  mkdir -p "$(dirname "$_marzban_log")"
+  log_info "Marzban install log: $_marzban_log"
+
+  echo "y" | bash "$MARZBAN_INSTALL_SCRIPT" install \
+    >"$_marzban_log" 2>&1 &
   local _marzban_bg_pid=$!
 
   # Ждём "Application startup complete" до 120 секунд
@@ -152,14 +157,14 @@ marzban_install() {
     ((_waited += 3)) || true
   done
 
-  # Убиваем зависший foreground-процесс docker compose up
-  # Контейнер при этом продолжает работать
+  # Убиваем foreground docker compose up (контейнер продолжает работать)
   kill "$_marzban_bg_pid" 2>/dev/null || true
   wait "$_marzban_bg_pid" 2>/dev/null || true
 
   if [[ "$_started" != "true" ]]; then
     log_error "Marzban did not start within ${_max_wait}s"
-    log_warn "Check logs: docker logs marzban"
+    log_warn "Check: docker logs marzban"
+    log_warn "Full install log: $_marzban_log"
     rm -f "$MARZBAN_INSTALL_SCRIPT"
     return 1
   fi
