@@ -737,11 +737,11 @@ MSG_F2B_DISABLED_RU="Fail2ban отключён"
 MSG_F2B_CHECK_CONFIG="Checking Fail2ban configuration"
 MSG_F2B_CHECK_CONFIG_RU="Проверка конфигурации Fail2ban"
 
-MSG_F2B_CONFIG_NOT_FOUND="Fail2ban configuration file not found: \$$1"
-MSG_F2B_CONFIG_NOT_FOUND_RU="Файл конфигурации Fail2ban не найден: \$$1"
+MSG_F2B_CONFIG_NOT_FOUND="Fail2ban configuration file not found: \${path}"
+MSG_F2B_CONFIG_NOT_FOUND_RU="Файл конфигурации Fail2ban не найден: \${path}"
 
-MSG_F2B_CONFIG_FOUND="Fail2ban configuration found at \$$1"
-MSG_F2B_CONFIG_FOUND_RU="Конфигурация Fail2ban найдена в \$$1"
+MSG_F2B_CONFIG_FOUND="Fail2ban configuration found at \${path}"
+MSG_F2B_CONFIG_FOUND_RU="Конфигурация Fail2ban найдена в \${path}"
 
 MSG_F2B_UNBANNING="Unbanning \${ip} from \${jail}"
 MSG_F2B_UNBANNING_RU="Разбаниваю \${ip} из \${jail}"
@@ -887,8 +887,8 @@ MSG_SSL_MODULE_REMOVED_RU="SSL модуль удалён (сертификаты
 # ══════════════════════════════════════════════════════════════
 # MODULE: SINGBOX
 # ══════════════════════════════════════════════════════════════
-MSG_SINGBOX_CACHED="Using cached Sing-box version: \$$1"
-MSG_SINGBOX_CACHED_RU="Использую кэшированную версию Sing-box: \$$1"
+MSG_SINGBOX_CACHED="Using cached Sing-box version: \${sb_tag}"
+MSG_SINGBOX_CACHED_RU="Использую кэшированную версию Sing-box: \${sb_tag}"
 
 MSG_SINGBOX_GETTING_VERSION="Getting latest Sing-box version from GitHub..."
 MSG_SINGBOX_GETTING_VERSION_RU="Получаю последнюю версию Sing-box с GitHub..."
@@ -911,8 +911,8 @@ MSG_SINGBOX_DOWNLOADING_RU="Загружаю Sing-box \${sb_tag}"
 MSG_SINGBOX_URL_EMPTY="Sing-box download URL is empty"
 MSG_SINGBOX_URL_EMPTY_RU="URL загрузки Sing-box пуст"
 
-MSG_SINGBOX_DOWNLOAD_FAILED="Failed to download Sing-box from: \$$1"
-MSG_SINGBOX_DOWNLOAD_FAILED_RU="Не удалось загрузить Sing-box из: \$$1"
+MSG_SINGBOX_DOWNLOAD_FAILED="Failed to download Sing-box from: \${url}"
+MSG_SINGBOX_DOWNLOAD_FAILED_RU="Не удалось загрузить Sing-box из: \${url}"
 
 MSG_SINGBOX_DOWNLOADED="Downloaded: /tmp/sing-box.tar.gz"
 MSG_SINGBOX_DOWNLOADED_RU="Загружено: /tmp/sing-box.tar.gz"
@@ -941,8 +941,8 @@ MSG_SINGBOX_INSTALL_BINARY_RU="Устанавливаю бинарник Sing-bo
 MSG_SINGBOX_BINARY_NOT_FOUND="sing-box binary not found in archive"
 MSG_SINGBOX_BINARY_NOT_FOUND_RU="Бинарник sing-box не найден в архиве"
 
-MSG_SINGBOX_INSTALLED="Installed: \$$1"
-MSG_SINGBOX_INSTALLED_RU="Установлено: \$$1"
+MSG_SINGBOX_INSTALLED="Installed: \${sb_tag}"
+MSG_SINGBOX_INSTALLED_RU="Установлено: \${sb_tag}"
 
 MSG_SINGBOX_INSTALLING="Installing Sing-box"
 MSG_SINGBOX_INSTALLING_RU="Устанавливаю Sing-box"
