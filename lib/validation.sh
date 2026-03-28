@@ -63,6 +63,9 @@ validate_time() {
 validate_chat_id() {
   local chat_id="$1"
 
+  # Если пустой — невалидно
+  [[ -z "$chat_id" ]] && return 1
+
   # Проверка формата: только цифры, возможно с минусом для групп
   [[ ! "$chat_id" =~ ^-?[0-9]+$ ]] && return 1
 

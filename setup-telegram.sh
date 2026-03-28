@@ -198,12 +198,15 @@ step_prompt_telegram_config() {
   read -rp "$prompt_chat_id" TG_CHAT_ID
   TG_CHAT_ID="${TG_CHAT_ID// /}"
 
-  # Валидация Chat ID
-  while ! validate_chat_id "$TG_CHAT_ID"; do
-    warning "$(get_tg_str WARN_INVALID_CHAT_ID_RU)"
-    read -rp "$prompt_chat_id" TG_CHAT_ID
-    TG_CHAT_ID="${TG_CHAT_ID// /}"
-  done
+  # Валидация Chat ID (пропускаем если пустой — пользователь нажал Enter)
+  if [[ -n "$TG_CHAT_ID" ]]; then
+    while ! validate_chat_id "$TG_CHAT_ID"; do
+      warning "$(get_tg_str WARN_INVALID_CHAT_ID_RU)"
+      read -rp "$prompt_chat_id" TG_CHAT_ID
+      TG_CHAT_ID="${TG_CHAT_ID// /}"
+      [[ -z "$TG_CHAT_ID" ]] && break
+    done
+  fi
 
   local prompt_report
   prompt_report="$(get_tg_str PROMPT_REPORT_TIME_RU)"
