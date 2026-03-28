@@ -352,8 +352,10 @@ test_install_sh_integration() {
     fail "install.sh: не загружает lib/utils.sh"
   fi
 
-  if grep -q 'source.*lib/modules/' "${MODULAR_SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: загружает модули из lib/modules/"
+  # Проверка динамической загрузки модулей из lib/modules/
+  # Модули загружаются через переменную $module_file или прямой путь
+  if grep -qE 'source.*lib/modules/|source.*"\$module_file"|source.*\$\{.*\}/install\.sh' "${MODULAR_SCRIPT_DIR}/install.sh"; then
+    pass "install.sh: загружает модули из lib/modules/ (динамически)"
     ((TESTS_PASSED++)) || true
   else
     fail "install.sh: не загружает модули из lib/modules/"
