@@ -607,6 +607,7 @@ step_ssl() { _step_ssl; }
 step_configure() { _step_ssl; }
 step_decoy_site() { _step_decoy; }
 step_traffic_shaping() { _step_traffic_shaping; }
+step_telegram() { _step_telegram; }
 step_finish() { _print_finish; }
 
 # ══════════════════════════════════════════════════════════════

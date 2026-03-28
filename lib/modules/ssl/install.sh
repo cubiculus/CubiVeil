@@ -229,11 +229,14 @@ ssl_configure_renewal() {
 ssl_configure() {
   log_step "ssl_configure" "Configuring SSL module"
 
-  # Настраиваем webroot
-  ssl_configure_webroot
-
-  # Настраиваем автоматическое обновление
-  ssl_configure_renewal
+  # В dev-режиме генерируем самоподписные сертификаты
+  if [[ "${DEV_MODE:-false}" == "true" ]]; then
+    ssl_generate_self_signed
+  else
+    # В production режиме настраиваем webroot для Let's Encrypt
+    ssl_configure_webroot
+    ssl_configure_renewal
+  fi
 
   log_success "SSL module configured"
 }
