@@ -41,5 +41,26 @@ server {
         try_files $uri =404;
     }
 
+    # Обработка POST (форма логина) — редирект обратно с fake-ошибкой
+    location = / {
+        limit_except GET HEAD {
+            # POST на логин — возвращаем 302 как будто неверный пароль
+            return 302 /?error=invalid_credentials;
+        }
+        try_files $uri $uri/ =404;
+    }
+
+    # Динамические маршруты — возвращаем index.html (SPA-поведение)
+    location /audit/ {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /files/upload {
+        limit_except GET HEAD {
+            return 302 /files/?error=upload_failed;
+        }
+        try_files $uri =404;
+    }
+
     location ~ /\. { deny all; }
 }
