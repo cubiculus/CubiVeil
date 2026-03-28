@@ -61,6 +61,7 @@ run_unit_tests() {
     "unit-ssl.sh:SSL module"
     "unit-marzban.sh:Marzban module"
     "unit-decoy-site.sh:Decoy-site module"
+    "unit-decoy-inner-pages.sh:Decoy Inner Pages"
     "unit-traffic-shaping.sh:Traffic Shaping module"
     "unit-backup.sh:Backup module"
     "unit-monitoring.sh:Monitoring module"
