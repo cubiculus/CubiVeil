@@ -898,6 +898,7 @@ main() {
   step_telegram
 
   step_finish
+  exit 0
 }
 
 main "$@"
