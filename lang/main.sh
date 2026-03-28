@@ -1330,3 +1330,711 @@ MSG_MARZBAN_REMOVED_RU="Marzban удалён (директория данных 
 
 MSG_MARZBAN_UPDATING_MODULE="Updating Marzban module"
 MSG_MARZBAN_UPDATING_MODULE_RU="Обновление модуля Marzban"
+
+# ══════════════════════════════════════════════════════════════
+# MODULE: BACKUP
+# ══════════════════════════════════════════════════════════════
+MSG_BACKUP_INIT="Initializing backup module"
+MSG_BACKUP_INIT_RU="Инициализация модуля резервного копирования"
+
+MSG_BACKUP_DIRS_CREATED="Backup directories created"
+MSG_BACKUP_DIRS_CREATED_RU="Директории для бэкапов созданы"
+
+MSG_BACKUP_GEN_KEY="Generating encryption key"
+MSG_BACKUP_GEN_KEY_RU="Генерирую ключ шифрования"
+
+MSG_BACKUP_KEY_GENERATED="Encryption key generated"
+MSG_BACKUP_KEY_GENERATED_RU="Ключ шифрования сгенерирован"
+
+MSG_BACKUP_KEY_NOT_FOUND="Encryption key not found, generating new key..."
+MSG_BACKUP_KEY_NOT_FOUND_RU="Ключ шифрования не найден, генерирую новый..."
+
+MSG_BACKUP_CHECK_ENV="Checking backup environment"
+MSG_BACKUP_CHECK_ENV_RU="Проверяю окружение для бэкапа"
+
+MSG_BACKUP_MARZBAN_DIR_NOT_FOUND="Marzban directory not found: $MARZBAN_DIR"
+MSG_BACKUP_MARZBAN_DIR_NOT_FOUND_RU="Директория Marzban не найдена: $MARZBAN_DIR"
+
+MSG_BACKUP_SINGBOX_NOT_FOUND="Sing-box binary not found"
+MSG_BACKUP_SINGBOX_NOT_FOUND_RU="Бинарник Sing-box не найден"
+
+MSG_BACKUP_SSL_DIR_NOT_FOUND="SSL certificates directory not found: $SSL_CERT_DIR"
+MSG_BACKUP_SSL_DIR_NOT_FOUND_RU="Директория SSL сертификатов не найдена: $SSL_CERT_DIR"
+
+MSG_BACKUP_AGE_NOT_FOUND="age encryption tool not found, backups will not be encrypted"
+MSG_BACKUP_AGE_NOT_FOUND_RU="Инструмент шифрования age не найден, бэкапы не будут зашифрованы"
+
+MSG_BACKUP_ENV_ISSUES="Found $issues environment issues, backup may be incomplete"
+MSG_BACKUP_ENV_ISSUES_RU="Найдено проблем окружения: $issues, бэкап может быть неполным"
+
+MSG_BACKUP_ENV_OK="Environment check passed"
+MSG_BACKUP_ENV_OK_RU="Проверка окружения пройдена"
+
+MSG_BACKUP_STOP_SERVICES="Stopping services for backup"
+MSG_BACKUP_STOP_SERVICES_RU="Останавливаю сервисы для бэкапа"
+
+MSG_BACKUP_MARZBAN_STOPPED="Marzban stopped"
+MSG_BACKUP_MARZBAN_STOPPED_RU="Marzban остановлен"
+
+MSG_BACKUP_SINGBOX_STOPPED="Sing-box stopped"
+MSG_BACKUP_SINGBOX_STOPPED_RU="Sing-box остановлен"
+
+MSG_BACKUP_MARZBAN_DB="Backing up Marzban database"
+MSG_BACKUP_MARZBAN_DB_RU="Резервирую базу данных Marzban"
+
+MSG_BACKUP_MARZBAN_DB_NOT_FOUND="Marzban database not found"
+MSG_BACKUP_MARZBAN_DB_NOT_FOUND_RU="База данных Marzban не найдена"
+
+MSG_BACKUP_MARZBAN_DB_BACKED="Marzban database backed up (SHA256: ${hash:0:8}...)"
+MSG_BACKUP_MARZBAN_DB_BACKED_RU="База данных Marzban зарезервирована (SHA256: ${hash:0:8}...)"
+
+MSG_BACKUP_MARZBAN_CONFIG="Backing up Marzban configuration"
+MSG_BACKUP_MARZBAN_CONFIG_RU="Резервирую конфигурацию Marzban"
+
+MSG_BACKUP_MARZBAN_CONFIG_BACKED="Marzban configuration backed up with integrity hashes"
+MSG_BACKUP_MARZBAN_CONFIG_BACKED_RU="Конфигурация Marzban зарезервирована с хэшами целостности"
+
+MSG_BACKUP_SINGBOX_CONFIG="Backing up Sing-box configuration"
+MSG_BACKUP_SINGBOX_CONFIG_RU="Резервирую конфигурацию Sing-box"
+
+MSG_BACKUP_SINGBOX_CONFIG_NOT_FOUND="Sing-box configuration not found"
+MSG_BACKUP_SINGBOX_CONFIG_NOT_FOUND_RU="Конфигурация Sing-box не найдена"
+
+MSG_BACKUP_SINGBOX_CONFIG_BACKED="Sing-box configuration backed up (SHA256: ${hash:0:8}...)"
+MSG_BACKUP_SINGBOX_CONFIG_BACKED_RU="Конфигурация Sing-box зарезервирована (SHA256: ${hash:0:8}...)"
+
+MSG_BACKUP_SSL_CERTS="Backing up SSL certificates"
+MSG_BACKUP_SSL_CERTS_RU="Резервирую SSL сертификаты"
+
+MSG_BACKUP_SSL_DIR_NOT_FOUND2="SSL certificates directory not found"
+MSG_BACKUP_SSL_DIR_NOT_FOUND2_RU="Директория SSL сертификатов не найдена"
+
+MSG_BACKUP_SSL_CHECKING="Checking SSL certificate for: $domain"
+MSG_BACKUP_SSL_CHECKING_RU="Проверяю SSL сертификат для: $domain"
+
+MSG_BACKUP_SSL_VALID="SSL certificate is valid: $domain"
+MSG_BACKUP_SSL_VALID_RU="SSL сертификат действителен: $domain"
+
+MSG_BACKUP_SSL_INVALID="SSL certificate validation failed: $domain"
+MSG_BACKUP_SSL_INVALID_RU="Проверка SSL сертификата не удалась: $domain"
+
+MSG_BACKUP_SSL_BACKED="SSL certificates backed up"
+MSG_BACKUP_SSL_BACKED_RU="SSL сертификаты зарезервированы"
+
+MSG_BACKUP_KEYS="Backing up keys and credentials"
+MSG_BACKUP_KEYS_RU="Резервирую ключи и учётные данные"
+
+MSG_BACKUP_AGE_UNAVAILABLE="age not available, credentials will not be encrypted"
+MSG_BACKUP_AGE_UNAVAILABLE_RU="age недоступен, учётные данные не будут зашифрованы"
+
+MSG_BACKUP_KEYS_BACKED="Keys and credentials backed up"
+MSG_BACKUP_KEYS_BACKED_RU="Ключи и учётные данные зарезервированы"
+
+MSG_BACKUP_ENCRYPT="Encrypting backup archive"
+MSG_BACKUP_ENCRYPT_RU="Шифрую архив бэкапа"
+
+MSG_BACKUP_AGE_UNAVAILABLE2="age not available, skipping encryption"
+MSG_BACKUP_AGE_UNAVAILABLE2_RU="age недоступен, пропускаю шифрование"
+
+MSG_BACKUP_ENCRYPTED="Backup encrypted: $encrypted_file"
+MSG_BACKUP_ENCRYPTED_RU="Бэкап зашифрован: $encrypted_file"
+
+MSG_BACKUP_ENCRYPTION_KEY="Encryption key: ${encrypted_file}.key"
+MSG_BACKUP_ENCRYPTION_KEY_RU="Ключ шифрования: ${encrypted_file}.key"
+
+MSG_BACKUP_ENCRYPT_FAILED="Failed to encrypt backup archive"
+MSG_BACKUP_ENCRYPT_FAILED_RU="Не удалось зашифровать архив бэкапа"
+
+MSG_BACKUP_SYS_INFO="Backing up system information"
+MSG_BACKUP_SYS_INFO_RU="Резервирую системную информацию"
+
+MSG_BACKUP_SYS_INFO_BACKED="System information backed up (SHA256: ${hash:0:8}...)"
+MSG_BACKUP_SYS_INFO_BACKED_RU="Системная информация зарезервирована (SHA256: ${hash:0:8}...)"
+
+MSG_BACKUP_CREATE_ARCHIVE="Creating backup archive"
+MSG_BACKUP_CREATE_ARCHIVE_RU="Создаю архив бэкапа"
+
+MSG_BACKUP_ARCHIVE_CREATED="Backup archive created: $archive_file ($size)"
+MSG_BACKUP_ARCHIVE_CREATED_RU="Архив бэкапа создан: $archive_file ($size)"
+
+MSG_BACKUP_ARCHIVE_FAILED="Failed to create backup archive"
+MSG_BACKUP_ARCHIVE_FAILED_RU="Не удалось создать архив бэкапа"
+
+MSG_BACKUP_START_SERVICES="Starting services after backup"
+MSG_BACKUP_START_SERVICES_RU="Запускаю сервисы после бэкапа"
+
+MSG_BACKUP_SINGBOX_STARTED="Sing-box started"
+MSG_BACKUP_SINGBOX_STARTED_RU="Sing-box запущен"
+
+MSG_BACKUP_MARZBAN_STARTED="Marzban started"
+MSG_BACKUP_MARZBAN_STARTED_RU="Marzban запущен"
+
+MSG_BACKUP_CLEANUP="Cleaning up old backups"
+MSG_BACKUP_CLEANUP_RU="Очищаю старые бэкапы"
+
+MSG_BACKUP_KEPT="Kept $count backups (retention: ${BACKUP_RETENTION_DAYS} days)"
+MSG_BACKUP_KEPT_RU="Сохранено бэкапов: $count (хранение: ${BACKUP_RETENTION_DAYS} дней)"
+
+MSG_BACKUP_FULL="Performing full backup"
+MSG_BACKUP_FULL_RU="Выполняю полный бэкап"
+
+MSG_BACKUP_FULL_COMPLETE="Full backup completed"
+MSG_BACKUP_FULL_COMPLETE_RU="Полный бэкап завершён"
+
+MSG_BACKUP_CONFIG_MODULE="Configuring backup module"
+MSG_BACKUP_CONFIG_MODULE_RU="Настраиваю модуль резервного копирования"
+
+MSG_BACKUP_ENV_CHECK_FAILED="Backup environment check failed"
+MSG_BACKUP_ENV_CHECK_FAILED_RU="Проверка окружения для бэкапа не удалась"
+
+MSG_BACKUP_GEN_KEY2="Generating encryption key..."
+MSG_BACKUP_GEN_KEY2_RU="Генерирую ключ шифрования..."
+
+MSG_BACKUP_KEY_GENERATED2="Encryption key generated: ${key_file}"
+MSG_BACKUP_KEY_GENERATED2_RU="Ключ шифрования сгенерирован: ${key_file}"
+
+MSG_BACKUP_KEY_EXISTS="Encryption key already exists"
+MSG_BACKUP_KEY_EXISTS_RU="Ключ шифрования уже существует"
+
+MSG_BACKUP_MODULE_CONFIGURED="Backup module configured"
+MSG_BACKUP_MODULE_CONFIGURED_RU="Модуль резервного копирования настроен"
+
+MSG_BACKUP_ENABLING="Enabling backup module"
+MSG_BACKUP_ENABLING_RU="Включаю модуль резервного копирования"
+
+MSG_BACKUP_CRON_NOT_FOUND="Cron not installed, installing..."
+MSG_BACKUP_CRON_NOT_FOUND_RU="Cron не установлен, устанавливаю..."
+
+MSG_BACKUP_CRON_ADDED="Daily backup cron job added"
+MSG_BACKUP_CRON_ADDED_RU="Ежедневный cron job для бэкапа добавлен"
+
+MSG_BACKUP_CRON_EXISTS="Backup cron job already exists"
+MSG_BACKUP_CRON_EXISTS_RU="Cron job для бэкапа уже существует"
+
+MSG_BACKUP_MODULE_ENABLED="Backup module enabled"
+MSG_BACKUP_MODULE_ENABLED_RU="Модуль резервного копирования включён"
+
+MSG_BACKUP_DISABLING="Disabling backup module"
+MSG_BACKUP_DISABLING_RU="Отключаю модуль резервного копирования"
+
+MSG_BACKUP_CRON_REMOVED="Backup cron job removed"
+MSG_BACKUP_CRON_REMOVED_RU="Cron job для бэкапа удалён"
+
+MSG_BACKUP_CRON_NOT_FOUND2="Backup cron job not found"
+MSG_BACKUP_CRON_NOT_FOUND2_RU="Cron job для бэкапа не найден"
+
+MSG_BACKUP_MODULE_DISABLED="Backup module disabled"
+MSG_BACKUP_MODULE_DISABLED_RU="Модуль резервного копирования отключён"
+
+MSG_BACKUP_QUICK="Performing quick backup"
+MSG_BACKUP_QUICK_RU="Выполняю быстрый бэкап"
+
+MSG_BACKUP_QUICK_COMPLETE="Quick backup completed"
+MSG_BACKUP_QUICK_COMPLETE_RU="Быстрый бэкап завершён"
+
+MSG_BACKUP_LISTING="Listing available backups"
+MSG_BACKUP_LISTING_RU="Список доступных бэкапов"
+
+MSG_BACKUP_CLEANUP_OLD="Removing old backups"
+MSG_BACKUP_CLEANUP_OLD_RU="Удаление старых бэкапов"
+
+# ══════════════════════════════════════════════════════════════
+# MODULE: MONITORING
+# ══════════════════════════════════════════════════════════════
+MSG_MONITOR_INIT="Initializing monitoring module"
+MSG_MONITOR_INIT_RU="Инициализация модуля мониторинга"
+
+MSG_MONITOR_DIRS_CREATED="Monitoring directories created"
+MSG_MONITOR_DIRS_CREATED_RU="Директории для мониторинга созданы"
+
+MSG_MONITOR_CHECK_SERVICES="Checking services status"
+MSG_MONITOR_CHECK_SERVICES_RU="Проверка статуса сервисов"
+
+MSG_MONITOR_ALL_ACTIVE="All services are active"
+MSG_MONITOR_ALL_ACTIVE_RU="Все сервисы активны"
+
+MSG_MONITOR_SOME_INACTIVE="Some services are inactive"
+MSG_MONITOR_SOME_INACTIVE_RU="Некоторые сервисы не активны"
+
+MSG_MONITOR_CHECK_RESOURCES="Checking system resources"
+MSG_MONITOR_CHECK_RESOURCES_RU="Проверка системных ресурсов"
+
+MSG_MONITOR_CPU_HIGH="CPU usage is high: ${cpu_usage}%"
+MSG_MONITOR_CPU_HIGH_RU="Высокое использование CPU: ${cpu_usage}%"
+
+MSG_MONITOR_RAM_HIGH="RAM usage is high: ${ram_usage}%"
+MSG_MONITOR_RAM_HIGH_RU="Высокое использование RAM: ${ram_usage}%"
+
+MSG_MONITOR_DISK_HIGH="Disk usage is high: ${disk_usage}%"
+MSG_MONITOR_DISK_HIGH_RU="Высокое использование диска: ${disk_usage}%"
+
+MSG_MONITOR_RESOURCE_ALERTS="Found $alerts resource alerts"
+MSG_MONITOR_RESOURCE_ALERTS_RU="Найдено предупреждений о ресурсах: $alerts"
+
+MSG_MONITOR_RESOURCES_OK="Resource usage is normal"
+MSG_MONITOR_RESOURCES_OK_RU="Использование ресурсов в норме"
+
+MSG_MONITOR_CHECK_NETWORK="Checking network connectivity"
+MSG_MONITOR_CHECK_NETWORK_RU="Проверка сетевого соединения"
+
+MSG_MONITOR_NETWORK_REACHABLE="Network: reachable to $host"
+MSG_MONITOR_NETWORK_REACHABLE_RU="Сеть: доступно соединение с $host"
+
+MSG_MONITOR_NETWORK_DOWN="Network: no connectivity"
+MSG_MONITOR_NETWORK_DOWN_RU="Сеть: нет соединения"
+
+MSG_MONITOR_CHECK_SSL="Checking SSL certificates"
+MSG_MONITOR_CHECK_SSL_RU="Проверка SSL сертификатов"
+
+MSG_MONITOR_SSL_CHECKING="Checking SSL certificate for: $domain"
+MSG_MONITOR_SSL_CHECKING_RU="Проверка SSL сертификата для: $domain"
+
+MSG_MONITOR_SSL_VALID="SSL certificate valid: $domain"
+MSG_MONITOR_SSL_VALID_RU="SSL сертификат действителен: $domain"
+
+MSG_MONITOR_SSL_FAILED="SSL certificate check failed: $domain"
+MSG_MONITOR_SSL_FAILED_RU="Проверка SSL сертификата не удалась: $domain"
+
+MSG_MONITOR_SSL_ALERT="$failed SSL certificate checks failed"
+MSG_MONITOR_SSL_ALERT_RU="Проверок SSL сертификатов не удалось: $failed"
+
+MSG_MONITOR_CHECK_MARZBAN_LOGS="Checking Marzban logs for errors"
+MSG_MONITOR_CHECK_MARZBAN_LOGS_RU="Проверка логов Marzban на ошибки"
+
+MSG_MONITOR_MARZBAN_ERRORS="Found $errors errors in Marzban logs (last hour)"
+MSG_MONITOR_MARZBAN_ERRORS_RU="Найдено ошибок в логах Marzban (за последний час): $errors"
+
+MSG_MONITOR_MARZBAN_NO_ERRORS="No errors in Marzban logs (last hour)"
+MSG_MONITOR_MARZBAN_NO_ERRORS_RU="Нет ошибок в логах Marzban (за последний час)"
+
+MSG_MONITOR_CHECK_SINGBOX_LOGS="Checking Sing-box logs for errors"
+MSG_MONITOR_CHECK_SINGBOX_LOGS_RU="Проверка логов Sing-box на ошибки"
+
+MSG_MONITOR_SINGBOX_ERRORS="Found $errors errors in Sing-box logs"
+MSG_MONITOR_SINGBOX_ERRORS_RU="Найдено ошибок в логах Sing-box: $errors"
+
+MSG_MONITOR_SINGBOX_NO_ERRORS="No errors in Sing-box logs"
+MSG_MONITOR_SINGBOX_NO_ERRORS_RU="Нет ошибок в логах Sing-box"
+
+MSG_MONITOR_CHECK_FAIL2BAN_LOGS="Checking Fail2ban logs"
+MSG_MONITOR_CHECK_FAIL2BAN_LOGS_RU="Проверка логов Fail2ban"
+
+MSG_MONITOR_FAIL2BAN_BANS="Fail2ban: currently banned $bans IPs"
+MSG_MONITOR_FAIL2BAN_BANS_RU="Fail2ban: сейчас забанено IP: $bans"
+
+MSG_MONITOR_HEALTH_CHECK="Performing system health check"
+MSG_MONITOR_HEALTH_CHECK_RU="Выполняю проверку здоровья системы"
+
+MSG_MONITOR_HEALTHY="System is healthy"
+MSG_MONITOR_HEALTHY_RU="Система здорова"
+
+MSG_MONITOR_DEGRADED="System health is degraded"
+MSG_MONITOR_DEGRADED_RU="Здоровье системы ухудшено"
+
+MSG_MONITOR_CRITICAL="System health is critical"
+MSG_MONITOR_CRITICAL_RU="Критическое состояние системы"
+
+MSG_MONITOR_GENERATE_REPORT="Generating system report"
+MSG_MONITOR_GENERATE_REPORT_RU="Генерирую отчёт о системе"
+
+MSG_MONITOR_REPORT_GENERATED="Report generated: $report_file"
+MSG_MONITOR_REPORT_GENERATED_RU="Отчёт сгенерирован: $report_file"
+
+MSG_MONITOR_CONFIG_MODULE="Configuring monitoring module"
+MSG_MONITOR_CONFIG_MODULE_RU="Настраиваю модуль мониторинга"
+
+MSG_MONITOR_CONFIG_CREATED="Configuration file created: ${config_file}"
+MSG_MONITOR_CONFIG_CREATED_RU="Файл конфигурации создан: ${config_file}"
+
+MSG_MONITOR_TOOL_NOT_FOUND="Required tool not found: $tool"
+MSG_MONITOR_TOOL_NOT_FOUND_RU="Требуемый инструмент не найден: $tool"
+
+MSG_MONITOR_MODULE_CONFIGURED="Monitoring module configured"
+MSG_MONITOR_MODULE_CONFIGURED_RU="Модуль мониторинга настроен"
+
+MSG_MONITOR_ENABLING="Enabling monitoring module"
+MSG_MONITOR_ENABLING_RU="Включаю модуль мониторинга"
+
+MSG_MONITOR_HOURLY_ADDED="Hourly health check cron job added"
+MSG_MONITOR_HOURLY_ADDED_RU="Ежечасный cron job для проверки здоровья добавлен"
+
+MSG_MONITOR_DAILY_ADDED="Daily report cron job added"
+MSG_MONITOR_DAILY_ADDED_RU="Ежедневный cron job для отчётов добавлен"
+
+MSG_MONITOR_CRON_ADDED="Monitoring cron jobs added"
+MSG_MONITOR_CRON_ADDED_RU="Cron jobs для мониторинга добавлены"
+
+MSG_MONITOR_CRON_EXISTS="Monitoring cron jobs already exist"
+MSG_MONITOR_CRON_EXISTS_RU="Cron jobs для мониторинга уже существуют"
+
+MSG_MONITOR_MODULE_ENABLED="Monitoring module enabled"
+MSG_MONITOR_MODULE_ENABLED_RU="Модуль мониторинга включён"
+
+MSG_MONITOR_DISABLING="Disabling monitoring module"
+MSG_MONITOR_DISABLING_RU="Отключаю модуль мониторинга"
+
+MSG_MONITOR_HEALTH_CRON_REMOVED="Health check cron job removed"
+MSG_MONITOR_HEALTH_CRON_REMOVED_RU="Cron job для проверки здоровья удалён"
+
+MSG_MONITOR_REPORT_CRON_REMOVED="Report cron job removed"
+MSG_MONITOR_REPORT_CRON_REMOVED_RU="Cron job для отчётов удалён"
+
+MSG_MONITOR_CRON_NOT_FOUND="Health check cron job not found"
+MSG_MONITOR_CRON_NOT_FOUND_RU="Cron job для проверки здоровья не найден"
+
+MSG_MONITOR_CRON_NOT_FOUND2="Report cron job not found"
+MSG_MONITOR_CRON_NOT_FOUND2_RU="Cron job для отчётов не найден"
+
+MSG_MONITOR_MODULE_DISABLED="Monitoring module disabled"
+MSG_MONITOR_MODULE_DISABLED_RU="Модуль мониторинга отключён"
+
+# ══════════════════════════════════════════════════════════════
+# MODULE: DECOY-SITE
+# ══════════════════════════════════════════════════════════════
+MSG_DECOY_INSTALL_DEPS="Installing decoy site dependencies"
+MSG_DECOY_INSTALL_DEPS_RU="Установка зависимостей сайта-прикрытия"
+
+MSG_DECOY_DEPS_INSTALLED="Decoy site dependencies installed"
+MSG_DECOY_DEPS_INSTALLED_RU="Зависимости decoy-site установлены"
+
+MSG_DECOY_CONFIGURING="Configuring decoy site"
+MSG_DECOY_CONFIGURING_RU="Настройка сайта-прикрытия"
+
+MSG_DECOY_CONFIGURED="Decoy site configured"
+MSG_DECOY_CONFIGURED_RU="Сайт-прикрытие настроен"
+
+MSG_DECOY_ENABLING="Starting decoy site"
+MSG_DECOY_ENABLING_RU="Запуск сайта-прикрытия"
+
+MSG_DECOY_NGINX_NOT_INSTALLED="nginx not installed — skipping decoy-site"
+MSG_DECOY_NGINX_NOT_INSTALLED_RU="nginx не установлен — пропускаю decoy-site"
+
+MSG_DECOY_CONFIG_NOT_FOUND="Decoy nginx config not found: $NGINX_CONF"
+MSG_DECOY_CONFIG_NOT_FOUND_RU="Конфиг nginx для decoy не найден: $NGINX_CONF"
+
+MSG_DECOY_SKIP_MANUAL="Skipping decoy-site — you can configure manually later"
+MSG_DECOY_SKIP_MANUAL_RU="Пропускаю decoy-site — сможете настроить вручную позже"
+
+MSG_DECOY_NGINX_CONFIG_ERROR="Nginx configuration error: $nginx_test_output"
+MSG_DECOY_NGINX_CONFIG_ERROR_RU="Ошибка конфигурации nginx: $nginx_test_output"
+
+MSG_DECOY_DISABLED_CONFIG_ERROR="Decoy-site disabled due to nginx config error"
+MSG_DECOY_DISABLED_CONFIG_ERROR_RU="Decoy-site отключён из-за ошибки конфигурации nginx"
+
+MSG_DECOY_ROTATION_ENABLED="File rotation enabled (~3 hours)"
+MSG_DECOY_ROTATION_ENABLED_RU="Ротация файлов активирована (~3 часа)"
+
+MSG_DECOY_ROTATION_DISABLED="File rotation disabled (rotation.enabled = false)"
+MSG_DECOY_ROTATION_DISABLED_RU="Ротация файлов отключена (rotation.enabled = false)"
+
+MSG_DECOY_STARTED="Decoy site started on port 443"
+MSG_DECOY_STARTED_RU="Сайт-прикрытие запущен на порту 443"
+
+MSG_DECOY_DISABLED="Decoy site disabled"
+MSG_DECOY_DISABLED_RU="Сайт-прикрытие отключён"
+
+MSG_DECOY_STATUS="Decoy site status"
+MSG_DECOY_STATUS_RU="Статус сайта-прикрытия"
+
+MSG_DECOY_NGINX_ACTIVE="nginx: active"
+MSG_DECOY_NGINX_ACTIVE_RU="nginx: активен"
+
+MSG_DECOY_NGINX_NOT_RUNNING="nginx: not running"
+MSG_DECOY_NGINX_NOT_RUNNING_RU="nginx: не запущен"
+
+MSG_DECOY_CERT_VALID="Certificate: valid until ${expiry}"
+MSG_DECOY_CERT_VALID_RU="Сертификат: действует до ${expiry}"
+
+MSG_DECOY_CERT_NOT_FOUND="Certificate not found: ${cert_file}"
+MSG_DECOY_CERT_NOT_FOUND_RU="Сертификат не найден: ${cert_file}"
+
+MSG_DECOY_FILES_COUNT="Files in /files/: ${file_count} (${total_size:-0})"
+MSG_DECOY_FILES_COUNT_RU="Файлов в /files/: ${file_count} (${total_size:-0})"
+
+MSG_DECOY_ROTATION_ACTIVE="Rotation: active"
+MSG_DECOY_ROTATION_ACTIVE_RU="Ротация: активна"
+
+MSG_DECOY_ROTATION_INACTIVE="Rotation: disabled (rotation.enabled = false)"
+MSG_DECOY_ROTATION_INACTIVE_RU="Ротация: отключена (rotation.enabled = false)"
+
+MSG_DECOY_PROFILE="Profile: template=${template} name='${site_name}' color=${accent_color}"
+MSG_DECOY_PROFILE_RU="Профиль: шаблон=${template} имя='${site_name}' цвет=${accent_color}"
+
+MSG_DECOY_WEBROOT_BUILT="Webroot built: ${fcount} files, ~${total_size} in ${DECOY_WEBROOT}"
+MSG_DECOY_WEBROOT_BUILT_RU="Webroot собран: ${fcount} файлов, ~${total_size} в ${DECOY_WEBROOT}"
+
+MSG_DECOY_NGINX_CONF_WRITTEN="Nginx config written: ${NGINX_CONF} (nginx ${_nginx_ver:-unknown})"
+MSG_DECOY_NGINX_CONF_WRITTEN_RU="Nginx конфиг записан: ${NGINX_CONF} (nginx ${_nginx_ver:-unknown})"
+
+MSG_DECOY_ROTATION_SKIPPED_LOAD="Rotation skipped: load average ${load} >= 2"
+MSG_DECOY_ROTATION_SKIPPED_LOAD_RU="Ротация пропущена: load average ${load} >= 2"
+
+MSG_DECOY_ROTATION_SKIPPED_SPACE="Rotation skipped: low space (${free_mb}MB < 200MB)"
+MSG_DECOY_ROTATION_SKIPPED_SPACE_RU="Ротация пропущена: мало места (${free_mb}MB < 200MB)"
+
+MSG_DECOY_ROTATION_REPLACED="Rotation: replaced $(basename "$old_file") → $(basename "$new_file")"
+MSG_DECOY_ROTATION_REPLACED_RU="Ротация: заменён $(basename "$old_file") → $(basename "$new_file")"
+
+MSG_DECOY_ROTATION_TIMESTAMP="Rotation timestamp updated: ${timestamp}"
+MSG_DECOY_ROTATION_TIMESTAMP_RU="Timestamp ротации обновлён: ${timestamp}"
+
+MSG_DECOY_ROTATION_TS_FAILED="Failed to update timestamp in decoy.json"
+MSG_DECOY_ROTATION_TS_FAILED_RU="Не удалось обновить timestamp в decoy.json"
+
+MSG_DECOY_ROTATION_COMPLETE="Rotation complete: ${replaced} files replaced"
+MSG_DECOY_ROTATION_COMPLETE_RU="Ротация завершена: заменено файлов ${replaced}"
+
+MSG_DECOY_TIMER_CREATED="Rotation timer created (enabled by default)"
+MSG_DECOY_TIMER_CREATED_RU="Таймер ротации создан (включён по умолчанию)"
+
+MSG_DECOY_NO_FILES="No files in ${DECOY_WEBROOT}/files/ — run module_configure first"
+MSG_DECOY_NO_FILES_RU="Нет файлов в ${DECOY_WEBROOT}/files/ — сначала запусти module_configure"
+
+MSG_DECOY_MIKROTIK_SAVED="MikroTik script saved to: $output_file"
+MSG_DECOY_MIKROTIK_SAVED_RU="MikroTik скрипт сохранён в: $output_file"
+
+# ══════════════════════════════════════════════════════════════
+# MODULE: ROLLBACK
+# ══════════════════════════════════════════════════════════════
+MSG_RB_INIT="Initializing rollback module"
+MSG_RB_INIT_RU="Инициализация модуля отката"
+
+MSG_RB_TEMP_CREATED="Rollback temp directory created"
+MSG_RB_TEMP_CREATED_RU="Временная директория для отката создана"
+
+MSG_RB_LISTING="Listing available backups"
+MSG_RB_LISTING_RU="Список доступных бэкапов"
+
+MSG_RB_NO_BACKUPS="No backups found"
+MSG_RB_NO_BACKUPS_RU="Бэкапы не найдены"
+
+MSG_RB_SELECTING="Selecting backup for restore"
+MSG_RB_SELECTING_RU="Выбор бэкапа для восстановления"
+
+MSG_RB_CANCELLED="Rollback cancelled"
+MSG_RB_CANCELLED_RU="Откат отменён"
+
+MSG_RB_INVALID_SELECTION="Invalid selection"
+MSG_RB_INVALID_SELECTION_RU="Некорректный выбор"
+
+MSG_RB_EXTRACTING="Extracting backup archive"
+MSG_RB_EXTRACTING_RU="Распаковка архива бэкапа"
+
+MSG_RB_ENCRYPTED_DETECTED="Encrypted archive detected, decrypting..."
+MSG_RB_ENCRYPTED_DETECTED_RU="Обнаружен зашифрованный архив, расшифровываю..."
+
+MSG_RB_KEY_NOT_FOUND="Encryption key not found: $key_file"
+MSG_RB_KEY_NOT_FOUND_RU="Ключ шифрования не найден: $key_file"
+
+MSG_RB_DECRYPT_FAILED="Failed to decrypt archive"
+MSG_RB_DECRYPT_FAILED_RU="Не удалось расшифровать архив"
+
+MSG_RB_DECRYPTED="Archive decrypted successfully"
+MSG_RB_DECRYPTED_RU="Архив успешно расшифрован"
+
+MSG_RB_EXTRACTED="Backup extracted"
+MSG_RB_EXTRACTED_RU="Бэкап распакован"
+
+MSG_RB_VERIFY="Verifying backup integrity"
+MSG_RB_VERIFY_RU="Проверка целостности бэкапа"
+
+MSG_RB_DB_INTEGRITY_FAILED="Marzban database integrity check FAILED"
+MSG_RB_DB_INTEGRITY_FAILED_RU="Проверка целостности базы данных Marzban НЕ ПРОЙДЕНА"
+
+MSG_RB_DB_INTEGRITY_OK="Marzban database integrity verified"
+MSG_RB_DB_INTEGRITY_OK_RU="Целостность базы данных Marzban проверена"
+
+MSG_RB_CONFIG_INTEGRITY_FAILED="Marzban configuration integrity check FAILED"
+MSG_RB_CONFIG_INTEGRITY_FAILED_RU="Проверка целостности конфигурации Marzban НЕ ПРОЙДЕНА"
+
+MSG_RB_CONFIG_INTEGRITY_OK="Marzban configuration integrity verified"
+MSG_RB_CONFIG_INTEGRITY_OK_RU="Целостность конфигурации Marzban проверена"
+
+MSG_RB_SINGBOX_INTEGRITY_FAILED="Sing-box configuration integrity check FAILED"
+MSG_RB_SINGBOX_INTEGRITY_FAILED_RU="Проверка целостности конфигурации Sing-box НЕ ПРОЙДЕНА"
+
+MSG_RB_SINGBOX_INTEGRITY_OK="Sing-box configuration integrity verified"
+MSG_RB_SINGBOX_INTEGRITY_OK_RU="Целостность конфигурации Sing-box проверена"
+
+MSG_RB_INTEGRITY_FAILED="Integrity checks failed: $issues files corrupted"
+MSG_RB_INTEGRITY_FAILED_RU="Проверки целостности не пройдены: файлов повреждено $issues"
+
+MSG_RB_INTEGRITY_OK="All integrity checks passed"
+MSG_RB_INTEGRITY_OK_RU="Все проверки целостности пройдены"
+
+MSG_RB_STOPPING="Stopping services for rollback"
+MSG_RB_STOPPING_RU="Остановка сервисов для отката"
+
+MSG_RB_RESTORE_DB="Restoring Marzban database"
+MSG_RB_RESTORE_DB_RU="Восстановление базы данных Marzban"
+
+MSG_RB_DB_BACKUP_NOT_FOUND="Marzban database backup not found"
+MSG_RB_DB_BACKUP_NOT_FOUND_RU="Бэкап базы данных Marzban не найден"
+
+MSG_RB_DB_INTEGRITY_CHECK_FAILED="Marzban database integrity check failed, aborting restore"
+MSG_RB_DB_INTEGRITY_CHECK_FAILED_RU="Проверка целостности базы данных Marzban не удалась, откат прерван"
+
+MSG_RB_DB_RESTORED="Marzban database restored"
+MSG_RB_DB_RESTORED_RU="База данных Marzban восстановлена"
+
+MSG_RB_RESTORE_CONFIG="Restoring Marzban configuration"
+MSG_RB_RESTORE_CONFIG_RU="Восстановление конфигурации Marzban"
+
+MSG_RB_ENV_INTEGRITY_FAILED="Marzban .env integrity check failed, skipping restore"
+MSG_RB_ENV_INTEGRITY_FAILED_RU="Проверка целостности .env Marzban не удалась, пропускаю восстановление"
+
+MSG_RB_ENV_RESTORED="Marzban .env restored"
+MSG_RB_ENV_RESTORED_RU="Marzban .env восстановлен"
+
+MSG_RB_ENV_BACKUP_NOT_FOUND="Marzban .env backup not found"
+MSG_RB_ENV_BACKUP_NOT_FOUND_RU="Бэкап Marzban .env не найден"
+
+MSG_RB_TEMPLATE_INTEGRITY_FAILED="Sing-box template integrity check failed, skipping restore"
+MSG_RB_TEMPLATE_INTEGRITY_FAILED_RU="Проверка целостности шаблона Sing-box не удалась, пропускаю восстановление"
+
+MSG_RB_TEMPLATE_RESTORED="Sing-box template restored"
+MSG_RB_TEMPLATE_RESTORED_RU="Шаблон Sing-box восстановлен"
+
+MSG_RB_TEMPLATE_BACKUP_NOT_FOUND="Sing-box template backup not found"
+MSG_RB_TEMPLATE_BACKUP_NOT_FOUND_RU="Бэкап шаблона Sing-box не найден"
+
+MSG_RB_RESTORE_SINGBOX="Restoring Sing-box configuration"
+MSG_RB_RESTORE_SINGBOX_RU="Восстановление конфигурации Sing-box"
+
+MSG_RB_SINGBOX_INTEGRITY_CHECK_FAILED="Sing-box configuration integrity check failed, skipping restore"
+MSG_RB_SINGBOX_INTEGRITY_CHECK_FAILED_RU="Проверка целостности конфигурации Sing-box не удалась, пропускаю восстановление"
+
+MSG_RB_SINGBOX_BACKUP_NOT_FOUND="Sing-box configuration backup not found"
+MSG_RB_SINGBOX_BACKUP_NOT_FOUND_RU="Бэкап конфигурации Sing-box не найден"
+
+MSG_RB_SINGBOX_RESTORED="Sing-box configuration restored"
+MSG_RB_SINGBOX_RESTORED_RU="Конфигурация Sing-box восстановлена"
+
+MSG_RB_RESTORE_SSL="Restoring SSL certificates"
+MSG_RB_RESTORE_SSL_RU="Восстановление SSL сертификатов"
+
+MSG_RB_SSL_BACKUP_NOT_FOUND="SSL certificates backup not found"
+MSG_RB_SSL_BACKUP_NOT_FOUND_RU="Бэкап SSL сертификатов не найден"
+
+MSG_RB_SSL_RESTORED="SSL certificates restored"
+MSG_RB_SSL_RESTORED_RU="SSL сертификаты восстановлены"
+
+MSG_RB_RESTORE_KEYS="Restoring keys and credentials"
+MSG_RB_RESTORE_KEYS_RU="Восстановление ключей и учётных данных"
+
+MSG_RB_CREDS_RESTORED="Credentials restored"
+MSG_RB_CREDS_RESTORED_RU="Учётные данные восстановлены"
+
+MSG_RB_CREDS_BACKUP_NOT_FOUND="Credentials backup not found"
+MSG_RB_CREDS_BACKUP_NOT_FOUND_RU="Бэкап учётных данных не найден"
+
+MSG_RB_KEY_RESTORED="Age key restored"
+MSG_RB_KEY_RESTORED_RU="Ключ Age восстановлен"
+
+MSG_RB_KEY_BACKUP_NOT_FOUND="Age key backup not found"
+MSG_RB_KEY_BACKUP_NOT_FOUND_RU="Бэкап ключа Age не найден"
+
+MSG_RB_STARTING="Starting services after rollback"
+MSG_RB_STARTING_RU="Запуск сервисов после отката"
+
+MSG_RB_FULL="Performing full rollback with integrity checks"
+MSG_RB_FULL_RU="Выполняю полный откат с проверками целостности"
+
+MSG_RB_FULL_COMPLETE="Full rollback completed"
+MSG_RB_FULL_COMPLETE_RU="Полный откат завершён"
+
+MSG_RB_LATEST="Performing rollback from latest backup"
+MSG_RB_LATEST_RU="Выполняю откат из последнего бэкапа"
+
+MSG_RB_USING_LATEST="Using latest backup: $(basename "$latest_backup")"
+MSG_RB_USING_LATEST_RU="Использую последний бэкап: $(basename "$latest_backup")"
+
+MSG_RB_LATEST_COMPLETE="Rollback from latest backup completed"
+MSG_RB_LATEST_COMPLETE_RU="Откат из последнего бэкапа завершён"
+
+MSG_RB_CONFIG_MODULE="Configuring rollback module"
+MSG_RB_CONFIG_MODULE_RU="Настройка модуля отката"
+
+MSG_RB_NO_BACKUPS_DIR="No backups found in ${BACKUP_ARCHIVE_DIR}"
+MSG_RB_NO_BACKUPS_DIR_RU="Бэкапы не найдены в ${BACKUP_ARCHIVE_DIR}"
+
+MSG_RB_RUN_BACKUP_FIRST="Run backup module first to create backups"
+MSG_RB_RUN_BACKUP_FIRST_RU="Сначала запустите модуль резервного копирования для создания бэкапов"
+
+MSG_RB_LATEST_BACKUP="Latest backup: $(basename "$latest_backup")"
+MSG_RB_LATEST_BACKUP_RU="Последний бэкап: $(basename "$latest_backup")"
+
+MSG_RB_BACKUP_VERIFIED="Backup integrity verified"
+MSG_RB_BACKUP_VERIFIED_RU="Целостность бэкапа проверена"
+
+MSG_RB_BACKUP_CHECK_FAILED="Backup integrity check failed"
+MSG_RB_BACKUP_CHECK_FAILED_RU="Проверка целостности бэкапа не удалась"
+
+MSG_RB_MODULE_CONFIGURED="Rollback module configured"
+MSG_RB_MODULE_CONFIGURED_RU="Модуль отката настроен"
+
+MSG_RB_ENABLING="Enabling rollback module"
+MSG_RB_ENABLING_RU="Включение модуля отката"
+
+MSG_RB_UTILITY="Rollback module is a utility module"
+MSG_RB_UTILITY_RU="Модуль отката — утилитный модуль"
+
+MSG_RB_NO_SERVICES_ENABLE="No services to enable"
+MSG_RB_NO_SERVICES_ENABLE_RU="Нет сервисов для включения"
+
+MSG_RB_USE_MODULE_ROLLBACK="Use 'module_rollback' to perform rollback"
+MSG_RB_USE_MODULE_ROLLBACK_RU="Используйте 'module_rollback' для выполнения отката"
+
+MSG_RB_MODULE_READY="Rollback module ready"
+MSG_RB_MODULE_READY_RU="Модуль отката готов"
+
+MSG_RB_DISABLING="Disabling rollback module"
+MSG_RB_DISABLING_RU="Отключение модуля отката"
+
+MSG_RB_NO_SERVICES_DISABLE="No services to disable"
+MSG_RB_NO_SERVICES_DISABLE_RU="Нет сервисов для отключения"
+
+MSG_RB_MODULE_DISABLED="Rollback module disabled"
+MSG_RB_MODULE_DISABLED_RU="Модуль отката отключён"
+
+# ══════════════════════════════════════════════════════════════
+# MODULE: TRAFFIC-SHAPING
+# ══════════════════════════════════════════════════════════════
+MSG_TS_CHECK="Checking tc/netem"
+MSG_TS_CHECK_RU="Проверка tc/netem"
+
+MSG_TS_AVAILABLE="tc/netem available (no additional dependencies)"
+MSG_TS_AVAILABLE_RU="tc/netem доступен (без дополнительных зависимостей)"
+
+MSG_TS_GENERATE="Generating shaping profile"
+MSG_TS_GENERATE_RU="Генерация профиля шейпинга"
+
+MSG_TS_PROFILE_SAVED="Shaping profile saved"
+MSG_TS_PROFILE_SAVED_RU="Профиль шейпинга сохранён"
+
+MSG_TS_APPLY="Applying tc rules"
+MSG_TS_APPLY_RU="Применение tc-правил"
+
+MSG_TS_ACTIVE="Traffic shaping active"
+MSG_TS_ACTIVE_RU="Шейпинг трафика активен"
+
+MSG_TS_DISABLED="Shaping disabled, tc rules reset"
+MSG_TS_DISABLED_RU="Шейпинг отключён, tc-правила сброшены"
+
+MSG_TS_STATUS="Traffic shaping status"
+MSG_TS_STATUS_RU="Статус шейпинга трафика"
+
+MSG_TS_SERVICE_ACTIVE="Service ${TS_SERVICE}: active"
+MSG_TS_SERVICE_ACTIVE_RU="Сервис ${TS_SERVICE}: активен"
+
+MSG_TS_SERVICE_NOT_RUNNING="Service ${TS_SERVICE}: not running"
+MSG_TS_SERVICE_NOT_RUNNING_RU="Сервис ${TS_SERVICE}: не запущен"
+
+MSG_TS_CURRENT_RULES="Current tc rules (${iface}):"
+MSG_TS_CURRENT_RULES_RU="Текущие правила tc (${iface}):"
+
+MSG_TS_UNINSTALL="Uninstalling traffic-shaping"
+MSG_TS_UNINSTALL_RU="Удаление traffic-shaping"
+
+MSG_TS_REMOVED="Traffic-shaping removed"
+MSG_TS_REMOVED_RU="Traffic-shaping удалён"
