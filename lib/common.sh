@@ -153,13 +153,13 @@ get_external_ip() {
 
 # Запись в лог файл
 log_message() {
-  local level="$1"
-  local message="$2"
+  local level="${1:-INFO}"
+  local message="${2:-}"
   local log_file="${3:-/var/log/cubiveil.log}"
 
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] [${level}] ${message}" >>"$log_file"
 }
 
-log_info() { log_message "INFO" "$1" "$2"; }
-log_warn() { log_message "WARN" "$1" "$2"; }
-log_error() { log_message "ERROR" "$1" "$2"; }
+log_info() { log_message "INFO" "$1" "${2:-}"; }
+log_warn() { log_message "WARN" "$1" "${2:-}"; }
+log_error() { log_message "ERROR" "$1" "${2:-}"; }
