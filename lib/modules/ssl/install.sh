@@ -359,7 +359,7 @@ ssl_enable() {
     cert_count="${cert_count:-0}"
   fi
 
-  if (( cert_count == 0 )); then
+  if ((cert_count == 0)); then
     log_warn "No SSL certificates found"
     return 0
   fi
