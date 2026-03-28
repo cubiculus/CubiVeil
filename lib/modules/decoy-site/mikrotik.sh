@@ -171,7 +171,7 @@ decoy_save_mikrotik_script() {
     echo "# ══════════════════════════════════════════════════════════════"
     echo ""
     decoy_print_mikrotik_script
-  } > "$output_file"
+  } >"$output_file"
 
   chmod 644 "$output_file" 2>/dev/null || true
   log_info "MikroTik script saved to: $output_file"

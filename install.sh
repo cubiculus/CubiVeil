@@ -459,7 +459,7 @@ prompt_inputs() {
 # Шаг в обёртке для показа прогресса [x/N]
 step_module() {
   local label="$1"
-  CURRENT_STEP=$((CURRENT_STEP+1))
+  CURRENT_STEP=$((CURRENT_STEP + 1))
   step "$CURRENT_STEP" "$TOTAL_STEPS" "$label"
 }
 # Экспортируем глобальные переменные, нужные модулям

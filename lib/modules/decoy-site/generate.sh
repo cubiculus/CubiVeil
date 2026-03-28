@@ -366,7 +366,7 @@ decoy_write_nginx_conf() {
     _nginx_major=$(echo "$_nginx_ver" | cut -d. -f1)
     _nginx_minor=$(echo "$_nginx_ver" | cut -d. -f2)
 
-    if [[ $_nginx_major -gt 1 || ( $_nginx_major -eq 1 && $_nginx_minor -ge 25 ) ]]; then
+    if [[ $_nginx_major -gt 1 || ($_nginx_major -eq 1 && $_nginx_minor -ge 25) ]]; then
       # nginx >= 1.25.1: отдельная директива
       HTTP2_LISTEN="listen 443 ssl;"
       HTTP2_DIRECTIVE="http2 on;"

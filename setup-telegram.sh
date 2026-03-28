@@ -350,7 +350,10 @@ print_finish() {
 
   echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${PLAIN}"
   if [[ "$LANG_NAME" == "Русский" ]]; then
-    echo -e "${GREEN}║  $(get_tg_str FINAL_SUCCESS_TITLE_RU)$(printf '%*s' $((48 - ${#$(get_tg_str FINAL_SUCCESS_TITLE_RU)})) '')║${PLAIN}"
+    local _title_ru _padding
+    _title_ru="$(get_tg_str FINAL_SUCCESS_TITLE_RU)"
+    _padding=$((48 - ${#_title_ru}))
+    echo -e "${GREEN}║  ${_title_ru}$(printf '%*s' "$_padding" '') ║${PLAIN}"
     echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${PLAIN}"
     echo ""
     echo -e "${CYAN}  $(get_tg_str FINAL_BOT_SECTION_RU)${PLAIN}"
@@ -388,7 +391,10 @@ print_finish() {
     echo -e "${YELLOW}  $(get_tg_str FINAL_NAVIGATION_RU)${PLAIN}"
     echo ""
   else
-    echo -e "${GREEN}║  $(get_tg_str FINAL_SUCCESS_TITLE)$(printf '%*s' $((48 - ${#$(get_tg_str FINAL_SUCCESS_TITLE)})) '')║${PLAIN}"
+    local _title_en _padding_en
+    _title_en="$(get_tg_str FINAL_SUCCESS_TITLE)"
+    _padding_en=$((48 - ${#_title_en}))
+    echo -e "${GREEN}║  ${_title_en}$(printf '%*s' "$_padding_en" '') ║${PLAIN}"
     echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${PLAIN}"
     echo ""
     echo -e "${CYAN}  $(get_tg_str FINAL_BOT_SECTION)${PLAIN}"

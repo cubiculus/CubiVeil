@@ -44,7 +44,6 @@ WARNINGS=()
 # Внутренние log_step (submodule) можно отключить, чтобы не показывать слишком много разделителей
 CUBIVEIL_HIDE_LOG_STEP="true"
 
-
 # ── Инициализация логирования / Logging Initialization ────
 
 # Инициализация лог-системы
