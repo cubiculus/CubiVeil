@@ -37,10 +37,10 @@ ts_check_compatibility() {
     if [[ "$existing_qdisc" -gt 0 ]]; then
       log_warn "Обнаружены существующие tc правила на $iface"
       log_warn "Это может конфликтовать с traffic-shaping"
-      # В production-режиме спрашиваем, в тестах просто пропускаем
-      if [[ "${DRY_RUN:-false}" != "true" && "${CI:-false}" != "true" ]]; then
+      # В dry-run режиме спрашиваем, в автоматическом — пропускаем
+      if [[ "${DRY_RUN:-false}" == "true" ]]; then
         # Проверяем интерактивный режим через переменную окружения
-        if [[ "${INTERACTIVE_MODE:-false}" == "true" ]]; then
+        if [[ "${INTERACTIVE_MODE:-false}" == "true" && -t 0 ]]; then
           read -rp "  Продолжить? (y/n): " cont
           if [[ "$cont" != "y" && "$cont" != "Y" ]]; then
             log_info "Отмена установки traffic-shaping"
@@ -49,6 +49,9 @@ ts_check_compatibility() {
         else
           log_info "Автоматический режим: продолжаем без подтверждения"
         fi
+      else
+        # Не dry-run — просто продолжаем
+        log_info "Продолжаем с существующими правилами tc"
       fi
     fi
   fi
