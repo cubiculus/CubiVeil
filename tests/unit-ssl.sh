@@ -110,7 +110,7 @@ test_ssl_generate_self_signed() {
     return
   fi
 
-  local expected_files=("privkey.pem" "cert.pem" "fullchain.pem")
+  local expected_files=("key.pem" "cert.pem" "fullchain.pem")
   for f in "${expected_files[@]}"; do
     if [[ ! -f "$tmp_dir/$f" ]]; then
       fail "ssl_generate_self_signed: РЅРµ СЃРѕР·РґР°Р» $f"

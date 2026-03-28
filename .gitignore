@@ -23,6 +23,7 @@ backups/
 *.bak
 *.swp
 *~
+*.txt
 
 # --- Archives ---
 *.tar.gz

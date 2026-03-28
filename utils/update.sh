@@ -36,10 +36,15 @@ ROOT_FILES=(
   "install.sh"
   "setup-telegram.sh"
   "run-tests.sh"
-  "lang.sh"
   "pyproject.toml"
   ".version"
   ".pre-commit-config.yaml"
+)
+
+# Файлы локализации
+LANG_FILES=(
+  "lang/main.sh"
+  "lang/telegram.sh"
 )
 
 # Файлы библиотеки
@@ -52,7 +57,6 @@ LIB_FILES=(
   "fallback.sh"
   "i18n.sh"
   "manifest.sh"
-  "install-steps.sh"
   "test-utils.sh"
 )
 
@@ -64,7 +68,6 @@ TEST_FILES=(
   "unit-telegram.sh"
   "unit-install.sh"
   "unit-lang.sh"
-  "unit-install-steps.sh"
   "unit-utilities.sh"
 )
 
@@ -225,6 +228,15 @@ step_download_update() {
     fi
   done
 
+  # Загружаем lang/*.sh
+  mkdir -p "${temp_dir}/lang"
+  for file in "${LANG_FILES[@]}"; do
+    if ! curl -sf --max-time 30 "${RAW_URL}/${file}" -o "${temp_dir}/${file}" 2>/dev/null; then
+      warning "Не удалось загрузить ${file}"
+      download_failed=1
+    fi
+  done
+
   # Загружаем lib/*.sh
   mkdir -p "${temp_dir}/lib"
   for file in "${LIB_FILES[@]}"; do
@@ -294,6 +306,11 @@ step_install_update() {
         cp "${TEMP_DIR}/${file}" "${PROJECT_DIR}/${file}"
       fi
     done
+
+    # Копируем lang
+    if [[ -d "${TEMP_DIR}/lang" ]]; then
+      cp -rp "${TEMP_DIR}/lang/"* "${PROJECT_DIR}/lang/" 2>/dev/null || true
+    fi
 
     # Копируем lib
     if [[ -d "${TEMP_DIR}/lib" ]]; then

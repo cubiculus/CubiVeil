@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 # в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—
 # в•‘        CubiVeil Unit Tests - Utilities                    в•‘
 # в•‘        РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СѓС‚РёР»РёС‚                                 в•‘
@@ -123,8 +123,8 @@ test_localization() {
   )
 
   for util in "${utilities[@]}"; do
-    # РџСЂРѕРІРµСЂРєР° РїРѕРґРєР»СЋС‡РµРЅРёСЏ lang.sh
-    if grep -q 'source.*lang.sh\|source.*fallback.sh' "${SCRIPT_DIR}/${util}" 2>/dev/null; then
+    # РџСЂРѕРІРµСЂРєР° РїРѕРґРєР»СЋС‡РµРЅРёСЏ lang/main.sh
+    if grep -q 'source.*lang/main.sh\|source.*fallback.sh' "${SCRIPT_DIR}/${util}" 2>/dev/null; then
       pass "Р›РѕРєР°Р»РёР·Р°С†РёСЏ РїРѕРґРєР»СЋС‡РµРЅР°: $util"
       ((TESTS_PASSED++)) || true
     else

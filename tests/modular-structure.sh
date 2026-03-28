@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 # в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—
 # в•‘        CubiVeil Unit Tests - Modular Structure            в•‘
 # в•‘        РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РјРѕРґСѓР»СЊРЅРѕР№ Р°СЂС…РёС‚РµРєС‚СѓСЂС‹                в•‘
@@ -33,41 +33,46 @@ test_directory_structure() {
 
 # в”Ђв”Ђ РўРµСЃС‚: РЅР°Р»РёС‡РёРµ РѕСЃРЅРѕРІРЅС‹С… С„Р°Р№Р»РѕРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_main_files() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ РѕСЃРЅРѕРІРЅС‹С… С„Р°Р№Р»РѕРІ..."
+  info "Тестирование наличия основных файлов..."
 
   local files=(
     "install.sh"
     "setup-telegram.sh"
-    "lang.sh"
     "README.md"
     "run-tests.sh"
   )
 
   for file in "${files[@]}"; do
     if [[ -f "${MODULAR_SCRIPT_DIR}/${file}" ]]; then
-      pass "Р¤Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚: $file"
+      pass "Файл существует: $file"
       ((TESTS_PASSED++)) || true
     else
-      warn "Р¤Р°Р№Р» РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚: $file"
+      warn "Файл отсутствует: $file"
     fi
   done
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: РјРѕРґСѓР»Рё lib в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: модули lib ────────────────────────────────────────────────────────
 test_lib_modules() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РјРѕРґСѓР»РµР№ РІ lib/..."
+  info "Тестирование модулей в lib/..."
 
   local lib_files=(
     "lib/utils.sh"
-    "lib/install-steps.sh"
+    "lib/common.sh"
+    "lib/validation.sh"
+    "lib/security.sh"
+    "lib/output.sh"
+    "lib/fallback.sh"
+    "lib/i18n.sh"
+    "lib/manifest.sh"
   )
 
   for file in "${lib_files[@]}"; do
     if [[ -f "${MODULAR_SCRIPT_DIR}/${file}" ]]; then
-      pass "РњРѕРґСѓР»СЊ СЃСѓС‰РµСЃС‚РІСѓРµС‚: $file"
+      pass "Модуль существует: $file"
       ((TESTS_PASSED++)) || true
     else
-      fail "РњРѕРґСѓР»СЊ РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚: $file"
+      fail "Модуль отсутствует: $file"
     fi
   done
 }
@@ -93,15 +98,15 @@ test_test_files() {
   done
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: СЃРёРЅС‚Р°РєСЃРёСЃ РІСЃРµС… СЃРєСЂРёРїС‚РѕРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: синтаксис всех скриптов ───────────────────────────────────────────
 test_all_syntax() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СЃРёРЅС‚Р°РєСЃРёСЃР° РІСЃРµС… СЃРєСЂРёРїС‚РѕРІ..."
+  info "Тестирование синтаксиса всех скриптов..."
 
   local scripts=(
     "install.sh"
     "setup-telegram.sh"
     "lib/utils.sh"
-    "lib/install-steps.sh"
+    "lib/common.sh"
     "tests/integration-test.sh"
     "tests/unit-utils.sh"
     "tests/unit-telegram.sh"
@@ -112,24 +117,23 @@ test_all_syntax() {
   for script in "${scripts[@]}"; do
     if [[ -f "${MODULAR_SCRIPT_DIR}/${script}" ]]; then
       if bash -n "${MODULAR_SCRIPT_DIR}/${script}" 2>/dev/null; then
-        pass "РЎРёРЅС‚Р°РєСЃРёСЃ OK: $script"
+        pass "Синтаксис OK: $script"
         ((TESTS_PASSED++)) || true
       else
-        fail "РЎРёРЅС‚Р°РєСЃРёС‡РµСЃРєР°СЏ РѕС€РёР±РєР°: $script"
+        fail "Синтаксическая ошибка: $script"
       fi
     fi
   done
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: РёСЃРїРѕР»РЅРёРјРѕСЃС‚СЊ СЃРєСЂРёРїС‚РѕРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: исполнимость скриптов ─────────────────────────────────────────────
 test_executable() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РёСЃРїРѕР»РЅРёРјРѕСЃС‚Рё СЃРєСЂРёРїС‚РѕРІ..."
+  info "Тестирование исполнимости скриптов..."
 
   local exec_scripts=(
     "install.sh"
     "setup-telegram.sh"
     "lib/utils.sh"
-    "lib/install-steps.sh"
     "tests/integration-test.sh"
     "tests/unit-utils.sh"
     "tests/unit-telegram.sh"
@@ -141,53 +145,53 @@ test_executable() {
     local script_path="${MODULAR_SCRIPT_DIR}/${script}"
     if [[ -f "$script_path" ]]; then
       if [[ -x "$script_path" ]]; then
-        pass "РСЃРїРѕР»РЅРёРјС‹Р№: $script"
+        pass "Исполнимый: $script"
         ((TESTS_PASSED++)) || true
       else
-        warn "РќРµ РёСЃРїРѕР»РЅРёРјС‹Р№: $script (chmod +x РјРѕР¶РµС‚ РїРѕРЅР°РґРѕР±РёС‚СЊСЃСЏ)"
+        warn "Не исполнимый: $script (chmod +x может понадобиться)"
       fi
     fi
   done
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: Р·Р°РіСЂСѓР·РєР° РјРѕРґСѓР»РµР№ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: загрузка модулей ──────────────────────────────────────────────────
 test_module_loading() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ Р·Р°РіСЂСѓР·РєРё РјРѕРґСѓР»РµР№..."
+  info "Тестирование загрузки модулей..."
 
-  # Mock Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№
+  # Mock зависимостей
   check_root() { :; }
   check_ubuntu() { :; }
   step() { echo "$1"; }
-  ok() { echo -e "${GREEN}[вњ“]${PLAIN} $1"; }
+  ok() { echo -e "${GREEN}[✓]${PLAIN} $1"; }
   warn() { echo -e "${YELLOW}[!]${PLAIN} $1"; }
   err() {
-    echo -e "${RED}[вњ—]${PLAIN} $1" >&2
+    echo -e "${RED}[✗]${PLAIN} $1" >&2
     exit 1
   }
 
-  # РџСЂРѕРІРµСЂРєР° Р·Р°РіСЂСѓР·РєРё lib/utils.sh
+  # Проверка загрузки lib/utils.sh
   if bash -c "source ${MODULAR_SCRIPT_DIR}/lib/utils.sh 2>&1"; then
-    pass "РњРѕРґСѓР»СЊ Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ: lib/utils.sh"
+    pass "Модуль загружается: lib/utils.sh"
     ((TESTS_PASSED++)) || true
   else
-    fail "РњРѕРґСѓР»СЊ РЅРµ Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ: lib/utils.sh"
+    fail "Модуль не загружается: lib/utils.sh"
   fi
 
-  # РџСЂРѕРІРµСЂРєР° Р·Р°РіСЂСѓР·РєРё lib/install-steps.sh (Р·Р°РІРёСЃРёС‚ РѕС‚ utils.sh)
-  if bash -c "source ${MODULAR_SCRIPT_DIR}/lib/utils.sh && source ${MODULAR_SCRIPT_DIR}/lib/install-steps.sh 2>&1"; then
-    pass "РњРѕРґСѓР»СЊ Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ: lib/install-steps.sh"
+  # Проверка загрузки lib/common.sh
+  if bash -c "source ${MODULAR_SCRIPT_DIR}/lib/common.sh 2>&1"; then
+    pass "Модуль загружается: lib/common.sh"
     ((TESTS_PASSED++)) || true
   else
-    fail "РњРѕРґСѓР»СЊ РЅРµ Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ: lib/install-steps.sh"
+    fail "Модуль не загружается: lib/common.sh"
   fi
 
-  # РџСЂРѕРІРµСЂРєР° Р·Р°РіСЂСѓР·РєРё lang.sh
-  if [[ -f "${MODULAR_SCRIPT_DIR}/lang.sh" ]]; then
-    if bash -c "source ${MODULAR_SCRIPT_DIR}/lang.sh 2>&1"; then
-      pass "РњРѕРґСѓР»СЊ Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ: lang.sh"
+  # Проверка загрузки lang/main.sh
+  if [[ -f "${MODULAR_SCRIPT_DIR}/lang/main.sh" ]]; then
+    if bash -c "source ${MODULAR_SCRIPT_DIR}/lang/main.sh 2>&1"; then
+      pass "Модуль загружается: lang/main.sh"
       ((TESTS_PASSED++)) || true
     else
-      warn "РњРѕРґСѓР»СЊ РЅРµ Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ: lang.sh"
+      warn "Модуль не загружается: lang/main.sh"
     fi
   fi
 }
@@ -230,80 +234,69 @@ test_utils_functions() {
   done
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: С„СѓРЅРєС†РёРё РІ lib/install-steps.sh в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-# shellcheck disable=SC2218
-test_install_steps_functions() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёР№ РІ lib/install-steps.sh..."
+# ── Тест: функции в install.sh ──────────────────────────────────────────────
+test_install_functions() {
+  info "Тестирование функций в install.sh..."
 
-  # Mock Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№
+  # Mock зависимостей
   check_root() { :; }
   check_ubuntu() { :; }
   step() { echo "$1"; }
   step_title() { echo "$1"; }
-  ok() { echo -e "${GREEN}[вњ“]${PLAIN} $1"; }
+  ok() { echo -e "${GREEN}[✓]${PLAIN} $1"; }
   warn() { echo -e "${YELLOW}[!]${PLAIN} $1"; }
   err() {
-    echo -e "${RED}[вњ—]${PLAIN} $1" >&2
+    echo -e "${RED}[✗]${PLAIN} $1" >&2
     exit 1
   }
   info() { echo "[INFO] $1"; }
 
-  # Р—Р°РіСЂСѓР¶Р°РµРј РјРѕРґСѓР»Рё
+  # Загружаем модули
   source "${MODULAR_SCRIPT_DIR}/lib/utils.sh"
-  source "${MODULAR_SCRIPT_DIR}/lib/install-steps.sh"
+  source "${MODULAR_SCRIPT_DIR}/lib/common.sh"
 
   local functions=(
     "prompt_inputs"
-    "step_check_ip_neighborhood"
-    "step_system_update"
-    "step_auto_updates"
-    "step_bbr"
-    "step_firewall"
-    "step_fail2ban"
-    "step_install_singbox"
-    "step_generate_keys_and_ports"
-    "step_install_marzban"
-    "step_ssl"
-    "step_configure"
-    "step_finish"
+    "_step_system"
+    "_step_firewall"
+    "_step_fail2ban"
+    "_step_singbox"
+    "_step_ssl"
+    "_step_marzban"
+    "_step_decoy"
+    "_step_traffic_shaping"
+    "_step_telegram"
+    "_generate_keys_and_ports"
   )
 
   for func in "${functions[@]}"; do
     if declare -f "$func" >/dev/null; then
-      pass "Р¤СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚: $func"
+      pass "Функция существует: $func"
       ((TESTS_PASSED++)) || true
     else
-      fail "Р¤СѓРЅРєС†РёСЏ РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚: $func"
+      fail "Функция отсутствует: $func"
     fi
   done
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: РѕС‚СЃСѓС‚СЃС‚РІРёРµ РґСѓР±Р»РёСЂРѕРІР°РЅРёСЏ РєРѕРґР° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: отсутствие дублирования кода ──────────────────────────────────────
 test_code_duplication() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РѕС‚СЃСѓС‚СЃС‚РІРёСЏ РґСѓР±Р»РёСЂРѕРІР°РЅРёСЏ РєРѕРґР°..."
+  info "Тестирование отсутствия дублирования кода..."
 
-  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ install.sh РЅРµ СЃРѕРґРµСЂР¶РёС‚ РєРѕРґ Telegram Р±РѕС‚Р°
+  # Проверка что install.sh не содержит код Telegram бота
   if ! grep -q 'cubiveil-bot' "${MODULAR_SCRIPT_DIR}/install.sh" 2>/dev/null; then
-    pass "install.sh: РЅРµ СЃРѕРґРµСЂР¶РёС‚ РєРѕРґ Telegram Р±РѕС‚Р° (РїСЂР°РІРёР»СЊРЅРѕ)"
+    pass "install.sh: не содержит код Telegram бота (правильно)"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: СЃРѕРґРµСЂР¶РёС‚ РєРѕРґ Telegram Р±РѕС‚Р° (РґСѓР±Р»РёСЂРѕРІР°РЅРёРµ!)"
+    fail "install.sh: содержит код Telegram бота (дублирование!)"
   fi
 
-  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ lib/utils.sh РЅРµ СЃРѕРґРµСЂР¶РёС‚ СЃРїРµС†РёС„РёС‡РЅС‹Р№ РєРѕРґ СѓСЃС‚Р°РЅРѕРІРєРё
+  # Проверка что lib/utils.sh не содержит специфичный код установки
   if ! grep -q 'step_' "${MODULAR_SCRIPT_DIR}/lib/utils.sh" 2>/dev/null; then
-    pass "lib/utils.sh: РЅРµ СЃРѕРґРµСЂР¶РёС‚ С„СѓРЅРєС†РёРё step_* (РїСЂР°РІРёР»СЊРЅРѕ)"
+    pass "lib/utils.sh: не содержит функции step_* (правильно)"
     ((TESTS_PASSED++)) || true
   else
-    warn "lib/utils.sh: СЃРѕРґРµСЂР¶РёС‚ С„СѓРЅРєС†РёРё step_* (РІРѕР·РјРѕР¶РЅРѕРµ РґСѓР±Р»РёСЂРѕРІР°РЅРёРµ)"
-  fi
-
-  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ lib/install-steps.sh РЅРµ СЃРѕРґРµСЂР¶РёС‚ РѕР±С‰РёРµ СѓС‚РёР»РёС‚С‹
-  if ! grep -q 'gen_random\|gen_hex\|gen_port' "${MODULAR_SCRIPT_DIR}/lib/install-steps.sh" 2>/dev/null; then
-    pass "lib/install-steps.sh: РЅРµ СЃРѕРґРµСЂР¶РёС‚ РѕР±С‰РёРµ СѓС‚РёР»РёС‚С‹ (РїСЂР°РІРёР»СЊРЅРѕ)"
-    ((TESTS_PASSED++)) || true
-  else
-    warn "lib/install-steps.sh: СЃРѕРґРµСЂР¶РёС‚ РѕР±С‰РёРµ СѓС‚РёР»РёС‚С‹ (РІРѕР·РјРѕР¶РЅРѕРµ РґСѓР±Р»РёСЂРѕРІР°РЅРёРµ)"
+    warn "lib/utils.sh: содержит функции step_* (возможное дублирование)"
   fi
 }
 
@@ -349,29 +342,29 @@ test_file_sizes() {
 
 # в”Ђв”Ђ РўРµСЃС‚: РёРЅС‚РµРіСЂР°С†РёСЏ РјРѕРґСѓР»РµР№ РІ install.sh в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_install_sh_integration() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РёРЅС‚РµРіСЂР°С†РёРё РјРѕРґСѓР»РµР№ РІ install.sh..."
+  info "Тестирование интеграции модулей в install.sh..."
 
-  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ install.sh Р·Р°РіСЂСѓР¶Р°РµС‚ РјРѕРґСѓР»Рё
+  # Проверка что install.sh загружает модули
   if grep -q 'source.*lib/utils.sh' "${MODULAR_SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: Р·Р°РіСЂСѓР¶Р°РµС‚ lib/utils.sh"
+    pass "install.sh: загружает lib/utils.sh"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: РЅРµ Р·Р°РіСЂСѓР¶Р°РµС‚ lib/utils.sh"
+    fail "install.sh: не загружает lib/utils.sh"
   fi
 
-  if grep -q 'source.*lib/install-steps.sh' "${MODULAR_SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: Р·Р°РіСЂСѓР¶Р°РµС‚ lib/install-steps.sh"
+  if grep -q 'source.*lib/modules/' "${MODULAR_SCRIPT_DIR}/install.sh"; then
+    pass "install.sh: загружает модули из lib/modules/"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: РЅРµ Р·Р°РіСЂСѓР¶Р°РµС‚ lib/install-steps.sh"
+    fail "install.sh: не загружает модули из lib/modules/"
   fi
 
-  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ install.sh РёСЃРїРѕР»СЊР·СѓРµС‚ С„СѓРЅРєС†РёРё РёР· РјРѕРґСѓР»РµР№
-  if grep -q 'prompt_inputs\|step_check_ip_neighborhood\|step_finish' "${MODULAR_SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: РёСЃРїРѕР»СЊР·СѓРµС‚ С„СѓРЅРєС†РёРё РёР· РјРѕРґСѓР»РµР№"
+  # Проверка что install.sh использует функции из модулей
+  if grep -q 'prompt_inputs\|_step_system\|_step_finish' "${MODULAR_SCRIPT_DIR}/install.sh"; then
+    pass "install.sh: использует функции из модулей"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚ С„СѓРЅРєС†РёРё РёР· РјРѕРґСѓР»РµР№"
+    fail "install.sh: не использует функции из модулей"
   fi
 }
 
@@ -412,7 +405,6 @@ main() {
   test_utils_functions
   echo ""
 
-  test_install_steps_functions
   echo ""
 
   test_code_duplication

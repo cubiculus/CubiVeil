@@ -278,7 +278,7 @@ Checks every 15 minutes. Alert sent only on transition from normal to exceeded.
 
 ### Localization
 
-The project supports Russian and English languages. Switch in `lang.sh`.
+The project supports Russian and English languages. Switch in `lang/main.sh`.
 
 ### Environment Variables
 
@@ -369,10 +369,6 @@ cubiveil/
 ├── run-tests.sh              # Run tests
 ├── .pre-commit-config.yaml   # Pre-commit hooks
 └── README.md                 # Documentation (RU)
-```
-├── lang.sh
-├── run-tests.sh
-└── README.md
 ```
 
 ## 🧪 Testing

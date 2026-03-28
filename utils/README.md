@@ -150,7 +150,7 @@ marzban-cli user delete myuser
 ### Подключение к проекту
 
 Все утилиты автоматически подключают:
-- `lang.sh` — локализация (RU/EN)
+- `lang/main.sh` — локализация (RU/EN)
 - `lib/utils.sh` — общие функции
 - `lib/fallback.sh` — резервная локализация
 

@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 # в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—
 # в•‘        CubiVeil Unit Tests - lang/main.sh                 в•‘
 # в•‘        РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ Р»РѕРєР°Р»РёР·Р°С†РёРё (EN/RU)                  в•‘
@@ -8,6 +8,7 @@ set -euo pipefail
 
 # в”Ђв”Ђ Р—Р°РіСЂСѓР·РєР° С‚РµСЃС‚РёСЂСѓРµРјРѕРіРѕ РјРѕРґСѓР»СЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "${SCRIPT_DIR}/lib/test-utils.sh"
 if [[ ! -f "${SCRIPT_DIR}/lang/main.sh" ]]; then
   echo "РћС€РёР±РєР°: lang/main.sh РЅРµ РЅР°Р№РґРµРЅ"
   exit 1
@@ -55,7 +56,7 @@ test_default_language() {
 
   # Р—Р°РіСЂСѓР¶Р°РµРј РјРѕРґСѓР»СЊ РІ РїРѕРґРїСЂРѕС†РµСЃСЃРµ С‡С‚РѕР±С‹ РЅРµ Р·Р°РіСЂСЏР·РЅСЏС‚СЊ СЃСЂРµРґСѓ
   local lang_name
-  lang_name=$(bash -c "source ${SCRIPT_DIR}/lang.sh && echo \$LANG_NAME" 2>/dev/null)
+  lang_name=$(bash -c "source ${SCRIPT_DIR}/lang/main.sh && echo \$LANG_NAME" 2>/dev/null)
 
   if [[ "$lang_name" == "Р СѓСЃСЃРєРёР№" || "$lang_name" == "English" ]]; then
     pass "РЇР·С‹Рє РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ СѓСЃС‚Р°РЅРѕРІР»РµРЅ: $lang_name"
@@ -69,7 +70,7 @@ test_default_language() {
 test_select_language_function() {
   info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёРё select_language..."
 
-  if bash -c "source ${SCRIPT_DIR}/lang.sh && declare -f select_language >/dev/null 2>&1" 2>/dev/null; then
+  if bash -c "source ${SCRIPT_DIR}/lang/main.sh && declare -f select_language >/dev/null 2>&1" 2>/dev/null; then
     pass "Р¤СѓРЅРєС†РёСЏ select_language СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     ((TESTS_PASSED++)) || true
   else
@@ -81,7 +82,7 @@ test_select_language_function() {
 test_step_title_function() {
   info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёРё step_title..."
 
-  if bash -c "source ${SCRIPT_DIR}/lang.sh && declare -f step_title >/dev/null 2>&1" 2>/dev/null; then
+  if bash -c "source ${SCRIPT_DIR}/lang/main.sh && declare -f step_title >/dev/null 2>&1" 2>/dev/null; then
     pass "Р¤СѓРЅРєС†РёСЏ step_title СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     ((TESTS_PASSED++)) || true
   else
@@ -93,7 +94,7 @@ test_step_title_function() {
 test_get_str_function() {
   info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёРё get_str..."
 
-  if bash -c "source ${SCRIPT_DIR}/lang.sh && declare -f get_str >/dev/null 2>&1" 2>/dev/null; then
+  if bash -c "source ${SCRIPT_DIR}/lang/main.sh && declare -f get_str >/dev/null 2>&1" 2>/dev/null; then
     pass "Р¤СѓРЅРєС†РёСЏ get_str СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     ((TESTS_PASSED++)) || true
   else
@@ -109,7 +110,7 @@ test_colors_defined() {
   local defined=0
 
   for color in "${colors[@]}"; do
-    if bash -c "source ${SCRIPT_DIR}/lang.sh && [[ -n \"\$$color\" ]] && echo 'yes'" 2>/dev/null | grep -q "yes"; then
+    if bash -c "source ${SCRIPT_DIR}/lang/main.sh && [[ -n \"\$$color\" ]] && echo 'yes'" 2>/dev/null | grep -q "yes"; then
       ((defined++))
     fi
   done
@@ -130,7 +131,7 @@ test_output_functions() {
   local defined=0
 
   for func in "${functions[@]}"; do
-    if bash -c "source ${SCRIPT_DIR}/lang.sh && declare -f $func >/dev/null 2>&1" 2>/dev/null; then
+    if bash -c "source ${SCRIPT_DIR}/lang/main.sh && declare -f $func >/dev/null 2>&1" 2>/dev/null; then
       ((defined++))
     fi
   done
@@ -158,7 +159,7 @@ test_en_strings() {
 
   local found=0
   for str in "${en_strings[@]}"; do
-    if grep -q "^${str}=" "${SCRIPT_DIR}/lang.sh" 2>/dev/null; then
+    if grep -q "^${str}=" "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null; then
       ((found++))
     fi
   done
@@ -186,7 +187,7 @@ test_ru_strings() {
 
   local found=0
   for str in "${ru_strings[@]}"; do
-    if grep -q "^${str}=" "${SCRIPT_DIR}/lang.sh" 2>/dev/null; then
+    if grep -q "^${str}=" "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null; then
       ((found++))
     fi
   done
@@ -220,7 +221,7 @@ test_step_titles() {
 
   local found=0
   for str in "${step_strings[@]}"; do
-    if grep -q "^${str}=" "${SCRIPT_DIR}/lang.sh" 2>/dev/null; then
+    if grep -q "^${str}=" "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null; then
       ((found++))
     fi
   done
@@ -254,7 +255,7 @@ test_step_titles_ru() {
 
   local found=0
   for str in "${step_strings[@]}"; do
-    if grep -q "^${str}=" "${SCRIPT_DIR}/lang.sh" 2>/dev/null; then
+    if grep -q "^${str}=" "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null; then
       ((found++))
     fi
   done
@@ -282,7 +283,7 @@ test_telegram_strings() {
 
   local found=0
   for str in "${tg_strings[@]}"; do
-    if grep -q "^${str}" "${SCRIPT_DIR}/lang.sh" 2>/dev/null; then
+    if grep -q "^${str}" "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null; then
       ((found++))
     fi
   done
@@ -310,7 +311,7 @@ test_final_messages() {
 
   local found=0
   for str in "${final_strings[@]}"; do
-    if grep -q "^${str}" "${SCRIPT_DIR}/lang.sh" 2>/dev/null; then
+    if grep -q "^${str}" "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null; then
       ((found++))
     fi
   done
@@ -338,7 +339,7 @@ test_final_messages_ru() {
 
   local found=0
   for str in "${final_strings[@]}"; do
-    if grep -q "^${str}" "${SCRIPT_DIR}/lang.sh" 2>/dev/null; then
+    if grep -q "^${str}" "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null; then
       ((found++))
     fi
   done
@@ -358,7 +359,7 @@ test_step_title_functionality() {
   # Р—Р°РіСЂСѓР¶Р°РµРј РјРѕРґСѓР»СЊ Рё С‚РµСЃС‚РёСЂСѓРµРј С„СѓРЅРєС†РёСЋ
   local output
   output=$(bash -c "
-    source ${SCRIPT_DIR}/lang.sh
+    source ${SCRIPT_DIR}/lang/main.sh
     LANG_NAME='English'
     step_title '1' 'РўРµСЃС‚ RU' 'Test EN'
   " 2>&1)
@@ -372,7 +373,7 @@ test_step_title_functionality() {
 
   # РўРµСЃС‚ РґР»СЏ СЂСѓСЃСЃРєРѕРіРѕ СЏР·С‹РєР°
   output=$(bash -c "
-    source ${SCRIPT_DIR}/lang.sh
+    source ${SCRIPT_DIR}/lang/main.sh
     LANG_NAME='Р СѓСЃСЃРєРёР№'
     step_title '1' 'РўРµСЃС‚ RU' 'Test EN'
   " 2>&1)
@@ -391,8 +392,8 @@ test_localization_completeness() {
 
   # РџРѕРґСЃС‡РёС‚С‹РІР°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ EN Рё RU СЃС‚СЂРѕРє
   local en_count ru_count
-  en_count=$(grep -cE '^[A-Z_]+="[A-Za-z ]+"$' "${SCRIPT_DIR}/lang.sh" 2>/dev/null || echo "0")
-  ru_count=$(grep -cE '^[A-Z_]+_RU=' "${SCRIPT_DIR}/lang.sh" 2>/dev/null || echo "0")
+  en_count=$(grep -cE '^[A-Z_]+="[A-Za-z ]+"$' "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null || echo "0")
+  ru_count=$(grep -cE '^[A-Z_]+_RU=' "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null || echo "0")
 
   info "РќР°Р№РґРµРЅРѕ EN СЃС‚СЂРѕРє: $en_count, RU СЃС‚СЂРѕРє: $ru_count"
 
@@ -416,7 +417,7 @@ test_no_empty_strings() {
 
   # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ РЅРµС‚ СЃС‚СЂРѕРє РІРёРґР° KEY=""
   local empty_count
-  empty_count=$(grep -cE '^[A-Z_]+=""$' "${SCRIPT_DIR}/lang.sh" 2>/dev/null || echo "0")
+  empty_count=$(grep -cE '^[A-Z_]+=""$' "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null || echo "0")
 
   if [[ $empty_count -eq 0 ]]; then
     pass "РџСѓСЃС‚С‹Рµ СЃС‚СЂРѕРєРё Р»РѕРєР°Р»РёР·Р°С†РёРё РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‚"
@@ -433,7 +434,7 @@ test_escaping_correctness() {
   # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ РЅРµС‚ РЅРµСЌРєСЂР°РЅРёСЂРѕРІР°РЅРЅС‹С… РєР°РІС‹С‡РµРє РІРЅСѓС‚СЂРё СЃС‚СЂРѕРє
   # (РїСЂРѕСЃС‚Р°СЏ СЌРІСЂРёСЃС‚РёС‡РµСЃРєР°СЏ РїСЂРѕРІРµСЂРєР°)
   local bad_lines
-  bad_lines=$(grep -n '="[^"]*"[^"]*="' "${SCRIPT_DIR}/lang.sh" 2>/dev/null | head -5 || true)
+  bad_lines=$(grep -n '="[^"]*"[^"]*="' "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null | head -5 || true)
 
   if [[ -z "$bad_lines" ]]; then
     pass "Р­РєСЂР°РЅРёСЂРѕРІР°РЅРёРµ РєР°РІС‹С‡РµРє РєРѕСЂСЂРµРєС‚РЅРѕ"
@@ -447,7 +448,7 @@ test_escaping_correctness() {
 test_check_root_function() {
   info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёРё check_root..."
 
-  if bash -c "source ${SCRIPT_DIR}/lang.sh && declare -f check_root >/dev/null 2>&1" 2>/dev/null; then
+  if bash -c "source ${SCRIPT_DIR}/lang/main.sh && declare -f check_root >/dev/null 2>&1" 2>/dev/null; then
     pass "Р¤СѓРЅРєС†РёСЏ check_root СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     ((TESTS_PASSED++)) || true
   else
@@ -459,7 +460,7 @@ test_check_root_function() {
 test_check_ubuntu_function() {
   info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёРё check_ubuntu..."
 
-  if bash -c "source ${SCRIPT_DIR}/lang.sh && declare -f check_ubuntu >/dev/null 2>&1" 2>/dev/null; then
+  if bash -c "source ${SCRIPT_DIR}/lang/main.sh && declare -f check_ubuntu >/dev/null 2>&1" 2>/dev/null; then
     pass "Р¤СѓРЅРєС†РёСЏ check_ubuntu СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     ((TESTS_PASSED++)) || true
   else
@@ -471,7 +472,7 @@ test_check_ubuntu_function() {
 test_print_banner_function() {
   info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёРё print_banner..."
 
-  if bash -c "source ${SCRIPT_DIR}/lang.sh && declare -f print_banner >/dev/null 2>&1" 2>/dev/null; then
+  if bash -c "source ${SCRIPT_DIR}/lang/main.sh && declare -f print_banner >/dev/null 2>&1" 2>/dev/null; then
     pass "Р¤СѓРЅРєС†РёСЏ print_banner СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     ((TESTS_PASSED++)) || true
   else
@@ -483,10 +484,10 @@ test_print_banner_function() {
 test_integration_with_modules() {
   info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РёРЅС‚РµРіСЂР°С†РёРё СЃ РґСЂСѓРіРёРјРё РјРѕРґСѓР»СЏРјРё..."
 
-  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ lang.sh РјРѕР¶РµС‚ Р±С‹С‚СЊ Р·Р°РіСЂСѓР¶РµРЅ РїРµСЂРµРґ РґСЂСѓРіРёРјРё РјРѕРґСѓР»СЏРјРё
+  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ lang/main.sh РјРѕР¶РµС‚ Р±С‹С‚СЊ Р·Р°РіСЂСѓР¶РµРЅ РїРµСЂРµРґ РґСЂСѓРіРёРјРё РјРѕРґСѓР»СЏРјРё
   local result
   result=$(bash -c "
-    source ${SCRIPT_DIR}/lang.sh
+    source ${SCRIPT_DIR}/lang/main.sh
     source ${SCRIPT_DIR}/lib/utils.sh 2>&1
     echo 'OK'
   " 2>&1)
@@ -503,11 +504,11 @@ test_integration_with_modules() {
 main() {
   echo ""
   echo -e "${YELLOW}в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—${PLAIN}"
-  echo -e "${YELLOW}в•‘        CubiVeil Unit Tests - lang.sh                 в•‘${PLAIN}"
+  echo -e "${YELLOW}в•‘        CubiVeil Unit Tests - lang/main.sh                 в•‘${PLAIN}"
   echo -e "${YELLOW}в•љв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ќ${PLAIN}"
   echo ""
 
-  info "РўРµСЃС‚РёСЂСѓРµРјС‹Р№ РјРѕРґСѓР»СЊ: ${SCRIPT_DIR}/lang.sh"
+  info "РўРµСЃС‚РёСЂСѓРµРјС‹Р№ РјРѕРґСѓР»СЊ: ${SCRIPT_DIR}/lang/main.sh"
   echo ""
 
   # в”Ђв”Ђ Р—Р°РїСѓСЃРє С‚РµСЃС‚РѕРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ

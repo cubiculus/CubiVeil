@@ -277,84 +277,27 @@ test_domain_argument() {
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: install-steps-main.sh СЃСѓС‰РµСЃС‚РІСѓРµС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_install_steps_main_exists() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ lib/steps/install-steps-main.sh..."
-
-  if [[ -f "${SCRIPT_DIR}/lib/steps/install-steps-main.sh" ]]; then
-    pass "lib/steps/install-steps-main.sh: С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚"
-  else
-    fail "lib/steps/install-steps-main.sh: С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ"
-  fi
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: step_ssl_dev С„СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_step_ssl_dev_exists() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёРё step_ssl_dev..."
-
-  if [[ -f "${SCRIPT_DIR}/lib/steps/install-steps-main.sh" ]]; then
-    if grep -q 'step_ssl_dev()' "${SCRIPT_DIR}/lib/steps/install-steps-main.sh"; then
-      pass "step_ssl_dev: С„СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚"
-    else
-      fail "step_ssl_dev: С„СѓРЅРєС†РёСЏ РЅРµ РЅР°Р№РґРµРЅР°"
-    fi
-  else
-    warn "lib/steps/install-steps-main.sh РЅРµ РЅР°Р№РґРµРЅ, РїСЂРѕРїСѓСЃРєР°РµРј С‚РµСЃС‚"
-  fi
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: step_ssl РїСЂРѕРІРµСЂСЏРµС‚ DEV_MODE в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_step_ssl_checks_dev_mode() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ step_ssl: РїСЂРѕРІРµСЂРєР° DEV_MODE..."
-
-  if [[ -f "${SCRIPT_DIR}/lib/steps/install-steps-main.sh" ]]; then
-    if grep -q 'DEV_MODE.*true' "${SCRIPT_DIR}/lib/steps/install-steps-main.sh" ||
-      grep -q 'DEV_MODE:-false' "${SCRIPT_DIR}/lib/steps/install-steps-main.sh"; then
-      pass "step_ssl: РїСЂРѕРІРµСЂСЏРµС‚ DEV_MODE"
-    else
-      fail "step_ssl: РЅРµ РїСЂРѕРІРµСЂСЏРµС‚ DEV_MODE"
-    fi
-  else
-    warn "lib/steps/install-steps-main.sh РЅРµ РЅР°Р№РґРµРЅ, РїСЂРѕРїСѓСЃРєР°РµРј С‚РµСЃС‚"
-  fi
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: openssl РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ self-signed в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_openssl_for_self_signed() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ openssl РґР»СЏ self-signed..."
-
-  if [[ -f "${SCRIPT_DIR}/lib/steps/install-steps-main.sh" ]]; then
-    if grep -q 'openssl.*req.*-x509' "${SCRIPT_DIR}/lib/steps/install-steps-main.sh"; then
-      pass "step_ssl_dev: РёСЃРїРѕР»СЊР·СѓРµС‚ openssl РґР»СЏ self-signed"
-    else
-      fail "step_ssl_dev: РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚ openssl РґР»СЏ self-signed"
-    fi
-  else
-    warn "lib/steps/install-steps-main.sh РЅРµ РЅР°Р№РґРµРЅ, РїСЂРѕРїСѓСЃРєР°РµРј С‚РµСЃС‚"
-  fi
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: prompt_inputs РїСЂРѕРІРµСЂСЏРµС‚ DEV_MODE в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: prompt_inputs проверяет DEV_MODE ─────────────────────────────────
 test_prompt_inputs_checks_dev_mode() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ prompt_inputs: РїСЂРѕРІРµСЂРєР° DEV_MODE..."
+  info "Тестирование prompt_inputs: проверка DEV_MODE..."
 
-  if grep -q 'DEV_MODE.*true' "${SCRIPT_DIR}/lib/install-steps.sh" ||
-    grep -q 'DEV_MODE:-false' "${SCRIPT_DIR}/lib/install-steps.sh"; then
-    pass "prompt_inputs: РїСЂРѕРІРµСЂСЏРµС‚ DEV_MODE"
+  if grep -q 'DEV_MODE.*true' "${SCRIPT_DIR}/install.sh" ||
+    grep -q 'DEV_MODE:-false' "${SCRIPT_DIR}/install.sh"; then
+    pass "prompt_inputs: проверяет DEV_MODE"
   else
-    fail "prompt_inputs: РЅРµ РїСЂРѕРІРµСЂСЏРµС‚ DEV_MODE"
+    fail "prompt_inputs: не проверяет DEV_MODE"
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: prompt_inputs РїСЂРѕРїСѓСЃРєР°РµС‚ РІРІРѕРґ РІ dev-СЂРµР¶РёРјРµ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: prompt_inputs пропускает ввод в dev-режиме ─────────────────────────
 test_prompt_inputs_skips_in_dev_mode() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ prompt_inputs: РїСЂРѕРїСѓСЃРє РІРІРѕРґР° РІ dev-СЂРµР¶РёРјРµ..."
+  info "Тестирование prompt_inputs: пропуск ввода в dev-режиме..."
 
-  if grep -q 'return 0' "${SCRIPT_DIR}/lib/install-steps.sh" &&
-    grep -q 'DEV-СЂРµР¶РёРј\|DEV mode' "${SCRIPT_DIR}/lib/install-steps.sh"; then
-    pass "prompt_inputs: РїСЂРѕРїСѓСЃРєР°РµС‚ РІРІРѕРґ РІ dev-СЂРµР¶РёРјРµ"
+  if grep -q 'return 0' "${SCRIPT_DIR}/install.sh" &&
+    grep -q 'DEV-режим\|DEV mode' "${SCRIPT_DIR}/install.sh"; then
+    pass "prompt_inputs: пропускает ввод в dev-режиме"
   else
-    fail "prompt_inputs: РЅРµ РїСЂРѕРїСѓСЃРєР°РµС‚ РІРІРѕРґ РІ dev-СЂРµР¶РёРјРµ"
+    fail "prompt_inputs: не пропускает ввод в dev-режиме"
   fi
 }
 
@@ -398,18 +341,12 @@ main() {
   test_dev_mode_warning
   test_default_dev_domain
 
-  # РўРµСЃС‚С‹ С„СѓРЅРєС†РёР№
+  # Тесты функций
   test_parse_args_exists
-  test_step_ssl_dev_exists
-  test_step_ssl_checks_dev_mode
-  test_openssl_for_self_signed
   test_prompt_inputs_checks_dev_mode
   test_prompt_inputs_skips_in_dev_mode
 
-  # РўРµСЃС‚С‹ С„Р°Р№Р»РѕРІ
-  test_install_steps_main_exists
-
-  # в”Ђв”Ђ РС‚РѕРіРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+  # ── Итоги ──────────────────────────────────────────────────────────────────
   echo ""
   echo "в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ"
   echo "  Р РµР·СѓР»СЊС‚Р°С‚С‹ / Results"

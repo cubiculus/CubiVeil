@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 # в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—
 # в•‘        CubiVeil Unit Tests - install.sh                   в•‘
 # в•‘        РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РіР»Р°РІРЅРѕР№ С‚РѕС‡РєРё РІС…РѕРґР°                  в•‘
@@ -87,12 +87,12 @@ test_strict_mode() {
 test_module_loading() {
   info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ Р·Р°РіСЂСѓР·РєРё РјРѕРґСѓР»РµР№..."
 
-  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ lang.sh Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ
-  if grep -q 'source.*lang.sh' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: Р·Р°РіСЂСѓР¶Р°РµС‚ lang.sh"
+  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ lang/main.sh Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ
+  if grep -q 'source.*lang/main.sh' "${SCRIPT_DIR}/install.sh"; then
+    pass "install.sh: Р·Р°РіСЂСѓР¶Р°РµС‚ lang/main.sh"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: РЅРµ Р·Р°РіСЂСѓР¶Р°РµС‚ lang.sh"
+    fail "install.sh: РЅРµ Р·Р°РіСЂСѓР¶Р°РµС‚ lang/main.sh"
   fi
 
   # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ lib/utils.sh Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ
@@ -341,16 +341,16 @@ test_error_handling() {
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: fallback РґР»СЏ lang.sh в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# в”Ђв”Ђ РўРµСЃС‚: fallback РґР»СЏ lang/main.sh в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_lang_fallback() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ fallback РґР»СЏ lang.sh..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ fallback РґР»СЏ lang/main.sh..."
 
-  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ РµСЃС‚СЊ fallback РµСЃР»Рё lang.sh РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚
-  if grep -A5 'if \[\[ -f.*lang.sh' "${SCRIPT_DIR}/install.sh" | grep -q "else\|fallback\|RED=\|GREEN="; then
-    pass "install.sh: РёРјРµРµС‚ fallback РґР»СЏ lang.sh"
+  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ РµСЃС‚СЊ fallback РµСЃР»Рё lang/main.sh РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚
+  if grep -A5 'if \[\[ -f.*lang/main.sh' "${SCRIPT_DIR}/install.sh" | grep -q "else\|fallback\|RED=\|GREEN="; then
+    pass "install.sh: РёРјРµРµС‚ fallback РґР»СЏ lang/main.sh"
     ((TESTS_PASSED++)) || true
   else
-    warn "install.sh: fallback РґР»СЏ lang.sh РЅРµ РЅР°Р№РґРµРЅ"
+    warn "install.sh: fallback РґР»СЏ lang/main.sh РЅРµ РЅР°Р№РґРµРЅ"
   fi
 }
 
@@ -462,6 +462,7 @@ test_dry_run_simulation() {
 
   # РЎРѕР·РґР°С‘Рј mock РґР»СЏ РІСЃРµС… РІРЅРµС€РЅРёС… РєРѕРјР°РЅРґ
   LANG_NAME="English"
+  export DRY_RUN="true"
 
   # Mock С„СѓРЅРєС†РёР№
   select_language() { :; }
@@ -504,7 +505,7 @@ test_dry_run_simulation() {
   source "${SCRIPT_DIR}/lib/utils.sh" 2>/dev/null || true
 
   # РџС‹С‚Р°РµРјСЃСЏ Р·Р°РіСЂСѓР·РёС‚СЊ install.sh Рё РїСЂРѕРІРµСЂРёС‚СЊ С‡С‚Рѕ main СЃСѓС‰РµСЃС‚РІСѓРµС‚
-  if bash -c "source ${SCRIPT_DIR}/install.sh 2>&1 && declare -f main >/dev/null" 2>/dev/null; then
+  if DRY_RUN="true" bash -c "source ${SCRIPT_DIR}/install.sh 2>&1 && declare -f main >/dev/null" 2>/dev/null; then
     pass "install.sh: Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ Рё main СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     ((TESTS_PASSED++)) || true
   else

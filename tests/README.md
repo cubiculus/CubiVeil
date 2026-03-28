@@ -112,12 +112,12 @@ bash tests/unit-lang.sh
 |-----------|----------|
 | **Базовые** | Наличие файла, синтаксис, shebang (#!/bin/bash) |
 | **Strict mode** | set -euo pipefail |
-| **Модули** | Загрузка lang.sh, lib/utils.sh, lib/install-steps.sh |
+| **Модули** | Загрузка lang/main.sh, lib/utils.sh, lib/modules/* |
 | **Функции** | main существует и вызывается |
 | **Шаги** | Использование 15+ функций из модулей, последовательность |
 | **Обработка ошибок** | err функция, || и && операторы |
-| **Fallback** | Резервные определения если lang.sh отсутствует |
-| **Размер** | < 200 строк (компактный) |
+| **Fallback** | Резервные определения если lang/main.sh отсутствует |
+| **Размер** | < 500 строк (оркестрация модулей) |
 | **Документация** | Комментарии (≥ 5) |
 | **Безопасность** | Проверка root, проверка Ubuntu, отсутствие хардкодных секретов |
 | **Кавычки** | Переменные в кавычках |
@@ -158,7 +158,7 @@ bash tests/test-install-modes.sh
 | Категория | Проверки |
 |-----------|----------|
 | **Базовые** | Наличие файла, синтаксис, функции (step_check_environment, main, и т.д.) |
-| **Зависимости** | Загрузка lang.sh, lib/utils.sh |
+| **Зависимости** | Загрузка lang/main.sh, lib/utils.sh |
 | **Безопасность** | Токен в os.environ.get, ProtectHome, ProtectSystem, NoNewPrivileges |
 | **Python бот** | |
 | └─ Метрики | get_cpu, get_ram, get_disk, get_uptime, get_active_users |
@@ -189,15 +189,15 @@ bash tests/unit-telegram.sh
 | Проверка | Описание |
 |----------|----------|
 | Структура директорий | lib/, tests/ существуют |
-| Основные файлы | install.sh, setup-telegram.sh, lang.sh, README.md, run-tests.sh |
-| Модули lib/ | utils.sh, install-steps.sh |
+| Основные файлы | install.sh, setup-telegram.sh, README.md, run-tests.sh |
+| Модули lib/ | utils.sh, common.sh, validation.sh, security.sh, и т.д. |
 | Тестовые файлы | Все тесты существуют |
 | Синтаксис | Все скрипты проходят bash -n |
 | Исполнимость | Скрипты имеют +x флаг |
 | Загрузка модулей | source работает без ошибок |
-| Функции | Все функции в utils.sh и install-steps.sh существуют |
+| Функции | Все функции в utils.sh существуют |
 | Дублирование | install.sh не содержит код бота, utils.sh не содержит step_* |
-| Размеры | install.sh < 200 строк |
+| Размеры | install.sh < 500 строк |
 | Интеграция | install.sh загружает модули и использует функции |
 
 **Запуск:**
@@ -269,7 +269,6 @@ sudo ./run-tests.sh --full
 ### Только конкретный тест
 ```bash
 bash tests/unit-utils.sh
-bash tests/unit-install-steps.sh
 bash tests/unit-lang.sh
 bash tests/unit-install.sh
 bash tests/unit-telegram.sh
@@ -415,7 +414,7 @@ sudo bash tests/integration-test.sh
 | lib/utils.sh | unit-utils.sh | ✅ gen_random, gen_hex, gen_port, unique_port, open_port, arch, get_server_ip |
 | install.sh | unit-install.sh | ✅ Структура, модули, обработка ошибок |
 | install.sh режимы | test-install-modes.sh | ✅ --dev, --dry-run, аргументы, usage |
-| lang.sh | unit-lang.sh | ✅ EN/RU строки, функции, локализация |
+| lang/main.sh | unit-lang.sh | ✅ EN/RU строки, функции, локализация |
 | setup-telegram.sh | unit-telegram.sh | ✅ Python бот, systemd, cron, валидация |
 | lib/modules/decoy-site/ | unit-decoy-site.sh | ✅ Генерация контента, ротация, MikroTik скрипт |
 | lib/modules/traffic-shaping/ | unit-traffic-shaping.sh | ✅ TC/netem правила, персистентность |
