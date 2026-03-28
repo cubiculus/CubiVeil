@@ -639,6 +639,87 @@ MSG_FAILED_PREPARE="Failed to prepare installation files"
 MSG_FAILED_PREPARE_RU="Не удалось подготовить файлы установки"
 
 # ══════════════════════════════════════════════════════════════
+# INSTALLER: ORCHESTRATOR
+# ══════════════════════════════════════════════════════════════
+MSG_MODULE_INSTALL_FAILED="module_install failed for {NAME}"
+MSG_MODULE_INSTALL_FAILED_RU="module_install не удался для {NAME}"
+
+MSG_MODULE_CONFIGURE_FAILED="module_configure failed for {NAME}"
+MSG_MODULE_CONFIGURE_FAILED_RU="module_configure не удался для {NAME}"
+
+MSG_MODULE_ENABLE_FAILED="module_enable failed for {NAME}"
+MSG_MODULE_ENABLE_FAILED_RU="module_enable не удался для {NAME}"
+
+MSG_MODULE_OK="Module {NAME}: ✓ OK"
+MSG_MODULE_OK_RU="Модуль {NAME}: ✓ OK"
+
+MSG_MODULE_SKIPPED_ISSUES="Module {NAME}: ⚠ Skipped with issues"
+MSG_MODULE_SKIPPED_ISSUES_RU="Модуль {NAME}: ⚠ Пропущен с ошибками"
+
+MSG_MODULE_SKIPPED="⚠ Skipped"
+MSG_MODULE_SKIPPED_RU="⚠ Пропущен"
+
+MSG_DRY_RUN_SKIPPED="✓ DRY-RUN: {NAME} skipped"
+MSG_DRY_RUN_SKIPPED_RU="✓ DRY-RUN: {NAME} пропущен"
+
+MSG_TELEGRAM_SETUP_NOT_FOUND="Telegram bot setup script not found: {SCRIPT}"
+MSG_TELEGRAM_SETUP_NOT_FOUND_RU="Скрипт настройки Telegram-бота не найден: {SCRIPT}"
+
+# ══════════════════════════════════════════════════════════════
+# INSTALLER: UI
+# ══════════════════════════════════════════════════════════════
+MSG_DRY_RUN_SIMULATION_MODE="This is a Simulation mode - no changes will be made"
+MSG_DRY_RUN_SIMULATION_MODE_RU="Это режим симуляции - изменения не будут внесены"
+
+MSG_DRY_RUN_CHECKING_ENV="Checking environment..."
+MSG_DRY_RUN_CHECKING_ENV_RU="Проверка окружения..."
+
+MSG_DRY_RUN_ROOT_ACCESS_WOULD_CHECK="[DRY-RUN] Root access: would check EUID"
+MSG_DRY_RUN_ROOT_ACCESS_WOULD_CHECK_RU="[DRY-RUN] Root access: проверил бы EUID"
+
+MSG_DRY_RUN_ROOT_ACCESS_OK="[DRY-RUN] Root access: OK"
+MSG_DRY_RUN_ROOT_ACCESS_OK_RU="[DRY-RUN] Root access: OK"
+
+MSG_DRY_RUN_UBUNTU_DETECTED_OK="[DRY-RUN] Ubuntu detected: OK"
+MSG_DRY_RUN_UBUNTU_DETECTED_OK_RU="[DRY-RUN] Ubuntu обнаружен: OK"
+
+MSG_DRY_RUN_UBUNTU_WOULD_CHECK="[DRY-RUN] Ubuntu detected: would check"
+MSG_DRY_RUN_UBUNTU_WOULD_CHECK_RU="[DRY-RUN] Ubuntu обнаружен: проверил бы"
+
+MSG_DRY_RUN_ENV_CHECKS_OK="[DRY-RUN] Environment checks: OK"
+MSG_DRY_RUN_ENV_CHECKS_OK_RU="[DRY-RUN] Проверка окружения: OK"
+
+MSG_DRY_RUN_MODE_DEV="Mode: DEV (self-signed SSL, no DNS check)"
+MSG_DRY_RUN_MODE_DEV_RU="Режим: DEV (самоподписный SSL, без проверки DNS)"
+
+MSG_DRY_RUN_MODE_PROD="Mode: PRODUCTION (Let's Encrypt)"
+MSG_DRY_RUN_MODE_PROD_RU="Режим: PRODUCTION (Let's Encrypt)"
+
+MSG_DRY_RUN_DOMAIN="Domain:"
+MSG_DRY_RUN_DOMAIN_RU="Домен:"
+
+MSG_DRY_RUN_EMAIL="Email:"
+MSG_DRY_RUN_EMAIL_RU="Email:"
+
+MSG_DRY_RUN_WILL_BE_PROMPTED="will be prompted"
+MSG_DRY_RUN_WILL_BE_PROMPTED_RU="будет запрошено"
+
+MSG_WARNINGS_DURING_INSTALL="⚠ Warnings during install:"
+MSG_WARNINGS_DURING_INSTALL_RU="⚠ Предупреждения при установке:"
+
+MSG_MIKROTIK_SCRIPT_SAVED="MikroTik script saved to: {PATH}"
+MSG_MIKROTIK_SCRIPT_SAVED_RU="MikroTik скрипт сохранён в: {PATH}"
+
+MSG_MIKROTIK_IMPORT_INSTRUCTIONS_1="1. Copy file {PATH} to your computer"
+MSG_MIKROTIK_IMPORT_INSTRUCTIONS_1_RU="1. Скопируйте файл {PATH} на компьютер"
+
+MSG_MIKROTIK_IMPORT_INSTRUCTIONS_2="2. In WinBox: Files → drag mikrotik-decoy.rsc"
+MSG_MIKROTIK_IMPORT_INSTRUCTIONS_2_RU="2. В WinBox: Files → перетащите mikrotik-decoy.rsc"
+
+MSG_MIKROTIK_IMPORT_INSTRUCTIONS_3="3. In Terminal: /import file-name=mikrotik-decoy.rsc"
+MSG_MIKROTIK_IMPORT_INSTRUCTIONS_3_RU="3. В Terminal: /import file-name=mikrotik-decoy.rsc"
+
+# ══════════════════════════════════════════════════════════════
 # MODULE: FIREWALL
 # ══════════════════════════════════════════════════════════════
 MSG_FW_INSTALLING="Installing UFW"
