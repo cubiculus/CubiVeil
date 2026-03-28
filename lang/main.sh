@@ -677,23 +677,23 @@ MSG_FW_DISABLING_RU="Отключаю файрвол"
 MSG_FW_DISABLED="Firewall disabled"
 MSG_FW_DISABLED_RU="Файрвол отключён"
 
-MSG_FW_OPENING_PORT="Opening port \${port}/\${proto}"
-MSG_FW_OPENING_PORT_RU="Открываю порт \${port}/\${proto}"
+MSG_FW_OPENING_PORT="Opening port \\${port}/\\${proto}"
+MSG_FW_OPENING_PORT_RU="Открываю порт \\${port}/\\${proto}"
 
-MSG_FW_INVALID_PORT="Invalid port: \${port}"
-MSG_FW_INVALID_PORT_RU="Невалидный порт: \${port}"
+MSG_FW_INVALID_PORT="Invalid port: \\${port}"
+MSG_FW_INVALID_PORT_RU="Невалидный порт: \\${port}"
 
-MSG_FW_OPEN_FAILED="Failed to open port \${port}/\${proto} in firewall"
-MSG_FW_OPEN_FAILED_RU="Не удалось открыть порт \${port}/\${proto} в файрволе"
+MSG_FW_OPEN_FAILED="Failed to open port \\${port}/\\${proto} in firewall"
+MSG_FW_OPEN_FAILED_RU="Не удалось открыть порт \\${port}/\\${proto} в файрволе"
 
-MSG_FW_PORT_OPENED="Port \${port}/\${proto} opened: \${comment}"
-MSG_FW_PORT_OPENED_RU="Порт \${port}/\${proto} открыт: \${comment}"
+MSG_FW_PORT_OPENED="Port \\${port}/\\${proto} opened: \\${comment}"
+MSG_FW_PORT_OPENED_RU="Порт \\${port}/\\${proto} открыт: \\${comment}"
 
-MSG_FW_CLOSING_PORT="Closing port \${port}/\${proto}"
-MSG_FW_CLOSING_PORT_RU="Закрываю порт \${port}/\${proto}"
+MSG_FW_CLOSING_PORT="Closing port \\${port}/\\${proto}"
+MSG_FW_CLOSING_PORT_RU="Закрываю порт \\${port}/\\${proto}"
 
-MSG_FW_PORT_CLOSED="Port \${port}/\${proto} closed"
-MSG_FW_PORT_CLOSED_RU="Порт \${port}/\${proto} закрыт"
+MSG_FW_PORT_CLOSED="Port \\${port}/\\${proto} closed"
+MSG_FW_PORT_CLOSED_RU="Порт \\${port}/\\${proto} закрыт"
 
 MSG_FW_UPDATING="Updating firewall configuration"
 MSG_FW_UPDATING_RU="Обновление конфигурации файрвола"
@@ -716,11 +716,11 @@ MSG_F2B_ALREADY_INSTALLED_RU="Fail2ban уже установлен"
 MSG_F2B_CONFIGURING="Configuring Fail2ban"
 MSG_F2B_CONFIGURING_RU="Настраиваю Fail2ban"
 
-MSG_F2B_SSH_PORT="Detected SSH port: \${ssh_port}"
-MSG_F2B_SSH_PORT_RU="Определён порт SSH: \${ssh_port}"
+MSG_F2B_SSH_PORT="Detected SSH port: \\${ssh_port}"
+MSG_F2B_SSH_PORT_RU="Определён порт SSH: \\${ssh_port}"
 
-MSG_F2B_CONFIGURED="Fail2ban configured: SSH protection on port \${ssh_port}"
-MSG_F2B_CONFIGURED_RU="Fail2ban настроен: защита SSH на порту \${ssh_port}"
+MSG_F2B_CONFIGURED="Fail2ban configured: SSH protection on port \\${ssh_port}"
+MSG_F2B_CONFIGURED_RU="Fail2ban настроен: защита SSH на порту \\${ssh_port}"
 
 MSG_F2B_ENABLING="Enabling Fail2ban"
 MSG_F2B_ENABLING_RU="Включаю Fail2ban"
@@ -743,8 +743,8 @@ MSG_F2B_CONFIG_NOT_FOUND_RU="Файл конфигурации Fail2ban не н�
 MSG_F2B_CONFIG_FOUND="Fail2ban configuration found at \$$1"
 MSG_F2B_CONFIG_FOUND_RU="Конфигурация Fail2ban найдена в \$$1"
 
-MSG_F2B_UNBANNING="Unbanning \${ip} from \${jail}"
-MSG_F2B_UNBANNING_RU="Разбаниваю \${ip} из \${jail}"
+MSG_F2B_UNBANNING="Unbanning \\${ip} from \\${jail}"
+MSG_F2B_UNBANNING_RU="Разбаниваю \\${ip} из \\${jail}"
 
 MSG_F2B_UPDATING="Updating Fail2ban configuration"
 MSG_F2B_UPDATING_RU="Обновление конфигурации Fail2ban"
@@ -764,14 +764,14 @@ MSG_SSL_INSTALLING_RU="Устанавливаю Certbot"
 MSG_SSL_ALREADY_INSTALLED="Certbot already installed"
 MSG_SSL_ALREADY_INSTALLED_RU="Certbot уже установлен"
 
-MSG_SSL_GENERATING_SELF_SIGNED="Generating self-signed certificate for \${domain}"
-MSG_SSL_GENERATING_SELF_SIGNED_RU="Генерирую самоподписной сертификат для \${domain}"
+MSG_SSL_GENERATING_SELF_SIGNED="Generating self-signed certificate for \\${domain}"
+MSG_SSL_GENERATING_SELF_SIGNED_RU="Генерирую самоподписной сертификат для \\${domain}"
 
 MSG_SSL_SELF_SIGNED_FAILED="Failed to generate self-signed certificate"
 MSG_SSL_SELF_SIGNED_FAILED_RU="Не удалось сгенерировать самоподписной сертификат"
 
-MSG_SSL_SELF_SIGNED_CREATED="Self-signed certificate generated at \${SSL_SELFIGNED_DIR}"
-MSG_SSL_SELF_SIGNED_CREATED_RU="Самоподписной сертификат сгенерирован в \${SSL_SELFIGNED_DIR}"
+MSG_SSL_SELF_SIGNED_CREATED="Self-signed certificate generated at \\${SSL_SELFIGNED_DIR}"
+MSG_SSL_SELF_SIGNED_CREATED_RU="Самоподписной сертификат сгенерирован в \\${SSL_SELFIGNED_DIR}"
 
 MSG_SSL_CERT_VALID_365="Certificate valid for 365 days"
 MSG_SSL_CERT_VALID_365_RU="Сертификат действителен 365 дней"
@@ -779,26 +779,26 @@ MSG_SSL_CERT_VALID_365_RU="Сертификат действителен 365 д�
 MSG_SSL_BROWSER_WARNING="Browsers will show security warning — this is expected in dev mode"
 MSG_SSL_BROWSER_WARNING_RU="Браузеры будут показывать предупреждение — это нормально для dev-режима"
 
-MSG_SSL_GENERATING_CERT="Generating SSL certificate for \${domain}"
-MSG_SSL_GENERATING_CERT_RU="Генерирую SSL сертификат для \${domain}"
+MSG_SSL_GENERATING_CERT="Generating SSL certificate for \\${domain}"
+MSG_SSL_GENERATING_CERT_RU="Генерирую SSL сертификат для \\${domain}"
 
-MSG_SSL_INVALID_DOMAIN="Invalid domain: \${domain}"
-MSG_SSL_INVALID_DOMAIN_RU="Некорректный домен: \${domain}"
+MSG_SSL_INVALID_DOMAIN="Invalid domain: \\${domain}"
+MSG_SSL_INVALID_DOMAIN_RU="Некорректный домен: \\${domain}"
 
-MSG_SSL_INVALID_EMAIL="Invalid email: \${email}"
-MSG_SSL_INVALID_EMAIL_RU="Некорректный email: \${email}"
+MSG_SSL_INVALID_EMAIL="Invalid email: \\${email}"
+MSG_SSL_INVALID_EMAIL_RU="Некорректный email: \\${email}"
 
-MSG_SSL_GENERATE_FAILED="Failed to generate SSL certificate for \${domain}"
-MSG_SSL_GENERATE_FAILED_RU="Не удалось сгенерировать SSL сертификат для \${domain}"
+MSG_SSL_GENERATE_FAILED="Failed to generate SSL certificate for \\${domain}"
+MSG_SSL_GENERATE_FAILED_RU="Не удалось сгенерировать SSL сертификат для \\${domain}"
 
-MSG_SSL_CERT_GENERATED="SSL certificate generated for \${domain}"
-MSG_SSL_CERT_GENERATED_RU="SSL сертификат сгенерирован для \${domain}"
+MSG_SSL_CERT_GENERATED="SSL certificate generated for \\${domain}"
+MSG_SSL_CERT_GENERATED_RU="SSL сертификат сгенерирован для \\${domain}"
 
 MSG_SSL_CONFIG_WEBROOT="Configuring webroot directory"
 MSG_SSL_CONFIG_WEBROOT_RU="Настраиваю директорию webroot"
 
-MSG_SSL_WEBROOT_CONFIGURED="Webroot configured at \${webroot_dir}"
-MSG_SSL_WEBROOT_CONFIGURED_RU="Webroot настроен в \${webroot_dir}"
+MSG_SSL_WEBROOT_CONFIGURED="Webroot configured at \\${webroot_dir}"
+MSG_SSL_WEBROOT_CONFIGURED_RU="Webroot настроен в \\${webroot_dir}"
 
 MSG_SSL_CONFIG_RENEWAL="Configuring automatic certificate renewal"
 MSG_SSL_CONFIG_RENEWAL_RU="Настраиваю автоматическое продление сертификата"
@@ -818,44 +818,44 @@ MSG_SSL_CONFIG_MODULE_RU="Настраиваю SSL модуль"
 MSG_SSL_MODULE_CONFIGURED="SSL module configured"
 MSG_SSL_MODULE_CONFIGURED_RU="SSL модуль настроен"
 
-MSG_SSL_CERT_NOT_FOUND="Certificate not found: \${cert_path}"
-MSG_SSL_CERT_NOT_FOUND_RU="Сертификат не найден: \${cert_path}"
+MSG_SSL_CERT_NOT_FOUND="Certificate not found: \\${cert_path}"
+MSG_SSL_CERT_NOT_FOUND_RU="Сертификат не найден: \\${cert_path}"
 
-MSG_SSL_CERT_EXPIRES="Certificate for \${domain} expires in \${days_left} days"
-MSG_SSL_CERT_EXPIRES_RU="Сертификат для \${domain} истекает через \${days_left} дней"
+MSG_SSL_CERT_EXPIRES="Certificate for \\${domain} expires in \\${days_left} days"
+MSG_SSL_CERT_EXPIRES_RU="Сертификат для \\${domain} истекает через \\${days_left} дней"
 
-MSG_SSL_CERT_EXPIRE_SOON="Certificate will expire soon (\${days_left} days)"
-MSG_SSL_CERT_EXPIRE_SOON_RU="Сертификат скоро истечёт (\${days_left} дней)"
+MSG_SSL_CERT_EXPIRE_SOON="Certificate will expire soon (\\${days_left} days)"
+MSG_SSL_CERT_EXPIRE_SOON_RU="Сертификат скоро истечёт (\\${days_left} дней)"
 
 MSG_SSL_RENEWING="Renewing SSL certificate"
 MSG_SSL_RENEWING_RU="Продлеваю SSL сертификат"
 
-MSG_SSL_CERT_RENEWED="Certificate renewed for \${domain}"
-MSG_SSL_CERT_RENEWED_RU="Сертификат продлён для \${domain}"
+MSG_SSL_CERT_RENEWED="Certificate renewed for \\${domain}"
+MSG_SSL_CERT_RENEWED_RU="Сертификат продлён для \\${domain}"
 
-MSG_SSL_RENEW_FAILED="Failed to renew certificate for \${domain}"
-MSG_SSL_RENEW_FAILED_RU="Не удалось продлить сертификат для \${domain}"
+MSG_SSL_RENEW_FAILED="Failed to renew certificate for \\${domain}"
+MSG_SSL_RENEW_FAILED_RU="Не удалось продлить сертификат для \\${domain}"
 
 MSG_SSL_RENEW_PARTIAL="Some certificates may have failed to renew"
 MSG_SSL_RENEW_PARTIAL_RU="Некоторые сертификаты могли не продлиться"
 
-MSG_SSL_REMOVING_CERT="Removing SSL certificate for \${domain}"
-MSG_SSL_REMOVING_CERT_RU="Удаляю SSL сертификат для \${domain}"
+MSG_SSL_REMOVING_CERT="Removing SSL certificate for \\${domain}"
+MSG_SSL_REMOVING_CERT_RU="Удаляю SSL сертификат для \\${domain}"
 
-MSG_SSL_CERT_NOT_FOUND_DOMAIN="Certificate not found for \${domain}"
-MSG_SSL_CERT_NOT_FOUND_DOMAIN_RU="Сертификат не найден для \${domain}"
+MSG_SSL_CERT_NOT_FOUND_DOMAIN="Certificate not found for \\${domain}"
+MSG_SSL_CERT_NOT_FOUND_DOMAIN_RU="Сертификат не найден для \\${domain}"
 
-MSG_SSL_CERT_REMOVED="Certificate removed for \${domain}"
-MSG_SSL_CERT_REMOVED_RU="Сертификат удалён для \${domain}"
+MSG_SSL_CERT_REMOVED="Certificate removed for \\${domain}"
+MSG_SSL_CERT_REMOVED_RU="Сертификат удалён для \\${domain}"
 
 MSG_SSL_ENABLING="Enabling SSL module"
 MSG_SSL_ENABLING_RU="Включаю SSL модуль"
 
-MSG_SSL_SELF_SIGNED_FOUND="Self-signed certificate found at \${SSL_SELFIGNED_DIR}"
-MSG_SSL_SELF_SIGNED_FOUND_RU="Самоподписной сертификат найден в \${SSL_SELFIGNED_DIR}"
+MSG_SSL_SELF_SIGNED_FOUND="Self-signed certificate found at \\${SSL_SELFIGNED_DIR}"
+MSG_SSL_SELF_SIGNED_FOUND_RU="Самоподписной сертификат найден в \\${SSL_SELFIGNED_DIR}"
 
-MSG_SSL_CERTS_FOUND="Found \${cert_count} SSL certificate(s)"
-MSG_SSL_CERTS_FOUND_RU="Найдено \${cert_count} SSL сертификат(ов)"
+MSG_SSL_CERTS_FOUND="Found \\${cert_count} SSL certificate(s)"
+MSG_SSL_CERTS_FOUND_RU="Найдено \\${cert_count} SSL сертификат(ов)"
 
 MSG_SSL_NO_CERTS="No SSL certificates found"
 MSG_SSL_NO_CERTS_RU="SSL сертификаты не найдены"
@@ -899,14 +899,14 @@ MSG_SINGBOX_GIT_FALLBACK_RU="GitHub API не ответил, пробую git ls
 MSG_SINGBOX_VERSION_FAILED="Cannot get Sing-box version from GitHub"
 MSG_SINGBOX_VERSION_FAILED_RU="Не удалось получить версию Sing-box с GitHub"
 
-MSG_SINGBOX_LATEST="Sing-box latest: \${SB_TAG} (\${_arch})"
-MSG_SINGBOX_LATEST_RU="Sing-box последняя: \${SB_TAG} (\${_arch})"
+MSG_SINGBOX_LATEST="Sing-box latest: \\${SB_TAG} (\\${_arch})"
+MSG_SINGBOX_LATEST_RU="Sing-box последняя: \\${SB_TAG} (\\${_arch})"
 
 MSG_SINGBOX_SHA_FAILED="Could not fetch SHA256 checksum, will skip verification"
 MSG_SINGBOX_SHA_FAILED_RU="Не удалось получить SHA256 checksum, пропускаю проверку"
 
-MSG_SINGBOX_DOWNLOADING="Downloading Sing-box \${sb_tag}"
-MSG_SINGBOX_DOWNLOADING_RU="Загружаю Sing-box \${sb_tag}"
+MSG_SINGBOX_DOWNLOADING="Downloading Sing-box \\${sb_tag}"
+MSG_SINGBOX_DOWNLOADING_RU="Загружаю Sing-box \\${sb_tag}"
 
 MSG_SINGBOX_URL_EMPTY="Sing-box download URL is empty"
 MSG_SINGBOX_URL_EMPTY_RU="URL загрузки Sing-box пуст"
@@ -1064,17 +1064,17 @@ MSG_SYS_APPLY_SYSCTL_RU="Применяю настройки sysctl"
 MSG_SYS_SETUP_BBR="Setting up BBR optimization"
 MSG_SYS_SETUP_BBR_RU="Настраиваю оптимизацию BBR"
 
-MSG_SYS_BBR_ENABLED="BBR optimization enabled (current: \${current})"
-MSG_SYS_BBR_ENABLED_RU="Оптимизация BBR включена (текущий: \${current})"
+MSG_SYS_BBR_ENABLED="BBR optimization enabled (current: \\${current})"
+MSG_SYS_BBR_ENABLED_RU="Оптимизация BBR включена (текущий: \\${current})"
 
-MSG_SYS_BBR_STATUS="Current TCP congestion control: \${CURRENT}"
-MSG_SYS_BBR_STATUS_RU="Текущий контроль перегрузки TCP: \${CURRENT}"
+MSG_SYS_BBR_STATUS="Current TCP congestion control: \\${CURRENT}"
+MSG_SYS_BBR_STATUS_RU="Текущий контроль перегрузки TCP: \\${CURRENT}"
 
 MSG_SYS_BBR_ACTIVE="BBR is active"
 MSG_SYS_BBR_ACTIVE_RU="BBR активен"
 
-MSG_SYS_BBR_NOT_ACTIVE="BBR is not active (current: \${CURRENT})"
-MSG_SYS_BBR_NOT_ACTIVE_RU="BBR не активен (текущий: \${CURRENT})"
+MSG_SYS_BBR_NOT_ACTIVE="BBR is not active (current: \\${CURRENT})"
+MSG_SYS_BBR_NOT_ACTIVE_RU="BBR не активен (текущий: \\${CURRENT})"
 
 MSG_SYS_CHECK_IP="Checking IP neighborhood for VPN/hosting servers"
 MSG_SYS_CHECK_IP_RU="Проверяю соседние IP на VPN/хостинг серверы"
@@ -1085,11 +1085,11 @@ MSG_SYS_IFACE_NOT_FOUND_RU="Не удалось определить сетев�
 MSG_SYS_CHECK_SERVICES="Checking critical services status"
 MSG_SYS_CHECK_SERVICES_RU="Проверяю статус критических сервисов"
 
-MSG_SYS_SERVICE_ACTIVE="\${service}: active"
-MSG_SYS_SERVICE_ACTIVE_RU="\${service}: активен"
+MSG_SYS_SERVICE_ACTIVE="\\${service}: active"
+MSG_SYS_SERVICE_ACTIVE_RU="\\${service}: активен"
 
-MSG_SYS_SERVICE_INACTIVE="\${service}: inactive"
-MSG_SYS_SERVICE_INACTIVE_RU="\${service}: не активен"
+MSG_SYS_SERVICE_INACTIVE="\\${service}: inactive"
+MSG_SYS_SERVICE_INACTIVE_RU="\\${service}: не активен"
 
 MSG_SYS_SERVICES_RESTARTED="Services restarted"
 MSG_SYS_SERVICES_RESTARTED_RU="Сервисы перезапущены"
@@ -1205,11 +1205,11 @@ MSG_MARZBAN_REMOVE_DIR_RU="Удаляю существующую директо�
 MSG_MARZBAN_INSTALL_LOG="Marzban install log: \$$1"
 MSG_MARZBAN_INSTALL_LOG_RU="Лог установки Marzban: \$$1"
 
-MSG_MARZBAN_WAITING="Waiting for Marzban... \${_elapsed}s"
-MSG_MARZBAN_WAITING_RU="Ожидание Marzban... \${_elapsed}с"
+MSG_MARZBAN_WAITING="Waiting for Marzban... \\${_elapsed}s"
+MSG_MARZBAN_WAITING_RU="Ожидание Marzban... \\${_elapsed}с"
 
-MSG_MARZBAN_TIMEOUT="Marzban did not start within \${_max_wait}s"
-MSG_MARZBAN_TIMEOUT_RU="Marzban не запустился в течение \${_max_wait}с"
+MSG_MARZBAN_TIMEOUT="Marzban did not start within \\${_max_wait}s"
+MSG_MARZBAN_TIMEOUT_RU="Marzban не запустился в течение \\${_max_wait}с"
 
 MSG_MARZBAN_CHECK_LOGS="Check: docker logs marzban"
 MSG_MARZBAN_CHECK_LOGS_RU="Проверьте: docker logs marzban"
@@ -1385,8 +1385,8 @@ MSG_BACKUP_MARZBAN_DB_RU="Резервирую базу данных Marzban"
 MSG_BACKUP_MARZBAN_DB_NOT_FOUND="Marzban database not found"
 MSG_BACKUP_MARZBAN_DB_NOT_FOUND_RU="База данных Marzban не найдена"
 
-MSG_BACKUP_MARZBAN_DB_BACKED="Marzban database backed up (SHA256: ${hash:0:8}...)"
-MSG_BACKUP_MARZBAN_DB_BACKED_RU="База данных Marzban зарезервирована (SHA256: ${hash:0:8}...)"
+MSG_BACKUP_MARZBAN_DB_BACKED="Marzban database backed up (SHA256: \${hash:0:8}...)"
+MSG_BACKUP_MARZBAN_DB_BACKED_RU="База данных Marzban зарезервирована (SHA256: \${hash:0:8}...)"
 
 MSG_BACKUP_MARZBAN_CONFIG="Backing up Marzban configuration"
 MSG_BACKUP_MARZBAN_CONFIG_RU="Резервирую конфигурацию Marzban"
@@ -1400,8 +1400,8 @@ MSG_BACKUP_SINGBOX_CONFIG_RU="Резервирую конфигурацию Sing
 MSG_BACKUP_SINGBOX_CONFIG_NOT_FOUND="Sing-box configuration not found"
 MSG_BACKUP_SINGBOX_CONFIG_NOT_FOUND_RU="Конфигурация Sing-box не найдена"
 
-MSG_BACKUP_SINGBOX_CONFIG_BACKED="Sing-box configuration backed up (SHA256: ${hash:0:8}...)"
-MSG_BACKUP_SINGBOX_CONFIG_BACKED_RU="Конфигурация Sing-box зарезервирована (SHA256: ${hash:0:8}...)"
+MSG_BACKUP_SINGBOX_CONFIG_BACKED="Sing-box configuration backed up (SHA256: \${hash:0:8}...)"
+MSG_BACKUP_SINGBOX_CONFIG_BACKED_RU="Конфигурация Sing-box зарезервирована (SHA256: \${hash:0:8}...)"
 
 MSG_BACKUP_SSL_CERTS="Backing up SSL certificates"
 MSG_BACKUP_SSL_CERTS_RU="Резервирую SSL сертификаты"
@@ -1439,8 +1439,8 @@ MSG_BACKUP_AGE_UNAVAILABLE2_RU="age недоступен, пропускаю ш�
 MSG_BACKUP_ENCRYPTED="Backup encrypted: \$$1"
 MSG_BACKUP_ENCRYPTED_RU="Бэкап зашифрован: \$$1"
 
-MSG_BACKUP_ENCRYPTION_KEY="Encryption key: \${encrypted_file}.key"
-MSG_BACKUP_ENCRYPTION_KEY_RU="Ключ шифрования: \${encrypted_file}.key"
+MSG_BACKUP_ENCRYPTION_KEY="Encryption key: \\${encrypted_file}.key"
+MSG_BACKUP_ENCRYPTION_KEY_RU="Ключ шифрования: \\${encrypted_file}.key"
 
 MSG_BACKUP_ENCRYPT_FAILED="Failed to encrypt backup archive"
 MSG_BACKUP_ENCRYPT_FAILED_RU="Не удалось зашифровать архив бэкапа"
@@ -1448,8 +1448,8 @@ MSG_BACKUP_ENCRYPT_FAILED_RU="Не удалось зашифровать арх�
 MSG_BACKUP_SYS_INFO="Backing up system information"
 MSG_BACKUP_SYS_INFO_RU="Резервирую системную информацию"
 
-MSG_BACKUP_SYS_INFO_BACKED="System information backed up (SHA256: ${hash:0:8}...)"
-MSG_BACKUP_SYS_INFO_BACKED_RU="Системная информация зарезервирована (SHA256: ${hash:0:8}...)"
+MSG_BACKUP_SYS_INFO_BACKED="System information backed up (SHA256: \${hash:0:8}...)"
+MSG_BACKUP_SYS_INFO_BACKED_RU="Системная информация зарезервирована (SHA256: \${hash:0:8}...)"
 
 MSG_BACKUP_CREATE_ARCHIVE="Creating backup archive"
 MSG_BACKUP_CREATE_ARCHIVE_RU="Создаю архив бэкапа"
@@ -1472,8 +1472,8 @@ MSG_BACKUP_MARZBAN_STARTED_RU="Marzban запущен"
 MSG_BACKUP_CLEANUP="Cleaning up old backups"
 MSG_BACKUP_CLEANUP_RU="Очищаю старые бэкапы"
 
-MSG_BACKUP_KEPT="Kept \$$1 backups (retention: \${BACKUP_RETENTION_DAYS} days)"
-MSG_BACKUP_KEPT_RU="Сохранено бэкапов: \$$1 (хранение: \${BACKUP_RETENTION_DAYS} дней)"
+MSG_BACKUP_KEPT="Kept \$$1 backups (retention: \\${BACKUP_RETENTION_DAYS} days)"
+MSG_BACKUP_KEPT_RU="Сохранено бэкапов: \$$1 (хранение: \\${BACKUP_RETENTION_DAYS} дней)"
 
 MSG_BACKUP_FULL="Performing full backup"
 MSG_BACKUP_FULL_RU="Выполняю полный бэкап"
@@ -1490,8 +1490,8 @@ MSG_BACKUP_ENV_CHECK_FAILED_RU="Проверка окружения для бэ�
 MSG_BACKUP_GEN_KEY2="Generating encryption key..."
 MSG_BACKUP_GEN_KEY2_RU="Генерирую ключ шифрования..."
 
-MSG_BACKUP_KEY_GENERATED2="Encryption key generated: \${key_file}"
-MSG_BACKUP_KEY_GENERATED2_RU="Ключ шифрования сгенерирован: \${key_file}"
+MSG_BACKUP_KEY_GENERATED2="Encryption key generated: \\${key_file}"
+MSG_BACKUP_KEY_GENERATED2_RU="Ключ шифрования сгенерирован: \\${key_file}"
 
 MSG_BACKUP_KEY_EXISTS="Encryption key already exists"
 MSG_BACKUP_KEY_EXISTS_RU="Ключ шифрования уже существует"
@@ -1559,14 +1559,14 @@ MSG_MONITOR_SOME_INACTIVE_RU="Некоторые сервисы не актив�
 MSG_MONITOR_CHECK_RESOURCES="Checking system resources"
 MSG_MONITOR_CHECK_RESOURCES_RU="Проверка системных ресурсов"
 
-MSG_MONITOR_CPU_HIGH="CPU usage is high: \${cpu_usage}%"
-MSG_MONITOR_CPU_HIGH_RU="Высокое использование CPU: \${cpu_usage}%"
+MSG_MONITOR_CPU_HIGH="CPU usage is high: \\${cpu_usage}%"
+MSG_MONITOR_CPU_HIGH_RU="Высокое использование CPU: \\${cpu_usage}%"
 
-MSG_MONITOR_RAM_HIGH="RAM usage is high: \${ram_usage}%"
-MSG_MONITOR_RAM_HIGH_RU="Высокое использование RAM: \${ram_usage}%"
+MSG_MONITOR_RAM_HIGH="RAM usage is high: \\${ram_usage}%"
+MSG_MONITOR_RAM_HIGH_RU="Высокое использование RAM: \\${ram_usage}%"
 
-MSG_MONITOR_DISK_HIGH="Disk usage is high: \${disk_usage}%"
-MSG_MONITOR_DISK_HIGH_RU="Высокое использование диска: \${disk_usage}%"
+MSG_MONITOR_DISK_HIGH="Disk usage is high: \\${disk_usage}%"
+MSG_MONITOR_DISK_HIGH_RU="Высокое использование диска: \\${disk_usage}%"
 
 MSG_MONITOR_RESOURCE_ALERTS="Found \$$1 resource alerts"
 MSG_MONITOR_RESOURCE_ALERTS_RU="Найдено предупреждений о ресурсах: \$$1"
@@ -1643,8 +1643,8 @@ MSG_MONITOR_REPORT_GENERATED_RU="Отчёт сгенерирован: \$$1"
 MSG_MONITOR_CONFIG_MODULE="Configuring monitoring module"
 MSG_MONITOR_CONFIG_MODULE_RU="Настраиваю модуль мониторинга"
 
-MSG_MONITOR_CONFIG_CREATED="Configuration file created: \${config_file}"
-MSG_MONITOR_CONFIG_CREATED_RU="Файл конфигурации создан: \${config_file}"
+MSG_MONITOR_CONFIG_CREATED="Configuration file created: \\${config_file}"
+MSG_MONITOR_CONFIG_CREATED_RU="Файл конфигурации создан: \\${config_file}"
 
 MSG_MONITOR_TOOL_NOT_FOUND="Required tool not found: \$$1"
 MSG_MONITOR_TOOL_NOT_FOUND_RU="Требуемый инструмент не найден: \$$1"
@@ -1742,14 +1742,14 @@ MSG_DECOY_NGINX_ACTIVE_RU="nginx: активен"
 MSG_DECOY_NGINX_NOT_RUNNING="nginx: not running"
 MSG_DECOY_NGINX_NOT_RUNNING_RU="nginx: не запущен"
 
-MSG_DECOY_CERT_VALID="Certificate: valid until \${expiry}"
-MSG_DECOY_CERT_VALID_RU="Сертификат: действует до \${expiry}"
+MSG_DECOY_CERT_VALID="Certificate: valid until \\${expiry}"
+MSG_DECOY_CERT_VALID_RU="Сертификат: действует до \\${expiry}"
 
-MSG_DECOY_CERT_NOT_FOUND="Certificate not found: \${cert_file}"
-MSG_DECOY_CERT_NOT_FOUND_RU="Сертификат не найден: \${cert_file}"
+MSG_DECOY_CERT_NOT_FOUND="Certificate not found: \\${cert_file}"
+MSG_DECOY_CERT_NOT_FOUND_RU="Сертификат не найден: \\${cert_file}"
 
-MSG_DECOY_FILES_COUNT="Files in /files/: \${file_count} (${total_size:-0})"
-MSG_DECOY_FILES_COUNT_RU="Файлов в /files/: \${file_count} (${total_size:-0})"
+MSG_DECOY_FILES_COUNT="Files in /files/: \\${file_count} (\${total_size:-0})"
+MSG_DECOY_FILES_COUNT_RU="Файлов в /files/: \\${file_count} (\${total_size:-0})"
 
 MSG_DECOY_ROTATION_ACTIVE="Rotation: active"
 MSG_DECOY_ROTATION_ACTIVE_RU="Ротация: активна"
@@ -1757,38 +1757,38 @@ MSG_DECOY_ROTATION_ACTIVE_RU="Ротация: активна"
 MSG_DECOY_ROTATION_INACTIVE="Rotation: disabled (rotation.enabled = false)"
 MSG_DECOY_ROTATION_INACTIVE_RU="Ротация: отключена (rotation.enabled = false)"
 
-MSG_DECOY_PROFILE="Profile: template=\${template} name='\${site_name}' color=\${accent_color}"
-MSG_DECOY_PROFILE_RU="Профиль: шаблон=\${template} имя='\${site_name}' цвет=\${accent_color}"
+MSG_DECOY_PROFILE="Profile: template=\\${template} name='\\${site_name}' color=\\${accent_color}"
+MSG_DECOY_PROFILE_RU="Профиль: шаблон=\\${template} имя='\\${site_name}' цвет=\\${accent_color}"
 
-MSG_DECOY_WEBROOT_BUILT="Webroot built: \${fcount} files, ~\${total_size} in \${DECOY_WEBROOT}"
-MSG_DECOY_WEBROOT_BUILT_RU="Webroot собран: \${fcount} файлов, ~\${total_size} в \${DECOY_WEBROOT}"
+MSG_DECOY_WEBROOT_BUILT="Webroot built: \\${fcount} files, ~\\${total_size} in \\${DECOY_WEBROOT}"
+MSG_DECOY_WEBROOT_BUILT_RU="Webroot собран: \\${fcount} файлов, ~\\${total_size} в \\${DECOY_WEBROOT}"
 
-MSG_DECOY_NGINX_CONF_WRITTEN="Nginx config written: \${NGINX_CONF} (nginx ${_nginx_ver:-unknown})"
-MSG_DECOY_NGINX_CONF_WRITTEN_RU="Nginx конфиг записан: \${NGINX_CONF} (nginx ${_nginx_ver:-unknown})"
+MSG_DECOY_NGINX_CONF_WRITTEN="Nginx config written: \\${NGINX_CONF} (nginx \${_nginx_ver:-unknown})"
+MSG_DECOY_NGINX_CONF_WRITTEN_RU="Nginx конфиг записан: \\${NGINX_CONF} (nginx \${_nginx_ver:-unknown})"
 
-MSG_DECOY_ROTATION_SKIPPED_LOAD="Rotation skipped: load average \${load} >= 2"
-MSG_DECOY_ROTATION_SKIPPED_LOAD_RU="Ротация пропущена: load average \${load} >= 2"
+MSG_DECOY_ROTATION_SKIPPED_LOAD="Rotation skipped: load average \\${load} >= 2"
+MSG_DECOY_ROTATION_SKIPPED_LOAD_RU="Ротация пропущена: load average \\${load} >= 2"
 
-MSG_DECOY_ROTATION_SKIPPED_SPACE="Rotation skipped: low space (\${free_mb}MB < 200MB)"
-MSG_DECOY_ROTATION_SKIPPED_SPACE_RU="Ротация пропущена: мало места (\${free_mb}MB < 200MB)"
+MSG_DECOY_ROTATION_SKIPPED_SPACE="Rotation skipped: low space (\\${free_mb}MB < 200MB)"
+MSG_DECOY_ROTATION_SKIPPED_SPACE_RU="Ротация пропущена: мало места (\\${free_mb}MB < 200MB)"
 
 MSG_DECOY_ROTATION_REPLACED="Rotation: replaced $(basename "\$$1") → $(basename "\$$1")"
 MSG_DECOY_ROTATION_REPLACED_RU="Ротация: заменён $(basename "\$$1") → $(basename "\$$1")"
 
-MSG_DECOY_ROTATION_TIMESTAMP="Rotation timestamp updated: \${timestamp}"
-MSG_DECOY_ROTATION_TIMESTAMP_RU="Timestamp ротации обновлён: \${timestamp}"
+MSG_DECOY_ROTATION_TIMESTAMP="Rotation timestamp updated: \\${timestamp}"
+MSG_DECOY_ROTATION_TIMESTAMP_RU="Timestamp ротации обновлён: \\${timestamp}"
 
 MSG_DECOY_ROTATION_TS_FAILED="Failed to update timestamp in decoy.json"
 MSG_DECOY_ROTATION_TS_FAILED_RU="Не удалось обновить timestamp в decoy.json"
 
-MSG_DECOY_ROTATION_COMPLETE="Rotation complete: \${replaced} files replaced"
-MSG_DECOY_ROTATION_COMPLETE_RU="Ротация завершена: заменено файлов \${replaced}"
+MSG_DECOY_ROTATION_COMPLETE="Rotation complete: \\${replaced} files replaced"
+MSG_DECOY_ROTATION_COMPLETE_RU="Ротация завершена: заменено файлов \\${replaced}"
 
 MSG_DECOY_TIMER_CREATED="Rotation timer created (enabled by default)"
 MSG_DECOY_TIMER_CREATED_RU="Таймер ротации создан (включён по умолчанию)"
 
-MSG_DECOY_NO_FILES="No files in \${DECOY_WEBROOT}/files/ — run module_configure first"
-MSG_DECOY_NO_FILES_RU="Нет файлов в \${DECOY_WEBROOT}/files/ — сначала запусти module_configure"
+MSG_DECOY_NO_FILES="No files in \\${DECOY_WEBROOT}/files/ — run module_configure first"
+MSG_DECOY_NO_FILES_RU="Нет файлов в \\${DECOY_WEBROOT}/files/ — сначала запусти module_configure"
 
 MSG_DECOY_MIKROTIK_SAVED="MikroTik script saved to: \$$1"
 MSG_DECOY_MIKROTIK_SAVED_RU="MikroTik скрипт сохранён в: \$$1"
@@ -1955,8 +1955,8 @@ MSG_RB_LATEST_COMPLETE_RU="Откат из последнего бэкапа з�
 MSG_RB_CONFIG_MODULE="Configuring rollback module"
 MSG_RB_CONFIG_MODULE_RU="Настройка модуля отката"
 
-MSG_RB_NO_BACKUPS_DIR="No backups found in \${BACKUP_ARCHIVE_DIR}"
-MSG_RB_NO_BACKUPS_DIR_RU="Бэкапы не найдены в \${BACKUP_ARCHIVE_DIR}"
+MSG_RB_NO_BACKUPS_DIR="No backups found in \\${BACKUP_ARCHIVE_DIR}"
+MSG_RB_NO_BACKUPS_DIR_RU="Бэкапы не найдены в \\${BACKUP_ARCHIVE_DIR}"
 
 MSG_RB_RUN_BACKUP_FIRST="Run backup module first to create backups"
 MSG_RB_RUN_BACKUP_FIRST_RU="Сначала запустите модуль резервного копирования для создания бэкапов"
@@ -2024,14 +2024,14 @@ MSG_TS_DISABLED_RU="Шейпинг отключён, tc-правила сбро�
 MSG_TS_STATUS="Traffic shaping status"
 MSG_TS_STATUS_RU="Статус шейпинга трафика"
 
-MSG_TS_SERVICE_ACTIVE="Service \${TS_SERVICE}: active"
-MSG_TS_SERVICE_ACTIVE_RU="Сервис \${TS_SERVICE}: активен"
+MSG_TS_SERVICE_ACTIVE="Service \\${TS_SERVICE}: active"
+MSG_TS_SERVICE_ACTIVE_RU="Сервис \\${TS_SERVICE}: активен"
 
-MSG_TS_SERVICE_NOT_RUNNING="Service \${TS_SERVICE}: not running"
-MSG_TS_SERVICE_NOT_RUNNING_RU="Сервис \${TS_SERVICE}: не запущен"
+MSG_TS_SERVICE_NOT_RUNNING="Service \\${TS_SERVICE}: not running"
+MSG_TS_SERVICE_NOT_RUNNING_RU="Сервис \\${TS_SERVICE}: не запущен"
 
-MSG_TS_CURRENT_RULES="Current tc rules (\${iface}):"
-MSG_TS_CURRENT_RULES_RU="Текущие правила tc (\${iface}):"
+MSG_TS_CURRENT_RULES="Current tc rules (\\${iface}):"
+MSG_TS_CURRENT_RULES_RU="Текущие правила tc (\\${iface}):"
 
 MSG_TS_UNINSTALL="Uninstalling traffic-shaping"
 MSG_TS_UNINSTALL_RU="Удаление traffic-shaping"
