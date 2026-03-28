@@ -417,6 +417,19 @@ ssl_is_active() {
 
 # Стандартный интерфейс модуля
 module_install() {
+  # Dry-run mode: skip actual installation
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    log_info "[DRY-RUN] Would install SSL module"
+    if [[ "${DEV_MODE:-false}" == "true" ]]; then
+      log_info "[DRY-RUN] Would generate self-signed certificate for ${DOMAIN:-dev.cubiveil.local}"
+    else
+      log_info "[DRY-RUN] Would generate Let's Encrypt certificate for ${DOMAIN:-}"
+      log_info "[DRY-RUN] Would open port 80 for validation"
+      log_info "[DRY-RUN] Would close port 80 after validation"
+    fi
+    return 0
+  fi
+
   ssl_install
 
   if [[ "${DEV_MODE:-false}" == "true" ]]; then
