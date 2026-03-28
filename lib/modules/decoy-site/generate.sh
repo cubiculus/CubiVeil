@@ -355,6 +355,32 @@ decoy_write_nginx_conf() {
   local server_token
   server_token=$(jq -r '.server_token' "$DECOY_CONFIG")
 
+  # Определяем версию nginx для выбора правильного синтаксиса http2
+  # nginx >= 1.25.1: отдельная директива "http2 on;"
+  # nginx < 1.25.1: inline "listen 443 ssl http2;"
+  local _nginx_ver _nginx_major _nginx_minor
+  local HTTP2_LISTEN HTTP2_DIRECTIVE
+
+  if command -v nginx &>/dev/null; then
+    _nginx_ver=$(nginx -v 2>&1 | grep -oP '\d+\.\d+\.\d+' | head -1 || echo "0.0.0")
+    _nginx_major=$(echo "$_nginx_ver" | cut -d. -f1)
+    _nginx_minor=$(echo "$_nginx_ver" | cut -d. -f2)
+
+    if [[ $_nginx_major -gt 1 || ( $_nginx_major -eq 1 && $_nginx_minor -ge 25 ) ]]; then
+      # nginx >= 1.25.1: отдельная директива
+      HTTP2_LISTEN="listen 443 ssl;"
+      HTTP2_DIRECTIVE="http2 on;"
+    else
+      # nginx < 1.25.1: inline в listen
+      HTTP2_LISTEN="listen 443 ssl http2;"
+      HTTP2_DIRECTIVE=""
+    fi
+  else
+    # nginx не установлен — используем старый синтаксис (совместимый)
+    HTTP2_LISTEN="listen 443 ssl http2;"
+    HTTP2_DIRECTIVE=""
+  fi
+
   # Пути к сертификатам — не копируем, ссылаемся на существующие
   local cert_file key_file
   if [[ "${DEV_MODE:-false}" == "true" ]]; then
@@ -375,9 +401,11 @@ decoy_write_nginx_conf() {
     -e "s|{{KEY_FILE}}|${key_file}|g" \
     -e "s|{{SERVER_TOKEN}}|${server_token}|g" \
     -e "s|{{REFERRER_POLICY}}|${referrer}|g" \
+    -e "s|{{HTTP2_LISTEN}}|${HTTP2_LISTEN}|g" \
+    -e "s|{{HTTP2_DIRECTIVE}}|${HTTP2_DIRECTIVE}|g" \
     "${MODULE_DIR}/nginx.conf.tpl" \
     >"$NGINX_CONF"
 
   chmod 640 "$NGINX_CONF"
-  log_info "Nginx конфиг записан: ${NGINX_CONF}"
+  log_info "Nginx конфиг записан: ${NGINX_CONF} (nginx ${_nginx_ver:-unknown})"
 }

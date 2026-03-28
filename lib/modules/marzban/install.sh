@@ -148,8 +148,11 @@ marzban_install() {
   local _max_wait=120
   local _waited=0
   local _started=false
+  local _container
   while [[ $_waited -lt $_max_wait ]]; do
-    if docker logs marzban 2>/dev/null | grep -q "Application startup complete"; then
+    # Контейнер может называться marzban или marzban_marzban_1 (docker-compose v1)
+    _container=$(docker ps -a --format '{{.Names}}' | grep -E '^marzban(_marzban_1)?$' | head -1)
+    if [[ -n "$_container" ]] && docker logs "$_container" 2>/dev/null | grep -q "Application startup complete"; then
       _started=true
       break
     fi
@@ -304,13 +307,20 @@ marzban_configure() {
 marzban_enable() {
   log_step "marzban_enable" "Enabling Marzban service"
 
-  # Marzban устанавливается как Docker контейнер, проверяем его статус
-  if docker ps --format '{{.Names}}' | grep -q "^marzban$"; then
+  # Определяем реальное имя контейнера (compose v1 или v2)
+  local _container
+  _container=$(docker ps -a --format '{{.Names}}' | grep -E '^marzban(_marzban_1)?$' | head -1)
+
+  if [[ -z "$_container" ]]; then
+    log_error "Marzban container not found"
+    return 1
+  fi
+
+  if docker ps --format '{{.Names}}' | grep -qF "$_container"; then
     log_success "Marzban Docker container is running"
   else
-    # Если контейнер не запущен, пробуем запустить через docker
     log_info "Starting Marzban Docker container..."
-    docker start marzban >/dev/null 2>&1 || {
+    docker start "$_container" >/dev/null 2>&1 || {
       log_error "Failed to start Marzban container"
       return 1
     }
@@ -321,7 +331,7 @@ marzban_enable() {
   sleep 5
 
   # Проверяем что контейнер работает
-  if docker ps --format '{{.Names}}' | grep -q "^marzban$"; then
+  if docker ps --format '{{.Names}}' | grep -qF "$_container"; then
     log_success "Marzban is running"
   else
     log_error "Marzban is not running"

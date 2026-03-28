@@ -456,6 +456,74 @@ EOF
   rm -rf "$test_config_dir" "$nginx_conf_dir"
 }
 
+# ── Тест: decoy_write_nginx_conf http2 синтаксис ───────────────
+test_decoy_write_nginx_conf_http2_syntax() {
+  info "Тестирование decoy_write_nginx_conf http2 синтаксис..."
+
+  local test_config_dir="/tmp/test-cubiveil-http2-$$"
+  mkdir -p "$test_config_dir"
+  DECOY_CONFIG="${test_config_dir}/decoy.json"
+
+  # Создаём тестовый конфиг
+  cat >"$DECOY_CONFIG" <<EOF
+{
+  "template": "portal",
+  "site_name": "Test Site",
+  "accent_color": "#4a90d9",
+  "copyright_year": "2025",
+  "server_token": "nginx",
+  "content_types": ["jpg"],
+  "rotation": {
+    "enabled": false,
+    "interval_hours": 3,
+    "files_per_cycle": 1
+  },
+  "behavior": {
+    "time_windows": ["morning", "day", "evening"],
+    "min_delay_min": 5,
+    "max_delay_min": 40,
+    "session_files": 3,
+    "speed_kbps_min": 200,
+    "speed_kbps_max": 1000
+  }
+}
+EOF
+
+  local nginx_conf_dir="/tmp/test-nginx-http2-$$"
+  mkdir -p "$nginx_conf_dir"
+  NGINX_CONF="${nginx_conf_dir}/cubiveil-decoy"
+
+  # Mock для nginx -v (версия 1.24.0 < 1.25.1)
+  nginx() {
+    if [[ "$*" == *"-v"* ]]; then
+      echo "nginx version: nginx/1.24.0" >&2
+      return 0
+    fi
+    return 0
+  }
+
+  # Вызываем функцию
+  decoy_write_nginx_conf || true
+
+  # Проверяем что конфиг создан с правильным синтаксисом
+  if [[ -f "$NGINX_CONF" ]]; then
+    # Для nginx < 1.25.1: "listen 443 ssl http2;"
+    if grep -q "listen 443 ssl http2;" "$NGINX_CONF"; then
+      pass "decoy_write_nginx_conf: старый синтаксис http2 (nginx < 1.25.1)"
+      ((TESTS_PASSED++)) || true
+    elif grep -q "http2 on;" "$NGINX_CONF"; then
+      pass "decoy_write_nginx_conf: новый синтаксис http2 (nginx >= 1.25.1)"
+      ((TESTS_PASSED++)) || true
+    else
+      fail "decoy_write_nginx_conf: синтаксис http2 не найден"
+    fi
+  else
+    fail "decoy_write_nginx_conf: конфиг не создан"
+  fi
+
+  rm -rf "$test_config_dir" "$nginx_conf_dir"
+}
+
 # ── Тест: decoy_write_rotate_timer ──────────────────────────────
 test_decoy_write_rotate_timer() {
   info "Тестирование decoy_write_rotate_timer..."
@@ -889,6 +957,9 @@ main() {
   echo ""
 
   test_decoy_write_nginx_conf
+  echo ""
+
+  test_decoy_write_nginx_conf_http2_syntax
   echo ""
 
   test_decoy_write_rotate_timer

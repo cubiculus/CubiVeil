@@ -6,9 +6,9 @@ server {
 }
 
 server {
-    listen 443 ssl;
+    {{HTTP2_LISTEN}}
     listen [::]:443 ssl;
-    http2 on;
+    {{HTTP2_DIRECTIVE}}
     server_name {{DOMAIN}};
 
     root {{WEBROOT}};
