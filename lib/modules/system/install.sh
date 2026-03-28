@@ -73,7 +73,7 @@ system_full_update() {
   log_step "system_full_update" "Performing full system update"
 
   log_info "System update may take up to 5 minutes — please wait..."
-  
+
   system_setup_update_env
   pkg_update
   pkg_upgrade
@@ -98,7 +98,17 @@ system_quick_update() {
 system_auto_updates_configure() {
   log_step "system_auto_updates_configure" "Configuring automatic updates"
 
-  cat >/etc/apt/apt.conf.d/20auto-upgrades <<'EOF'
+  if [[ $EUID -ne 0 ]]; then
+    log_warn "system_auto_updates_configure: requires root privileges (skipped)"
+    return 0
+  fi
+
+  if ! mkdir -p /etc/apt/apt.conf.d 2>/dev/null; then
+    log_warn "Cannot create /etc/apt/apt.conf.d (no root?)"
+    return 0
+  fi
+
+  cat >/etc/apt/apt.conf.d/20auto-upgrades <<'EOF' 2>/dev/null || true
 APT::Periodic::Update-Package-Lists "1";
 APT::Periodic::Unattended-Upgrade "1";
 APT::Periodic::AutocleanInterval "7";
@@ -111,7 +121,17 @@ EOF
 system_auto_updates_unattended_configure() {
   log_step "system_auto_updates_unattended_configure" "Configuring unattended-upgrades"
 
-  cat >/etc/apt/apt.conf.d/50unattended-upgrades <<'EOF'
+  if [[ $EUID -ne 0 ]]; then
+    log_warn "system_auto_updates_unattended_configure: requires root privileges (skipped)"
+    return 0
+  fi
+
+  if ! mkdir -p /etc/apt/apt.conf.d 2>/dev/null; then
+    log_warn "Cannot create /etc/apt/apt.conf.d (no root?)"
+    return 0
+  fi
+
+  cat >/etc/apt/apt.conf.d/50unattended-upgrades <<'EOF' 2>/dev/null || true
 // Только security-патчи — мажорные обновления вручную
 Unattended-Upgrade::Allowed-Origins {
   "${distro_id}:${distro_codename}-security";
@@ -155,11 +175,16 @@ system_auto_updates_setup() {
 system_bbr_load_module() {
   log_step "system_bbr_load_module" "Loading BBR kernel module"
 
+  if [[ $EUID -ne 0 ]]; then
+    log_warn "system_bbr_load_module: requires root privileges (skipped)"
+    return 0
+  fi
+
   modprobe tcp_bbr 2>/dev/null || true
 
   # Добавляем модуль в автозагрузку
   if [[ ! -f "/etc/modules-load.d/tcp-bbr.conf" ]]; then
-    echo "tcp_bbr" >/etc/modules-load.d/tcp-bbr.conf
+    echo "tcp_bbr" >/etc/modules-load.d/tcp-bbr.conf 2>/dev/null || true
   fi
 
   log_debug "BBR module loaded"
@@ -169,7 +194,12 @@ system_bbr_load_module() {
 system_bbr_create_sysctl_config() {
   log_step "system_bbr_create_sysctl_config" "Creating sysctl configuration for BBR"
 
-  cat >/etc/sysctl.d/99-cubiveil.conf <<'EOF'
+  if [[ $EUID -ne 0 ]]; then
+    log_warn "system_bbr_create_sysctl_config: requires root privileges (skipped)"
+    return 0
+  fi
+
+  cat >/etc/sysctl.d/99-cubiveil.conf <<'EOF' 2>/dev/null || true
 # CubiVeil — BBR и оптимизация сетевого стека
 
 # BBR снижает задержки и повышает скорость на длинных маршрутах

@@ -52,17 +52,20 @@ run_unit_tests() {
 
   local unit_tests=(
     "modular-structure.sh:Модульная структура"
+    "test-install-modes.sh:install.sh режимы"
     "unit-utils.sh:lib/utils.sh"
     "unit-install-steps.sh:lib/install-steps.sh"
     "unit-lang.sh:lang.sh"
     "unit-install.sh:install.sh"
     "unit-telegram.sh:setup-telegram.sh"
-    "unit-utilities.sh:Новые утилиты"
+    "unit-decoy-site.sh:decoy-site module"
+    "unit-traffic-shaping.sh:Traffic Shaping module"
     "unit-system.sh:System module"
     "unit-backup.sh:Backup module"
     "unit-rollback.sh:Rollback module"
     "unit-monitoring.sh:Monitoring module"
-    "unit-traffic-shaping.sh:Traffic Shaping module"
+    "unit-utilities.sh:Новые утилиты"
+    "unit-ssl.sh:SSL module"
   )
 
   for test_info in "${unit_tests[@]}"; do
@@ -101,6 +104,29 @@ run_unit_via_integration() {
   else
     ((TOTAL_FAILED++)) || true
     echo -e "${RED}✗ Unit тесты провалены${PLAIN}"
+  fi
+}
+
+# ── Запуск Telegram-bot (Python) тестов ──────────────────────
+run_telegram_bot_tests() {
+  print_section "Telegram-bot Tests (Python)"
+
+  local bot_tests_dir="$TESTS_DIR/telegram-bot"
+
+  if [[ ! -f "$bot_tests_dir/run_tests.py" ]]; then
+    echo -e "${YELLOW}⚠ Telegram-bot test runner не найден: $bot_tests_dir/run_tests.py${PLAIN}"
+    return 0
+  fi
+
+  echo -e "${BLUE}Запуск Telegram-bot тестов...${PLAIN}"
+  echo ""
+
+  if python3 "$bot_tests_dir/run_tests.py"; then
+    ((TOTAL_PASSED++)) || true
+    echo -e "${GREEN}✓ Telegram-bot тесты пройдены${PLAIN}"
+  else
+    ((TOTAL_FAILED++)) || true
+    echo -e "${RED}✗ Telegram-bot тесты провалены${PLAIN}"
   fi
 }
 
@@ -192,12 +218,14 @@ main() {
   case "$mode" in
   unit)
     run_unit_tests
+    run_telegram_bot_tests
     ;;
   integration)
     run_integration_tests
     ;;
   full)
     run_unit_tests
+    run_telegram_bot_tests
     run_integration_tests
     ;;
   esac

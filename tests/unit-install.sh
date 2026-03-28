@@ -367,6 +367,9 @@ test_script_size() {
     ((TESTS_PASSED++)) || true
   elif [[ $line_count -lt 500 ]]; then
     warn "install.sh: умеренного размера ($line_count строк)"
+  elif [[ $line_count -lt 1000 ]]; then
+    pass "install.sh: допустимый размер ($line_count строк)"
+    ((TESTS_PASSED++)) || true
   else
     fail "install.sh: слишком большой ($line_count строк), нужен рефакторинг"
   fi

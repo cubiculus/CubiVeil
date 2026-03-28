@@ -158,7 +158,7 @@ test_rollback_select_backup_mock() {
 
   # Mock для read
   read() {
-    echo "1" # Возвращаем первый вариант
+    selection="1" # Возвращаем первый вариант
     return 0
   }
 

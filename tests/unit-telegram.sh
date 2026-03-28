@@ -92,7 +92,7 @@ test_functions_exist() {
 
   # Извлекаем имена функций из скрипта
   local functions
-  functions=$(grep -E '^[[:space:]]*[a-zA-Z_][a-zA-Z0-9_]*[[:space:]]*\(\)' "${SCRIPT_DIR}/setup-telegram.sh" | awk '{print $1}' | sort -u)
+  functions=$(grep -E '^[[:space:]]*[a-zA-Z_][a-zA-Z0-9_]*[[:space:]]*\(\)' "${SCRIPT_DIR}/setup-telegram.sh" | awk '{print $1}' | sed 's/()$//' | sort -u)
 
   local required_functions=(
     "step_check_environment"

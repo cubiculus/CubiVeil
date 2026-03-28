@@ -349,7 +349,7 @@ step_update_marzban() {
   # Проверяем наличие команды marzban
   if command -v marzban &>/dev/null; then
     info "Выполнение marzban upgrade..."
-    
+
     # Запускаем обновление Marzban
     if marzban upgrade 2>&1; then
       success "Marzban обновлён"
@@ -389,14 +389,14 @@ step_update_singbox() {
 
   # Загружаем модуль sing-box для обновления
   local singbox_module="${CUBIVEIL_DIR}/lib/modules/singbox/install.sh"
-  
+
   if [[ -f "$singbox_module" ]]; then
     info "Выполнение обновления sing-box..."
-    
+
     # Source модуля и вызов функции обновления
     # shellcheck disable=SC1090
     source "$singbox_module"
-    
+
     if declare -f singbox_update &>/dev/null; then
       if singbox_update; then
         success "sing-box обновлён"
@@ -426,7 +426,7 @@ step_restart_services() {
   fi
 
   local services=("marzban" "sing-box" "cubiveil-bot")
-  
+
   for service in "${services[@]}"; do
     if systemctl is-active --quiet "$service" 2>/dev/null; then
       info "Перезапуск $service..."
@@ -460,7 +460,7 @@ step_finish() {
   echo "══════════════════════════════════════════════════════════"
   echo "  Статус сервисов:"
   echo "══════════════════════════════════════════════════════════"
-  
+
   for service in marzban sing-box cubiveil-bot; do
     if systemctl is-active --quiet "$service" 2>/dev/null; then
       echo -e "  ${GREEN}●${PLAIN} $service — активен"
@@ -468,7 +468,7 @@ step_finish() {
       echo -e "  ${YELLOW}○${PLAIN} $service — не активен"
     fi
   done
-  
+
   echo "══════════════════════════════════════════════════════════"
   echo ""
 }
@@ -490,4 +490,7 @@ main() {
   step_finish
 }
 
-main "$@"
+# Only execute main if script is run directly (not sourced)
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  main "$@"
+fi

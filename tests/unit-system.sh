@@ -320,6 +320,59 @@ test_system_install_base_dependencies() {
   ((TESTS_PASSED++)) || true
 }
 
+# ── Тест: pkg_update ─────────────────────────────────────────
+test_pkg_update() {
+  info "Тестирование pkg_update..."
+
+  apt_args=()
+  apt-get() { apt_args=("$@"); return 0; }
+
+  pkg_update
+
+  if [[ "${DEBIAN_FRONTEND:-}" == "noninteractive" ]] && [[ "${UCF_FORCE_CONFFOLD:-}" == "1" ]] && [[ "${apt_args[0]}" == "update" ]]; then
+    pass "pkg_update выполняет apt-get update и устанавливает окружение"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "pkg_update не выполняет ожидаемые действия"
+  fi
+}
+
+# ── Тест: pkg_upgrade ────────────────────────────────────────
+test_pkg_upgrade() {
+  info "Тестирование pkg_upgrade..."
+
+  apt_args=()
+  apt-get() { apt_args=("$@"); return 0; }
+  sed() { return 0; }
+
+  pkg_upgrade
+
+  if [[ "${DEBIAN_FRONTEND:-}" == "noninteractive" ]] && [[ "${UCF_FORCE_CONFFOLD:-}" == "1" ]] && [[ "${UCFF_FORCE_CONFFNEW:-}" == "1" ]] && [[ "${apt_args[0]}" == "upgrade" ]]; then
+    pass "pkg_upgrade выполняет apt-get upgrade и устанавливает окружение"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "pkg_upgrade не выполняет ожидаемые действия"
+  fi
+}
+
+# ── Тест: pkg_full_upgrade ───────────────────────────────────
+test_pkg_full_upgrade() {
+  info "Тестирование pkg_full_upgrade..."
+
+  apt_args=()
+  apt-get() { apt_args=("$@"); return 0; }
+  sed() { return 0; }
+
+  pkg_full_upgrade
+
+  if [[ "${DEBIAN_FRONTEND:-}" == "noninteractive" ]] && [[ "${UCF_FORCE_CONFFOLD:-}" == "1" ]] && [[ "${UCFF_FORCE_CONFFNEW:-}" == "1" ]] && [[ "${apt_args[0]}" == "dist-upgrade" ]]; then
+    pass "pkg_full_upgrade выполняет apt-get dist-upgrade и устанавливает окружение"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "pkg_full_upgrade не выполняет ожидаемые действия"
+  fi
+}
+
 # ── Тест: module_install ───────────────────────────────────────
 test_module_install() {
   info "Тестирование module_install..."

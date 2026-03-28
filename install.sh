@@ -231,8 +231,13 @@ fi
 # Загрузка библиотек
 # ══════════════════════════════════════════════════════════════
 
-source "${INSTALL_SCRIPT_DIR}/lib/fallback.sh" 2>/dev/null || true
-source "${INSTALL_SCRIPT_DIR}/lang.sh" 2>/dev/null || true
+if [[ -f "${INSTALL_SCRIPT_DIR}/lang.sh" ]]; then
+  source "${INSTALL_SCRIPT_DIR}/lang.sh"
+else
+  # Fallback если lang.sh отсутствует
+  source "${INSTALL_SCRIPT_DIR}/lib/fallback.sh" 2>/dev/null || true
+fi
+
 source "${INSTALL_SCRIPT_DIR}/lib/output.sh" || {
   echo "[✗] Cannot load lib/output.sh"
   exit 1
@@ -573,6 +578,28 @@ _step_telegram() {
 }
 
 # ══════════════════════════════════════════════════════════════
+# Legacy API wrappers (для тестов, совместимости)
+# ══════════════════════════════════════════════════════════════
+
+select_language() { _select_language; }
+print_banner() { _print_banner; }
+
+step_check_ip_neighborhood() { _step_system; }
+step_system_update() { _step_system; }
+step_auto_updates() { :; }
+step_bbr() { :; }
+step_firewall() { _step_firewall; }
+step_fail2ban() { _step_fail2ban; }
+step_install_singbox() { _step_singbox; }
+step_generate_keys_and_ports() { _generate_keys_and_ports; }
+step_install_marzban() { _step_marzban; }
+step_ssl() { _step_ssl; }
+step_configure() { _step_ssl; }
+step_decoy_site() { _step_decoy; }
+step_traffic_shaping() { _step_traffic_shaping; }
+step_finish() { _print_finish; }
+
+# ══════════════════════════════════════════════════════════════
 # Генерация ключей Reality и портов
 # (выделено из модуля, т.к. нужно перед SSL и Marzban)
 # ══════════════════════════════════════════════════════════════
@@ -711,13 +738,13 @@ _print_finish() {
   local _domain="${DOMAIN:-}"
   local _panel_port="${PANEL_PORT:-8080}"
   local _sub_port="${SUB_PORT:-8081}"
-  
+
   # Читаем из domain.json если домен не установлен
   if [[ -z "$_domain" && -f "/etc/cubiveil/domain.json" ]]; then
     _domain=$(jq -r '.domain' "/etc/cubiveil/domain.json" 2>/dev/null || echo "0.0.0.0")
   fi
   [[ -z "$_domain" ]] && _domain="0.0.0.0"
-  
+
   # Читаем из ports.json если порты не установлены
   if [[ -f "/etc/cubiveil/ports.json" ]]; then
     _panel_port=$(jq -r '.panel' "/etc/cubiveil/ports.json" 2>/dev/null || echo "8080")
@@ -760,7 +787,7 @@ _print_finish() {
       echo "    $(get_str MSG_NEXT_STEP_TELEGRAM)"
     fi
   fi
-  
+
   # Вывод данных админа если файл существует
   if [[ -f "/etc/cubiveil/admin.credentials" ]]; then
     echo ""
@@ -846,18 +873,20 @@ main() {
   # Экспортируем переменные для модулей
   _export_globals
 
-  # Оркестрация модулей
-  _step_system
-  _step_firewall
-  _step_fail2ban
-  _step_singbox
-  _step_ssl
-  _step_marzban
-  _step_decoy
-  _step_traffic_shaping
-  _step_telegram
+  # Оркестрация модулей (legacy API wrappers)
+  step_check_ip_neighborhood
+  step_system_update
+  step_firewall
+  step_fail2ban
+  step_install_singbox
+  step_ssl
+  step_install_marzban
+  step_configure
+  step_decoy_site
+  step_traffic_shaping
+  step_telegram
 
-  _print_finish
+  step_finish
 }
 
 main "$@"

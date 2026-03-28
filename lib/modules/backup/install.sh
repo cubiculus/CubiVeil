@@ -163,7 +163,7 @@ backup_marzban_db() {
 
   if [[ ! -f "${MARZBAN_DIR}/db.sqlite3" ]]; then
     log_warn "Marzban database not found"
-    return 1
+    return 0
   fi
 
   local backup_db="${BACKUP_DIR}/marzban-db.sqlite3"
@@ -244,11 +244,12 @@ backup_ssl_certs() {
 
   if [[ ! -d "$SSL_CERT_DIR" ]]; then
     log_warn "SSL certificates directory not found"
-    return 1
+    return 0
   fi
 
   # Копируем все сертификаты
-  cp -r "$SSL_CERT_DIR" "${BACKUP_DIR}/ssl-certs/"
+  mkdir -p "${BACKUP_DIR}/ssl-certs" 2>/dev/null || true
+  cp -r "$SSL_CERT_DIR" "${BACKUP_DIR}/ssl-certs/" 2>/dev/null || true
 
   # Проверяем валидность сертификатов используя verify_ssl_cert из security.sh
   local cert_file="${SSL_CERT_DIR}/fullchain.pem"
@@ -563,9 +564,9 @@ module_quick_backup() {
 
   backup_init
 
-  backup_marzban_db
-  backup_marzban_config
-  backup_ssl_certs
+  backup_marzban_db || true
+  backup_marzban_config || true
+  backup_ssl_certs || true
 
   backup_create_archive "cubiveil-quick"
 

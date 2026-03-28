@@ -384,7 +384,11 @@ telegram_main() {
   echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${PLAIN}"
 }
 
+main() {
+  telegram_main "$@"
+}
+
 # Запускаем main только если скрипт запущен напрямую, а не через source
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  telegram_main "$@"
+  main "$@"
 fi
