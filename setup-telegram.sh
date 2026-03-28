@@ -7,7 +7,13 @@
 set -euo pipefail
 
 # ── Определение директории скрипта ───────────────────────────
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Когда вызван из install.sh, INSTALL_SCRIPT_DIR уже указывает на корень репо.
+# Когда запущен напрямую, используем BASH_SOURCE.
+if [[ -n "${INSTALL_SCRIPT_DIR:-}" && -d "${INSTALL_SCRIPT_DIR}/lib" ]]; then
+  SCRIPT_DIR="$INSTALL_SCRIPT_DIR"
+else
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+fi
 
 # ── Подключение локализации ──────────────────────────────────
 if [[ -f "${SCRIPT_DIR}/lang/telegram.sh" ]]; then
