@@ -62,17 +62,24 @@ decoy_generate_profile() {
   mkdir -p /etc/cubiveil
   cat >"$DECOY_CONFIG" <<EOF
 {
-  "template":       "${template}",
-  "site_name":      "${site_name}",
-  "accent_color":   "${accent_color}",
-  "copyright_year": "${copyright_year}",
-  "server_token":   "${server_token}",
-  "content_types":  ["jpg", "pdf", "mp4", "mp3"],
+  "template":         "${template}",
+  "site_name":        "${site_name}",
+  "accent_color":     "${accent_color}",
+  "copyright_year":   "${copyright_year}",
+  "server_token":     "${server_token}",
+  "content_types":    ["jpg", "pdf", "mp4", "mp3"],
+  "max_total_files_mb": 5000,
   "rotation": {
     "enabled":         true,
     "interval_hours":  3,
     "files_per_cycle": 1,
-    "last_rotated_at": null
+    "last_rotated_at": null,
+    "types": {
+      "jpg": { "enabled": true,  "weight": 4, "size_min_mb": 5,   "size_max_mb": 20 },
+      "pdf": { "enabled": true,  "weight": 2, "size_min_mb": 50,  "size_max_mb": 200 },
+      "mp4": { "enabled": true,  "weight": 1, "size_min_mb": 100, "size_max_mb": 300 },
+      "mp3": { "enabled": false, "weight": 1, "size_min_mb": 10,  "size_max_mb": 50 }
+    }
   },
   "behavior": {
     "time_windows":    ["morning", "day", "evening"],
@@ -96,6 +103,12 @@ decoy_build_webroot() {
   site_name=$(jq -r '.site_name' "$DECOY_CONFIG")
   accent_color=$(jq -r '.accent_color' "$DECOY_CONFIG")
   copyright_year=$(jq -r '.copyright_year' "$DECOY_CONFIG")
+
+  # Очистка старых файлов перед генерацией новых (при переустановке/обновлении)
+  if [[ -d "${DECOY_WEBROOT}/files" ]]; then
+    log_info "Очистка старых файлов перед генерацией новых..."
+    find "${DECOY_WEBROOT}/files" -type f -delete 2>/dev/null || true
+  fi
 
   mkdir -p "${DECOY_WEBROOT}/files"
 
