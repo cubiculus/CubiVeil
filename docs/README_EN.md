@@ -122,7 +122,38 @@ sudo bash install.sh --dev --domain=mytest.local
 
 # Show help
 sudo bash install.sh --help
+
+# Debug mode (verbose output + DEBUG logs)
+sudo bash install.sh --debug
+
+# Debug mode + simulation (no system changes)
+sudo bash install.sh --debug --dry-run
+
+# Skip decoy-site installation
+sudo bash install.sh --no-decoy
+
+# Skip Traffic Shaping module
+sudo bash install.sh --no-traffic-shaping
+
+# Install Telegram bot (interactive setup)
+sudo bash install.sh --telegram
+
+# Save installation log
+sudo bash install.sh --debug 2>&1 | tee install_debug.log
 ```
+
+**All options:**
+
+| Option | Description |
+|--------|-------------|
+| `--dev` | Dev mode: self-signed SSL, no domain required |
+| `--dry-run` | Simulate installation without system changes |
+| `--debug`, `-v` | Debug mode: verbose output + DEBUG logs |
+| `--domain=NAME` | Set domain (default in dev: dev.cubiveil.local) |
+| `--no-decoy` | Skip decoy-site installation |
+| `--no-traffic-shaping` | Skip Traffic Shaping module |
+| `--telegram` | Install Telegram bot |
+| `--help`, `-h` | Show help |
 
 ## 📦 Components
 

@@ -114,7 +114,38 @@ sudo bash install.sh --dev --domain=mytest.local
 
 # Показать справку
 sudo bash install.sh --help
+
+# Режим отладки (подробный вывод + DEBUG логи)
+sudo bash install.sh --debug
+
+# Режим отладки + симуляция (без изменений в системе)
+sudo bash install.sh --debug --dry-run
+
+# Пропустить установку сайта-прикрытия
+sudo bash install.sh --no-decoy
+
+# Пропустить модуль Traffic Shaping
+sudo bash install.sh --no-traffic-shaping
+
+# Установить Telegram-бот (интерактивная настройка)
+sudo bash install.sh --telegram
+
+# Сохранить лог установки
+sudo bash install.sh --debug 2>&1 | tee install_debug.log
 ```
+
+**Все параметры:**
+
+| Параметр | Описание |
+|----------|----------|
+| `--dev` | Dev-режим: самоподписной SSL, не требуется домен |
+| `--dry-run` | Симуляция установки без изменений в системе |
+| `--debug`, `-v` | Режим отладки: подробный вывод + DEBUG логи |
+| `--domain=NAME` | Установить домен (по умолчанию в dev: dev.cubiveil.local) |
+| `--no-decoy` | Пропустить установку сайта-прикрытия |
+| `--no-traffic-shaping` | Пропустить модуль Traffic Shaping |
+| `--telegram` | Установить Telegram-бот |
+| `--help`, `-h` | Показать справку |
 
 ## 📦 Компоненты
 
