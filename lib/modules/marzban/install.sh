@@ -296,21 +296,31 @@ marzban_configure() {
 marzban_enable() {
   log_step "marzban_enable" "Enabling Marzban service"
 
-  svc_enable_start "$MARZBAN_SERVICE"
+  # Marzban устанавливается как Docker контейнер, проверяем его статус
+  if docker ps --format '{{.Names}}' | grep -q "^marzban$"; then
+    log_success "Marzban Docker container is running"
+  else
+    # Если контейнер не запущен, пробуем запустить через docker
+    log_info "Starting Marzban Docker container..."
+    docker start marzban >/dev/null 2>&1 || {
+      log_error "Failed to start Marzban container"
+      return 1
+    }
+  fi
 
   # Ждём пока Marzban запустится
   log_info "Waiting for Marzban to start..."
   sleep 5
 
-  # Проверяем статус сервиса
-  if svc_active "$MARZBAN_SERVICE"; then
-    log_success "Marzban service is running"
+  # Проверяем что контейнер работает
+  if docker ps --format '{{.Names}}' | grep -q "^marzban$"; then
+    log_success "Marzban is running"
   else
-    log_error "Marzban service failed to start"
+    log_error "Marzban is not running"
     return 1
   fi
 
-  log_success "Marzban service enabled and started"
+  log_success "Marzban enabled and started"
 }
 
 # Выключение сервиса Marzban
