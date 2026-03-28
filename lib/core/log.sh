@@ -38,6 +38,13 @@ if [[ -z "${RED:-}" ]]; then
   PLAIN='\033[0m'
 fi
 
+# Собираем предупреждения для итогового блока
+WARNINGS=()
+
+# Внутренние log_step (submodule) можно отключить, чтобы не показывать слишком много разделителей
+CUBIVEIL_HIDE_LOG_STEP="true"
+
+
 # ── Инициализация логирования / Logging Initialization ────
 
 # Инициализация лог-системы
@@ -127,8 +134,10 @@ log_console_success() {
 
 # Предупреждение (консоль + лог)
 log_console_warning() {
-  echo -e "${YELLOW}⚠️${PLAIN} $*"
-  log_warn "$*"
+  local msg="$*"
+  echo -e "${YELLOW}⚠️${PLAIN} ${msg}"
+  log_warn "${msg}"
+  WARNINGS+=("${msg}")
 }
 
 # Ошибка (консоль + лог)
@@ -216,11 +225,19 @@ log_step_title() {
 
 # Простой заголовок шага с логированием (совместимость)
 log_step() {
-  local msg="$1"
-  echo -e "\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
-  echo -e "${BLUE}  ${msg}${PLAIN}"
-  echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
-  log_info "$msg"
+  local step_key="$1"
+  local msg="${2:-$1}"
+
+  # Показываем визуальный разделитель только для верхнего уровня (по умолчанию скрыто)
+  if [[ "${CUBIVEIL_HIDE_LOG_STEP:-true}" != "true" ]]; then
+    echo -e "\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
+    echo -e "${BLUE}  ${msg}${PLAIN}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
+  else
+    echo -e "· ${msg}"
+  fi
+
+  log_info "${msg}"
 }
 
 # ── Функции совместимости / Compatibility Functions ────────

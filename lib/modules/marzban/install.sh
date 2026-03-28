@@ -146,19 +146,31 @@ marzban_install() {
 
   # Ждём "Application startup complete" до 120 секунд
   local _max_wait=120
-  local _waited=0
   local _started=false
   local _container
-  while [[ $_waited -lt $_max_wait ]]; do
+  local _start_time
+  _start_time=$(date +%s)
+
+  while true; do
+    local _now
+    _now=$(date +%s)
+    local _elapsed=$((_now - _start_time))
+
+    if [[ $_elapsed -ge $_max_wait ]]; then
+      break
+    fi
+
     # Контейнер может называться marzban или marzban_marzban_1 (docker-compose v1)
     _container=$(docker ps -a --format '{{.Names}}' | grep -E '^marzban(_marzban_1)?$' | head -1)
     if [[ -n "$_container" ]] && docker logs "$_container" 2>/dev/null | grep -q "Application startup complete"; then
       _started=true
       break
     fi
-    sleep 3
-    ((_waited += 3)) || true
+
+    echo -ne "\rWaiting for Marzban... ${_elapsed}s"
+    sleep 1
   done
+  echo -ne "\r"
 
   # Убиваем foreground docker compose up (контейнер продолжает работать)
   kill "$_marzban_bg_pid" 2>/dev/null || true

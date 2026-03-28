@@ -561,32 +561,32 @@ MSG_PROMPT_TELEGRAM_RU="Установить Telegram-бот для монито
 MSG_TELEGRAM_WILL_BE_INSTALLED="Telegram bot will be installed after main components"
 MSG_TELEGRAM_WILL_BE_INSTALLED_RU="Telegram-бот будет установлен после основных компонентов"
 
-MSG_STEP_1_8_SYSTEM="Step 1/8 — System update and base configuration"
-MSG_STEP_1_8_SYSTEM_RU="Шаг 1/8 — Обновление системы и базовые настройки"
+MSG_STEP_1_8_SYSTEM="System update and base configuration"
+MSG_STEP_1_8_SYSTEM_RU="Обновление системы и базовые настройки"
 
-MSG_STEP_2_8_FIREWALL="Step 2/8 — Firewall (UFW)"
-MSG_STEP_2_8_FIREWALL_RU="Шаг 2/8 — Файрвол (UFW)"
+MSG_STEP_2_8_FIREWALL="Firewall (UFW)"
+MSG_STEP_2_8_FIREWALL_RU="Файрвол (UFW)"
 
-MSG_STEP_3_8_FAIL2BAN="Step 3/8 — Fail2ban"
-MSG_STEP_3_8_FAIL2BAN_RU="Шаг 3/8 — Fail2ban"
+MSG_STEP_3_8_FAIL2BAN="Fail2ban"
+MSG_STEP_3_8_FAIL2BAN_RU="Fail2ban"
 
-MSG_STEP_4_8_SINGBOX="Step 4/8 — Sing-box"
-MSG_STEP_4_8_SINGBOX_RU="Шаг 4/8 — Sing-box"
+MSG_STEP_4_8_SINGBOX="Sing-box"
+MSG_STEP_4_8_SINGBOX_RU="Sing-box"
 
-MSG_STEP_5_8_SSL="Step 5/8 — SSL certificate"
-MSG_STEP_5_8_SSL_RU="Шаг 5/8 — SSL сертификат"
+MSG_STEP_5_8_SSL="SSL certificate"
+MSG_STEP_5_8_SSL_RU="SSL сертификат"
 
-MSG_STEP_6_8_MARZBAN="Step 6/8 — Marzban"
-MSG_STEP_6_8_MARZBAN_RU="Шаг 6/8 — Marzban"
+MSG_STEP_6_8_MARZBAN="Marzban"
+MSG_STEP_6_8_MARZBAN_RU="Marzban"
 
-MSG_STEP_7_8_DECOY="Step 7/8 — Decoy site"
-MSG_STEP_7_8_DECOY_RU="Шаг 7/8 — Сайт-прикрытие (decoy)"
+MSG_STEP_7_8_DECOY="Decoy site"
+MSG_STEP_7_8_DECOY_RU="Сайт-прикрытие (decoy)"
 
-MSG_STEP_8_8_TRAFFIC="Step 8/8 — Traffic shaping"
-MSG_STEP_8_8_TRAFFIC_RU="Шаг 8/8 — Traffic shaping"
+MSG_STEP_8_8_TRAFFIC="Traffic shaping"
+MSG_STEP_8_8_TRAFFIC_RU="Traffic shaping"
 
-MSG_STEP_9_9_TELEGRAM="Step 9/9 — Telegram bot"
-MSG_STEP_9_9_TELEGRAM_RU="Шаг 9/9 — Telegram-бот"
+MSG_STEP_9_9_TELEGRAM="Telegram bot"
+MSG_STEP_9_9_TELEGRAM_RU="Telegram-бот"
 
 MSG_MODULE_NOT_FOUND="Module not found, skipping: {NAME}"
 MSG_MODULE_NOT_FOUND_RU="Модуль не найден, пропускаем: {NAME}"

@@ -284,6 +284,44 @@ EOF
   ok "Команды: /status /backup /users /restart /help"
 }
 
+# Функция для шагов Telegram-установки с локализацией
+setup_step() {
+  local step_num="$1"
+  local total_steps="$2"
+  local ru="$3"
+  local en="$4"
+
+  if [[ "$LANG_NAME" == "Русский" ]]; then
+    step_module "$step_num" "$total_steps" "$ru"
+  else
+    step_module "$step_num" "$total_steps" "$en"
+  fi
+}
+
+# Ждем, пока systemd-сервис запустится, с отображением таймера
+wait_for_service() {
+  local svc="$1"
+  local max_wait="${2:-30}"
+  local start_ts
+  start_ts=$(date +%s)
+
+  while true; do
+    if systemctl is-active --quiet "$svc"; then
+      success "$svc is active"
+      return 0
+    fi
+    local now_ts
+    now_ts=$(date +%s)
+    local elapsed=$((now_ts - start_ts))
+    if [[ $elapsed -ge $max_wait ]]; then
+      warning "$svc did not become active in ${max_wait}s"
+      return 1
+    fi
+    echo -ne "\rWaiting for $svc... ${elapsed}s"
+    sleep 1
+  done
+}
+
 # ══════════════════════════════════════════════════════════════
 # Точка входа / Entry point
 # ══════════════════════════════════════════════════════════════
@@ -300,6 +338,16 @@ telegram_main() {
   step_prompt_telegram_config
   step_install_bot
   step_configure_services
+
+  # Итоговая сводка предупреждений
+  if [[ ${#WARNINGS[@]} -gt 0 ]]; then
+    echo ""
+    echo -e "${YELLOW}⚠ Warnings during Telegram install:${PLAIN}"
+    for _warn in "${WARNINGS[@]}"; do
+      echo -e "  - ${_warn}"
+    done
+    echo ""
+  fi
 
   echo ""
   if [[ "$LANG_NAME" == "Русский" ]]; then

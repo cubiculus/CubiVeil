@@ -14,8 +14,6 @@
 
 set -euo pipefail
 
-echo "DEBUG: BASH_SOURCE=${BASH_SOURCE[0]}" # debug
-
 # ── Определение корневой директории ─────────────────────────
 # При запуске через curl/pipe BASH_SOURCE[0] == "-s"
 if [[ "${BASH_SOURCE[0]}" == "-s" || ! -f "${BASH_SOURCE[0]}" ]]; then
@@ -458,7 +456,12 @@ prompt_inputs() {
 # ══════════════════════════════════════════════════════════════
 # Вспомогательная функция: загрузить и вызвать модуль
 # ══════════════════════════════════════════════════════════════
-
+# Шаг в обёртке для показа прогресса [x/N]
+step_module() {
+  local label="$1"
+  CURRENT_STEP=$((CURRENT_STEP+1))
+  step "$CURRENT_STEP" "$TOTAL_STEPS" "$label"
+}
 # Экспортируем глобальные переменные, нужные модулям
 _export_globals() {
   export LANG_NAME DEV_MODE DRY_RUN DEBUG_MODE DOMAIN LE_EMAIL SERVER_IP
@@ -471,11 +474,13 @@ run_module() {
   local module_file="${INSTALL_SCRIPT_DIR}/lib/modules/${name}/install.sh"
 
   if [[ ! -f "$module_file" ]]; then
-    warn "Module not found, skipping: $name ($module_file)"
+    warning "Module not found, skipping: $name ($module_file)"
+    WARNINGS+=("Module not found: $name")
+    echo -e "${YELLOW}⚠ Skipped${PLAIN}"
     return 0
   fi
 
-  # Каждый модуль source-ится в подоболочке чтобы не загрязнять глобальный namespace
+  # Каждый модуль source-ится в подоболочке чтобы не загрязнить глобальную namespace
   # НО нам нужны side-effects (порты, ключи), поэтому source в текущей оболочке
   # с очисткой module_* функций после
   # shellcheck disable=SC1090
@@ -485,21 +490,46 @@ run_module() {
     info "[DRY-RUN] Would run: ${name}::install, configure, enable"
     unset -f module_install module_configure module_enable module_disable \
       module_update module_remove module_status module_health_check 2>/dev/null || true
+    echo -e "${GREEN}✓ DRY-RUN: ${name} skipped${PLAIN}"
     return 0
   fi
 
-  # Каждый шаг с явной обработкой ошибок — предотвращаем молчаливое завершение
+  # Отключаем обильные разделители log_step для внутренних шагов модулей
+  export CUBIVEIL_HIDE_LOG_STEP="true"
+
+  local module_status=0
+
   if declare -f module_install >/dev/null; then
-    module_install || { warn "module_install failed for ${name}, continuing"; }
-  fi
-  if declare -f module_configure >/dev/null; then
-    module_configure || { warn "module_configure failed for ${name}, continuing"; }
-  fi
-  if declare -f module_enable >/dev/null; then
-    module_enable || { warn "module_enable failed for ${name}, continuing"; }
+    if ! module_install; then
+      warning "module_install failed for ${name}, continuing"
+      WARNINGS+=("module_install failed for ${name}")
+      module_status=1
+    fi
   fi
 
-  # Сбрасываем функции модуля, чтобы следующий модуль не унаследовал
+  if declare -f module_configure >/dev/null; then
+    if ! module_configure; then
+      warning "module_configure failed for ${name}, continuing"
+      WARNINGS+=("module_configure failed for ${name}")
+      module_status=1
+    fi
+  fi
+
+  if declare -f module_enable >/dev/null; then
+    if ! module_enable; then
+      warning "module_enable failed for ${name}, continuing"
+      WARNINGS+=("module_enable failed for ${name}")
+      module_status=1
+    fi
+  fi
+
+  if [[ $module_status -eq 0 ]]; then
+    success "Module ${name}: ✓ OK"
+  else
+    warning "Module ${name}: ⚠ Skipped with issues"
+  fi
+
+  # Сбрасываем функции модуля, чтобы следующий модуль не унаследил
   unset -f module_install module_configure module_enable module_disable \
     module_update module_remove module_status module_health_check 2>/dev/null || true
 }
@@ -511,28 +541,28 @@ run_module() {
 _step_system() {
   local _label
   _label="$(get_str MSG_STEP_1_8_SYSTEM)"
-  step "$_label"
+  step_module "$_label"
   run_module "system"
 }
 
 _step_firewall() {
   local _label
   _label="$(get_str MSG_STEP_2_8_FIREWALL)"
-  step "$_label"
+  step_module "$_label"
   run_module "firewall"
 }
 
 _step_fail2ban() {
   local _label
   _label="$(get_str MSG_STEP_3_8_FAIL2BAN)"
-  step "$_label"
+  step_module "$_label"
   run_module "fail2ban"
 }
 
 _step_singbox() {
   local _label
   _label="$(get_str MSG_STEP_4_8_SINGBOX)"
-  step "$_label"
+  step_module "$_label"
 
   # Генерируем ключи и порты до установки, чтобы модуль SSL/Marzban их видел
   _generate_keys_and_ports
@@ -542,14 +572,14 @@ _step_singbox() {
 _step_ssl() {
   local _label
   _label="$(get_str MSG_STEP_5_8_SSL)"
-  step "$_label"
+  step_module "$_label"
   run_module "ssl"
 }
 
 _step_marzban() {
   local _label
   _label="$(get_str MSG_STEP_6_8_MARZBAN)"
-  step "$_label"
+  step_module "$_label"
   run_module "marzban"
 }
 
@@ -557,7 +587,7 @@ _step_decoy() {
   [[ "$INSTALL_DECOY" != "true" ]] && return 0
   local _label
   _label="$(get_str MSG_STEP_7_8_DECOY)"
-  step "$_label"
+  step_module "$_label"
   run_module "decoy-site"
 }
 
@@ -565,7 +595,7 @@ _step_traffic_shaping() {
   [[ "$INSTALL_TRAFFIC_SHAPING" != "true" ]] && return 0
   local _label
   _label="$(get_str MSG_STEP_8_8_TRAFFIC)"
-  step "$_label"
+  step_module "$_label"
   run_module "traffic-shaping"
 }
 
@@ -573,8 +603,7 @@ _step_telegram() {
   [[ "$INSTALL_TELEGRAM" != "true" ]] && return 0
   local _label
   _label="$(get_str MSG_STEP_9_9_TELEGRAM)"
-  step "$_label"
-
+  step_module "$_label"
   # Запускаем setup-telegram.sh
   local _setup_script="${INSTALL_SCRIPT_DIR}/setup-telegram.sh"
   if [[ -f "$_setup_script" ]]; then
@@ -765,9 +794,21 @@ _print_finish() {
   local _panel_url="https://${_domain}:${_panel_port}"
   local _sub_url="https://${_domain}:${_sub_port}/subscription"
 
+  # Итоговая сводка предупреждений
+  if [[ ${#WARNINGS[@]} -gt 0 ]]; then
+    echo ""
+    echo -e "${YELLOW}⚠ Warnings during install:${PLAIN}"
+    for _warn in "${WARNINGS[@]}"; do
+      echo -e "  - ${_warn}"
+    done
+    echo ""
+  fi
+
+  # Выделение финального блока (URL + credentials)
+  echo -e "${GREEN}╔══════════════════════════════════════════════════════════════════════════╗${PLAIN}"
   if [[ "$LANG_NAME" == "Русский" ]]; then
-    echo "  $(get_str SUCCESS_PANEL_URL_RU)     ${_panel_url}"
-    echo "  $(get_str SUCCESS_SUBSCRIPTION_URL_RU)   ${_sub_url}"
+    echo -e "${GREEN}  $(get_str SUCCESS_PANEL_URL_RU)     ${_panel_url}${PLAIN}"
+    echo -e "${GREEN}  $(get_str SUCCESS_SUBSCRIPTION_URL_RU)   ${_sub_url}${PLAIN}"
     echo ""
     echo "  $(get_str SUCCESS_PROFILES_RU) Trojan · Shadowsocks · VLESS · VMess · Hysteria2"
     echo ""
@@ -799,22 +840,24 @@ _print_finish() {
     fi
   fi
 
+  echo -e "${GREEN}╚══════════════════════════════════════════════════════════════════════════╝${PLAIN}"
+
   # Вывод данных админа если файл существует
   if [[ -f "/etc/cubiveil/admin.credentials" ]]; then
     echo ""
-    echo "══════════════════════════════════════════════════════════"
+    echo -e "${GREEN}╔══════════════════════════════════════════════════════════╗${PLAIN}"
     if [[ "$LANG_NAME" == "Русский" ]]; then
-      echo "  $(get_str MSG_ADMIN_CREDENTIALS_RU)"
+      echo -e "${GREEN}  $(get_str MSG_ADMIN_CREDENTIALS_RU)${PLAIN}"
     else
-      echo "  $(get_str MSG_ADMIN_CREDENTIALS)"
+      echo -e "${GREEN}  $(get_str MSG_ADMIN_CREDENTIALS)${PLAIN}"
     fi
-    echo "══════════════════════════════════════════════════════════"
+    echo -e "${GREEN}╠══════════════════════════════════════════════════════════╣${PLAIN}"
     local _admin_user _admin_pass
     _admin_user=$(grep "MARZBAN_USERNAME" /etc/cubiveil/admin.credentials 2>/dev/null | cut -d= -f2 || echo "N/A")
     _admin_pass=$(grep "MARZBAN_PASSWORD" /etc/cubiveil/admin.credentials 2>/dev/null | cut -d= -f2 || echo "N/A")
-    echo "  Username: ${_admin_user}"
-    echo "  Password: ${_admin_pass}"
-    echo "══════════════════════════════════════════════════════════"
+    echo -e "${GREEN}  Username: ${PLAIN}${_admin_user}"
+    echo -e "${GREEN}  Password: ${YELLOW}${_admin_pass}${PLAIN}"
+    echo -e "${GREEN}╚══════════════════════════════════════════════════════════╝${PLAIN}"
     echo ""
   fi
 
@@ -867,9 +910,13 @@ main() {
     return 0
   fi
 
+  # Инициализация счётчика шагов
+  CURRENT_STEP=0
+  TOTAL_STEPS=9
+
   # Выбор языка (если переменная задана, пропускаем)
   if [[ -n "${LANG_NAME:-}" ]]; then
-    echo "Language установлено: ${LANG_NAME}"
+    :
   else
     _select_language
   fi
