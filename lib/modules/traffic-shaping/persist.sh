@@ -38,16 +38,16 @@ ts_check_compatibility() {
       log_warn "Обнаружены существующие tc правила на $iface"
       log_warn "Это может конфликтовать с traffic-shaping"
       # В production-режиме спрашиваем, в тестах просто пропускаем
-      if [[ "${DRY_RUN:-false}" != "true" ]]; then
-        # Проверяем интерактивный режим
-        if [[ -t 0 ]]; then
+      if [[ "${DRY_RUN:-false}" != "true" && "${CI:-false}" != "true" ]]; then
+        # Проверяем интерактивный режим через переменную окружения
+        if [[ "${INTERACTIVE_MODE:-false}" == "true" ]]; then
           read -rp "  Продолжить? (y/n): " cont
           if [[ "$cont" != "y" && "$cont" != "Y" ]]; then
             log_info "Отмена установки traffic-shaping"
             return 1
           fi
         else
-          log_info "Неинтерактивный режим: пропускаем проверку"
+          log_info "Автоматический режим: продолжаем без подтверждения"
         fi
       fi
     fi

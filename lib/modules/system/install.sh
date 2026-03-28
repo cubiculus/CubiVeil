@@ -62,6 +62,7 @@ EOF
   # Устанавливаем приоритет debconf в critical (только критические вопросы)
   echo "debconf debconf/priority select critical" | debconf-set-selections 2>/dev/null || true
 
+  log_info "Update and upgrade may take up to 5 minutes — please wait..."
   log_debug "Non-interactive update environment configured"
 }
 
@@ -71,6 +72,8 @@ EOF
 system_full_update() {
   log_step "system_full_update" "Performing full system update"
 
+  log_info "System update may take up to 5 minutes — please wait..."
+  
   system_setup_update_env
   pkg_update
   pkg_upgrade

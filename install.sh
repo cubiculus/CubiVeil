@@ -142,6 +142,10 @@ INSTALL_DECOY="true"
 INSTALL_TRAFFIC_SHAPING="true"
 INSTALL_TELEGRAM=""
 
+# Автоматический режим (не интерактивный) — для предотвращения запросов
+INTERACTIVE_MODE="false"
+export INTERACTIVE_MODE
+
 # Переменные, которые будут заполнены в prompt_inputs()
 LE_EMAIL=""
 LANG_NAME="${LANG_NAME:-Русский}"

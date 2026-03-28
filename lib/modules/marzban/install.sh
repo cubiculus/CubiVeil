@@ -220,7 +220,7 @@ marzban_enable() {
   sleep 5
 
   # Проверяем статус сервиса
-  if svc_is_active "$MARZBAN_SERVICE"; then
+  if svc_active "$MARZBAN_SERVICE"; then
     log_success "Marzban service is running"
   else
     log_error "Marzban service failed to start"
@@ -244,7 +244,7 @@ marzban_disable() {
 
 # Проверка активности Marzban
 marzban_is_active() {
-  svc_is_active "$MARZBAN_SERVICE"
+  svc_active "$MARZBAN_SERVICE"
 }
 
 # Проверка здоровья Marzban
@@ -252,7 +252,7 @@ marzban_health_check() {
   log_step "marzban_health_check" "Checking Marzban health"
 
   # Проверяем статус сервиса
-  if ! svc_is_active "$MARZBAN_SERVICE"; then
+  if ! svc_active "$MARZBAN_SERVICE"; then
     log_error "Marzban service is not active"
     return 1
   fi
@@ -305,7 +305,7 @@ marzban_start() {
 marzban_status() {
   log_step "marzban_status" "Marzban status"
 
-  if svc_is_active "$MARZBAN_SERVICE"; then
+  if svc_active "$MARZBAN_SERVICE"; then
     log_success "Marzban is running"
     return 0
   else
