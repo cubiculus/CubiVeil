@@ -41,12 +41,26 @@ system_setup_update_env() {
   # Отключаем все интерактивные диалоги dpkg/debconf/needrestart
   export DEBIAN_FRONTEND=noninteractive
   export UCF_FORCE_CONFFOLD=1
+  export UCFF_FORCE_CONFFNEW=1
 
   # needrestart спрашивает о перезапуске сервисов — переводим в автоматический режим
   if [[ -f /etc/needrestart/needrestart.conf ]]; then
     sed -i "s/#\$nrconf{restart} = 'i'/\$nrconf{restart} = 'a'/" \
       /etc/needrestart/needrestart.conf 2>/dev/null || true
   fi
+
+  # Отключаем интерактивные диалоги debconf для всех пакетов
+  # Предотвращает появление синих/фиолетовых экранов конфигурации
+  if [[ ! -f /etc/debconf.conf ]]; then
+    cat >/etc/debconf.conf <<'EOF'
+# CubiVeil: non-interactive debconf
+Debug: false
+Debug_Show_Process: false
+EOF
+  fi
+
+  # Устанавливаем приоритет debconf в critical (только критические вопросы)
+  echo "debconf debconf/priority select critical" | debconf-set-selections 2>/dev/null || true
 
   log_debug "Non-interactive update environment configured"
 }

@@ -51,7 +51,14 @@ pkg_check() {
 
 # Обновление индекса пакетов
 pkg_update() {
-  apt-get update -qq >/dev/null 2>&1
+  # Подавляем все интерактивные диалоги
+  export DEBIAN_FRONTEND=noninteractive
+  export UCF_FORCE_CONFFOLD=1
+  
+  # Опции dpkg для автоматического выбора старых конфигов
+  local DPKG_OPTS='-o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold'
+  
+  apt-get update -qq $DPKG_OPTS >/dev/null 2>&1
 }
 
 # Обновление установленных пакетов
@@ -61,6 +68,7 @@ pkg_upgrade() {
   # Отключаем все интерактивные диалоги dpkg/debconf/needrestart
   export DEBIAN_FRONTEND=noninteractive
   export UCF_FORCE_CONFFOLD=1
+  export UCFF_FORCE_CONFFNEW=1
 
   # needrestart спрашивает о перезапуске сервисов — переводим в автоматический режим
   if [[ -f /etc/needrestart/needrestart.conf ]]; then
@@ -78,6 +86,13 @@ pkg_full_upgrade() {
 
   export DEBIAN_FRONTEND=noninteractive
   export UCF_FORCE_CONFFOLD=1
+  export UCFF_FORCE_CONFFNEW=1
+
+  # needrestart спрашивает о перезапуске сервисов — переводим в автоматический режим
+  if [[ -f /etc/needrestart/needrestart.conf ]]; then
+    sed -i "s/#\$nrconf{restart} = 'i'/\$nrconf{restart} = 'a'/" \
+      /etc/needrestart/needrestart.conf 2>/dev/null || true
+  fi
 
   # shellcheck disable=SC2086
   apt-get dist-upgrade -y -qq $DPKG_OPTS >/dev/null 2>&1
