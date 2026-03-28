@@ -19,12 +19,19 @@ else
 fi
 
 # ── Подключение общих модулей ────────────────────────────────
-source "${SCRIPT_DIR}/lib/common.sh" || {
-  echo -e "\033[0;31m[✗] Не удалось загрузить lib/common.sh\033[0m"
-  exit 1
-}
+# Обязательно загружаем в правильном порядке (без вложенных lib/lib путей)
+export TELEGRAM_BOT_lib_SCRIPT_DIR="${SCRIPT_DIR}/lib"
+
 source "${SCRIPT_DIR}/lib/output.sh" || {
   echo -e "\033[0;31m[✗] Не удалось загрузить lib/output.sh\033[0m"
+  exit 1
+}
+source "${SCRIPT_DIR}/lib/security.sh" || {
+  echo -e "\033[0;31m[✗] Не удалось загрузить lib/security.sh\033[0m"
+  exit 1
+}
+source "${SCRIPT_DIR}/lib/common.sh" || {
+  echo -e "\033[0;31m[✗] Не удалось загрузить lib/common.sh\033[0m"
   exit 1
 }
 source "${SCRIPT_DIR}/lib/utils.sh" || {
