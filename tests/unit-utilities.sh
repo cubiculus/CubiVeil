@@ -1,20 +1,20 @@
 #!/bin/bash
-# ╔═══════════════════════════════════════════════════════════╗
-# ║        CubiVeil Unit Tests - Utilities                    ║
-# ║        Тестирование утилит                                 ║
-# ╚═══════════════════════════════════════════════════════════╝
+# в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—
+# в•‘        CubiVeil Unit Tests - Utilities                    в•‘
+# в•‘        РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СѓС‚РёР»РёС‚                                 в•‘
+# в•љв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ќ
 
 set -euo pipefail
 
-# ── Подключение тестовых утилит ───────────────────────────────
+# в”Ђв”Ђ РџРѕРґРєР»СЋС‡РµРЅРёРµ С‚РµСЃС‚РѕРІС‹С… СѓС‚РёР»РёС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${SCRIPT_DIR}/lib/test-utils.sh"
-# Для тестирования шагов обновления
+# Р”Р»СЏ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ С€Р°РіРѕРІ РѕР±РЅРѕРІР»РµРЅРёСЏ
 source "${SCRIPT_DIR}/utils/update.sh" 2>/dev/null || true
 
-# ── Тест: наличие утилит ───────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: РЅР°Р»РёС‡РёРµ СѓС‚РёР»РёС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_utilities_exist() {
-  info "Тестирование наличия утилит..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ СѓС‚РёР»РёС‚..."
 
   local utilities=(
     "utils/update.sh"
@@ -27,17 +27,17 @@ test_utilities_exist() {
 
   for util in "${utilities[@]}"; do
     if [[ -f "${SCRIPT_DIR}/${util}" ]]; then
-      pass "Утилита существует: $util"
+      pass "РЈС‚РёР»РёС‚Р° СЃСѓС‰РµСЃС‚РІСѓРµС‚: $util"
       ((TESTS_PASSED++)) || true
     else
-      fail "Утилита отсутствует: $util"
+      fail "РЈС‚РёР»РёС‚Р° РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚: $util"
     fi
   done
 }
 
-# ── Тест: синтаксис утилит ───────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: СЃРёРЅС‚Р°РєСЃРёСЃ СѓС‚РёР»РёС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_utilities_syntax() {
-  info "Тестирование синтаксиса утилит..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СЃРёРЅС‚Р°РєСЃРёСЃР° СѓС‚РёР»РёС‚..."
 
   local utilities=(
     "utils/update.sh"
@@ -51,18 +51,18 @@ test_utilities_syntax() {
   for util in "${utilities[@]}"; do
     if [[ -f "${SCRIPT_DIR}/${util}" ]]; then
       if bash -n "${SCRIPT_DIR}/${util}" 2>/dev/null; then
-        pass "Синтаксис OK: $util"
+        pass "РЎРёРЅС‚Р°РєСЃРёСЃ OK: $util"
         ((TESTS_PASSED++)) || true
       else
-        fail "Синтаксическая ошибка: $util"
+        fail "РЎРёРЅС‚Р°РєСЃРёС‡РµСЃРєР°СЏ РѕС€РёР±РєР°: $util"
       fi
     fi
   done
 }
 
-# ── Тест: заголовок shebang ───────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: Р·Р°РіРѕР»РѕРІРѕРє shebang в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_shebang() {
-  info "Тестирование shebang утилит..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ shebang СѓС‚РёР»РёС‚..."
 
   local utilities=(
     "utils/update.sh"
@@ -81,14 +81,14 @@ test_shebang() {
       pass "Shebang OK: $util"
       ((TESTS_PASSED++)) || true
     else
-      fail "Неверный shebang: $util ($first_line)"
+      fail "РќРµРІРµСЂРЅС‹Р№ shebang: $util ($first_line)"
     fi
   done
 }
 
-# ── Тест: безопасность (set -euo pipefail) ───────────────────
+# в”Ђв”Ђ РўРµСЃС‚: Р±РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ (set -euo pipefail) в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_safety_flags() {
-  info "Тестирование флагов безопасности..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„Р»Р°РіРѕРІ Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё..."
 
   local utilities=(
     "utils/update.sh"
@@ -101,17 +101,17 @@ test_safety_flags() {
 
   for util in "${utilities[@]}"; do
     if grep -q "set -euo pipefail" "${SCRIPT_DIR}/${util}" 2>/dev/null; then
-      pass "Флаги безопасности: $util"
+      pass "Р¤Р»Р°РіРё Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё: $util"
       ((TESTS_PASSED++)) || true
     else
-      warn "Нет флагов безопасности: $util"
+      warn "РќРµС‚ С„Р»Р°РіРѕРІ Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё: $util"
     fi
   done
 }
 
-# ── Тест: локализация ────────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: Р»РѕРєР°Р»РёР·Р°С†РёСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_localization() {
-  info "Тестирование локализации..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ Р»РѕРєР°Р»РёР·Р°С†РёРё..."
 
   local utilities=(
     "utils/update.sh"
@@ -123,19 +123,19 @@ test_localization() {
   )
 
   for util in "${utilities[@]}"; do
-    # Проверка подключения lang.sh
+    # РџСЂРѕРІРµСЂРєР° РїРѕРґРєР»СЋС‡РµРЅРёСЏ lang.sh
     if grep -q 'source.*lang.sh\|source.*fallback.sh' "${SCRIPT_DIR}/${util}" 2>/dev/null; then
-      pass "Локализация подключена: $util"
+      pass "Р›РѕРєР°Р»РёР·Р°С†РёСЏ РїРѕРґРєР»СЋС‡РµРЅР°: $util"
       ((TESTS_PASSED++)) || true
     else
-      warn "Локализация не подключена: $util"
+      warn "Р›РѕРєР°Р»РёР·Р°С†РёСЏ РЅРµ РїРѕРґРєР»СЋС‡РµРЅР°: $util"
     fi
   done
 }
 
-# ── Тест: проверка root прав ─────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: РїСЂРѕРІРµСЂРєР° root РїСЂР°РІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_root_check() {
-  info "Тестирование проверки root прав..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїСЂРѕРІРµСЂРєРё root РїСЂР°РІ..."
 
   local utilities=(
     "utils/update.sh"
@@ -148,26 +148,26 @@ test_root_check() {
 
   for util in "${utilities[@]}"; do
     if grep -qE 'EUID.*-ne.*0|root' "${SCRIPT_DIR}/${util}" 2>/dev/null; then
-      pass "Проверка root: $util"
+      pass "РџСЂРѕРІРµСЂРєР° root: $util"
       ((TESTS_PASSED++)) || true
     else
-      warn "Нет проверки root: $util"
+      warn "РќРµС‚ РїСЂРѕРІРµСЂРєРё root: $util"
     fi
   done
 }
 
-# ── Тест: функции в backup.sh ────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: С„СѓРЅРєС†РёРё РІ backup.sh в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_backup_functions() {
-  info "Тестирование функций в backup.sh..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёР№ РІ backup.sh..."
 
-  # Mock зависимостей
+  # Mock Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№
   check_root() { :; }
   check_ubuntu() { :; }
   step() { echo "$1"; }
-  ok() { echo -e "${GREEN}[✓]${PLAIN} $1"; }
+  ok() { echo -e "${GREEN}[вњ“]${PLAIN} $1"; }
   warn() { echo -e "${YELLOW}[!]${PLAIN} $1"; }
   err() {
-    echo -e "${RED}[✗]${PLAIN} $1" >&2
+    echo -e "${RED}[вњ—]${PLAIN} $1" >&2
     exit 1
   }
   info() { echo "[INFO] $1"; }
@@ -190,18 +190,18 @@ test_backup_functions() {
 
   for func in "${functions[@]}"; do
     if declare -f "$func" >/dev/null 2>&1; then
-      pass "Функция существует: $func"
+      pass "Р¤СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚: $func"
       ((TESTS_PASSED++)) || true
     else
-      # Функции могут быть недоступны из-за структуры скрипта
-      info "Функция не проверена: $func (может быть локальной)"
+      # Р¤СѓРЅРєС†РёРё РјРѕРіСѓС‚ Р±С‹С‚СЊ РЅРµРґРѕСЃС‚СѓРїРЅС‹ РёР·-Р·Р° СЃС‚СЂСѓРєС‚СѓСЂС‹ СЃРєСЂРёРїС‚Р°
+      info "Р¤СѓРЅРєС†РёСЏ РЅРµ РїСЂРѕРІРµСЂРµРЅР°: $func (РјРѕР¶РµС‚ Р±С‹С‚СЊ Р»РѕРєР°Р»СЊРЅРѕР№)"
     fi
   done
 }
 
-# ── Тест: функции в monitor.sh ───────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: С„СѓРЅРєС†РёРё РІ monitor.sh в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_monitor_functions() {
-  info "Тестирование функций в monitor.sh..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёР№ РІ monitor.sh..."
 
   local functions=(
     "get_cpu_usage"
@@ -217,17 +217,17 @@ test_monitor_functions() {
 
   for func in "${functions[@]}"; do
     if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/utils/monitor.sh" 2>/dev/null; then
-      pass "Функция существует: $func"
+      pass "Р¤СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚: $func"
       ((TESTS_PASSED++)) || true
     else
-      info "Функция не проверена: $func (может отсутствовать в файле)"
+      info "Р¤СѓРЅРєС†РёСЏ РЅРµ РїСЂРѕРІРµСЂРµРЅР°: $func (РјРѕР¶РµС‚ РѕС‚СЃСѓС‚СЃС‚РІРѕРІР°С‚СЊ РІ С„Р°Р№Р»Рµ)"
     fi
   done
 }
 
-# ── Тест: функции в diagnose.sh ──────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: С„СѓРЅРєС†РёРё РІ diagnose.sh в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_diagnose_functions() {
-  info "Тестирование функций в diagnose.sh..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёР№ РІ diagnose.sh..."
 
   local functions=(
     "step_check_dns"
@@ -243,17 +243,17 @@ test_diagnose_functions() {
 
   for func in "${functions[@]}"; do
     if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/utils/diagnose.sh" 2>/dev/null; then
-      pass "Функция существует: $func"
+      pass "Р¤СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚: $func"
       ((TESTS_PASSED++)) || true
     else
-      warn "Функция не проверена: $func"
+      warn "Р¤СѓРЅРєС†РёСЏ РЅРµ РїСЂРѕРІРµСЂРµРЅР°: $func"
     fi
   done
 }
 
-# ── Тест: функции в export-config.sh ─────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: С„СѓРЅРєС†РёРё РІ export-config.sh в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_export_functions() {
-  info "Тестирование функций в export-config.sh..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёР№ РІ export-config.sh..."
 
   local functions=(
     "step_collect_config"
@@ -265,17 +265,17 @@ test_export_functions() {
 
   for func in "${functions[@]}"; do
     if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/export-config.sh" 2>/dev/null; then
-      pass "Функция существует: $func"
+      pass "Р¤СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚: $func"
       ((TESTS_PASSED++)) || true
     else
-      fail "Функция отсутствует: $func"
+      fail "Р¤СѓРЅРєС†РёСЏ РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚: $func"
     fi
   done
 }
 
-# ── Тест: функции в update.sh ────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: С„СѓРЅРєС†РёРё РІ update.sh в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_update_functions() {
-  info "Тестирование функций в update.sh..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёР№ РІ update.sh..."
 
   local functions=(
     "step_check_versions"
@@ -289,46 +289,46 @@ test_update_functions() {
 
   for func in "${functions[@]}"; do
     if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/update.sh" 2>/dev/null; then
-      pass "Функция существует: $func"
+      pass "Р¤СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚: $func"
       ((TESTS_PASSED++)) || true
     else
-      fail "Функция отсутствует: $func"
+      fail "Р¤СѓРЅРєС†РёСЏ РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚: $func"
     fi
   done
 }
-# ── Тест: step_update_marzban — пропуск обновления ───────────
+# в”Ђв”Ђ РўРµСЃС‚: step_update_marzban вЂ” РїСЂРѕРїСѓСЃРє РѕР±РЅРѕРІР»РµРЅРёСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_step_update_marzban_skip() {
-  info "Тестирование step_update_marzban (skip)..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ step_update_marzban (skip)..."
 
-  # Убедимся, что запрос в функции обрабатывается без звонков к реальному Marzban
+  # РЈР±РµРґРёРјСЃСЏ, С‡С‚Рѕ Р·Р°РїСЂРѕСЃ РІ С„СѓРЅРєС†РёРё РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ Р±РµР· Р·РІРѕРЅРєРѕРІ Рє СЂРµР°Р»СЊРЅРѕРјСѓ Marzban
   local output
   output=$(printf 'n\n' | step_update_marzban 2>&1)
 
-  if [[ "$output" == *"Пропуск обновления Marzban"* ]]; then
-    pass "step_update_marzban: корректная ветка пропуска при пользовательском ответе n"
+  if [[ "$output" == *"РџСЂРѕРїСѓСЃРє РѕР±РЅРѕРІР»РµРЅРёСЏ Marzban"* ]]; then
+    pass "step_update_marzban: РєРѕСЂСЂРµРєС‚РЅР°СЏ РІРµС‚РєР° РїСЂРѕРїСѓСЃРєР° РїСЂРё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРѕРј РѕС‚РІРµС‚Рµ n"
     ((TESTS_PASSED++)) || true
   else
-    fail "step_update_marzban: неработающая ветка пропуска"
+    fail "step_update_marzban: РЅРµСЂР°Р±РѕС‚Р°СЋС‰Р°СЏ РІРµС‚РєР° РїСЂРѕРїСѓСЃРєР°"
   fi
 }
 
-# ── Тест: step_update_singbox — пропуск обновления ──────────
+# в”Ђв”Ђ РўРµСЃС‚: step_update_singbox вЂ” РїСЂРѕРїСѓСЃРє РѕР±РЅРѕРІР»РµРЅРёСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_step_update_singbox_skip() {
-  info "Тестирование step_update_singbox (skip)..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ step_update_singbox (skip)..."
 
   local output
   output=$(printf 'n\n' | step_update_singbox 2>&1)
 
-  if [[ "$output" == *"Пропуск обновления sing-box"* ]]; then
-    pass "step_update_singbox: корректная ветка пропуска при пользовательском ответе n"
+  if [[ "$output" == *"РџСЂРѕРїСѓСЃРє РѕР±РЅРѕРІР»РµРЅРёСЏ sing-box"* ]]; then
+    pass "step_update_singbox: РєРѕСЂСЂРµРєС‚РЅР°СЏ РІРµС‚РєР° РїСЂРѕРїСѓСЃРєР° РїСЂРё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРѕРј РѕС‚РІРµС‚Рµ n"
     ((TESTS_PASSED++)) || true
   else
-    fail "step_update_singbox: неработающая ветка пропуска"
+    fail "step_update_singbox: РЅРµСЂР°Р±РѕС‚Р°СЋС‰Р°СЏ РІРµС‚РєР° РїСЂРѕРїСѓСЃРєР°"
   fi
 }
-# ── Тест: функции в rollback.sh ──────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: С„СѓРЅРєС†РёРё РІ rollback.sh в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_rollback_functions() {
-  info "Тестирование функций в rollback.sh..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёР№ РІ rollback.sh..."
 
   local functions=(
     "step_select_backup"
@@ -342,41 +342,41 @@ test_rollback_functions() {
 
   for func in "${functions[@]}"; do
     if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/rollback.sh" 2>/dev/null; then
-      pass "Функция существует: $func"
+      pass "Р¤СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚: $func"
       ((TESTS_PASSED++)) || true
     else
-      fail "Функция отсутствует: $func"
+      fail "Р¤СѓРЅРєС†РёСЏ РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚: $func"
     fi
   done
 }
 
-# ── Тест: Python health check module ─────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: Python health check module в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_python_health_check() {
-  info "Тестирование Python health check модуля..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ Python health check РјРѕРґСѓР»СЏ..."
 
   local health_check_file="${SCRIPT_DIR}/assets/telegram-bot/health_check.py"
 
   if [[ -f "$health_check_file" ]]; then
-    pass "health_check.py существует"
+    pass "health_check.py СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     ((TESTS_PASSED++)) || true
 
-    # Проверка синтаксиса Python
+    # РџСЂРѕРІРµСЂРєР° СЃРёРЅС‚Р°РєСЃРёСЃР° Python
     if python3 -m py_compile "$health_check_file" 2>/dev/null; then
-      pass "Синтаксис Python OK: health_check.py"
+      pass "РЎРёРЅС‚Р°РєСЃРёСЃ Python OK: health_check.py"
       ((TESTS_PASSED++)) || true
     else
-      fail "Синтаксическая ошибка: health_check.py"
+      fail "РЎРёРЅС‚Р°РєСЃРёС‡РµСЃРєР°СЏ РѕС€РёР±РєР°: health_check.py"
     fi
 
-    # Проверка наличия классов
+    # РџСЂРѕРІРµСЂРєР° РЅР°Р»РёС‡РёСЏ РєР»Р°СЃСЃРѕРІ
     if grep -q "class HealthChecker" "$health_check_file"; then
-      pass "Класс HealthChecker существует"
+      pass "РљР»Р°СЃСЃ HealthChecker СЃСѓС‰РµСЃС‚РІСѓРµС‚"
       ((TESTS_PASSED++)) || true
     else
-      fail "Класс HealthChecker не найден"
+      fail "РљР»Р°СЃСЃ HealthChecker РЅРµ РЅР°Р№РґРµРЅ"
     fi
 
-    # Проверка наличия методов
+    # РџСЂРѕРІРµСЂРєР° РЅР°Р»РёС‡РёСЏ РјРµС‚РѕРґРѕРІ
     local methods=(
       "check_connection_speed"
       "check_profile_status"
@@ -391,66 +391,66 @@ test_python_health_check() {
 
     for method in "${methods[@]}"; do
       if grep -q "def ${method}" "$health_check_file"; then
-        pass "Метод существует: $method"
+        pass "РњРµС‚РѕРґ СЃСѓС‰РµСЃС‚РІСѓРµС‚: $method"
         ((TESTS_PASSED++)) || true
       else
-        fail "Метод не найден: $method"
+        fail "РњРµС‚РѕРґ РЅРµ РЅР°Р№РґРµРЅ: $method"
       fi
     done
   else
-    fail "health_check.py не найден"
+    fail "health_check.py РЅРµ РЅР°Р№РґРµРЅ"
   fi
 }
 
-# ── Тест: обновлённый bot.py ─────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: РѕР±РЅРѕРІР»С‘РЅРЅС‹Р№ bot.py в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_bot_updated() {
-  info "Тестирование обновлённого bot.py..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РѕР±РЅРѕРІР»С‘РЅРЅРѕРіРѕ bot.py..."
 
   local bot_file="${SCRIPT_DIR}/assets/telegram-bot/bot.py"
 
   if [[ -f "$bot_file" ]]; then
-    pass "bot.py существует"
+    pass "bot.py СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     ((TESTS_PASSED++)) || true
 
-    # Проверка импорта health_check
+    # РџСЂРѕРІРµСЂРєР° РёРјРїРѕСЂС‚Р° health_check
     if grep -q "from health_check import HealthChecker" "$bot_file"; then
-      pass "HealthChecker импортирован в bot.py"
+      pass "HealthChecker РёРјРїРѕСЂС‚РёСЂРѕРІР°РЅ РІ bot.py"
       ((TESTS_PASSED++)) || true
     else
-      fail "HealthChecker не импортирован в bot.py"
+      fail "HealthChecker РЅРµ РёРјРїРѕСЂС‚РёСЂРѕРІР°РЅ РІ bot.py"
     fi
 
-    # Проверка инициализации health checker
+    # РџСЂРѕРІРµСЂРєР° РёРЅРёС†РёР°Р»РёР·Р°С†РёРё health checker
     if grep -q "self.health = HealthChecker()" "$bot_file"; then
-      pass "HealthChecker инициализирован"
+      pass "HealthChecker РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅ"
       ((TESTS_PASSED++)) || true
     else
-      fail "HealthChecker не инициализирован"
+      fail "HealthChecker РЅРµ РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅ"
     fi
 
-    # Проверка health check в poll
+    # РџСЂРѕРІРµСЂРєР° health check РІ poll
     if grep -q "check_health_and_heal" "$bot_file"; then
-      pass "Health check вызывается в poll"
+      pass "Health check РІС‹Р·С‹РІР°РµС‚СЃСЏ РІ poll"
       ((TESTS_PASSED++)) || true
     else
-      fail "Health check не вызывается в poll"
+      fail "Health check РЅРµ РІС‹Р·С‹РІР°РµС‚СЃСЏ РІ poll"
     fi
   else
-    fail "bot.py не найден"
+    fail "bot.py РЅРµ РЅР°Р№РґРµРЅ"
   fi
 }
 
-# ── Тест: обновлённый commands.py ────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: РѕР±РЅРѕРІР»С‘РЅРЅС‹Р№ commands.py в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_commands_updated() {
-  info "Тестирование обновлённого commands.py..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РѕР±РЅРѕРІР»С‘РЅРЅРѕРіРѕ commands.py..."
 
   local commands_file="${SCRIPT_DIR}/assets/telegram-bot/commands.py"
 
   if [[ -f "$commands_file" ]]; then
-    pass "commands.py существует"
+    pass "commands.py СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     ((TESTS_PASSED++)) || true
 
-    # Проверка новых команд
+    # РџСЂРѕРІРµСЂРєР° РЅРѕРІС‹С… РєРѕРјР°РЅРґ
     local commands=(
       "/health"
       "/speedtest"
@@ -459,14 +459,14 @@ test_commands_updated() {
 
     for cmd in "${commands[@]}"; do
       if grep -q "\"$cmd\"" "$commands_file"; then
-        pass "Команда существует: $cmd"
+        pass "РљРѕРјР°РЅРґР° СЃСѓС‰РµСЃС‚РІСѓРµС‚: $cmd"
         ((TESTS_PASSED++)) || true
       else
-        fail "Команда не найдена: $cmd"
+        fail "РљРѕРјР°РЅРґР° РЅРµ РЅР°Р№РґРµРЅР°: $cmd"
       fi
     done
 
-    # Проверка методов
+    # РџСЂРѕРІРµСЂРєР° РјРµС‚РѕРґРѕРІ
     local methods=(
       "_health"
       "_speedtest"
@@ -475,36 +475,36 @@ test_commands_updated() {
 
     for method in "${methods[@]}"; do
       if grep -q "def ${method}" "$commands_file"; then
-        pass "Метод существует: $method"
+        pass "РњРµС‚РѕРґ СЃСѓС‰РµСЃС‚РІСѓРµС‚: $method"
         ((TESTS_PASSED++)) || true
       else
-        fail "Метод не найден: $method"
+        fail "РњРµС‚РѕРґ РЅРµ РЅР°Р№РґРµРЅ: $method"
       fi
     done
   else
-    fail "commands.py не найден"
+    fail "commands.py РЅРµ РЅР°Р№РґРµРЅ"
   fi
 }
 
-# ── Тест: install-aliases.sh ─────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: install-aliases.sh в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_install_aliases() {
-  info "Тестирование install-aliases.sh..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ install-aliases.sh..."
 
   local aliases_file="${SCRIPT_DIR}/utils/install-aliases.sh"
 
   if [[ -f "$aliases_file" ]]; then
-    pass "install-aliases.sh существует"
+    pass "install-aliases.sh СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     ((TESTS_PASSED++)) || true
 
-    # Проверка установки CLI
+    # РџСЂРѕРІРµСЂРєР° СѓСЃС‚Р°РЅРѕРІРєРё CLI
     if grep -q "/usr/local/bin/cubiveil" "$aliases_file"; then
-      pass "CLI путь настроен"
+      pass "CLI РїСѓС‚СЊ РЅР°СЃС‚СЂРѕРµРЅ"
       ((TESTS_PASSED++)) || true
     else
-      fail "CLI путь не найден"
+      fail "CLI РїСѓС‚СЊ РЅРµ РЅР°Р№РґРµРЅ"
     fi
 
-    # Проверка алиасов
+    # РџСЂРѕРІРµСЂРєР° Р°Р»РёР°СЃРѕРІ
     local aliases=(
       "cv="
       "cv-update="
@@ -518,29 +518,29 @@ test_install_aliases() {
 
     for alias in "${aliases[@]}"; do
       if grep -q "$alias" "$aliases_file"; then
-        pass "Алиас существует: $alias"
+        pass "РђР»РёР°СЃ СЃСѓС‰РµСЃС‚РІСѓРµС‚: $alias"
         ((TESTS_PASSED++)) || true
       else
-        warn "Алиас не найден: $alias"
+        warn "РђР»РёР°СЃ РЅРµ РЅР°Р№РґРµРЅ: $alias"
       fi
     done
   else
-    fail "install-aliases.sh не найден"
+    fail "install-aliases.sh РЅРµ РЅР°Р№РґРµРЅ"
   fi
 }
 
-# ── Основная функция ─────────────────────────────────────────
+# в”Ђв”Ђ РћСЃРЅРѕРІРЅР°СЏ С„СѓРЅРєС†РёСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 main() {
   echo ""
-  echo -e "${YELLOW}╔══════════════════════════════════════════════════════╗${PLAIN}"
-  echo -e "${YELLOW}║        CubiVeil Unit Tests - New Utilities           ║${PLAIN}"
-  echo -e "${YELLOW}╚══════════════════════════════════════════════════════╝${PLAIN}"
+  echo -e "${YELLOW}в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—${PLAIN}"
+  echo -e "${YELLOW}в•‘        CubiVeil Unit Tests - New Utilities           в•‘${PLAIN}"
+  echo -e "${YELLOW}в•љв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ќ${PLAIN}"
   echo ""
 
-  info "Тестируемый проект: ${SCRIPT_DIR}"
+  info "РўРµСЃС‚РёСЂСѓРµРјС‹Р№ РїСЂРѕРµРєС‚: ${SCRIPT_DIR}"
   echo ""
 
-  # ── Запуск тестов ─────────────────────────────────────────
+  # в”Ђв”Ђ Р—Р°РїСѓСЃРє С‚РµСЃС‚РѕРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
   test_utilities_exist
   echo ""
 
@@ -595,21 +595,21 @@ main() {
   test_install_aliases
   echo ""
 
-  # ── Итоги ───────────────────────────────────────────────
+  # в”Ђв”Ђ РС‚РѕРіРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
   echo ""
-  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
-  echo -e "${GREEN}Пройдено: $TESTS_PASSED${PLAIN}"
+  echo -e "${YELLOW}в”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓ${PLAIN}"
+  echo -e "${GREEN}РџСЂРѕР№РґРµРЅРѕ: $TESTS_PASSED${PLAIN}"
   if [[ $TESTS_FAILED -gt 0 ]]; then
-    echo -e "${RED}Провалено:  $TESTS_FAILED${PLAIN}"
+    echo -e "${RED}РџСЂРѕРІР°Р»РµРЅРѕ:  $TESTS_FAILED${PLAIN}"
   fi
-  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
+  echo -e "${YELLOW}в”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓ${PLAIN}"
   echo ""
 
   if [[ $TESTS_FAILED -gt 0 ]]; then
-    echo -e "${RED}❌ Тесты провалены${PLAIN}"
+    echo -e "${RED}вќЊ РўРµСЃС‚С‹ РїСЂРѕРІР°Р»РµРЅС‹${PLAIN}"
     exit 1
   else
-    echo -e "${GREEN}✅ Все тесты пройдены${PLAIN}"
+    echo -e "${GREEN}вњ… Р’СЃРµ С‚РµСЃС‚С‹ РїСЂРѕР№РґРµРЅС‹${PLAIN}"
     exit 0
   fi
 }

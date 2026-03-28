@@ -1,15 +1,15 @@
 #!/bin/bash
-# ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Test Suite                            ║
-# ║          github.com/cubiculus/cubiveil                    ║
-# ║                                                           ║
-# ║  Комплексное тестирование всех модулей                    ║
-# ╚═══════════════════════════════════════════════════════════╝
+# в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—
+# в•‘          CubiVeil вЂ” Test Suite                            в•‘
+# в•‘          github.com/cubiculus/cubiveil                    в•‘
+# в•‘                                                           в•‘
+# в•‘  РљРѕРјРїР»РµРєСЃРЅРѕРµ С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ РІСЃРµС… РјРѕРґСѓР»РµР№                    в•‘
+# в•љв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ќ
 
-# ── Подключение зависимостей / Dependencies ─────────────────
+# в”Ђв”Ђ РџРѕРґРєР»СЋС‡РµРЅРёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ / Dependencies в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Подключаем core модули
+# РџРѕРґРєР»СЋС‡Р°РµРј core РјРѕРґСѓР»Рё
 if [[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]]; then
   source "${SCRIPT_DIR}/lib/core/system.sh"
 fi
@@ -18,39 +18,39 @@ if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
   source "${SCRIPT_DIR}/lib/core/log.sh"
 fi
 
-# Подключаем manifest
+# РџРѕРґРєР»СЋС‡Р°РµРј manifest
 if [[ -f "${SCRIPT_DIR}/lib/manifest.sh" ]]; then
   source "${SCRIPT_DIR}/lib/manifest.sh"
 fi
 
-# ── Конфигурация тестирования / Test Configuration ────────
+# в”Ђв”Ђ РљРѕРЅС„РёРіСѓСЂР°С†РёСЏ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ / Test Configuration в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 TEST_RESULTS_DIR="/tmp/cubiveil-test-results"
 TEST_LOG_FILE="${TEST_RESULTS_DIR}/test.log"
 
-# Счётчики тестов
+# РЎС‡С‘С‚С‡РёРєРё С‚РµСЃС‚РѕРІ
 TESTS_TOTAL=0
 TESTS_PASSED=0
 TESTS_FAILED=0
 TESTS_SKIPPED=0
 
-# ── Инициализация / Initialization ─────────────────────────────
+# в”Ђв”Ђ РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ / Initialization в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
-# Инициализация тестовой среды
+# РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ С‚РµСЃС‚РѕРІРѕР№ СЃСЂРµРґС‹
 test_init() {
   log_step "test_init" "Initializing test environment"
 
   dir_ensure "$TEST_RESULTS_DIR"
 
-  # Очищаем лог-файл
+  # РћС‡РёС‰Р°РµРј Р»РѕРі-С„Р°Р№Р»
   echo "" >"$TEST_LOG_FILE"
 
   log_debug "Test environment initialized"
 }
 
-# ── Утилиты тестирования / Test Utilities ────────────────
+# в”Ђв”Ђ РЈС‚РёР»РёС‚С‹ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ / Test Utilities в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
-# Вывод результата теста
+# Р’С‹РІРѕРґ СЂРµР·СѓР»СЊС‚Р°С‚Р° С‚РµСЃС‚Р°
 test_result() {
   local test_name="$1"
   local result="$2"
@@ -77,9 +77,9 @@ test_result() {
   esac
 }
 
-# ── Тесты Core модулей / Core Module Tests ───────────────
+# в”Ђв”Ђ РўРµСЃС‚С‹ Core РјРѕРґСѓР»РµР№ / Core Module Tests в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
-# Тест: Core модули доступны
+# РўРµСЃС‚: Core РјРѕРґСѓР»Рё РґРѕСЃС‚СѓРїРЅС‹
 test_core_modules_available() {
   local test_name="Core modules availability"
 
@@ -91,7 +91,7 @@ test_core_modules_available() {
   fi
 }
 
-# Тест: Проверка pkg_check
+# РўРµСЃС‚: РџСЂРѕРІРµСЂРєР° pkg_check
 test_pkg_check() {
   local test_name="pkg_check function"
 
@@ -102,11 +102,11 @@ test_pkg_check() {
   fi
 }
 
-# Тест: Проверка svc_active
+# РўРµСЃС‚: РџСЂРѕРІРµСЂРєР° svc_active
 test_svc_active() {
   local test_name="svc_active function"
 
-  # Проверяем несуществующий сервис
+  # РџСЂРѕРІРµСЂСЏРµРј РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ СЃРµСЂРІРёСЃ
   if ! svc_active "nonexistent-service-12345"; then
     test_result "$test_name" "pass"
   else
@@ -114,9 +114,9 @@ test_svc_active() {
   fi
 }
 
-# ── Тесты Manifest / Manifest Tests ─────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚С‹ Manifest / Manifest Tests в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
-# Тест: Manifest загружается
+# РўРµСЃС‚: Manifest Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ
 test_manifest_loads() {
   local test_name="Manifest loading"
 
@@ -127,7 +127,7 @@ test_manifest_loads() {
   fi
 }
 
-# Тест: Проверка порядка модулей
+# РўРµСЃС‚: РџСЂРѕРІРµСЂРєР° РїРѕСЂСЏРґРєР° РјРѕРґСѓР»РµР№
 test_manifest_order() {
   local test_name="Manifest order validation"
 
@@ -141,9 +141,9 @@ test_manifest_order() {
   fi
 }
 
-# ── Тесты модулей / Module Tests ─────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚С‹ РјРѕРґСѓР»РµР№ / Module Tests в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
-# Тест: Firewall модуль доступен
+# РўРµСЃС‚: Firewall РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
 test_firewall_module() {
   local test_name="Firewall module availability"
 
@@ -156,7 +156,7 @@ test_firewall_module() {
   fi
 }
 
-# Тест: Fail2ban модуль доступен
+# РўРµСЃС‚: Fail2ban РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
 test_fail2ban_module() {
   local test_name="Fail2ban module availability"
 
@@ -169,7 +169,7 @@ test_fail2ban_module() {
   fi
 }
 
-# Тест: SSL модуль доступен
+# РўРµСЃС‚: SSL РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
 test_ssl_module() {
   local test_name="SSL module availability"
 
@@ -182,7 +182,7 @@ test_ssl_module() {
   fi
 }
 
-# Тест: Singbox модуль доступен
+# РўРµСЃС‚: Singbox РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
 test_singbox_module() {
   local test_name="Singbox module availability"
 
@@ -195,7 +195,7 @@ test_singbox_module() {
   fi
 }
 
-# Тест: Marzban модуль доступен
+# РўРµСЃС‚: Marzban РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
 test_marzban_module() {
   local test_name="Marzban module availability"
 
@@ -208,7 +208,7 @@ test_marzban_module() {
   fi
 }
 
-# Тест: System модуль доступен
+# РўРµСЃС‚: System РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
 test_system_module() {
   local test_name="System module availability"
 
@@ -221,7 +221,7 @@ test_system_module() {
   fi
 }
 
-# Тест: Backup модуль доступен
+# РўРµСЃС‚: Backup РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
 test_backup_module() {
   local test_name="Backup module availability"
 
@@ -234,7 +234,7 @@ test_backup_module() {
   fi
 }
 
-# Тест: Rollback модуль доступен
+# РўРµСЃС‚: Rollback РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
 test_rollback_module() {
   local test_name="Rollback module availability"
 
@@ -247,7 +247,7 @@ test_rollback_module() {
   fi
 }
 
-# Тест: Monitoring модуль доступен
+# РўРµСЃС‚: Monitoring РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
 test_monitoring_module() {
   local test_name="Monitoring module availability"
 
@@ -260,9 +260,9 @@ test_monitoring_module() {
   fi
 }
 
-# ── Тесты Step функций / Step Functions Tests ───────────
+# в”Ђв”Ђ РўРµСЃС‚С‹ Step С„СѓРЅРєС†РёР№ / Step Functions Tests в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
-# Тест: Step файлы доступны
+# РўРµСЃС‚: Step С„Р°Р№Р»С‹ РґРѕСЃС‚СѓРїРЅС‹
 test_step_files_available() {
   local test_name="Step files availability"
 
@@ -278,9 +278,9 @@ test_step_files_available() {
   fi
 }
 
-# ── Тесты утилит / Utility Tests ──────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚С‹ СѓС‚РёР»РёС‚ / Utility Tests в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
-# Тест: Utils.sh доступен
+# РўРµСЃС‚: Utils.sh РґРѕСЃС‚СѓРїРµРЅ
 test_utils_available() {
   local test_name="Utils.sh availability"
 
@@ -291,7 +291,7 @@ test_utils_available() {
   fi
 }
 
-# Тест: Validation.sh доступен
+# РўРµСЃС‚: Validation.sh РґРѕСЃС‚СѓРїРµРЅ
 test_validation_available() {
   local test_name="Validation.sh availability"
 
@@ -302,7 +302,7 @@ test_validation_available() {
   fi
 }
 
-# Тест: Security.sh доступен
+# РўРµСЃС‚: Security.sh РґРѕСЃС‚СѓРїРµРЅ
 test_security_available() {
   local test_name="Security.sh availability"
 
@@ -313,19 +313,19 @@ test_security_available() {
   fi
 }
 
-# ── Запуск всех тестов / Run All Tests ─────────────────────
+# в”Ђв”Ђ Р—Р°РїСѓСЃРє РІСЃРµС… С‚РµСЃС‚РѕРІ / Run All Tests в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
-# Запуск всех тестов
+# Р—Р°РїСѓСЃРє РІСЃРµС… С‚РµСЃС‚РѕРІ
 test_run_all() {
   log_step "test_run_all" "Running all tests"
 
   echo ""
-  echo "═══════════════════════════════════════════════════"
+  echo "в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ"
   echo "  CubiVeil Test Suite"
-  echo "═══════════════════════════════════════════════════"
+  echo "в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ"
   echo ""
 
-  # Core модули
+  # Core РјРѕРґСѓР»Рё
   test_core_modules_available
   test_pkg_check
   test_svc_active
@@ -334,7 +334,7 @@ test_run_all() {
   test_manifest_loads
   test_manifest_order
 
-  # Модули
+  # РњРѕРґСѓР»Рё
   test_firewall_module
   test_fail2ban_module
   test_ssl_module
@@ -345,24 +345,24 @@ test_run_all() {
   test_rollback_module
   test_monitoring_module
 
-  # Step функции
+  # Step С„СѓРЅРєС†РёРё
   test_step_files_available
 
-  # Утилиты
+  # РЈС‚РёР»РёС‚С‹
   test_utils_available
   test_validation_available
   test_security_available
 
   echo ""
-  echo "═══════════════════════════════════════════════════"
+  echo "в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ"
   echo ""
 }
 
-# Отчёт о тестах
+# РћС‚С‡С‘С‚ Рѕ С‚РµСЃС‚Р°С…
 test_report() {
-  echo "═══════════════════════════════════════════════════"
+  echo "в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ"
   echo "  Test Results"
-  echo "═══════════════════════════════════════════════════"
+  echo "в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ"
   echo ""
   echo "  Total:   $TESTS_TOTAL"
   echo "  Passed:  $TESTS_PASSED"
@@ -371,11 +371,11 @@ test_report() {
   echo ""
 
   if [[ $TESTS_FAILED -eq 0 ]]; then
-    echo "  Status: ✓ ALL TESTS PASSED"
+    echo "  Status: вњ“ ALL TESTS PASSED"
     echo ""
     return 0
   else
-    echo "  Status: ✗ SOME TESTS FAILED"
+    echo "  Status: вњ— SOME TESTS FAILED"
     echo ""
     echo "  Log file: $TEST_LOG_FILE"
     echo ""
@@ -383,7 +383,7 @@ test_report() {
   fi
 }
 
-# Быстрый тест (только критичные)
+# Р‘С‹СЃС‚СЂС‹Р№ С‚РµСЃС‚ (С‚РѕР»СЊРєРѕ РєСЂРёС‚РёС‡РЅС‹Рµ)
 test_run_quick() {
   log_step "test_run_quick" "Running quick tests"
 
@@ -393,29 +393,29 @@ test_run_quick() {
   test_marzban_module
 }
 
-# ── Модульный интерфейс / Module Interface ─────────────────
+# в”Ђв”Ђ РњРѕРґСѓР»СЊРЅС‹Р№ РёРЅС‚РµСЂС„РµР№СЃ / Module Interface в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
-# Стандартный интерфейс модуля
+# РЎС‚Р°РЅРґР°СЂС‚РЅС‹Р№ РёРЅС‚РµСЂС„РµР№СЃ РјРѕРґСѓР»СЏ
 module_install() { :; }
 module_configure() { :; }
 module_enable() { :; }
 module_disable() { :; }
 
-# Запуск всех тестов
+# Р—Р°РїСѓСЃРє РІСЃРµС… С‚РµСЃС‚РѕРІ
 module_test_all() {
   test_init
   test_run_all
   test_report
 }
 
-# Запуск быстрых тестов
+# Р—Р°РїСѓСЃРє Р±С‹СЃС‚СЂС‹С… С‚РµСЃС‚РѕРІ
 module_test_quick() {
   test_init
   test_run_quick
   test_report
 }
 
-# Запуск только определённого теста
+# Р—Р°РїСѓСЃРє С‚РѕР»СЊРєРѕ РѕРїСЂРµРґРµР»С‘РЅРЅРѕРіРѕ С‚РµСЃС‚Р°
 module_test_one() {
   local test_func="$1"
 

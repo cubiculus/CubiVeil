@@ -1,26 +1,26 @@
 #!/bin/bash
-# ╔═══════════════════════════════════════════════════════════╗
-# ║        CubiVeil Unit Tests - install.sh                   ║
-# ║        Тестирование главной точки входа                  ║
-# ╚═══════════════════════════════════════════════════════════╝
+# в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—
+# в•‘        CubiVeil Unit Tests - install.sh                   в•‘
+# в•‘        РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РіР»Р°РІРЅРѕР№ С‚РѕС‡РєРё РІС…РѕРґР°                  в•‘
+# в•љв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ќ
 
-# Strict mode отключен для совместимости с mock-функциями
+# Strict mode РѕС‚РєР»СЋС‡РµРЅ РґР»СЏ СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё СЃ mock-С„СѓРЅРєС†РёСЏРјРё
 
-# ── Путь к проекту ───────────────────────────────────────────
+# в”Ђв”Ђ РџСѓС‚СЊ Рє РїСЂРѕРµРєС‚Сѓ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# ── Цвета ────────────────────────────────────────────────────
+# в”Ђв”Ђ Р¦РІРµС‚Р° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 CYAN='\033[0;36m'
 PLAIN='\033[0m'
 
-# ── Счётчик тестов ───────────────────────────────────────────
+# в”Ђв”Ђ РЎС‡С‘С‚С‡РёРє С‚РµСЃС‚РѕРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 TESTS_PASSED=0
 TESTS_FAILED=0
 
-# ── Mock функций вывода ──────────────────────────────────────
+# в”Ђв”Ђ Mock С„СѓРЅРєС†РёР№ РІС‹РІРѕРґР° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 info() { echo -e "${CYAN}[INFO]${PLAIN} $*" >&2; }
 pass() {
   echo -e "${GREEN}[PASS]${PLAIN} $*" >&2
@@ -32,108 +32,108 @@ fail() {
 }
 warn() { echo -e "${YELLOW}[WARN]${PLAIN} $*" >&2; }
 
-# ── Тест: файл существует ───────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_file_exists() {
-  info "Тестирование наличия файла install.sh..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ С„Р°Р№Р»Р° install.sh..."
 
   if [[ -f "${SCRIPT_DIR}/install.sh" ]]; then
-    pass "install.sh: файл существует"
+    pass "install.sh: С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: файл не найден"
+    fail "install.sh: С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ"
   fi
 }
 
-# ── Тест: синтаксис скрипта ───────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: СЃРёРЅС‚Р°РєСЃРёСЃ СЃРєСЂРёРїС‚Р° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_syntax() {
-  info "Тестирование синтаксиса install.sh..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СЃРёРЅС‚Р°РєСЃРёСЃР° install.sh..."
 
   if bash -n "${SCRIPT_DIR}/install.sh" 2>/dev/null; then
-    pass "install.sh: синтаксис корректен"
+    pass "install.sh: СЃРёРЅС‚Р°РєСЃРёСЃ РєРѕСЂСЂРµРєС‚РµРЅ"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: синтаксическая ошибка"
+    fail "install.sh: СЃРёРЅС‚Р°РєСЃРёС‡РµСЃРєР°СЏ РѕС€РёР±РєР°"
   fi
 }
 
-# ── Тест: скрипт имеет shebang ────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: СЃРєСЂРёРїС‚ РёРјРµРµС‚ shebang в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_shebang() {
-  info "Тестирование shebang..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ shebang..."
 
   local shebang
   shebang=$(head -1 "${SCRIPT_DIR}/install.sh")
 
   if [[ "$shebang" == "#!/bin/bash" ]]; then
-    pass "install.sh: корректный shebang"
+    pass "install.sh: РєРѕСЂСЂРµРєС‚РЅС‹Р№ shebang"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: некорректный shebang: $shebang"
+    fail "install.sh: РЅРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ shebang: $shebang"
   fi
 }
 
-# ── Тест: strict mode включён ─────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: strict mode РІРєР»СЋС‡С‘РЅ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_strict_mode() {
-  info "Тестирование strict mode..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ strict mode..."
 
   if grep -q "set -euo pipefail" "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: strict mode включён"
+    pass "install.sh: strict mode РІРєР»СЋС‡С‘РЅ"
     ((TESTS_PASSED++)) || true
   else
-    warn "install.sh: strict mode не включён"
+    warn "install.sh: strict mode РЅРµ РІРєР»СЋС‡С‘РЅ"
   fi
 }
 
-# ── Тест: загрузка модулей ────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: Р·Р°РіСЂСѓР·РєР° РјРѕРґСѓР»РµР№ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_module_loading() {
-  info "Тестирование загрузки модулей..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ Р·Р°РіСЂСѓР·РєРё РјРѕРґСѓР»РµР№..."
 
-  # Проверка что lang.sh загружается
+  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ lang.sh Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ
   if grep -q 'source.*lang.sh' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: загружает lang.sh"
+    pass "install.sh: Р·Р°РіСЂСѓР¶Р°РµС‚ lang.sh"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: не загружает lang.sh"
+    fail "install.sh: РЅРµ Р·Р°РіСЂСѓР¶Р°РµС‚ lang.sh"
   fi
 
-  # Проверка что lib/utils.sh загружается
+  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ lib/utils.sh Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ
   if grep -q 'source.*lib/utils.sh' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: загружает lib/utils.sh"
+    pass "install.sh: Р·Р°РіСЂСѓР¶Р°РµС‚ lib/utils.sh"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: не загружает lib/utils.sh"
+    fail "install.sh: РЅРµ Р·Р°РіСЂСѓР¶Р°РµС‚ lib/utils.sh"
   fi
 }
 
-# ── Тест: функция main существует ─────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: С„СѓРЅРєС†РёСЏ main СЃСѓС‰РµСЃС‚РІСѓРµС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_main_function() {
-  info "Тестирование функции main..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёРё main..."
 
   if grep -q "^main()" "${SCRIPT_DIR}/install.sh" ||
     grep -q "main() {" "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: функция main существует"
+    pass "install.sh: С„СѓРЅРєС†РёСЏ main СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: функция main не найдена"
+    fail "install.sh: С„СѓРЅРєС†РёСЏ main РЅРµ РЅР°Р№РґРµРЅР°"
   fi
 }
 
-# ── Тест: функция main вызывается ─────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: С„СѓРЅРєС†РёСЏ main РІС‹Р·С‹РІР°РµС‚СЃСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_main_call() {
-  info "Тестирование вызова функции main..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РІС‹Р·РѕРІР° С„СѓРЅРєС†РёРё main..."
 
   if grep -q 'main "$@"' "${SCRIPT_DIR}/install.sh" ||
     grep -q 'main "$1"' "${SCRIPT_DIR}/install.sh" ||
     grep -q 'main' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: main вызывается"
+    pass "install.sh: main РІС‹Р·С‹РІР°РµС‚СЃСЏ"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: main не вызывается"
+    fail "install.sh: main РЅРµ РІС‹Р·С‹РІР°РµС‚СЃСЏ"
   fi
 }
 
-# ── Тест: использование функций из модулей ────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ С„СѓРЅРєС†РёР№ РёР· РјРѕРґСѓР»РµР№ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_module_functions_usage() {
-  info "Тестирование использования функций из модулей..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ С„СѓРЅРєС†РёР№ РёР· РјРѕРґСѓР»РµР№..."
 
   local required_functions=(
     "select_language"
@@ -163,27 +163,27 @@ test_module_functions_usage() {
   done
 
   if [[ $found -ge 15 ]]; then
-    pass "install.sh: использует функции из модулей ($found/${#required_functions[@]})"
+    pass "install.sh: РёСЃРїРѕР»СЊР·СѓРµС‚ С„СѓРЅРєС†РёРё РёР· РјРѕРґСѓР»РµР№ ($found/${#required_functions[@]})"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: недостаточно использует функции из модулей ($found/${#required_functions[@]})"
+    fail "install.sh: РЅРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РёСЃРїРѕР»СЊР·СѓРµС‚ С„СѓРЅРєС†РёРё РёР· РјРѕРґСѓР»РµР№ ($found/${#required_functions[@]})"
   fi
 }
 
-# ── Тест: последовательность шагов установки ──────────────────
+# в”Ђв”Ђ РўРµСЃС‚: РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚СЊ С€Р°РіРѕРІ СѓСЃС‚Р°РЅРѕРІРєРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_installation_steps_order() {
-  info "Тестирование последовательности шагов установки..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚Рё С€Р°РіРѕРІ СѓСЃС‚Р°РЅРѕРІРєРё..."
 
-  # Извлекаем тело функции main
+  # РР·РІР»РµРєР°РµРј С‚РµР»Рѕ С„СѓРЅРєС†РёРё main
   local main_body
   main_body=$(sed -n '/^main()/,/^}/p' "${SCRIPT_DIR}/install.sh" 2>/dev/null || echo "")
 
   if [[ -z "$main_body" ]]; then
-    warn "Не удалось извлечь тело функции main"
+    warn "РќРµ СѓРґР°Р»РѕСЃСЊ РёР·РІР»РµС‡СЊ С‚РµР»Рѕ С„СѓРЅРєС†РёРё main"
     return
   fi
 
-  # Проверяем порядок вызова шагов
+  # РџСЂРѕРІРµСЂСЏРµРј РїРѕСЂСЏРґРѕРє РІС‹Р·РѕРІР° С€Р°РіРѕРІ
   local expected_order=(
     "select_language"
     "print_banner"
@@ -204,266 +204,266 @@ test_installation_steps_order() {
     if [[ "$current_line" -gt 0 && "$current_line" -gt "$last_line" ]]; then
       last_line=$current_line
     elif [[ "$current_line" -eq 0 ]]; then
-      warn "Шаг не найден: $step"
+      warn "РЁР°Рі РЅРµ РЅР°Р№РґРµРЅ: $step"
     else
       correct_order=false
     fi
   done
 
   if $correct_order; then
-    pass "install.sh: последовательность шагов корректна"
+    pass "install.sh: РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚СЊ С€Р°РіРѕРІ РєРѕСЂСЂРµРєС‚РЅР°"
     ((TESTS_PASSED++)) || true
   else
-    warn "install.sh: возможная проблема с последовательностью шагов"
+    warn "install.sh: РІРѕР·РјРѕР¶РЅР°СЏ РїСЂРѕР±Р»РµРјР° СЃ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚СЊСЋ С€Р°РіРѕРІ"
   fi
 }
 
-# ── Тест: step_traffic_shaping после step_configure ───────────
+# в”Ђв”Ђ РўРµСЃС‚: step_traffic_shaping РїРѕСЃР»Рµ step_configure в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_traffic_shaping_after_configure() {
-  info "Тестирование последовательности step_configure → step_traffic_shaping..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚Рё step_configure в†’ step_traffic_shaping..."
 
-  # Находим номера строк вызова step_configure и step_traffic_shaping
+  # РќР°С…РѕРґРёРј РЅРѕРјРµСЂР° СЃС‚СЂРѕРє РІС‹Р·РѕРІР° step_configure Рё step_traffic_shaping
   local configure_line traffic_line
   configure_line=$(grep -n '^  step_configure$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
   traffic_line=$(grep -n '^  step_traffic_shaping$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
 
   if [[ "$configure_line" -eq 0 ]]; then
-    fail "install.sh: step_configure не найден"
+    fail "install.sh: step_configure РЅРµ РЅР°Р№РґРµРЅ"
     return
   fi
 
   if [[ "$traffic_line" -eq 0 ]]; then
-    fail "install.sh: step_traffic_shaping не найден"
+    fail "install.sh: step_traffic_shaping РЅРµ РЅР°Р№РґРµРЅ"
     return
   fi
 
-  # Проверяем что step_traffic_shaping вызывается сразу после step_configure
+  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ step_traffic_shaping РІС‹Р·С‹РІР°РµС‚СЃСЏ СЃСЂР°Р·Сѓ РїРѕСЃР»Рµ step_configure
   local expected_traffic_line=$((configure_line + 2))
 
   if [[ "$traffic_line" -eq "$expected_traffic_line" ]]; then
-    pass "install.sh: step_traffic_shaping вызывается после step_configure (строки $configure_line → $traffic_line)"
+    pass "install.sh: step_traffic_shaping РІС‹Р·С‹РІР°РµС‚СЃСЏ РїРѕСЃР»Рµ step_configure (СЃС‚СЂРѕРєРё $configure_line в†’ $traffic_line)"
     ((TESTS_PASSED++)) || true
   elif [[ "$traffic_line" -gt "$configure_line" ]]; then
-    pass "install.sh: step_traffic_shaping вызывается после step_configure (строки $configure_line → $traffic_line)"
+    pass "install.sh: step_traffic_shaping РІС‹Р·С‹РІР°РµС‚СЃСЏ РїРѕСЃР»Рµ step_configure (СЃС‚СЂРѕРєРё $configure_line в†’ $traffic_line)"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: step_traffic_shaping должен вызываться после step_configure"
+    fail "install.sh: step_traffic_shaping РґРѕР»Р¶РµРЅ РІС‹Р·С‹РІР°С‚СЊСЃСЏ РїРѕСЃР»Рµ step_configure"
   fi
 }
 
-# ── Тест: step_decoy_site после step_configure ────────────────
+# в”Ђв”Ђ РўРµСЃС‚: step_decoy_site РїРѕСЃР»Рµ step_configure в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_decoy_site_after_configure() {
-  info "Тестирование последовательности step_configure → step_decoy_site..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚Рё step_configure в†’ step_decoy_site..."
 
-  # Находим номера строк вызова step_configure и step_decoy_site
+  # РќР°С…РѕРґРёРј РЅРѕРјРµСЂР° СЃС‚СЂРѕРє РІС‹Р·РѕРІР° step_configure Рё step_decoy_site
   local configure_line decoy_line
   configure_line=$(grep -n '^  step_configure$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
   decoy_line=$(grep -n '^  step_decoy_site$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
 
   if [[ "$configure_line" -eq 0 ]]; then
-    fail "install.sh: step_configure не найден"
+    fail "install.sh: step_configure РЅРµ РЅР°Р№РґРµРЅ"
     return
   fi
 
   if [[ "$decoy_line" -eq 0 ]]; then
-    fail "install.sh: step_decoy_site не найден"
+    fail "install.sh: step_decoy_site РЅРµ РЅР°Р№РґРµРЅ"
     return
   fi
 
-  # Проверяем что step_decoy_site вызывается сразу после step_configure
+  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ step_decoy_site РІС‹Р·С‹РІР°РµС‚СЃСЏ СЃСЂР°Р·Сѓ РїРѕСЃР»Рµ step_configure
   local expected_decoy_line=$((configure_line + 2))
 
   if [[ "$decoy_line" -eq "$expected_decoy_line" ]]; then
-    pass "install.sh: step_decoy_site вызывается после step_configure (строки $configure_line → $decoy_line)"
+    pass "install.sh: step_decoy_site РІС‹Р·С‹РІР°РµС‚СЃСЏ РїРѕСЃР»Рµ step_configure (СЃС‚СЂРѕРєРё $configure_line в†’ $decoy_line)"
     ((TESTS_PASSED++)) || true
   elif [[ "$decoy_line" -gt "$configure_line" ]]; then
-    pass "install.sh: step_decoy_site вызывается после step_configure (строки $configure_line → $decoy_line)"
+    pass "install.sh: step_decoy_site РІС‹Р·С‹РІР°РµС‚СЃСЏ РїРѕСЃР»Рµ step_configure (СЃС‚СЂРѕРєРё $configure_line в†’ $decoy_line)"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: step_decoy_site должен вызываться после step_configure"
+    fail "install.sh: step_decoy_site РґРѕР»Р¶РµРЅ РІС‹Р·С‹РІР°С‚СЊСЃСЏ РїРѕСЃР»Рµ step_configure"
   fi
 }
 
-# ── Тест: step_traffic_shaping после step_decoy_site ──────────
+# в”Ђв”Ђ РўРµСЃС‚: step_traffic_shaping РїРѕСЃР»Рµ step_decoy_site в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_traffic_shaping_after_decoy_site() {
-  info "Тестирование последовательности step_decoy_site → step_traffic_shaping..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚Рё step_decoy_site в†’ step_traffic_shaping..."
 
-  # Находим номера строк вызова step_decoy_site и step_traffic_shaping
+  # РќР°С…РѕРґРёРј РЅРѕРјРµСЂР° СЃС‚СЂРѕРє РІС‹Р·РѕРІР° step_decoy_site Рё step_traffic_shaping
   local decoy_line traffic_line
   decoy_line=$(grep -n '^  step_decoy_site$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
   traffic_line=$(grep -n '^  step_traffic_shaping$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
 
   if [[ "$decoy_line" -eq 0 ]]; then
-    fail "install.sh: step_decoy_site не найден"
+    fail "install.sh: step_decoy_site РЅРµ РЅР°Р№РґРµРЅ"
     return
   fi
 
   if [[ "$traffic_line" -eq 0 ]]; then
-    fail "install.sh: step_traffic_shaping не найден"
+    fail "install.sh: step_traffic_shaping РЅРµ РЅР°Р№РґРµРЅ"
     return
   fi
 
-  # Проверяем что step_traffic_shaping вызывается сразу после step_decoy_site
+  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ step_traffic_shaping РІС‹Р·С‹РІР°РµС‚СЃСЏ СЃСЂР°Р·Сѓ РїРѕСЃР»Рµ step_decoy_site
   local expected_traffic_line=$((decoy_line + 2))
 
   if [[ "$traffic_line" -eq "$expected_traffic_line" ]]; then
-    pass "install.sh: step_traffic_shaping вызывается после step_decoy_site (строки $decoy_line → $traffic_line)"
+    pass "install.sh: step_traffic_shaping РІС‹Р·С‹РІР°РµС‚СЃСЏ РїРѕСЃР»Рµ step_decoy_site (СЃС‚СЂРѕРєРё $decoy_line в†’ $traffic_line)"
     ((TESTS_PASSED++)) || true
   elif [[ "$traffic_line" -gt "$decoy_line" ]]; then
-    pass "install.sh: step_traffic_shaping вызывается после step_decoy_site (строки $decoy_line → $traffic_line)"
+    pass "install.sh: step_traffic_shaping РІС‹Р·С‹РІР°РµС‚СЃСЏ РїРѕСЃР»Рµ step_decoy_site (СЃС‚СЂРѕРєРё $decoy_line в†’ $traffic_line)"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: step_traffic_shaping должен вызываться после step_decoy_site"
+    fail "install.sh: step_traffic_shaping РґРѕР»Р¶РµРЅ РІС‹Р·С‹РІР°С‚СЊСЃСЏ РїРѕСЃР»Рµ step_decoy_site"
   fi
 }
 
-# ── Тест: обработка ошибок ────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: РѕР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РѕРє в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_error_handling() {
-  info "Тестирование обработки ошибок..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РѕР±СЂР°Р±РѕС‚РєРё РѕС€РёР±РѕРє..."
 
-  # Проверка что err функция используется
+  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ err С„СѓРЅРєС†РёСЏ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
   if grep -q 'err "' "${SCRIPT_DIR}/install.sh" ||
     grep -q "err '" "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: использует функцию err для ошибок"
+    pass "install.sh: РёСЃРїРѕР»СЊР·СѓРµС‚ С„СѓРЅРєС†РёСЋ err РґР»СЏ РѕС€РёР±РѕРє"
     ((TESTS_PASSED++)) || true
   else
-    warn "install.sh: не использует функцию err"
+    warn "install.sh: РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚ С„СѓРЅРєС†РёСЋ err"
   fi
 
-  # Проверка что есть проверки на ошибки
+  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ РµСЃС‚СЊ РїСЂРѕРІРµСЂРєРё РЅР° РѕС€РёР±РєРё
   if grep -q "|| {" "${SCRIPT_DIR}/install.sh" ||
     grep -q "|| true" "${SCRIPT_DIR}/install.sh" ||
     grep -q "&&" "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: использует обработку ошибок"
+    pass "install.sh: РёСЃРїРѕР»СЊР·СѓРµС‚ РѕР±СЂР°Р±РѕС‚РєСѓ РѕС€РёР±РѕРє"
     ((TESTS_PASSED++)) || true
   else
-    warn "install.sh: не использует явную обработку ошибок"
+    warn "install.sh: РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚ СЏРІРЅСѓСЋ РѕР±СЂР°Р±РѕС‚РєСѓ РѕС€РёР±РѕРє"
   fi
 }
 
-# ── Тест: fallback для lang.sh ────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: fallback РґР»СЏ lang.sh в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_lang_fallback() {
-  info "Тестирование fallback для lang.sh..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ fallback РґР»СЏ lang.sh..."
 
-  # Проверка что есть fallback если lang.sh отсутствует
+  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ РµСЃС‚СЊ fallback РµСЃР»Рё lang.sh РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚
   if grep -A5 'if \[\[ -f.*lang.sh' "${SCRIPT_DIR}/install.sh" | grep -q "else\|fallback\|RED=\|GREEN="; then
-    pass "install.sh: имеет fallback для lang.sh"
+    pass "install.sh: РёРјРµРµС‚ fallback РґР»СЏ lang.sh"
     ((TESTS_PASSED++)) || true
   else
-    warn "install.sh: fallback для lang.sh не найден"
+    warn "install.sh: fallback РґР»СЏ lang.sh РЅРµ РЅР°Р№РґРµРЅ"
   fi
 }
 
-# ── Тест: размеры скрипта ─────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: СЂР°Р·РјРµСЂС‹ СЃРєСЂРёРїС‚Р° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_script_size() {
-  info "Тестирование размера скрипта..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СЂР°Р·РјРµСЂР° СЃРєСЂРёРїС‚Р°..."
 
   local line_count
   line_count=$(wc -l <"${SCRIPT_DIR}/install.sh")
 
-  # install.sh должен быть компактным (< 200 строк — хорошо)
+  # install.sh РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РєРѕРјРїР°РєС‚РЅС‹Рј (< 200 СЃС‚СЂРѕРє вЂ” С…РѕСЂРѕС€Рѕ)
   if [[ $line_count -lt 200 ]]; then
-    pass "install.sh: компактный ($line_count строк)"
+    pass "install.sh: РєРѕРјРїР°РєС‚РЅС‹Р№ ($line_count СЃС‚СЂРѕРє)"
     ((TESTS_PASSED++)) || true
   elif [[ $line_count -lt 500 ]]; then
-    warn "install.sh: умеренного размера ($line_count строк)"
+    warn "install.sh: СѓРјРµСЂРµРЅРЅРѕРіРѕ СЂР°Р·РјРµСЂР° ($line_count СЃС‚СЂРѕРє)"
   elif [[ $line_count -lt 1000 ]]; then
-    pass "install.sh: допустимый размер ($line_count строк)"
+    pass "install.sh: РґРѕРїСѓСЃС‚РёРјС‹Р№ СЂР°Р·РјРµСЂ ($line_count СЃС‚СЂРѕРє)"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: слишком большой ($line_count строк), нужен рефакторинг"
+    fail "install.sh: СЃР»РёС€РєРѕРј Р±РѕР»СЊС€РѕР№ ($line_count СЃС‚СЂРѕРє), РЅСѓР¶РµРЅ СЂРµС„Р°РєС‚РѕСЂРёРЅРі"
   fi
 }
 
-# ── Тест: наличие комментариев ────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: РЅР°Р»РёС‡РёРµ РєРѕРјРјРµРЅС‚Р°СЂРёРµРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_comments() {
-  info "Тестирование наличия комментариев..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ РєРѕРјРјРµРЅС‚Р°СЂРёРµРІ..."
 
   local comment_count
   comment_count=$(grep -c "^#" "${SCRIPT_DIR}/install.sh" 2>/dev/null || echo "0")
 
   if [[ $comment_count -ge 5 ]]; then
-    pass "install.sh: достаточное количество комментариев ($comment_count)"
+    pass "install.sh: РґРѕСЃС‚Р°С‚РѕС‡РЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ РєРѕРјРјРµРЅС‚Р°СЂРёРµРІ ($comment_count)"
     ((TESTS_PASSED++)) || true
   else
-    warn "install.sh: мало комментариев ($comment_count)"
+    warn "install.sh: РјР°Р»Рѕ РєРѕРјРјРµРЅС‚Р°СЂРёРµРІ ($comment_count)"
   fi
 }
 
-# ── Тест: запуск без root (должен показать предупреждение) ───
+# в”Ђв”Ђ РўРµСЃС‚: Р·Р°РїСѓСЃРє Р±РµР· root (РґРѕР»Р¶РµРЅ РїРѕРєР°Р·Р°С‚СЊ РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ) в”Ђв”Ђв”Ђ
 test_run_without_root() {
-  info "Тестирование запуска без root..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ Р·Р°РїСѓСЃРєР° Р±РµР· root..."
 
-  # Запускаем скрипт в dry-run режиме (если есть такая возможность)
-  # или проверяем что есть проверка на root
+  # Р—Р°РїСѓСЃРєР°РµРј СЃРєСЂРёРїС‚ РІ dry-run СЂРµР¶РёРјРµ (РµСЃР»Рё РµСЃС‚СЊ С‚Р°РєР°СЏ РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ)
+  # РёР»Рё РїСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ РµСЃС‚СЊ РїСЂРѕРІРµСЂРєР° РЅР° root
   if grep -q "check_root\|EUID\|root" "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: имеет проверку на root"
+    pass "install.sh: РёРјРµРµС‚ РїСЂРѕРІРµСЂРєСѓ РЅР° root"
     ((TESTS_PASSED++)) || true
   else
-    warn "install.sh: проверка на root не найдена"
+    warn "install.sh: РїСЂРѕРІРµСЂРєР° РЅР° root РЅРµ РЅР°Р№РґРµРЅР°"
   fi
 }
 
-# ── Тест: проверка на Ubuntu ──────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: РїСЂРѕРІРµСЂРєР° РЅР° Ubuntu в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_ubuntu_check() {
-  info "Тестирование проверки на Ubuntu..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїСЂРѕРІРµСЂРєРё РЅР° Ubuntu..."
 
   if grep -q "check_ubuntu\|ubuntu\|Ubuntu" "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: имеет проверку на Ubuntu"
+    pass "install.sh: РёРјРµРµС‚ РїСЂРѕРІРµСЂРєСѓ РЅР° Ubuntu"
     ((TESTS_PASSED++)) || true
   else
-    warn "install.sh: проверка на Ubuntu не найдена"
+    warn "install.sh: РїСЂРѕРІРµСЂРєР° РЅР° Ubuntu РЅРµ РЅР°Р№РґРµРЅР°"
   fi
 }
 
-# ── Тест: переменные окружения ────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: РїРµСЂРµРјРµРЅРЅС‹Рµ РѕРєСЂСѓР¶РµРЅРёСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_environment_variables() {
-  info "Тестирование переменных окружения..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїРµСЂРµРјРµРЅРЅС‹С… РѕРєСЂСѓР¶РµРЅРёСЏ..."
 
-  # Проверка что скрипт не требует внешних переменных окружения
-  # (кроме тех что устанавливаются внутри скрипта)
+  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ СЃРєСЂРёРїС‚ РЅРµ С‚СЂРµР±СѓРµС‚ РІРЅРµС€РЅРёС… РїРµСЂРµРјРµРЅРЅС‹С… РѕРєСЂСѓР¶РµРЅРёСЏ
+  # (РєСЂРѕРјРµ С‚РµС… С‡С‚Рѕ СѓСЃС‚Р°РЅР°РІР»РёРІР°СЋС‚СЃСЏ РІРЅСѓС‚СЂРё СЃРєСЂРёРїС‚Р°)
   local env_deps
   env_deps=$(grep -oE '\$\{?[A-Z_]+\}?' "${SCRIPT_DIR}/install.sh" 2>/dev/null |
     grep -v "^\${SCRIPT_DIR}\|^\${LANG_NAME}\|^\${DOMAIN}\|^\${LE_EMAIL}" |
     sort -u | wc -l || echo "0")
 
   if [[ $env_deps -lt 10 ]]; then
-    pass "install.sh: минимальные внешние зависимости ($env_deps)"
+    pass "install.sh: РјРёРЅРёРјР°Р»СЊРЅС‹Рµ РІРЅРµС€РЅРёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё ($env_deps)"
     ((TESTS_PASSED++)) || true
   else
-    warn "install.sh: много внешних зависимостей ($env_deps)"
+    warn "install.sh: РјРЅРѕРіРѕ РІРЅРµС€РЅРёС… Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ ($env_deps)"
   fi
 }
 
-# ── Тест: интеграция с setup-telegram.sh ──────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: РёРЅС‚РµРіСЂР°С†РёСЏ СЃ setup-telegram.sh в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_telegram_integration() {
-  info "Тестирование интеграции с Telegram..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РёРЅС‚РµРіСЂР°С†РёРё СЃ Telegram..."
 
-  # Проверка что install.sh упоминает setup-telegram.sh
+  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ install.sh СѓРїРѕРјРёРЅР°РµС‚ setup-telegram.sh
   if grep -q "setup-telegram.sh" "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: упоминает setup-telegram.sh"
+    pass "install.sh: СѓРїРѕРјРёРЅР°РµС‚ setup-telegram.sh"
     ((TESTS_PASSED++)) || true
   else
-    warn "install.sh: не упоминает setup-telegram.sh"
+    warn "install.sh: РЅРµ СѓРїРѕРјРёРЅР°РµС‚ setup-telegram.sh"
   fi
 
-  # Проверка что INSTALL_TG переменная используется
+  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ INSTALL_TG РїРµСЂРµРјРµРЅРЅР°СЏ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
   if grep -q "INSTALL_TG" "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: использует INSTALL_TG переменную"
+    pass "install.sh: РёСЃРїРѕР»СЊР·СѓРµС‚ INSTALL_TG РїРµСЂРµРјРµРЅРЅСѓСЋ"
     ((TESTS_PASSED++)) || true
   else
-    warn "install.sh: INSTALL_TG переменная не найдена"
+    warn "install.sh: INSTALL_TG РїРµСЂРµРјРµРЅРЅР°СЏ РЅРµ РЅР°Р№РґРµРЅР°"
   fi
 }
 
-# ── Тест: dry-run симуляция (mock) ────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: dry-run СЃРёРјСѓР»СЏС†РёСЏ (mock) в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_dry_run_simulation() {
-  info "Тестирование dry-run симуляции..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ dry-run СЃРёРјСѓР»СЏС†РёРё..."
 
-  # Создаём mock для всех внешних команд
+  # РЎРѕР·РґР°С‘Рј mock РґР»СЏ РІСЃРµС… РІРЅРµС€РЅРёС… РєРѕРјР°РЅРґ
   LANG_NAME="English"
 
-  # Mock функций
+  # Mock С„СѓРЅРєС†РёР№
   select_language() { :; }
   print_banner() { :; }
   prompt_inputs() {
@@ -484,7 +484,7 @@ test_dry_run_simulation() {
   step_configure() { :; }
   step_finish() { :; }
 
-  # Mock утилит
+  # Mock СѓС‚РёР»РёС‚
   check_root() { :; }
   check_ubuntu() { :; }
   step() { :; }
@@ -500,38 +500,38 @@ test_dry_run_simulation() {
   arch() { echo "amd64"; }
   unique_port() { echo "30000"; }
 
-  # Загружаем модули
+  # Р—Р°РіСЂСѓР¶Р°РµРј РјРѕРґСѓР»Рё
   source "${SCRIPT_DIR}/lib/utils.sh" 2>/dev/null || true
 
-  # Пытаемся загрузить install.sh и проверить что main существует
+  # РџС‹С‚Р°РµРјСЃСЏ Р·Р°РіСЂСѓР·РёС‚СЊ install.sh Рё РїСЂРѕРІРµСЂРёС‚СЊ С‡С‚Рѕ main СЃСѓС‰РµСЃС‚РІСѓРµС‚
   if bash -c "source ${SCRIPT_DIR}/install.sh 2>&1 && declare -f main >/dev/null" 2>/dev/null; then
-    pass "install.sh: загружается и main существует"
+    pass "install.sh: Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ Рё main СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     ((TESTS_PASSED++)) || true
   else
-    # Это может не сработать из-за интерактивности, поэтому warning
-    warn "install.sh: загрузка может требовать интерактивности"
+    # Р­С‚Рѕ РјРѕР¶РµС‚ РЅРµ СЃСЂР°Р±РѕС‚Р°С‚СЊ РёР·-Р·Р° РёРЅС‚РµСЂР°РєС‚РёРІРЅРѕСЃС‚Рё, РїРѕСЌС‚РѕРјСѓ warning
+    warn "install.sh: Р·Р°РіСЂСѓР·РєР° РјРѕР¶РµС‚ С‚СЂРµР±РѕРІР°С‚СЊ РёРЅС‚РµСЂР°РєС‚РёРІРЅРѕСЃС‚Рё"
   fi
 }
 
-# ── Тест: безопасность (отсутствие хардкодных секретов) ───────
+# в”Ђв”Ђ РўРµСЃС‚: Р±РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ (РѕС‚СЃСѓС‚СЃС‚РІРёРµ С…Р°СЂРґРєРѕРґРЅС‹С… СЃРµРєСЂРµС‚РѕРІ) в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_security_no_hardcoded_secrets() {
-  info "Тестирование безопасности (отсутствие секретов)..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё (РѕС‚СЃСѓС‚СЃС‚РІРёРµ СЃРµРєСЂРµС‚РѕРІ)..."
 
-  # Проверка что нет хардкодных паролей или ключей
+  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ РЅРµС‚ С…Р°СЂРґРєРѕРґРЅС‹С… РїР°СЂРѕР»РµР№ РёР»Рё РєР»СЋС‡РµР№
   if grep -qiE "password\s*=\s*['\"][^'\"]+['\"]|secret\s*=\s*['\"][^'\"]+['\"]|key\s*=\s*['\"][^'\"]+['\"]" \
     "${SCRIPT_DIR}/install.sh" 2>/dev/null | grep -v "SUDO_PASSWORD\|SECRET_KEY\|SS_PASSWORD"; then
-    fail "install.sh: возможны хардкодные секреты"
+    fail "install.sh: РІРѕР·РјРѕР¶РЅС‹ С…Р°СЂРґРєРѕРґРЅС‹Рµ СЃРµРєСЂРµС‚С‹"
   else
-    pass "install.sh: хардкодные секреты не найдены"
+    pass "install.sh: С…Р°СЂРґРєРѕРґРЅС‹Рµ СЃРµРєСЂРµС‚С‹ РЅРµ РЅР°Р№РґРµРЅС‹"
     ((TESTS_PASSED++)) || true
   fi
 }
 
-# ── Тест: использование кавычек ───────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ РєР°РІС‹С‡РµРє в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_quoting_usage() {
-  info "Тестирование использования кавычек..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РєР°РІС‹С‡РµРє..."
 
-  # Проверка что переменные используются с кавычками
+  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ РїРµСЂРµРјРµРЅРЅС‹Рµ РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ СЃ РєР°РІС‹С‡РєР°РјРё
   # shellcheck disable=SC2034
   local unquoted_vars
   # shellcheck disable=SC2034
@@ -543,25 +543,25 @@ test_quoting_usage() {
     wc -l || echo "0")
 
   if [[ $quoted_vars -gt 0 ]]; then
-    pass "install.sh: использует кавычки для переменных ($quoted_vars)"
+    pass "install.sh: РёСЃРїРѕР»СЊР·СѓРµС‚ РєР°РІС‹С‡РєРё РґР»СЏ РїРµСЂРµРјРµРЅРЅС‹С… ($quoted_vars)"
     ((TESTS_PASSED++)) || true
   else
-    warn "install.sh: переменные могут быть не в кавычках"
+    warn "install.sh: РїРµСЂРµРјРµРЅРЅС‹Рµ РјРѕРіСѓС‚ Р±С‹С‚СЊ РЅРµ РІ РєР°РІС‹С‡РєР°С…"
   fi
 }
 
-# ── Основная функция ─────────────────────────────────────────
+# в”Ђв”Ђ РћСЃРЅРѕРІРЅР°СЏ С„СѓРЅРєС†РёСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 main() {
   echo ""
-  echo -e "${YELLOW}╔══════════════════════════════════════════════════════╗${PLAIN}"
-  echo -e "${YELLOW}║        CubiVeil Unit Tests - install.sh              ║${PLAIN}"
-  echo -e "${YELLOW}╚══════════════════════════════════════════════════════╝${PLAIN}"
+  echo -e "${YELLOW}в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—${PLAIN}"
+  echo -e "${YELLOW}в•‘        CubiVeil Unit Tests - install.sh              в•‘${PLAIN}"
+  echo -e "${YELLOW}в•љв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ќ${PLAIN}"
   echo ""
 
-  info "Тестируемый скрипт: ${SCRIPT_DIR}/install.sh"
+  info "РўРµСЃС‚РёСЂСѓРµРјС‹Р№ СЃРєСЂРёРїС‚: ${SCRIPT_DIR}/install.sh"
   echo ""
 
-  # ── Запуск тестов ─────────────────────────────────────────
+  # в”Ђв”Ђ Р—Р°РїСѓСЃРє С‚РµСЃС‚РѕРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
   test_file_exists
   echo ""
 
@@ -631,21 +631,21 @@ main() {
   test_quoting_usage
   echo ""
 
-  # ── Итоги ───────────────────────────────────────────────
+  # в”Ђв”Ђ РС‚РѕРіРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
   echo ""
-  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
-  echo -e "${GREEN}Пройдено: $TESTS_PASSED${PLAIN}"
+  echo -e "${YELLOW}в”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓ${PLAIN}"
+  echo -e "${GREEN}РџСЂРѕР№РґРµРЅРѕ: $TESTS_PASSED${PLAIN}"
   if [[ $TESTS_FAILED -gt 0 ]]; then
-    echo -e "${RED}Провалено:  $TESTS_FAILED${PLAIN}"
+    echo -e "${RED}РџСЂРѕРІР°Р»РµРЅРѕ:  $TESTS_FAILED${PLAIN}"
   fi
-  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
+  echo -e "${YELLOW}в”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓ${PLAIN}"
   echo ""
 
   if [[ $TESTS_FAILED -gt 0 ]]; then
-    echo -e "${RED}❌ Тесты провалены${PLAIN}"
+    echo -e "${RED}вќЊ РўРµСЃС‚С‹ РїСЂРѕРІР°Р»РµРЅС‹${PLAIN}"
     exit 1
   else
-    echo -e "${GREEN}✅ Все тесты пройдены${PLAIN}"
+    echo -e "${GREEN}вњ… Р’СЃРµ С‚РµСЃС‚С‹ РїСЂРѕР№РґРµРЅС‹${PLAIN}"
     exit 0
   fi
 }

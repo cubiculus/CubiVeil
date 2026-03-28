@@ -1,28 +1,28 @@
 #!/bin/bash
-# ╔═══════════════════════════════════════════════════════════╗
-# ║      CubiVeil Unit Tests - install.sh modes               ║
-# ║      Тестирование режимов --dev и --dry-run              ║
-# ╚═══════════════════════════════════════════════════════════╝
+# в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—
+# в•‘      CubiVeil Unit Tests - install.sh modes               в•‘
+# в•‘      РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СЂРµР¶РёРјРѕРІ --dev Рё --dry-run              в•‘
+# в•љв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ќ
 
 set -euo pipefail
 
-# ── Путь к проекту ───────────────────────────────────────────
+# в”Ђв”Ђ РџСѓС‚СЊ Рє РїСЂРѕРµРєС‚Сѓ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck disable=SC2034
 TESTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# ── Счётчик тестов ───────────────────────────────────────────
+# в”Ђв”Ђ РЎС‡С‘С‚С‡РёРє С‚РµСЃС‚РѕРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 TESTS_PASSED=0
 TESTS_FAILED=0
 
-# ── Цвета ────────────────────────────────────────────────────
+# в”Ђв”Ђ Р¦РІРµС‚Р° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 CYAN='\033[0;36m'
 PLAIN='\033[0m'
 
-# ── Функции вывода ───────────────────────────────────────────
+# в”Ђв”Ђ Р¤СѓРЅРєС†РёРё РІС‹РІРѕРґР° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 info() { echo -e "${CYAN}[INFO]${PLAIN} $*" >&2; }
 pass() {
   echo -e "${GREEN}[PASS]${PLAIN} $*" >&2
@@ -34,371 +34,371 @@ fail() {
 }
 warn() { echo -e "${YELLOW}[WARN]${PLAIN} $*" >&2; }
 
-# ── Загрузка модулей ─────────────────────────────────────────
+# в”Ђв”Ђ Р—Р°РіСЂСѓР·РєР° РјРѕРґСѓР»РµР№ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 source "${SCRIPT_DIR}/lib/output.sh" 2>/dev/null || true
 
-# ── Тест: файл install.sh существует ─────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: С„Р°Р№Р» install.sh СЃСѓС‰РµСЃС‚РІСѓРµС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_install_file_exists() {
-  info "Тестирование наличия файла install.sh..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ С„Р°Р№Р»Р° install.sh..."
 
   if [[ -f "${SCRIPT_DIR}/install.sh" ]]; then
-    pass "install.sh: файл существует"
+    pass "install.sh: С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚"
   else
-    fail "install.sh: файл не найден"
+    fail "install.sh: С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ"
   fi
 }
 
-# ── Тест: синтаксис install.sh ───────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: СЃРёРЅС‚Р°РєСЃРёСЃ install.sh в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_install_syntax() {
-  info "Тестирование синтаксиса install.sh..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СЃРёРЅС‚Р°РєСЃРёСЃР° install.sh..."
 
   if bash -n "${SCRIPT_DIR}/install.sh" 2>/dev/null; then
-    pass "install.sh: синтаксис корректен"
+    pass "install.sh: СЃРёРЅС‚Р°РєСЃРёСЃ РєРѕСЂСЂРµРєС‚РµРЅ"
   else
-    fail "install.sh: синтаксическая ошибка"
+    fail "install.sh: СЃРёРЅС‚Р°РєСЃРёС‡РµСЃРєР°СЏ РѕС€РёР±РєР°"
   fi
 }
 
-# ── Тест: переменная DEV_MODE определена ─────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: РїРµСЂРµРјРµРЅРЅР°СЏ DEV_MODE РѕРїСЂРµРґРµР»РµРЅР° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_dev_mode_variable() {
-  info "Тестирование переменной DEV_MODE..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїРµСЂРµРјРµРЅРЅРѕР№ DEV_MODE..."
 
   if grep -q 'DEV_MODE=' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: переменная DEV_MODE определена"
+    pass "install.sh: РїРµСЂРµРјРµРЅРЅР°СЏ DEV_MODE РѕРїСЂРµРґРµР»РµРЅР°"
   else
-    fail "install.sh: переменная DEV_MODE не найдена"
+    fail "install.sh: РїРµСЂРµРјРµРЅРЅР°СЏ DEV_MODE РЅРµ РЅР°Р№РґРµРЅР°"
   fi
 }
 
-# ── Тест: переменная DRY_RUN определена ──────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: РїРµСЂРµРјРµРЅРЅР°СЏ DRY_RUN РѕРїСЂРµРґРµР»РµРЅР° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_dry_run_variable() {
-  info "Тестирование переменной DRY_RUN..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїРµСЂРµРјРµРЅРЅРѕР№ DRY_RUN..."
 
   if grep -q 'DRY_RUN=' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: переменная DRY_RUN определена"
+    pass "install.sh: РїРµСЂРµРјРµРЅРЅР°СЏ DRY_RUN РѕРїСЂРµРґРµР»РµРЅР°"
   else
-    fail "install.sh: переменная DRY_RUN не найдена"
+    fail "install.sh: РїРµСЂРµРјРµРЅРЅР°СЏ DRY_RUN РЅРµ РЅР°Р№РґРµРЅР°"
   fi
 }
 
-# ── Тест: аргумент --dev обрабатывается ──────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: Р°СЂРіСѓРјРµРЅС‚ --dev РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_dev_argument() {
-  info "Тестирование обработки аргумента --dev..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РѕР±СЂР°Р±РѕС‚РєРё Р°СЂРіСѓРјРµРЅС‚Р° --dev..."
 
   if grep -q '\-\-dev)' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: аргумент --dev обрабатывается"
+    pass "install.sh: Р°СЂРіСѓРјРµРЅС‚ --dev РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ"
   else
-    fail "install.sh: аргумент --dev не обрабатывается"
+    fail "install.sh: Р°СЂРіСѓРјРµРЅС‚ --dev РЅРµ РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ"
   fi
 }
 
-# ── Тест: аргумент --dry-run обрабатывается ──────────────────
+# в”Ђв”Ђ РўРµСЃС‚: Р°СЂРіСѓРјРµРЅС‚ --dry-run РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_dry_run_argument() {
-  info "Тестирование обработки аргумента --dry-run..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РѕР±СЂР°Р±РѕС‚РєРё Р°СЂРіСѓРјРµРЅС‚Р° --dry-run..."
 
   if grep -q '\-\-dry-run)' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: аргумент --dry-run обрабатывается"
+    pass "install.sh: Р°СЂРіСѓРјРµРЅС‚ --dry-run РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ"
   else
-    fail "install.sh: аргумент --dry-run не обрабатывается"
+    fail "install.sh: Р°СЂРіСѓРјРµРЅС‚ --dry-run РЅРµ РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ"
   fi
 }
 
-# ── Тест: usage содержит --dev ───────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: usage СЃРѕРґРµСЂР¶РёС‚ --dev в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_usage_has_dev() {
-  info "Тестирование usage: наличие --dev..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ usage: РЅР°Р»РёС‡РёРµ --dev..."
 
   if grep -q '\-\-dev' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: usage содержит --dev"
+    pass "install.sh: usage СЃРѕРґРµСЂР¶РёС‚ --dev"
   else
-    fail "install.sh: usage не содержит --dev"
+    fail "install.sh: usage РЅРµ СЃРѕРґРµСЂР¶РёС‚ --dev"
   fi
 }
 
-# ── Тест: usage содержит --dry-run ───────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: usage СЃРѕРґРµСЂР¶РёС‚ --dry-run в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_usage_has_dry_run() {
-  info "Тестирование usage: наличие --dry-run..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ usage: РЅР°Р»РёС‡РёРµ --dry-run..."
 
   if grep -q '\-\-dry-run' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: usage содержит --dry-run"
+    pass "install.sh: usage СЃРѕРґРµСЂР¶РёС‚ --dry-run"
   else
-    fail "install.sh: usage не содержит --dry-run"
+    fail "install.sh: usage РЅРµ СЃРѕРґРµСЂР¶РёС‚ --dry-run"
   fi
 }
 
-# ── Тест: usage содержит примеры ─────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: usage СЃРѕРґРµСЂР¶РёС‚ РїСЂРёРјРµСЂС‹ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_usage_has_examples() {
-  info "Тестирование usage: наличие примеров..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ usage: РЅР°Р»РёС‡РёРµ РїСЂРёРјРµСЂРѕРІ..."
 
   local examples_count
   examples_count=$(grep -c 'Examples:' "${SCRIPT_DIR}/install.sh" || echo "0")
 
   if [[ "$examples_count" -ge 1 ]]; then
-    pass "install.sh: usage содержит примеры"
+    pass "install.sh: usage СЃРѕРґРµСЂР¶РёС‚ РїСЂРёРјРµСЂС‹"
   else
-    fail "install.sh: usage не содержит примеры"
+    fail "install.sh: usage РЅРµ СЃРѕРґРµСЂР¶РёС‚ РїСЂРёРјРµСЂС‹"
   fi
 }
 
-# ── Тест: dry-run режим показывает план установки ────────────
+# в”Ђв”Ђ РўРµСЃС‚: dry-run СЂРµР¶РёРј РїРѕРєР°Р·С‹РІР°РµС‚ РїР»Р°РЅ СѓСЃС‚Р°РЅРѕРІРєРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_dry_run_shows_plan() {
-  info "Тестирование dry-run: план установки..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ dry-run: РїР»Р°РЅ СѓСЃС‚Р°РЅРѕРІРєРё..."
 
   if grep -q 'Installation Plan' "${SCRIPT_DIR}/install.sh" ||
-    grep -q 'План установки' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: dry-run показывает план установки"
+    grep -q 'РџР»Р°РЅ СѓСЃС‚Р°РЅРѕРІРєРё' "${SCRIPT_DIR}/install.sh"; then
+    pass "install.sh: dry-run РїРѕРєР°Р·С‹РІР°РµС‚ РїР»Р°РЅ СѓСЃС‚Р°РЅРѕРІРєРё"
   else
-    fail "install.sh: dry-run не показывает план установки"
+    fail "install.sh: dry-run РЅРµ РїРѕРєР°Р·С‹РІР°РµС‚ РїР»Р°РЅ СѓСЃС‚Р°РЅРѕРІРєРё"
   fi
 }
 
-# ── Тест: dry-run проверяет root ─────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: dry-run РїСЂРѕРІРµСЂСЏРµС‚ root в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_dry_run_checks_root() {
-  info "Тестирование dry-run: проверка root..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ dry-run: РїСЂРѕРІРµСЂРєР° root..."
 
   if grep -q 'EUID' "${SCRIPT_DIR}/install.sh" &&
     grep -q 'Root access' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: dry-run проверяет root доступ"
+    pass "install.sh: dry-run РїСЂРѕРІРµСЂСЏРµС‚ root РґРѕСЃС‚СѓРї"
   else
-    fail "install.sh: dry-run не проверяет root доступ"
+    fail "install.sh: dry-run РЅРµ РїСЂРѕРІРµСЂСЏРµС‚ root РґРѕСЃС‚СѓРї"
   fi
 }
 
-# ── Тест: dry-run проверяет Ubuntu ───────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: dry-run РїСЂРѕРІРµСЂСЏРµС‚ Ubuntu в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_dry_run_checks_ubuntu() {
-  info "Тестирование dry-run: проверка Ubuntu..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ dry-run: РїСЂРѕРІРµСЂРєР° Ubuntu..."
 
   if grep -q 'ubuntu' "${SCRIPT_DIR}/install.sh" &&
     grep -q 'Ubuntu detected' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: dry-run проверяет Ubuntu"
+    pass "install.sh: dry-run РїСЂРѕРІРµСЂСЏРµС‚ Ubuntu"
   else
-    fail "install.sh: dry-run не проверяет Ubuntu"
+    fail "install.sh: dry-run РЅРµ РїСЂРѕРІРµСЂСЏРµС‚ Ubuntu"
   fi
 }
 
-# ── Тест: dev режим показывает предупреждение ────────────────
+# в”Ђв”Ђ РўРµСЃС‚: dev СЂРµР¶РёРј РїРѕРєР°Р·С‹РІР°РµС‚ РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_dev_mode_warning() {
-  info "Тестирование dev-режим: предупреждение..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ dev-СЂРµР¶РёРј: РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ..."
 
   if grep -q 'DEV MODE' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: dev-режим показывает предупреждение"
+    pass "install.sh: dev-СЂРµР¶РёРј РїРѕРєР°Р·С‹РІР°РµС‚ РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ"
   else
-    fail "install.sh: dev-режим не показывает предупреждение"
+    fail "install.sh: dev-СЂРµР¶РёРј РЅРµ РїРѕРєР°Р·С‹РІР°РµС‚ РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ"
   fi
 }
 
-# ── Тест: dry-run показывает сообщение о симуляции ───────────
+# в”Ђв”Ђ РўРµСЃС‚: dry-run РїРѕРєР°Р·С‹РІР°РµС‚ СЃРѕРѕР±С‰РµРЅРёРµ Рѕ СЃРёРјСѓР»СЏС†РёРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_dry_run_simulation_message() {
-  info "Тестирование dry-run: сообщение о симуляции..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ dry-run: СЃРѕРѕР±С‰РµРЅРёРµ Рѕ СЃРёРјСѓР»СЏС†РёРё..."
 
   if grep -q 'Simulation mode' "${SCRIPT_DIR}/install.sh" ||
-    grep -q 'Режим симуляции' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: dry-run показывает сообщение о симуляции"
+    grep -q 'Р РµР¶РёРј СЃРёРјСѓР»СЏС†РёРё' "${SCRIPT_DIR}/install.sh"; then
+    pass "install.sh: dry-run РїРѕРєР°Р·С‹РІР°РµС‚ СЃРѕРѕР±С‰РµРЅРёРµ Рѕ СЃРёРјСѓР»СЏС†РёРё"
   else
-    fail "install.sh: dry-run не показывает сообщение о симуляции"
+    fail "install.sh: dry-run РЅРµ РїРѕРєР°Р·С‹РІР°РµС‚ СЃРѕРѕР±С‰РµРЅРёРµ Рѕ СЃРёРјСѓР»СЏС†РёРё"
   fi
 }
 
-# ── Тест: dry-run не вносит изменения ────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: dry-run РЅРµ РІРЅРѕСЃРёС‚ РёР·РјРµРЅРµРЅРёСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_dry_run_no_changes() {
-  info "Тестирование dry-run: отсутствие изменений..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ dry-run: РѕС‚СЃСѓС‚СЃС‚РІРёРµ РёР·РјРµРЅРµРЅРёР№..."
 
   if grep -q 'No changes' "${SCRIPT_DIR}/install.sh" ||
-    grep -q 'изменения не будут' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: dry-run указывает на отсутствие изменений"
+    grep -q 'РёР·РјРµРЅРµРЅРёСЏ РЅРµ Р±СѓРґСѓС‚' "${SCRIPT_DIR}/install.sh"; then
+    pass "install.sh: dry-run СѓРєР°Р·С‹РІР°РµС‚ РЅР° РѕС‚СЃСѓС‚СЃС‚РІРёРµ РёР·РјРµРЅРµРЅРёР№"
   else
-    fail "install.sh: dry-run не указывает на отсутствие изменений"
+    fail "install.sh: dry-run РЅРµ СѓРєР°Р·С‹РІР°РµС‚ РЅР° РѕС‚СЃСѓС‚СЃС‚РІРёРµ РёР·РјРµРЅРµРЅРёР№"
   fi
 }
 
-# ── Тест: parse_args функция существует ──────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: parse_args С„СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_parse_args_exists() {
-  info "Тестирование функции parse_args..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёРё parse_args..."
 
   if grep -q 'parse_args()' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: функция parse_args существует"
+    pass "install.sh: С„СѓРЅРєС†РёСЏ parse_args СЃСѓС‰РµСЃС‚РІСѓРµС‚"
   else
-    fail "install.sh: функция parse_args не найдена"
+    fail "install.sh: С„СѓРЅРєС†РёСЏ parse_args РЅРµ РЅР°Р№РґРµРЅР°"
   fi
 }
 
-# ── Тест: usage функция существует ───────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: usage С„СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_usage_exists() {
-  info "Тестирование функции usage..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёРё usage..."
 
   if grep -q 'usage()' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: функция usage существует"
+    pass "install.sh: С„СѓРЅРєС†РёСЏ usage СЃСѓС‰РµСЃС‚РІСѓРµС‚"
   else
-    fail "install.sh: функция usage не найдена"
+    fail "install.sh: С„СѓРЅРєС†РёСЏ usage РЅРµ РЅР°Р№РґРµРЅР°"
   fi
 }
 
-# ── Тест: --help обрабатывается ──────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: --help РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_help_argument() {
-  info "Тестирование обработки --help..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РѕР±СЂР°Р±РѕС‚РєРё --help..."
 
   if grep -q '\-\-help' "${SCRIPT_DIR}/install.sh" &&
     grep -q 'usage' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: --help обрабатывается"
+    pass "install.sh: --help РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ"
   else
-    fail "install.sh: --help не обрабатывается"
+    fail "install.sh: --help РЅРµ РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ"
   fi
 }
 
-# ── Тест: DEV_DOMAIN переменная определена ───────────────────
+# в”Ђв”Ђ РўРµСЃС‚: DEV_DOMAIN РїРµСЂРµРјРµРЅРЅР°СЏ РѕРїСЂРµРґРµР»РµРЅР° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_dev_domain_variable() {
-  info "Тестирование переменной DEV_DOMAIN..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїРµСЂРµРјРµРЅРЅРѕР№ DEV_DOMAIN..."
 
   if grep -q 'DEV_DOMAIN=' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: переменная DEV_DOMAIN определена"
+    pass "install.sh: РїРµСЂРµРјРµРЅРЅР°СЏ DEV_DOMAIN РѕРїСЂРµРґРµР»РµРЅР°"
   else
-    fail "install.sh: переменная DEV_DOMAIN не найдена"
+    fail "install.sh: РїРµСЂРµРјРµРЅРЅР°СЏ DEV_DOMAIN РЅРµ РЅР°Р№РґРµРЅР°"
   fi
 }
 
-# ── Тест: dev.cubiveil.local используется по умолчанию ───────
+# в”Ђв”Ђ РўРµСЃС‚: dev.cubiveil.local РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_default_dev_domain() {
-  info "Тестирование домена по умолчанию для dev..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РґРѕРјРµРЅР° РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РґР»СЏ dev..."
 
   if grep -q 'dev.cubiveil.local' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: dev.cubiveil.local используется по умолчанию"
+    pass "install.sh: dev.cubiveil.local РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ"
   else
-    fail "install.sh: dev.cubiveil.local не найдено"
+    fail "install.sh: dev.cubiveil.local РЅРµ РЅР°Р№РґРµРЅРѕ"
   fi
 }
 
-# ── Тест: --domain аргумент обрабатывается ───────────────────
+# в”Ђв”Ђ РўРµСЃС‚: --domain Р°СЂРіСѓРјРµРЅС‚ РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_domain_argument() {
-  info "Тестирование обработки --domain..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РѕР±СЂР°Р±РѕС‚РєРё --domain..."
 
   if grep -q '\-\-domain=' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: --domain обрабатывается"
+    pass "install.sh: --domain РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ"
   else
-    fail "install.sh: --domain не обрабатывается"
+    fail "install.sh: --domain РЅРµ РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ"
   fi
 }
 
-# ── Тест: install-steps-main.sh существует ───────────────────
+# в”Ђв”Ђ РўРµСЃС‚: install-steps-main.sh СЃСѓС‰РµСЃС‚РІСѓРµС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_install_steps_main_exists() {
-  info "Тестирование наличия lib/steps/install-steps-main.sh..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ lib/steps/install-steps-main.sh..."
 
   if [[ -f "${SCRIPT_DIR}/lib/steps/install-steps-main.sh" ]]; then
-    pass "lib/steps/install-steps-main.sh: файл существует"
+    pass "lib/steps/install-steps-main.sh: С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚"
   else
-    fail "lib/steps/install-steps-main.sh: файл не найден"
+    fail "lib/steps/install-steps-main.sh: С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ"
   fi
 }
 
-# ── Тест: step_ssl_dev функция существует ────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: step_ssl_dev С„СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_step_ssl_dev_exists() {
-  info "Тестирование функции step_ssl_dev..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёРё step_ssl_dev..."
 
   if [[ -f "${SCRIPT_DIR}/lib/steps/install-steps-main.sh" ]]; then
     if grep -q 'step_ssl_dev()' "${SCRIPT_DIR}/lib/steps/install-steps-main.sh"; then
-      pass "step_ssl_dev: функция существует"
+      pass "step_ssl_dev: С„СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     else
-      fail "step_ssl_dev: функция не найдена"
+      fail "step_ssl_dev: С„СѓРЅРєС†РёСЏ РЅРµ РЅР°Р№РґРµРЅР°"
     fi
   else
-    warn "lib/steps/install-steps-main.sh не найден, пропускаем тест"
+    warn "lib/steps/install-steps-main.sh РЅРµ РЅР°Р№РґРµРЅ, РїСЂРѕРїСѓСЃРєР°РµРј С‚РµСЃС‚"
   fi
 }
 
-# ── Тест: step_ssl проверяет DEV_MODE ────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: step_ssl РїСЂРѕРІРµСЂСЏРµС‚ DEV_MODE в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_step_ssl_checks_dev_mode() {
-  info "Тестирование step_ssl: проверка DEV_MODE..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ step_ssl: РїСЂРѕРІРµСЂРєР° DEV_MODE..."
 
   if [[ -f "${SCRIPT_DIR}/lib/steps/install-steps-main.sh" ]]; then
     if grep -q 'DEV_MODE.*true' "${SCRIPT_DIR}/lib/steps/install-steps-main.sh" ||
       grep -q 'DEV_MODE:-false' "${SCRIPT_DIR}/lib/steps/install-steps-main.sh"; then
-      pass "step_ssl: проверяет DEV_MODE"
+      pass "step_ssl: РїСЂРѕРІРµСЂСЏРµС‚ DEV_MODE"
     else
-      fail "step_ssl: не проверяет DEV_MODE"
+      fail "step_ssl: РЅРµ РїСЂРѕРІРµСЂСЏРµС‚ DEV_MODE"
     fi
   else
-    warn "lib/steps/install-steps-main.sh не найден, пропускаем тест"
+    warn "lib/steps/install-steps-main.sh РЅРµ РЅР°Р№РґРµРЅ, РїСЂРѕРїСѓСЃРєР°РµРј С‚РµСЃС‚"
   fi
 }
 
-# ── Тест: openssl используется для self-signed ───────────────
+# в”Ђв”Ђ РўРµСЃС‚: openssl РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ self-signed в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_openssl_for_self_signed() {
-  info "Тестирование использования openssl для self-signed..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ openssl РґР»СЏ self-signed..."
 
   if [[ -f "${SCRIPT_DIR}/lib/steps/install-steps-main.sh" ]]; then
     if grep -q 'openssl.*req.*-x509' "${SCRIPT_DIR}/lib/steps/install-steps-main.sh"; then
-      pass "step_ssl_dev: использует openssl для self-signed"
+      pass "step_ssl_dev: РёСЃРїРѕР»СЊР·СѓРµС‚ openssl РґР»СЏ self-signed"
     else
-      fail "step_ssl_dev: не использует openssl для self-signed"
+      fail "step_ssl_dev: РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚ openssl РґР»СЏ self-signed"
     fi
   else
-    warn "lib/steps/install-steps-main.sh не найден, пропускаем тест"
+    warn "lib/steps/install-steps-main.sh РЅРµ РЅР°Р№РґРµРЅ, РїСЂРѕРїСѓСЃРєР°РµРј С‚РµСЃС‚"
   fi
 }
 
-# ── Тест: prompt_inputs проверяет DEV_MODE ───────────────────
+# в”Ђв”Ђ РўРµСЃС‚: prompt_inputs РїСЂРѕРІРµСЂСЏРµС‚ DEV_MODE в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_prompt_inputs_checks_dev_mode() {
-  info "Тестирование prompt_inputs: проверка DEV_MODE..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ prompt_inputs: РїСЂРѕРІРµСЂРєР° DEV_MODE..."
 
   if grep -q 'DEV_MODE.*true' "${SCRIPT_DIR}/lib/install-steps.sh" ||
     grep -q 'DEV_MODE:-false' "${SCRIPT_DIR}/lib/install-steps.sh"; then
-    pass "prompt_inputs: проверяет DEV_MODE"
+    pass "prompt_inputs: РїСЂРѕРІРµСЂСЏРµС‚ DEV_MODE"
   else
-    fail "prompt_inputs: не проверяет DEV_MODE"
+    fail "prompt_inputs: РЅРµ РїСЂРѕРІРµСЂСЏРµС‚ DEV_MODE"
   fi
 }
 
-# ── Тест: prompt_inputs пропускает ввод в dev-режиме ─────────
+# в”Ђв”Ђ РўРµСЃС‚: prompt_inputs РїСЂРѕРїСѓСЃРєР°РµС‚ РІРІРѕРґ РІ dev-СЂРµР¶РёРјРµ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_prompt_inputs_skips_in_dev_mode() {
-  info "Тестирование prompt_inputs: пропуск ввода в dev-режиме..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ prompt_inputs: РїСЂРѕРїСѓСЃРє РІРІРѕРґР° РІ dev-СЂРµР¶РёРјРµ..."
 
   if grep -q 'return 0' "${SCRIPT_DIR}/lib/install-steps.sh" &&
-    grep -q 'DEV-режим\|DEV mode' "${SCRIPT_DIR}/lib/install-steps.sh"; then
-    pass "prompt_inputs: пропускает ввод в dev-режиме"
+    grep -q 'DEV-СЂРµР¶РёРј\|DEV mode' "${SCRIPT_DIR}/lib/install-steps.sh"; then
+    pass "prompt_inputs: РїСЂРѕРїСѓСЃРєР°РµС‚ РІРІРѕРґ РІ dev-СЂРµР¶РёРјРµ"
   else
-    fail "prompt_inputs: не пропускает ввод в dev-режиме"
+    fail "prompt_inputs: РЅРµ РїСЂРѕРїСѓСЃРєР°РµС‚ РІРІРѕРґ РІ dev-СЂРµР¶РёРјРµ"
   fi
 }
 
-# ── Запуск тестов ────────────────────────────────────────────
+# в”Ђв”Ђ Р—Р°РїСѓСЃРє С‚РµСЃС‚РѕРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 main() {
-  echo "══════════════════════════════════════════════════════════"
+  echo "в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ"
   echo "  CubiVeil Unit Tests - install.sh modes"
-  echo "  Тестирование режимов --dev и --dry-run"
-  echo "══════════════════════════════════════════════════════════"
+  echo "  РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СЂРµР¶РёРјРѕРІ --dev Рё --dry-run"
+  echo "в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ"
   echo ""
 
-  # Базовые тесты
+  # Р‘Р°Р·РѕРІС‹Рµ С‚РµСЃС‚С‹
   test_install_file_exists
   test_install_syntax
 
-  # Тесты переменных
+  # РўРµСЃС‚С‹ РїРµСЂРµРјРµРЅРЅС‹С…
   test_dev_mode_variable
   test_dry_run_variable
   test_dev_domain_variable
 
-  # Тесты аргументов
+  # РўРµСЃС‚С‹ Р°СЂРіСѓРјРµРЅС‚РѕРІ
   test_dev_argument
   test_dry_run_argument
   test_domain_argument
   test_help_argument
 
-  # Тесты usage
+  # РўРµСЃС‚С‹ usage
   test_usage_exists
   test_usage_has_dev
   test_usage_has_dry_run
   test_usage_has_examples
 
-  # Тесты dry-run
+  # РўРµСЃС‚С‹ dry-run
   test_dry_run_shows_plan
   test_dry_run_checks_root
   test_dry_run_checks_ubuntu
   test_dry_run_simulation_message
   test_dry_run_no_changes
 
-  # Тесты dev-режима
+  # РўРµСЃС‚С‹ dev-СЂРµР¶РёРјР°
   test_dev_mode_warning
   test_default_dev_domain
 
-  # Тесты функций
+  # РўРµСЃС‚С‹ С„СѓРЅРєС†РёР№
   test_parse_args_exists
   test_step_ssl_dev_exists
   test_step_ssl_checks_dev_mode
@@ -406,24 +406,24 @@ main() {
   test_prompt_inputs_checks_dev_mode
   test_prompt_inputs_skips_in_dev_mode
 
-  # Тесты файлов
+  # РўРµСЃС‚С‹ С„Р°Р№Р»РѕРІ
   test_install_steps_main_exists
 
-  # ── Итоги ────────────────────────────────────────────────────
+  # в”Ђв”Ђ РС‚РѕРіРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
   echo ""
-  echo "══════════════════════════════════════════════════════════"
-  echo "  Результаты / Results"
-  echo "══════════════════════════════════════════════════════════"
+  echo "в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ"
+  echo "  Р РµР·СѓР»СЊС‚Р°С‚С‹ / Results"
+  echo "в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ"
   echo ""
-  echo -e "  Пройдено ${GREEN}(${TESTS_PASSED})${PLAIN}"
-  echo -e "  Провалено ${RED}(${TESTS_FAILED})${PLAIN}"
+  echo -e "  РџСЂРѕР№РґРµРЅРѕ ${GREEN}(${TESTS_PASSED})${PLAIN}"
+  echo -e "  РџСЂРѕРІР°Р»РµРЅРѕ ${RED}(${TESTS_FAILED})${PLAIN}"
   echo ""
 
   if [[ $TESTS_FAILED -gt 0 ]]; then
-    echo -e "${RED}  Тесты не пройдены${PLAIN}"
+    echo -e "${RED}  РўРµСЃС‚С‹ РЅРµ РїСЂРѕР№РґРµРЅС‹${PLAIN}"
     exit 1
   else
-    echo -e "${GREEN}  Все тесты пройдены ✓${PLAIN}"
+    echo -e "${GREEN}  Р’СЃРµ С‚РµСЃС‚С‹ РїСЂРѕР№РґРµРЅС‹ вњ“${PLAIN}"
     exit 0
   fi
 }

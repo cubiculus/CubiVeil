@@ -1,23 +1,23 @@
 #!/bin/bash
-# ╔═══════════════════════════════════════════════════════════╗
-# ║        CubiVeil Unit Tests - Traffic Shaping Module     ║
-# ║        Тестирование lib/modules/traffic-shaping/         ║
-# ╚═══════════════════════════════════════════════════════════╝
+# в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—
+# в•‘        CubiVeil Unit Tests - Traffic Shaping Module     в•‘
+# в•‘        РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ lib/modules/traffic-shaping/         в•‘
+# в•љв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ќ
 
-# Strict mode отключен для совместимости с mock-функциями
+# Strict mode РѕС‚РєР»СЋС‡РµРЅ РґР»СЏ СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё СЃ mock-С„СѓРЅРєС†РёСЏРјРё
 
-# ── Счётчик тестов ───────────────────────────────────────────
+# в”Ђв”Ђ РЎС‡С‘С‚С‡РёРє С‚РµСЃС‚РѕРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 TESTS_PASSED=0
 TESTS_FAILED=0
 
-# ── Цвета ────────────────────────────────────────────────────
+# в”Ђв”Ђ Р¦РІРµС‚Р° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 CYAN='\033[0;36m'
 PLAIN='\033[0m'
 
-# ── Функции вывода ────────────────────────────────────────────
+# в”Ђв”Ђ Р¤СѓРЅРєС†РёРё РІС‹РІРѕРґР° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 info() { echo -e "${CYAN}[INFO]${PLAIN} $*" >&2; }
 pass() {
   echo -e "${GREEN}[PASS]${PLAIN} $*" >&2
@@ -29,20 +29,20 @@ fail() {
 }
 warn() { echo -e "${YELLOW}[WARN]${PLAIN} $*" >&2; }
 
-# ── Путь к проекту ───────────────────────────────────────────
+# в”Ђв”Ђ РџСѓС‚СЊ Рє РїСЂРѕРµРєС‚Сѓ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# ── Загрузка тестируемых модулей ───────────────────────────────
+# в”Ђв”Ђ Р—Р°РіСЂСѓР·РєР° С‚РµСЃС‚РёСЂСѓРµРјС‹С… РјРѕРґСѓР»РµР№ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 MODULE_PATH="${PROJECT_ROOT}/lib/modules/traffic-shaping/install.sh"
 PERSIST_PATH="${PROJECT_ROOT}/lib/modules/traffic-shaping/persist.sh"
 UNINSTALL_PATH="${PROJECT_ROOT}/lib/modules/traffic-shaping/uninstall.sh"
 
 if [[ ! -f "$MODULE_PATH" ]]; then
-  echo "Ошибка: Traffic Shaping module не найден: $MODULE_PATH"
+  echo "РћС€РёР±РєР°: Traffic Shaping module РЅРµ РЅР°Р№РґРµРЅ: $MODULE_PATH"
   exit 1
 fi
 
-# ── Mock зависимостей ─────────────────────────────────────────
+# в”Ђв”Ђ Mock Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 log_step() { echo "[LOG_STEP] $1: $2" >&2; }
 log_debug() { echo "[DEBUG] $1" >&2; }
 log_success() { echo "[SUCCESS] $1" >&2; }
@@ -50,34 +50,34 @@ log_warn() { echo "[WARN] $1" >&2; }
 log_info() { echo "[INFO] $1" >&2; }
 log_error() { echo "[ERROR] $1" >&2; }
 
-# Mock core функций
+# Mock core С„СѓРЅРєС†РёР№
 pkg_install_packages() {
   echo "[MOCK] pkg_install_packages: $*" >&2
   return 0
 }
 
-# Mock для команд
+# Mock РґР»СЏ РєРѕРјР°РЅРґ
 command() {
   local cmd="$1"
   if [[ "$cmd" == "-v" ]]; then
     if [[ "$2" == "tc" ]]; then
-      return 0 # tc доступен
+      return 0 # tc РґРѕСЃС‚СѓРїРµРЅ
     fi
   fi
   return 0
 }
 
-# Mock для jq
+# Mock РґР»СЏ jq
 jq() {
   local filter="$1"
   local file="${2:-}"
 
-  # Если файл существует и jq доступен, читаем реальное значение
+  # Р•СЃР»Рё С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚ Рё jq РґРѕСЃС‚СѓРїРµРЅ, С‡РёС‚Р°РµРј СЂРµР°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ
   if [[ -n "$file" ]] && [[ -f "$file" ]]; then
     if command -v jq &>/dev/null; then
       command jq -r "$filter" "$file" 2>/dev/null || echo ""
     else
-      # Fallback: используем grep для простого парсинга
+      # Fallback: РёСЃРїРѕР»СЊР·СѓРµРј grep РґР»СЏ РїСЂРѕСЃС‚РѕРіРѕ РїР°СЂСЃРёРЅРіР°
       local key="${filter#*.}"
       key="${key%%\[*}"
       local result
@@ -88,7 +88,7 @@ jq() {
     return 0
   fi
 
-  # Mock для тестов без файла
+  # Mock РґР»СЏ С‚РµСЃС‚РѕРІ Р±РµР· С„Р°Р№Р»Р°
   if [[ "$filter" == *".interface"* ]]; then
     echo "eth0"
   elif [[ "$filter" == *".delay_ms"* ]]; then
@@ -103,21 +103,21 @@ jq() {
   return 0
 }
 
-# Mock для системных команд
+# Mock РґР»СЏ СЃРёСЃС‚РµРјРЅС‹С… РєРѕРјР°РЅРґ
 mkdir() {
   command mkdir -p "$@" 2>/dev/null || true
 }
 cat() {
   local output=""
-  # Если stdin не терминал - это heredoc или pipe
+  # Р•СЃР»Рё stdin РЅРµ С‚РµСЂРјРёРЅР°Р» - СЌС‚Рѕ heredoc РёР»Рё pipe
   if [[ ! -t 0 ]]; then
-    # Читаем весь stdin
+    # Р§РёС‚Р°РµРј РІРµСЃСЊ stdin
     output=$(command cat 2>/dev/null)
-    # Проверяем есть ли перенаправление вывода (для heredoc в файле)
-    # В bash это нельзя перехватить, поэтому просто выводим
+    # РџСЂРѕРІРµСЂСЏРµРј РµСЃС‚СЊ Р»Рё РїРµСЂРµРЅР°РїСЂР°РІР»РµРЅРёРµ РІС‹РІРѕРґР° (РґР»СЏ heredoc РІ С„Р°Р№Р»Рµ)
+    # Р’ bash СЌС‚Рѕ РЅРµР»СЊР·СЏ РїРµСЂРµС…РІР°С‚РёС‚СЊ, РїРѕСЌС‚РѕРјСѓ РїСЂРѕСЃС‚Рѕ РІС‹РІРѕРґРёРј
     echo "$output"
   else
-    # Чтение из файла
+    # Р§С‚РµРЅРёРµ РёР· С„Р°Р№Р»Р°
     command cat "$@" 2>/dev/null || echo ""
   fi
 }
@@ -137,10 +137,10 @@ ip() {
 }
 awk() { echo "eth0"; }
 head() {
-  # Не перехватываем вызовы с -1 (используются в тестах shebang)
+  # РќРµ РїРµСЂРµС…РІР°С‚С‹РІР°РµРј РІС‹Р·РѕРІС‹ СЃ -1 (РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ РІ С‚РµСЃС‚Р°С… shebang)
   if [[ "$1" == "-1" ]]; then
     /usr/bin/head "$@"
-  # Обработка head -c1 (символов)
+  # РћР±СЂР°Р±РѕС‚РєР° head -c1 (СЃРёРјРІРѕР»РѕРІ)
   elif [[ "$1" == "-c"* ]]; then
     /usr/bin/head "$@"
   else
@@ -151,198 +151,198 @@ cut() { echo "value"; }
 rm() { return 0; }
 date() { echo "2025-01-01T00:00:00Z"; }
 
-# ── Загрузка модулей ───────────────────────────────────────────
+# в”Ђв”Ђ Р—Р°РіСЂСѓР·РєР° РјРѕРґСѓР»РµР№ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 # shellcheck source=lib/modules/traffic-shaping/install.sh
 source "$MODULE_PATH"
 
-# Переопределяем константы после загрузки модуля
+# РџРµСЂРµРѕРїСЂРµРґРµР»СЏРµРј РєРѕРЅСЃС‚Р°РЅС‚С‹ РїРѕСЃР»Рµ Р·Р°РіСЂСѓР·РєРё РјРѕРґСѓР»СЏ
 export TS_CONFIG="/tmp/cubiveil-traffic-shaping-test.json"
 export TS_SERVICE="cubiveil-tc"
 export TS_APPLY_SCRIPT="/tmp/cubiveil-tc-apply-test.sh"
 
-# ── Тест: файлы существуют ───────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: С„Р°Р№Р»С‹ СЃСѓС‰РµСЃС‚РІСѓСЋС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_files_exist() {
-  info "Тестирование наличия файлов модуля..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ С„Р°Р№Р»РѕРІ РјРѕРґСѓР»СЏ..."
 
   local all_found=true
   local file
   for file in "$MODULE_PATH" "$PERSIST_PATH" "$UNINSTALL_PATH"; do
     if [[ -f "$file" ]]; then
-      pass "$(basename "$file"): файл существует"
+      pass "$(basename "$file"): С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     else
-      fail "$(basename "$file"): файл не найден"
+      fail "$(basename "$file"): С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ"
       # shellcheck disable=SC2034
       all_found=false
     fi
   done
 }
 
-# ── Тест: синтаксис скриптов ───────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: СЃРёРЅС‚Р°РєСЃРёСЃ СЃРєСЂРёРїС‚РѕРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_syntax() {
-  info "Тестирование синтаксиса..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СЃРёРЅС‚Р°РєСЃРёСЃР°..."
 
   for file in "$MODULE_PATH" "$PERSIST_PATH" "$UNINSTALL_PATH"; do
     if bash -n "$file" 2>/dev/null; then
-      pass "$(basename "$file"): синтаксис корректен"
+      pass "$(basename "$file"): СЃРёРЅС‚Р°РєСЃРёСЃ РєРѕСЂСЂРµРєС‚РµРЅ"
     else
-      fail "$(basename "$file"): синтаксическая ошибка"
+      fail "$(basename "$file"): СЃРёРЅС‚Р°РєСЃРёС‡РµСЃРєР°СЏ РѕС€РёР±РєР°"
     fi
   done
 }
 
-# ── Тест: shebang ──────────────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: shebang в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_shebang() {
-  info "Тестирование shebang..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ shebang..."
 
   for file in "$MODULE_PATH" "$PERSIST_PATH" "$UNINSTALL_PATH"; do
     local shebang
     read -r shebang <"$file"
 
     if [[ "$shebang" == "#!/bin/bash" ]]; then
-      pass "$(basename "$file"): корректный shebang"
+      pass "$(basename "$file"): РєРѕСЂСЂРµРєС‚РЅС‹Р№ shebang"
     else
-      fail "$(basename "$file"): некорректный shebang: $shebang"
+      fail "$(basename "$file"): РЅРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ shebang: $shebang"
     fi
   done
 }
 
-# ── Тест: ts_generate_profile ───────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: ts_generate_profile в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_ts_generate_profile() {
-  info "Тестирование ts_generate_profile..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ ts_generate_profile..."
 
-  # Очищаем предыдущий конфиг если есть
+  # РћС‡РёС‰Р°РµРј РїСЂРµРґС‹РґСѓС‰РёР№ РєРѕРЅС„РёРі РµСЃР»Рё РµСЃС‚СЊ
   rm -f "$TS_CONFIG" 2>/dev/null || true
 
-  # Временно заменяем heredoc на echo для теста
-  # Сохраняем оригинальную функцию
+  # Р’СЂРµРјРµРЅРЅРѕ Р·Р°РјРµРЅСЏРµРј heredoc РЅР° echo РґР»СЏ С‚РµСЃС‚Р°
+  # РЎРѕС…СЂР°РЅСЏРµРј РѕСЂРёРіРёРЅР°Р»СЊРЅСѓСЋ С„СѓРЅРєС†РёСЋ
   local _original_ts_generate_profile
   _original_ts_generate_profile=$(declare -f ts_generate_profile 2>/dev/null || echo "")
 
-  # Переопределяем функцию для использования echo вместо heredoc
+  # РџРµСЂРµРѕРїСЂРµРґРµР»СЏРµРј С„СѓРЅРєС†РёСЋ РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ echo РІРјРµСЃС‚Рѕ heredoc
   ts_generate_profile() {
-    # Проверяем совместимость перед генерацией
+    # РџСЂРѕРІРµСЂСЏРµРј СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚СЊ РїРµСЂРµРґ РіРµРЅРµСЂР°С†РёРµР№
     if ! ts_check_compatibility; then
-      log_warn "Совместимость не проверена, продолжаем с осторожностью"
+      log_warn "РЎРѕРІРјРµСЃС‚РёРјРѕСЃС‚СЊ РЅРµ РїСЂРѕРІРµСЂРµРЅР°, РїСЂРѕРґРѕР»Р¶Р°РµРј СЃ РѕСЃС‚РѕСЂРѕР¶РЅРѕСЃС‚СЊСЋ"
     fi
 
     local iface
     iface=$(ip route show default | awk '/default/ {print $5}' | head -1)
     [[ -z "$iface" ]] && {
-      log_error "Не удалось определить сетевой интерфейс"
+      log_error "РќРµ СѓРґР°Р»РѕСЃСЊ РѕРїСЂРµРґРµР»РёС‚СЊ СЃРµС‚РµРІРѕР№ РёРЅС‚РµСЂС„РµР№СЃ"
       return 1
     }
 
-    # Уникальный "почерк" — генерируется один раз, не меняется
-    local jitter=$((RANDOM % 16 + 5))        # 5–20 мс
-    local delay=$((RANDOM % 7 + 2))          # 2–8 мс
-    local reorder_tenths=$((RANDOM % 5 + 1)) # 0.1–0.5%
+    # РЈРЅРёРєР°Р»СЊРЅС‹Р№ "РїРѕС‡РµСЂРє" вЂ” РіРµРЅРµСЂРёСЂСѓРµС‚СЃСЏ РѕРґРёРЅ СЂР°Р·, РЅРµ РјРµРЅСЏРµС‚СЃСЏ
+    local jitter=$((RANDOM % 16 + 5))        # 5вЂ“20 РјСЃ
+    local delay=$((RANDOM % 7 + 2))          # 2вЂ“8 РјСЃ
+    local reorder_tenths=$((RANDOM % 5 + 1)) # 0.1вЂ“0.5%
 
     mkdir -p /etc/cubiveil
 
-    # Используем printf вместо heredoc
+    # РСЃРїРѕР»СЊР·СѓРµРј printf РІРјРµСЃС‚Рѕ heredoc
     printf '{\n  "interface":       "%s",\n  "delay_ms":        %s,\n  "jitter_ms":       %s,\n  "reorder_percent": "0.%s",\n  "generated_at":    "%s"\n}\n' \
       "$iface" "$delay" "$jitter" "$reorder_tenths" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >"$TS_CONFIG"
 
     chmod 600 "$TS_CONFIG"
-    log_info "Профиль TC: iface=${iface} delay=${delay}ms jitter=${jitter}ms reorder=0.${reorder_tenths}%"
+    log_info "РџСЂРѕС„РёР»СЊ TC: iface=${iface} delay=${delay}ms jitter=${jitter}ms reorder=0.${reorder_tenths}%"
   }
 
-  # Вызываем функцию
+  # Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ
   ts_generate_profile
 
-  # Проверяем что конфиг создан
+  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ РєРѕРЅС„РёРі СЃРѕР·РґР°РЅ
   if [[ -f "$TS_CONFIG" ]]; then
-    pass "ts_generate_profile: конфиг создан"
+    pass "ts_generate_profile: РєРѕРЅС„РёРі СЃРѕР·РґР°РЅ"
   else
-    fail "ts_generate_profile: конфиг не создан"
+    fail "ts_generate_profile: РєРѕРЅС„РёРі РЅРµ СЃРѕР·РґР°РЅ"
   fi
 
-  # Проверяем наличие обязательных полей
+  # РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹С… РїРѕР»РµР№
   if grep -q '"interface"' "$TS_CONFIG" &&
     grep -q '"delay_ms"' "$TS_CONFIG" &&
     grep -q '"jitter_ms"' "$TS_CONFIG" &&
     grep -q '"reorder_percent"' "$TS_CONFIG" &&
     grep -q '"generated_at"' "$TS_CONFIG"; then
-    pass "ts_generate_profile: все поля присутствуют"
+    pass "ts_generate_profile: РІСЃРµ РїРѕР»СЏ РїСЂРёСЃСѓС‚СЃС‚РІСѓСЋС‚"
   else
-    fail "ts_generate_profile: не все поля присутствуют"
+    fail "ts_generate_profile: РЅРµ РІСЃРµ РїРѕР»СЏ РїСЂРёСЃСѓС‚СЃС‚РІСѓСЋС‚"
   fi
 
-  # Проверяем что delay_ms в допустимом диапазоне (2-8)
+  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ delay_ms РІ РґРѕРїСѓСЃС‚РёРјРѕРј РґРёР°РїР°Р·РѕРЅРµ (2-8)
   local delay
   delay=$(grep -o '"delay_ms"[[:space:]]*:[[:space:]]*[0-9]*' "$TS_CONFIG" 2>/dev/null | grep -o '[0-9]*' | head -1)
   if [[ -n "$delay" ]] && [[ "$delay" -ge 2 ]] && [[ "$delay" -le 8 ]]; then
-    pass "ts_generate_profile: delay_ms в диапазоне ($delay)"
+    pass "ts_generate_profile: delay_ms РІ РґРёР°РїР°Р·РѕРЅРµ ($delay)"
   else
-    pass "ts_generate_profile: delay_ms сгенерирован ($delay)"
+    pass "ts_generate_profile: delay_ms СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅ ($delay)"
   fi
 
-  # Проверяем что jitter_ms в допустимом диапазоне (5-20)
+  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ jitter_ms РІ РґРѕРїСѓСЃС‚РёРјРѕРј РґРёР°РїР°Р·РѕРЅРµ (5-20)
   local jitter
   jitter=$(grep -o '"jitter_ms"[[:space:]]*:[[:space:]]*[0-9]*' "$TS_CONFIG" 2>/dev/null | grep -o '[0-9]*' | head -1)
   if [[ -n "$jitter" ]] && [[ "$jitter" -ge 5 ]] && [[ "$jitter" -le 20 ]]; then
-    pass "ts_generate_profile: jitter_ms в диапазоне ($jitter)"
+    pass "ts_generate_profile: jitter_ms РІ РґРёР°РїР°Р·РѕРЅРµ ($jitter)"
   else
-    pass "ts_generate_profile: jitter_ms сгенерирован ($jitter)"
+    pass "ts_generate_profile: jitter_ms СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅ ($jitter)"
   fi
 
-  # Проверяем формат reorder_percent
+  # РџСЂРѕРІРµСЂСЏРµРј С„РѕСЂРјР°С‚ reorder_percent
   local reorder
   reorder=$(grep -o '"reorder_percent"[[:space:]]*:[[:space:]]*"0\.[0-9]*"' "$TS_CONFIG" 2>/dev/null | grep -o '0\.[0-9]*' | head -1)
   if [[ -n "$reorder" ]] && [[ "$reorder" =~ ^0\.[0-9]+$ ]]; then
-    pass "ts_generate_profile: reorder_percent имеет правильный формат ($reorder)"
+    pass "ts_generate_profile: reorder_percent РёРјРµРµС‚ РїСЂР°РІРёР»СЊРЅС‹Р№ С„РѕСЂРјР°С‚ ($reorder)"
   else
-    pass "ts_generate_profile: reorder_percent сгенерирован ($reorder)"
+    pass "ts_generate_profile: reorder_percent СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅ ($reorder)"
   fi
 }
 
-# ── Тест: ts_write_apply_script ─────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: ts_write_apply_script в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_ts_write_apply_script() {
-  info "Тестирование ts_write_apply_script..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ ts_write_apply_script..."
 
-  # Создаём тестовый конфиг используя printf
+  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ РєРѕРЅС„РёРі РёСЃРїРѕР»СЊР·СѓСЏ printf
   printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' >"$TS_CONFIG"
 
   local script_dir="/tmp/test-cubiveil-script-$$"
   mkdir -p "$script_dir"
   export TS_APPLY_SCRIPT="${script_dir}/tc-apply.sh"
 
-  # Вызываем функцию
+  # Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ
   ts_write_apply_script || true
 
-  pass "ts_write_apply_script: вызвана без ошибок"
+  pass "ts_write_apply_script: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
 
   rm -rf "$script_dir"
 }
 
-# ── Тест: ts_write_systemd_service ──────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: ts_write_systemd_service в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_ts_write_systemd_service() {
-  info "Тестирование ts_write_systemd_service..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ ts_write_systemd_service..."
 
-  # Создаём тестовый конфиг используя printf
+  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ РєРѕРЅС„РёРі РёСЃРїРѕР»СЊР·СѓСЏ printf
   printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' >"$TS_CONFIG"
 
   export TS_SERVICE="cubiveil-tc"
   export TS_APPLY_SCRIPT="/usr/local/lib/cubiveil/tc-apply.sh"
 
-  # Вызываем функцию
+  # Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ
   ts_write_systemd_service || true
 
-  pass "ts_write_systemd_service: вызвана без ошибок"
+  pass "ts_write_systemd_service: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
 }
 
-# ── Тест: module_install ───────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: module_install в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_module_install() {
-  info "Тестирование module_install..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_install..."
 
   module_install
 
-  pass "module_install: вызвана без ошибок"
+  pass "module_install: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
 }
 
-# ── Тест: module_configure ─────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: module_configure в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_module_configure() {
-  info "Тестирование module_configure..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_configure..."
 
   local script_dir="/tmp/test-cubiveil-script-$$"
   mkdir -p "$script_dir"
@@ -351,14 +351,14 @@ test_module_configure() {
 
   module_configure || true
 
-  pass "module_configure: вызвана без ошибок"
+  pass "module_configure: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
 
   rm -rf "$script_dir"
 }
 
-# ── Тест: module_enable ────────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: module_enable в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_module_enable() {
-  info "Тестирование module_enable..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_enable..."
 
   local script_dir="/tmp/test-cubiveil-script-$$"
   mkdir -p "$script_dir"
@@ -367,38 +367,38 @@ test_module_enable() {
 
   module_enable
 
-  pass "module_enable: вызвана без ошибок"
+  pass "module_enable: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
 
   rm -rf "$script_dir"
 }
 
-# ── Тест: module_disable ──────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: module_disable в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_module_disable() {
-  info "Тестирование module_disable..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_disable..."
 
   export TS_SERVICE="cubiveil-tc"
 
   module_disable
 
-  pass "module_disable: вызвана без ошибок"
+  pass "module_disable: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
 }
 
-# ── Тест: module_status ────────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: module_status в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_module_status() {
-  info "Тестирование module_status..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_status..."
 
   export TS_SERVICE="cubiveil-tc"
 
   module_status || true
 
-  pass "module_status: вызвана без ошибок"
+  pass "module_status: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
 }
 
-# ── Тест: уникальность параметров ───────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚СЊ РїР°СЂР°РјРµС‚СЂРѕРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_unique_parameters() {
-  info "Тестирование уникальности параметров профиля..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚Рё РїР°СЂР°РјРµС‚СЂРѕРІ РїСЂРѕС„РёР»СЏ..."
 
-  # Генерируем два профиля в /tmp
+  # Р“РµРЅРµСЂРёСЂСѓРµРј РґРІР° РїСЂРѕС„РёР»СЏ РІ /tmp
   export TS_CONFIG="/tmp/traffic-shaping-1.json"
   ts_generate_profile
   local delay1 jitter1
@@ -411,14 +411,14 @@ test_unique_parameters() {
   delay2=$(grep -o '"delay_ms"[[:space:]]*:[[:space:]]*[0-9]*' "$TS_CONFIG" 2>/dev/null | grep -o '[0-9]*' | head -1)
   jitter2=$(grep -o '"jitter_ms"[[:space:]]*:[[:space:]]*[0-9]*' "$TS_CONFIG" 2>/dev/null | grep -o '[0-9]*' | head -1)
 
-  # Параметры могут совпасть случайно, но это маловероятно
-  pass "ts_generate_profile: профиль 1 (delay=${delay1}, jitter=${jitter1})"
-  pass "ts_generate_profile: профиль 2 (delay=${delay2}, jitter=${jitter2})"
+  # РџР°СЂР°РјРµС‚СЂС‹ РјРѕРіСѓС‚ СЃРѕРІРїР°СЃС‚СЊ СЃР»СѓС‡Р°Р№РЅРѕ, РЅРѕ СЌС‚Рѕ РјР°Р»РѕРІРµСЂРѕСЏС‚РЅРѕ
+  pass "ts_generate_profile: РїСЂРѕС„РёР»СЊ 1 (delay=${delay1}, jitter=${jitter1})"
+  pass "ts_generate_profile: РїСЂРѕС„РёР»СЊ 2 (delay=${delay2}, jitter=${jitter2})"
 }
 
-# ── Тест: наличие всех основных функций ────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: РЅР°Р»РёС‡РёРµ РІСЃРµС… РѕСЃРЅРѕРІРЅС‹С… С„СѓРЅРєС†РёР№ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_all_functions_exist() {
-  info "Тестирование наличия всех основных функций..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ РІСЃРµС… РѕСЃРЅРѕРІРЅС‹С… С„СѓРЅРєС†РёР№..."
 
   local required_functions=(
     "ts_check_compatibility"
@@ -440,23 +440,23 @@ test_all_functions_exist() {
   done
 
   if [[ $found -eq ${#required_functions[@]} ]]; then
-    pass "Все функции существуют ($found/${#required_functions[@]})"
+    pass "Р’СЃРµ С„СѓРЅРєС†РёРё СЃСѓС‰РµСЃС‚РІСѓСЋС‚ ($found/${#required_functions[@]})"
   else
-    fail "Не все функции найдены ($found/${#required_functions[@]})"
+    fail "РќРµ РІСЃРµ С„СѓРЅРєС†РёРё РЅР°Р№РґРµРЅС‹ ($found/${#required_functions[@]})"
   fi
 }
 
-# ── Тест: ts_check_compatibility ──────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: ts_check_compatibility в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_ts_check_compatibility() {
-  info "Тестирование ts_check_compatibility..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ ts_check_compatibility..."
 
-  # Создаём тестовый конфиг используя printf
+  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ РєРѕРЅС„РёРі РёСЃРїРѕР»СЊР·СѓСЏ printf
   printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' >"$TS_CONFIG"
 
-  # Mock для tc (возвращает пустой вывод = нет существующих qdisc)
+  # Mock РґР»СЏ tc (РІРѕР·РІСЂР°С‰Р°РµС‚ РїСѓСЃС‚РѕР№ РІС‹РІРѕРґ = РЅРµС‚ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёС… qdisc)
   tc() { return 0; }
 
-  # Mock для ip
+  # Mock РґР»СЏ ip
   ip() {
     if [[ "$*" == *"route show default"* ]]; then
       echo "default via 192.168.1.1 dev eth0"
@@ -465,22 +465,22 @@ test_ts_check_compatibility() {
     fi
   }
 
-  # Вызываем функцию
+  # Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ
   if ts_check_compatibility 2>/dev/null; then
-    pass "ts_check_compatibility: возвращает 0 при отсутствии конфликтов"
+    pass "ts_check_compatibility: РІРѕР·РІСЂР°С‰Р°РµС‚ 0 РїСЂРё РѕС‚СЃСѓС‚СЃС‚РІРёРё РєРѕРЅС„Р»РёРєС‚РѕРІ"
   else
-    fail "ts_check_compatibility: вернул ошибку"
+    fail "ts_check_compatibility: РІРµСЂРЅСѓР» РѕС€РёР±РєСѓ"
   fi
 }
 
-# ── Тест: ts_check_compatibility обнаруживает существующие qdisc ──
+# в”Ђв”Ђ РўРµСЃС‚: ts_check_compatibility РѕР±РЅР°СЂСѓР¶РёРІР°РµС‚ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёРµ qdisc в”Ђв”Ђ
 test_ts_check_compatibility_detects_qdisc() {
-  info "Тестирование обнаружения существующих qdisc..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РѕР±РЅР°СЂСѓР¶РµРЅРёСЏ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёС… qdisc..."
 
-  # Создаём тестовый конфиг
+  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ РєРѕРЅС„РёРі
   printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' >"$TS_CONFIG"
 
-  # Mock для tc (возвращает существующие qdisc)
+  # Mock РґР»СЏ tc (РІРѕР·РІСЂР°С‰Р°РµС‚ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёРµ qdisc)
   tc() {
     if [[ "$*" == *"qdisc show"* ]]; then
       echo "qdisc fq 0: root"
@@ -489,7 +489,7 @@ test_ts_check_compatibility_detects_qdisc() {
     return 0
   }
 
-  # Mock для ip
+  # Mock РґР»СЏ ip
   ip() {
     if [[ "$*" == *"route show default"* ]]; then
       echo "default via 192.168.1.1 dev eth0"
@@ -498,12 +498,12 @@ test_ts_check_compatibility_detects_qdisc() {
     fi
   }
 
-  # Mock для read (автоматически отвечаем 'n' на вопрос)
+  # Mock РґР»СЏ read (Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё РѕС‚РІРµС‡Р°РµРј 'n' РЅР° РІРѕРїСЂРѕСЃ)
   read() {
     if [[ "$*" == *"-rp"* ]]; then
-      # Это read -rp с prompt
+      # Р­С‚Рѕ read -rp СЃ prompt
       REPLY="n"
-      # Для совместимости с set -u
+      # Р”Р»СЏ СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё СЃ set -u
       # shellcheck disable=SC2034
       local cont="n"
     else
@@ -513,42 +513,42 @@ test_ts_check_compatibility_detects_qdisc() {
     fi
   }
 
-  # Mock для log_warn
+  # Mock РґР»СЏ log_warn
   log_warn() {
     echo "[WARN] $1" >&2
   }
 
-  # Mock для log_info
+  # Mock РґР»СЏ log_info
   log_info() {
     echo "[INFO] $1" >&2
   }
 
-  # Вызываем функцию (должна вернуть ошибку из-за 'n' ответа)
+  # Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ (РґРѕР»Р¶РЅР° РІРµСЂРЅСѓС‚СЊ РѕС€РёР±РєСѓ РёР·-Р·Р° 'n' РѕС‚РІРµС‚Р°)
   if ts_check_compatibility; then
-    warn "ts_check_compatibility: не отработала отказ при конфликте"
+    warn "ts_check_compatibility: РЅРµ РѕС‚СЂР°Р±РѕС‚Р°Р»Р° РѕС‚РєР°Р· РїСЂРё РєРѕРЅС„Р»РёРєС‚Рµ"
   else
-    pass "ts_check_compatibility: обнаруживает конфликт qdisc"
+    pass "ts_check_compatibility: РѕР±РЅР°СЂСѓР¶РёРІР°РµС‚ РєРѕРЅС„Р»РёРєС‚ qdisc"
   fi
 }
 
-# ── Тест: ts_check_compatibility проверяет Docker/LXC ─────────
+# в”Ђв”Ђ РўРµСЃС‚: ts_check_compatibility РїСЂРѕРІРµСЂСЏРµС‚ Docker/LXC в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_ts_check_compatibility_docker_lxc() {
-  info "Тестирование проверки Docker/LXC..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїСЂРѕРІРµСЂРєРё Docker/LXC..."
 
-  # Создаём тестовый конфиг
+  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ РєРѕРЅС„РёРі
   printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' >"$TS_CONFIG"
 
-  # Mock для tc (возвращает qdisc)
+  # Mock РґР»СЏ tc (РІРѕР·РІСЂР°С‰Р°РµС‚ qdisc)
   tc() {
     if [[ "$*" == *"qdisc show"* ]]; then
-      # Имитируем вывод от Docker bridge
+      # РРјРёС‚РёСЂСѓРµРј РІС‹РІРѕРґ РѕС‚ Docker bridge
       echo "qdisc noqueue 0: root link/ether"
       return 0
     fi
     return 0
   }
 
-  # Mock для ip
+  # Mock РґР»СЏ ip
   ip() {
     if [[ "$*" == *"route show default"* ]]; then
       echo "default via 192.168.1.1 dev eth0"
@@ -557,26 +557,26 @@ test_ts_check_compatibility_docker_lxc() {
     fi
   }
 
-  # Mock для log_warn
+  # Mock РґР»СЏ log_warn
   log_warn() {
     echo "[WARN] $1" >&2
   }
 
-  # Проверяем что функция вызывается без ошибок
+  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ С„СѓРЅРєС†РёСЏ РІС‹Р·С‹РІР°РµС‚СЃСЏ Р±РµР· РѕС€РёР±РѕРє
   ts_check_compatibility 2>/dev/null || true
 
-  pass "ts_check_compatibility: проверка Docker/LXC существует"
+  pass "ts_check_compatibility: РїСЂРѕРІРµСЂРєР° Docker/LXC СЃСѓС‰РµСЃС‚РІСѓРµС‚"
 }
 
-# ── Тест: ts_check_compatibility в неинтерактивном режиме ─────
+# в”Ђв”Ђ РўРµСЃС‚: ts_check_compatibility РІ РЅРµРёРЅС‚РµСЂР°РєС‚РёРІРЅРѕРј СЂРµР¶РёРјРµ в”Ђв”Ђв”Ђв”Ђв”Ђ
 test_ts_check_compatibility_non_interactive() {
-  info "Тестирование ts_check_compatibility в неинтерактивном режиме..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ ts_check_compatibility РІ РЅРµРёРЅС‚РµСЂР°РєС‚РёРІРЅРѕРј СЂРµР¶РёРјРµ..."
 
-  # Создаём тестовый конфиг
+  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ РєРѕРЅС„РёРі
   printf '{\n  "interface": "eth0",\n  "delay_ms": 4,\n  "jitter_ms": 12,\n  "reorder_percent": "0.3",\n  "generated_at": "2025-01-01T00:00:00Z"\n}\n' >"$TS_CONFIG"
   export DRY_RUN="true"
 
-  # Mock для tc (возвращает существующие qdisc)
+  # Mock РґР»СЏ tc (РІРѕР·РІСЂР°С‰Р°РµС‚ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёРµ qdisc)
   tc() {
     if [[ "$*" == *"qdisc show"* ]]; then
       echo "qdisc fq 0: root"
@@ -585,7 +585,7 @@ test_ts_check_compatibility_non_interactive() {
     return 0
   }
 
-  # Mock для ip
+  # Mock РґР»СЏ ip
   ip() {
     if [[ "$*" == *"route show default"* ]]; then
       echo "default via 192.168.1.1 dev eth0"
@@ -594,30 +594,30 @@ test_ts_check_compatibility_non_interactive() {
     fi
   }
 
-  # Mock для log_warn
+  # Mock РґР»СЏ log_warn
   log_warn() {
     echo "[WARN] $1" >&2
   }
 
-  # В неинтерактивном режиме (DRY_RUN=true) должна возвращать 0
+  # Р’ РЅРµРёРЅС‚РµСЂР°РєС‚РёРІРЅРѕРј СЂРµР¶РёРјРµ (DRY_RUN=true) РґРѕР»Р¶РЅР° РІРѕР·РІСЂР°С‰Р°С‚СЊ 0
   if ts_check_compatibility 2>/dev/null; then
-    pass "ts_check_compatibility: пропускает проверку в неинтерактивном режиме"
+    pass "ts_check_compatibility: РїСЂРѕРїСѓСЃРєР°РµС‚ РїСЂРѕРІРµСЂРєСѓ РІ РЅРµРёРЅС‚РµСЂР°РєС‚РёРІРЅРѕРј СЂРµР¶РёРјРµ"
   else
-    fail "ts_check_compatibility: ошибка в неинтерактивном режиме"
+    fail "ts_check_compatibility: РѕС€РёР±РєР° РІ РЅРµРёРЅС‚РµСЂР°РєС‚РёРІРЅРѕРј СЂРµР¶РёРјРµ"
   fi
 
   export DRY_RUN="false"
 }
 
-# ── Основная функция ─────────────────────────────────────────
+# в”Ђв”Ђ РћСЃРЅРѕРІРЅР°СЏ С„СѓРЅРєС†РёСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 main() {
   echo ""
-  echo -e "${YELLOW}╔══════════════════════════════════════════════════════╗${PLAIN}"
-  echo -e "${YELLOW}║     CubiVeil Unit Tests - Traffic Shaping Module ║${PLAIN}"
-  echo -e "${YELLOW}╚══════════════════════════════════════════════════════╝${PLAIN}"
+  echo -e "${YELLOW}в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—${PLAIN}"
+  echo -e "${YELLOW}в•‘     CubiVeil Unit Tests - Traffic Shaping Module в•‘${PLAIN}"
+  echo -e "${YELLOW}в•љв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ќ${PLAIN}"
   echo ""
 
-  # ── Запуск тестов ─────────────────────────────────────────
+  # в”Ђв”Ђ Р—Р°РїСѓСЃРє С‚РµСЃС‚РѕРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
   test_files_exist
   echo ""
 
@@ -669,21 +669,21 @@ main() {
   test_ts_check_compatibility_non_interactive
   echo ""
 
-  # ── Итоги ───────────────────────────────────────────────
+  # в”Ђв”Ђ РС‚РѕРіРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
   echo ""
-  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
-  echo -e "${GREEN}Пройдено: $TESTS_PASSED${PLAIN}"
+  echo -e "${YELLOW}в”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓ${PLAIN}"
+  echo -e "${GREEN}РџСЂРѕР№РґРµРЅРѕ: $TESTS_PASSED${PLAIN}"
   if [[ $TESTS_FAILED -gt 0 ]]; then
-    echo -e "${RED}Провалено:  $TESTS_FAILED${PLAIN}"
+    echo -e "${RED}РџСЂРѕРІР°Р»РµРЅРѕ:  $TESTS_FAILED${PLAIN}"
   fi
-  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
+  echo -e "${YELLOW}в”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓ${PLAIN}"
   echo ""
 
   if [[ $TESTS_FAILED -gt 0 ]]; then
-    echo -e "${RED}❌ Тесты провалены${PLAIN}"
+    echo -e "${RED}вќЊ РўРµСЃС‚С‹ РїСЂРѕРІР°Р»РµРЅС‹${PLAIN}"
     exit 1
   else
-    echo -e "${GREEN}✅ Все тесты пройдены${PLAIN}"
+    echo -e "${GREEN}вњ… Р’СЃРµ С‚РµСЃС‚С‹ РїСЂРѕР№РґРµРЅС‹${PLAIN}"
     exit 0
   fi
 }

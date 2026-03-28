@@ -1,27 +1,27 @@
 #!/bin/bash
-# ╔═══════════════════════════════════════════════════════════╗
-# ║        CubiVeil Unit Tests - Decoy Site Module           ║
-# ║        Тестирование lib/modules/decoy-site/             ║
-# ╚═══════════════════════════════════════════════════════════╝
+# в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—
+# в•‘        CubiVeil Unit Tests - Decoy Site Module           в•‘
+# в•‘        РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ lib/modules/decoy-site/             в•‘
+# в•љв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ќ
 
 set -euo pipefail
 
-# ── Подключение тестовых утилит ───────────────────────────────
+# в”Ђв”Ђ РџРѕРґРєР»СЋС‡РµРЅРёРµ С‚РµСЃС‚РѕРІС‹С… СѓС‚РёР»РёС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${PROJECT_ROOT}/lib/test-utils.sh"
 
-# ── Загрузка тестируемых модулей ───────────────────────────────
+# в”Ђв”Ђ Р—Р°РіСЂСѓР·РєР° С‚РµСЃС‚РёСЂСѓРµРјС‹С… РјРѕРґСѓР»РµР№ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 MODULE_PATH="${PROJECT_ROOT}/lib/modules/decoy-site/install.sh"
 GENERATE_PATH="${PROJECT_ROOT}/lib/modules/decoy-site/generate.sh"
 ROTATE_PATH="${PROJECT_ROOT}/lib/modules/decoy-site/rotate.sh"
 MIKROTIK_PATH="${PROJECT_ROOT}/lib/modules/decoy-site/mikrotik.sh"
 
 if [[ ! -f "$MODULE_PATH" ]]; then
-  echo "Ошибка: Decoy Site module не найден: $MODULE_PATH"
+  echo "РћС€РёР±РєР°: Decoy Site module РЅРµ РЅР°Р№РґРµРЅ: $MODULE_PATH"
   exit 1
 fi
 
-# ── Mock зависимостей ─────────────────────────────────────────
+# в”Ђв”Ђ Mock Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 log_step() { echo "[LOG_STEP] $1: $2" >&2; }
 log_debug() { echo "[DEBUG] $1" >&2; }
 log_success() { echo "[SUCCESS] $1" >&2; }
@@ -29,21 +29,21 @@ log_warn() { echo "[WARN] $1" >&2; }
 log_info() { echo "[INFO] $1" >&2; }
 log_error() { echo "[ERROR] $1" >&2; }
 
-# Mock core функций
+# Mock core С„СѓРЅРєС†РёР№
 pkg_install_packages() {
   echo "[MOCK] pkg_install_packages: $*" >&2
   return 0
 }
 pkg_install() {
   echo "[MOCK] pkg_install: $1" >&2
-  return 1 # по умолчанию пакет не установлен
+  return 1 # РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РїР°РєРµС‚ РЅРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅ
 }
 
-# Mock для jq — возвращает корректные значения для всех полей decoy.json
+# Mock РґР»СЏ jq вЂ” РІРѕР·РІСЂР°С‰Р°РµС‚ РєРѕСЂСЂРµРєС‚РЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ РґР»СЏ РІСЃРµС… РїРѕР»РµР№ decoy.json
 jq() {
   local filter="$1"
   local file="${2:-}"
-  # Не логируем чтобы не засорять вывод
+  # РќРµ Р»РѕРіРёСЂСѓРµРј С‡С‚РѕР±С‹ РЅРµ Р·Р°СЃРѕСЂСЏС‚СЊ РІС‹РІРѕРґ
   if [[ "$filter" == *".template"* ]]; then
     echo "portal"
   elif [[ "$filter" == *".site_name"* ]]; then
@@ -73,21 +73,21 @@ jq() {
   elif [[ "$filter" == *".content_types"* ]]; then
     echo '["jpg"]'
   else
-    # Для неизвестных фильтров возвращаем пустоту а не "default"
+    # Р”Р»СЏ РЅРµРёР·РІРµСЃС‚РЅС‹С… С„РёР»СЊС‚СЂРѕРІ РІРѕР·РІСЂР°С‰Р°РµРј РїСѓСЃС‚РѕС‚Сѓ Р° РЅРµ "default"
     echo ""
   fi
   return 0
 }
 
-# Mock для системных команд — НЕ ломаем heredoc!
+# Mock РґР»СЏ СЃРёСЃС‚РµРјРЅС‹С… РєРѕРјР°РЅРґ вЂ” РќР• Р»РѕРјР°РµРј heredoc!
 chmod() { return 0; }
 chown() { return 0; }
 sed() {
-  # Возвращаем валидный HTML для шаблонов
+  # Р’РѕР·РІСЂР°С‰Р°РµРј РІР°Р»РёРґРЅС‹Р№ HTML РґР»СЏ С€Р°Р±Р»РѕРЅРѕРІ
   echo "<html><body>Test Content</body></html>"
 }
 find() {
-  # Для поиска jpg файлов в webroot
+  # Р”Р»СЏ РїРѕРёСЃРєР° jpg С„Р°Р№Р»РѕРІ РІ webroot
   if [[ "$*" == *".jpg"* ]]; then
     echo "/tmp/test/files/file1.jpg"
     echo "/tmp/test/files/file2.jpg"
@@ -102,20 +102,20 @@ enscript() { return 0; }
 ps2pdf() { return 0; }
 ffmpeg() { return 0; }
 systemctl() {
-  # is-active возвращает статус для проверок
+  # is-active РІРѕР·РІСЂР°С‰Р°РµС‚ СЃС‚Р°С‚СѓСЃ РґР»СЏ РїСЂРѕРІРµСЂРѕРє
   if [[ "$*" == *"is-active"* ]]; then
     if [[ "$*" == *"nginx"* ]]; then
-      return 0 # nginx активен
+      return 0 # nginx Р°РєС‚РёРІРµРЅ
     elif [[ "$*" == *"cubiveil-decoy-rotate.timer"* ]]; then
-      return 0 # таймер активен
+      return 0 # С‚Р°Р№РјРµСЂ Р°РєС‚РёРІРµРЅ
     fi
     return 1
   fi
-  # enable/start/reload — успех
+  # enable/start/reload вЂ” СѓСЃРїРµС…
   return 0
 }
 nginx() {
-  # nginx -t — проверка конфига
+  # nginx -t вЂ” РїСЂРѕРІРµСЂРєР° РєРѕРЅС„РёРіР°
   if [[ "$*" == *"-t"* ]]; then
     return 0
   fi
@@ -135,17 +135,17 @@ date() {
 }
 ip() { echo "eth0"; }
 cut() {
-  # Для /proc/loadavg возвращаем низкую загрузку
+  # Р”Р»СЏ /proc/loadavg РІРѕР·РІСЂР°С‰Р°РµРј РЅРёР·РєСѓСЋ Р·Р°РіСЂСѓР·РєСѓ
   if [[ "$*" == *"-d."* ]] || [[ "$*" == *"/proc/loadavg"* ]]; then
     echo "0"
   else
-    # Для остальных случаев — безопасное значение
+    # Р”Р»СЏ РѕСЃС‚Р°Р»СЊРЅС‹С… СЃР»СѓС‡Р°РµРІ вЂ” Р±РµР·РѕРїР°СЃРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ
     echo "0"
   fi
 }
 tail() { echo "tail"; }
 du() {
-  # Возвращаем корректный формат: размер и путь
+  # Р’РѕР·РІСЂР°С‰Р°РµРј РєРѕСЂСЂРµРєС‚РЅС‹Р№ С„РѕСЂРјР°С‚: СЂР°Р·РјРµСЂ Рё РїСѓС‚СЊ
   echo "10M"
 }
 wc() {
@@ -156,7 +156,7 @@ wc() {
   fi
 }
 head() {
-  # Не перехватываем вызовы с -1 (используются в тестах shebang)
+  # РќРµ РїРµСЂРµС…РІР°С‚С‹РІР°РµРј РІС‹Р·РѕРІС‹ СЃ -1 (РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ РІ С‚РµСЃС‚Р°С… shebang)
   if [[ "$1" == "-1" ]]; then
     /usr/bin/head "$@" 2>/dev/null || echo "line1"
   else
@@ -164,35 +164,35 @@ head() {
   fi
 }
 awk() {
-  # Для /proc/loadavg возвращаем первое поле
+  # Р”Р»СЏ /proc/loadavg РІРѕР·РІСЂР°С‰Р°РµРј РїРµСЂРІРѕРµ РїРѕР»Рµ
   if [[ "$*" == *"/proc/loadavg"* ]]; then
     echo "0.50 0.60 0.70"
   elif [[ "$*" == *"'{print \$1}'"* ]] || [[ "$*" == *'{print $1}'* ]]; then
     echo "0"
   elif [[ "$*" == *"NR==2"* ]]; then
-    echo "100" # для df -m (свободное место)
+    echo "100" # РґР»СЏ df -m (СЃРІРѕР±РѕРґРЅРѕРµ РјРµСЃС‚Рѕ)
   else
     echo "value"
   fi
 }
 grep() {
-  # Для проверки активности сервиса
+  # Р”Р»СЏ РїСЂРѕРІРµСЂРєРё Р°РєС‚РёРІРЅРѕСЃС‚Рё СЃРµСЂРІРёСЃР°
   if [[ "$*" == *"-q"* ]]; then
-    return 0 # всегда находим
+    return 0 # РІСЃРµРіРґР° РЅР°С…РѕРґРёРј
   fi
-  # Для подсчета (-c) возвращаем число
+  # Р”Р»СЏ РїРѕРґСЃС‡РµС‚Р° (-c) РІРѕР·РІСЂР°С‰Р°РµРј С‡РёСЃР»Рѕ
   if [[ "$*" == *"-c"* ]]; then
-    echo "5" # Возвращаем 5 совпадений
+    echo "5" # Р’РѕР·РІСЂР°С‰Р°РµРј 5 СЃРѕРІРїР°РґРµРЅРёР№
     return 0
   fi
   echo "match"
 }
 shuf() { echo "/tmp/test/files/file1.jpg"; }
 
-# Mock для gen_hex и gen_random (из utils.sh)
+# Mock РґР»СЏ gen_hex Рё gen_random (РёР· utils.sh)
 gen_hex() {
   local length="${1:-6}"
-  # Возвращаем валидную hex строку
+  # Р’РѕР·РІСЂР°С‰Р°РµРј РІР°Р»РёРґРЅСѓСЋ hex СЃС‚СЂРѕРєСѓ
   local result=""
   for ((i = 0; i < length; i++)); do
     result+="a"
@@ -208,72 +208,72 @@ gen_random() {
   echo "$result"
 }
 
-# Mock для DOMAIN и DEV_MODE
+# Mock РґР»СЏ DOMAIN Рё DEV_MODE
 # shellcheck disable=SC2034
 DOMAIN="example.com"
 # shellcheck disable=SC2034
 DEV_MODE="false"
 
-# Переопределяем пути для тестов
+# РџРµСЂРµРѕРїСЂРµРґРµР»СЏРµРј РїСѓС‚Рё РґР»СЏ С‚РµСЃС‚РѕРІ
 export DECOY_CONFIG=""
 export DECOY_WEBROOT=""
 export NGINX_CONF=""
 
-# ── Загрузка модулей ───────────────────────────────────────────
+# в”Ђв”Ђ Р—Р°РіСЂСѓР·РєР° РјРѕРґСѓР»РµР№ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 # shellcheck source=lib/modules/decoy-site/install.sh
 source "$MODULE_PATH"
 
-# ── Тест: файлы существуют ───────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: С„Р°Р№Р»С‹ СЃСѓС‰РµСЃС‚РІСѓСЋС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_files_exist() {
-  info "Тестирование наличия файлов модуля..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ С„Р°Р№Р»РѕРІ РјРѕРґСѓР»СЏ..."
 
   local all_found=true
 
   for file in "$MODULE_PATH" "$GENERATE_PATH" "$ROTATE_PATH" "$MIKROTIK_PATH"; do
     if [[ -f "$file" ]]; then
-      pass "$(basename "$file"): файл существует"
+      pass "$(basename "$file"): С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚"
       ((TESTS_PASSED++)) || true
     else
-      fail "$(basename "$file"): файл не найден"
+      fail "$(basename "$file"): С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ"
       all_found=false
     fi
   done
 }
 
-# ── Тест: синтаксис скриптов ───────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: СЃРёРЅС‚Р°РєСЃРёСЃ СЃРєСЂРёРїС‚РѕРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_syntax() {
-  info "Тестирование синтаксиса..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СЃРёРЅС‚Р°РєСЃРёСЃР°..."
 
   for file in "$MODULE_PATH" "$GENERATE_PATH" "$ROTATE_PATH" "$MIKROTIK_PATH"; do
     if bash -n "$file" 2>/dev/null; then
-      pass "$(basename "$file"): синтаксис корректен"
+      pass "$(basename "$file"): СЃРёРЅС‚Р°РєСЃРёСЃ РєРѕСЂСЂРµРєС‚РµРЅ"
       ((TESTS_PASSED++)) || true
     else
-      fail "$(basename "$file"): синтаксическая ошибка"
+      fail "$(basename "$file"): СЃРёРЅС‚Р°РєСЃРёС‡РµСЃРєР°СЏ РѕС€РёР±РєР°"
     fi
   done
 }
 
-# ── Тест: shebang ──────────────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: shebang в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_shebang() {
-  info "Тестирование shebang..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ shebang..."
 
   for file in "$MODULE_PATH" "$GENERATE_PATH" "$ROTATE_PATH" "$MIKROTIK_PATH"; do
     local shebang
     read -r shebang <"$file"
 
     if [[ "$shebang" == "#!/bin/bash" ]]; then
-      pass "$(basename "$file"): корректный shebang"
+      pass "$(basename "$file"): РєРѕСЂСЂРµРєС‚РЅС‹Р№ shebang"
       ((TESTS_PASSED++)) || true
     else
-      fail "$(basename "$file"): некорректный shebang: $shebang"
+      fail "$(basename "$file"): РЅРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ shebang: $shebang"
     fi
   done
 }
 
-# ── Тест: шаблоны HTML существуют ───────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: С€Р°Р±Р»РѕРЅС‹ HTML СЃСѓС‰РµСЃС‚РІСѓСЋС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_templates_exist() {
-  info "Тестирование наличия HTML-шаблонов..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ HTML-С€Р°Р±Р»РѕРЅРѕРІ..."
 
   local templates_dir="${PROJECT_ROOT}/lib/modules/decoy-site/templates"
   local templates=("portal.html" "dashboard.html" "admin.html" "storage.html")
@@ -281,40 +281,40 @@ test_templates_exist() {
 
   for template in "${templates[@]}"; do
     if [[ -f "${templates_dir}/${template}" ]]; then
-      pass "${template}: шаблон существует"
+      pass "${template}: С€Р°Р±Р»РѕРЅ СЃСѓС‰РµСЃС‚РІСѓРµС‚"
       ((TESTS_PASSED++)) || true
     else
-      fail "${template}: шаблон не найден"
+      fail "${template}: С€Р°Р±Р»РѕРЅ РЅРµ РЅР°Р№РґРµРЅ"
       # shellcheck disable=SC2034
       local all_found=false
     fi
   done
 }
 
-# ── Тест: nginx.conf.tpl существует ─────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: nginx.conf.tpl СЃСѓС‰РµСЃС‚РІСѓРµС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_nginx_template_exists() {
-  info "Тестирование наличия nginx шаблона..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ nginx С€Р°Р±Р»РѕРЅР°..."
 
   local nginx_tpl="${PROJECT_ROOT}/lib/modules/decoy-site/nginx.conf.tpl"
 
   if [[ -f "$nginx_tpl" ]]; then
-    pass "nginx.conf.tpl: шаблон существует"
+    pass "nginx.conf.tpl: С€Р°Р±Р»РѕРЅ СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     ((TESTS_PASSED++)) || true
   else
-    fail "nginx.conf.tpl: шаблон не найден"
+    fail "nginx.conf.tpl: С€Р°Р±Р»РѕРЅ РЅРµ РЅР°Р№РґРµРЅ"
   fi
 }
 
-# ── Тест: decoy_generate_profile ────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: decoy_generate_profile в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_decoy_generate_profile() {
-  info "Тестирование decoy_generate_profile..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ decoy_generate_profile..."
 
-  # Создаём временную директорию для конфига
+  # РЎРѕР·РґР°С‘Рј РІСЂРµРјРµРЅРЅСѓСЋ РґРёСЂРµРєС‚РѕСЂРёСЋ РґР»СЏ РєРѕРЅС„РёРіР°
   local test_config_dir="/tmp/test-cubiveil-$$"
   mkdir -p "$test_config_dir"
   DECOY_CONFIG="${test_config_dir}/decoy.json"
 
-  # Временное переопределение mkdir для decoy_generate_profile
+  # Р’СЂРµРјРµРЅРЅРѕРµ РїРµСЂРµРѕРїСЂРµРґРµР»РµРЅРёРµ mkdir РґР»СЏ decoy_generate_profile
   local _orig_mkdir
   _orig_mkdir=$(declare -f mkdir 2>/dev/null || echo "mkdir() { command mkdir -p \"\$@\"; }")
 
@@ -326,47 +326,47 @@ test_decoy_generate_profile() {
     fi
   }
 
-  # Вызываем функцию
+  # Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ
   decoy_generate_profile
 
-  # Восстанавливаем оригинальный mkdir
+  # Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµРј РѕСЂРёРіРёРЅР°Р»СЊРЅС‹Р№ mkdir
   eval "$_orig_mkdir"
 
-  # Проверяем что конфиг создан
+  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ РєРѕРЅС„РёРі СЃРѕР·РґР°РЅ
   if [[ -f "$DECOY_CONFIG" ]]; then
-    pass "decoy_generate_profile: конфиг создан"
+    pass "decoy_generate_profile: РєРѕРЅС„РёРі СЃРѕР·РґР°РЅ"
     ((TESTS_PASSED++)) || true
   else
-    fail "decoy_generate_profile: конфиг не создан"
+    fail "decoy_generate_profile: РєРѕРЅС„РёРі РЅРµ СЃРѕР·РґР°РЅ"
   fi
 
-  # Проверяем наличие обязательных полей
+  # РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹С… РїРѕР»РµР№
   if grep -q '"template"' "$DECOY_CONFIG" &&
     grep -q '"site_name"' "$DECOY_CONFIG" &&
     grep -q '"accent_color"' "$DECOY_CONFIG" &&
     grep -q '"server_token"' "$DECOY_CONFIG" &&
     grep -q '"rotation"' "$DECOY_CONFIG" &&
     grep -q '"behavior"' "$DECOY_CONFIG"; then
-    pass "decoy_generate_profile: все поля присутствуют"
+    pass "decoy_generate_profile: РІСЃРµ РїРѕР»СЏ РїСЂРёСЃСѓС‚СЃС‚РІСѓСЋС‚"
     ((TESTS_PASSED++)) || true
   else
-    fail "decoy_generate_profile: не все поля присутствуют"
+    fail "decoy_generate_profile: РЅРµ РІСЃРµ РїРѕР»СЏ РїСЂРёСЃСѓС‚СЃС‚РІСѓСЋС‚"
   fi
 
-  # Проверяем что rotation.enabled = false
+  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ rotation.enabled = false
   if grep -q '"enabled".*false' "$DECOY_CONFIG"; then
     pass "decoy_generate_profile: rotation.enabled = false"
     ((TESTS_PASSED++)) || true
   else
-    fail "decoy_generate_profile: rotation.enabled не false"
+    fail "decoy_generate_profile: rotation.enabled РЅРµ false"
   fi
 
   rm -rf "$test_config_dir" "/tmp/etc/cubiveil"
 }
 
-# ── Тест: decoy_build_webroot ───────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: decoy_build_webroot в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_decoy_build_webroot() {
-  info "Тестирование decoy_build_webroot..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ decoy_build_webroot..."
 
   local test_webroot="/tmp/test-decoy-$$"
   mkdir -p "$test_webroot"
@@ -376,7 +376,7 @@ test_decoy_build_webroot() {
   mkdir -p "$test_config_dir"
   DECOY_CONFIG="${test_config_dir}/decoy.json"
 
-  # Создаём тестовый конфиг
+  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ РєРѕРЅС„РёРі
   cat >"$DECOY_CONFIG" <<EOF
 {
   "template": "portal",
@@ -401,24 +401,24 @@ test_decoy_build_webroot() {
 }
 EOF
 
-  # Вызываем функцию
+  # Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ
   decoy_build_webroot || true
 
-  pass "decoy_build_webroot: вызвана без ошибок"
+  pass "decoy_build_webroot: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
   ((TESTS_PASSED++)) || true
 
   rm -rf "$test_webroot" "$test_config_dir"
 }
 
-# ── Тест: decoy_write_nginx_conf ────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: decoy_write_nginx_conf в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_decoy_write_nginx_conf() {
-  info "Тестирование decoy_write_nginx_conf..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ decoy_write_nginx_conf..."
 
   local test_config_dir="/tmp/test-cubiveil-$$"
   mkdir -p "$test_config_dir"
   DECOY_CONFIG="${test_config_dir}/decoy.json"
 
-  # Создаём тестовый конфиг
+  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ РєРѕРЅС„РёРі
   cat >"$DECOY_CONFIG" <<EOF
 {
   "template": "portal",
@@ -447,24 +447,24 @@ EOF
   mkdir -p "$nginx_conf_dir"
   NGINX_CONF="${nginx_conf_dir}/cubiveil-decoy"
 
-  # Вызываем функцию
+  # Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ
   decoy_write_nginx_conf || true
 
-  pass "decoy_write_nginx_conf: вызвана без ошибок"
+  pass "decoy_write_nginx_conf: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
   ((TESTS_PASSED++)) || true
 
   rm -rf "$test_config_dir" "$nginx_conf_dir"
 }
 
-# ── Тест: decoy_write_nginx_conf http2 синтаксис ───────────────
+# в”Ђв”Ђ РўРµСЃС‚: decoy_write_nginx_conf http2 СЃРёРЅС‚Р°РєСЃРёСЃ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_decoy_write_nginx_conf_http2_syntax() {
-  info "Тестирование decoy_write_nginx_conf http2 синтаксис..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ decoy_write_nginx_conf http2 СЃРёРЅС‚Р°РєСЃРёСЃ..."
 
   local test_config_dir="/tmp/test-cubiveil-http2-$$"
   mkdir -p "$test_config_dir"
   DECOY_CONFIG="${test_config_dir}/decoy.json"
 
-  # Создаём тестовый конфиг
+  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ РєРѕРЅС„РёРі
   cat >"$DECOY_CONFIG" <<EOF
 {
   "template": "portal",
@@ -493,7 +493,7 @@ EOF
   mkdir -p "$nginx_conf_dir"
   NGINX_CONF="${nginx_conf_dir}/cubiveil-decoy"
 
-  # Mock для nginx -v (версия 1.24.0 < 1.25.1)
+  # Mock РґР»СЏ nginx -v (РІРµСЂСЃРёСЏ 1.24.0 < 1.25.1)
   nginx() {
     if [[ "$*" == *"-v"* ]]; then
       echo "nginx version: nginx/1.24.0" >&2
@@ -502,37 +502,37 @@ EOF
     return 0
   }
 
-  # Вызываем функцию
+  # Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ
   decoy_write_nginx_conf || true
 
-  # Проверяем что конфиг создан с правильным синтаксисом
+  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ РєРѕРЅС„РёРі СЃРѕР·РґР°РЅ СЃ РїСЂР°РІРёР»СЊРЅС‹Рј СЃРёРЅС‚Р°РєСЃРёСЃРѕРј
   if [[ -f "$NGINX_CONF" ]]; then
-    # Для nginx < 1.25.1: "listen 443 ssl http2;"
+    # Р”Р»СЏ nginx < 1.25.1: "listen 443 ssl http2;"
     if grep -q "listen 443 ssl http2;" "$NGINX_CONF"; then
-      pass "decoy_write_nginx_conf: старый синтаксис http2 (nginx < 1.25.1)"
+      pass "decoy_write_nginx_conf: СЃС‚Р°СЂС‹Р№ СЃРёРЅС‚Р°РєСЃРёСЃ http2 (nginx < 1.25.1)"
       ((TESTS_PASSED++)) || true
     elif grep -q "http2 on;" "$NGINX_CONF"; then
-      pass "decoy_write_nginx_conf: новый синтаксис http2 (nginx >= 1.25.1)"
+      pass "decoy_write_nginx_conf: РЅРѕРІС‹Р№ СЃРёРЅС‚Р°РєСЃРёСЃ http2 (nginx >= 1.25.1)"
       ((TESTS_PASSED++)) || true
     else
-      fail "decoy_write_nginx_conf: синтаксис http2 не найден"
+      fail "decoy_write_nginx_conf: СЃРёРЅС‚Р°РєСЃРёСЃ http2 РЅРµ РЅР°Р№РґРµРЅ"
     fi
   else
-    fail "decoy_write_nginx_conf: конфиг не создан"
+    fail "decoy_write_nginx_conf: РєРѕРЅС„РёРі РЅРµ СЃРѕР·РґР°РЅ"
   fi
 
   rm -rf "$test_config_dir" "$nginx_conf_dir"
 }
 
-# ── Тест: decoy_write_rotate_timer ──────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: decoy_write_rotate_timer в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_decoy_write_rotate_timer() {
-  info "Тестирование decoy_write_rotate_timer..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ decoy_write_rotate_timer..."
 
   local test_config_dir="/tmp/test-cubiveil-$$"
   mkdir -p "$test_config_dir"
   DECOY_CONFIG="${test_config_dir}/decoy.json"
 
-  # Создаём тестовый конфиг
+  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ РєРѕРЅС„РёРі
   cat >"$DECOY_CONFIG" <<EOF
 {
   "template": "portal",
@@ -560,7 +560,7 @@ EOF
   local systemd_dir="/tmp/test-systemd-$$"
   mkdir -p "$systemd_dir"
 
-  # Mock для systemctl daemon-reload
+  # Mock РґР»СЏ systemctl daemon-reload
   systemctl() {
     if [[ "$*" == *"daemon-reload"* ]]; then
       return 0
@@ -568,18 +568,18 @@ EOF
     return 0
   }
 
-  # Вызываем функцию
+  # Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ
   decoy_write_rotate_timer || true
 
-  pass "decoy_write_rotate_timer: вызвана без ошибок"
+  pass "decoy_write_rotate_timer: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
   ((TESTS_PASSED++)) || true
 
   rm -rf "$test_config_dir" "$systemd_dir"
 }
 
-# ── Тест: decoy_rotate_once ─────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: decoy_rotate_once в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_decoy_rotate_once() {
-  info "Тестирование decoy_rotate_once..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ decoy_rotate_once..."
 
   local test_webroot="/tmp/test-decoy-$$"
   mkdir -p "$test_webroot/files"
@@ -589,7 +589,7 @@ test_decoy_rotate_once() {
   mkdir -p "$test_config_dir"
   DECOY_CONFIG="${test_config_dir}/decoy.json"
 
-  # Создаём тестовый конфиг
+  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ РєРѕРЅС„РёРі
   cat >"$DECOY_CONFIG" <<EOF
 {
   "template": "portal",
@@ -614,45 +614,45 @@ test_decoy_rotate_once() {
 }
 EOF
 
-  # Mock для /proc/loadavg
+  # Mock РґР»СЏ /proc/loadavg
   _proc_loadavg() { echo "0.50 0.60 0.70 1/100 12345"; }
 
-  # Вызываем функцию
+  # Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ
   decoy_rotate_once || true
 
-  pass "decoy_rotate_once: вызвана без ошибок"
+  pass "decoy_rotate_once: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
   ((TESTS_PASSED++)) || true
 
   rm -rf "$test_webroot" "$test_config_dir"
 }
 
-# ── Тест: decoy_print_mikrotik_script ────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: decoy_print_mikrotik_script в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_decoy_print_mikrotik_script() {
-  info "Тестирование decoy_print_mikrotik_script..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ decoy_print_mikrotik_script..."
 
-  # Проверяем что функция существует и может быть вызвана
-  # Полный тест требует мокирования множества команд, пропускаем в прототипе
+  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ С„СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚ Рё РјРѕР¶РµС‚ Р±С‹С‚СЊ РІС‹Р·РІР°РЅР°
+  # РџРѕР»РЅС‹Р№ С‚РµСЃС‚ С‚СЂРµР±СѓРµС‚ РјРѕРєРёСЂРѕРІР°РЅРёСЏ РјРЅРѕР¶РµСЃС‚РІР° РєРѕРјР°РЅРґ, РїСЂРѕРїСѓСЃРєР°РµРј РІ РїСЂРѕС‚РѕС‚РёРїРµ
   if declare -f decoy_print_mikrotik_script &>/dev/null; then
-    pass "decoy_print_mikrotik_script: функция существует"
+    pass "decoy_print_mikrotik_script: С„СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     ((TESTS_PASSED++)) || true
   else
-    fail "decoy_print_mikrotik_script: функция не найдена"
+    fail "decoy_print_mikrotik_script: С„СѓРЅРєС†РёСЏ РЅРµ РЅР°Р№РґРµРЅР°"
   fi
 }
 
-# ── Тест: module_install ───────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: module_install в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_module_install() {
-  info "Тестирование module_install..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_install..."
 
   module_install
 
-  pass "module_install: вызвана без ошибок"
+  pass "module_install: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
   ((TESTS_PASSED++)) || true
 }
 
-# ── Тест: module_configure ─────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: module_configure в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_module_configure() {
-  info "Тестирование module_configure..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_configure..."
 
   local test_config_dir="/tmp/test-cubiveil-$$"
   mkdir -p "$test_config_dir"
@@ -668,45 +668,45 @@ test_module_configure() {
 
   module_configure || true
 
-  pass "module_configure: вызвана без ошибок"
+  pass "module_configure: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
   ((TESTS_PASSED++)) || true
 
   rm -rf "$test_config_dir" "$test_webroot" "$nginx_conf_dir"
 }
 
-# ── Тест: module_enable ────────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: module_enable в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_module_enable() {
-  info "Тестирование module_enable..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_enable..."
 
   module_enable
 
-  pass "module_enable: вызвана без ошибок"
+  pass "module_enable: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
   ((TESTS_PASSED++)) || true
 }
 
-# ── Тест: module_disable ──────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: module_disable в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_module_disable() {
-  info "Тестирование module_disable..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_disable..."
 
   module_disable
 
-  pass "module_disable: вызвана без ошибок"
+  pass "module_disable: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
   ((TESTS_PASSED++)) || true
 }
 
-# ── Тест: module_status ────────────────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: module_status в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_module_status() {
-  info "Тестирование module_status..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_status..."
 
   module_status || true
 
-  pass "module_status: вызвана без ошибок"
+  pass "module_status: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
   ((TESTS_PASSED++)) || true
 }
 
-# ── Тест: наличие всех основных функций ────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: РЅР°Р»РёС‡РёРµ РІСЃРµС… РѕСЃРЅРѕРІРЅС‹С… С„СѓРЅРєС†РёР№ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_all_functions_exist() {
-  info "Тестирование наличия всех основных функций..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ РІСЃРµС… РѕСЃРЅРѕРІРЅС‹С… С„СѓРЅРєС†РёР№..."
 
   local required_functions=(
     "decoy_generate_profile"
@@ -725,28 +725,28 @@ test_all_functions_exist() {
   local found=0
   for func in "${required_functions[@]}"; do
     if declare -f "$func" &>/dev/null; then
-      ((found++)) || true # || true чтобы избежать exit с set -e
+      ((found++)) || true # || true С‡С‚РѕР±С‹ РёР·Р±РµР¶Р°С‚СЊ exit СЃ set -e
     fi
   done
 
   if [[ $found -eq ${#required_functions[@]} ]]; then
-    pass "Все функции существуют ($found/${#required_functions[@]})"
+    pass "Р’СЃРµ С„СѓРЅРєС†РёРё СЃСѓС‰РµСЃС‚РІСѓСЋС‚ ($found/${#required_functions[@]})"
     ((TESTS_PASSED++)) || true
   else
-    fail "Не все функции найдены ($found/${#required_functions[@]})"
+    fail "РќРµ РІСЃРµ С„СѓРЅРєС†РёРё РЅР°Р№РґРµРЅС‹ ($found/${#required_functions[@]})"
   fi
 }
 
-# ── Тест: decoy.json содержит last_rotated_at ─────────────────
+# в”Ђв”Ђ РўРµСЃС‚: decoy.json СЃРѕРґРµСЂР¶РёС‚ last_rotated_at в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_decoy_json_has_last_rotated_at() {
-  info "Тестирование last_rotated_at в decoy.json..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ last_rotated_at РІ decoy.json..."
 
   local test_id="lastrot-$$-$RANDOM"
   local test_config_dir="/tmp/test-cubiveil-${test_id}"
   mkdir -p "$test_config_dir"
   DECOY_CONFIG="${test_config_dir}/decoy.json"
 
-  # Создаём тестовый конфиг
+  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ РєРѕРЅС„РёРі
   cat >"$DECOY_CONFIG" <<EOF
 {
   "template": "portal",
@@ -772,20 +772,20 @@ test_decoy_json_has_last_rotated_at() {
 }
 EOF
 
-  # Проверяем наличие поля
+  # РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ РїРѕР»СЏ
   if grep -q '"last_rotated_at"' "$DECOY_CONFIG"; then
-    pass "decoy.json: содержит last_rotated_at"
+    pass "decoy.json: СЃРѕРґРµСЂР¶РёС‚ last_rotated_at"
     ((TESTS_PASSED++)) || true
   else
-    fail "decoy.json: отсутствует last_rotated_at"
+    fail "decoy.json: РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚ last_rotated_at"
   fi
 
   rm -rf "$test_config_dir"
 }
 
-# ── Тест: _generate_session_block ──────────────────────────────
+# в”Ђв”Ђ РўРµСЃС‚: _generate_session_block в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_generate_session_block() {
-  info "Тестирование _generate_session_block..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ _generate_session_block..."
 
   local test_id="session-$$-$RANDOM"
   local test_webroot="/tmp/test-decoy-${test_id}"
@@ -796,7 +796,7 @@ test_generate_session_block() {
   mkdir -p "$test_config_dir"
   DECOY_CONFIG="${test_config_dir}/decoy.json"
 
-  # Создаём тестовый конфиг
+  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ РєРѕРЅС„РёРі
   cat >"$DECOY_CONFIG" <<EOF
 {
   "template": "portal",
@@ -822,39 +822,39 @@ test_generate_session_block() {
 }
 EOF
 
-  # Создаём тестовые файлы
+  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Рµ С„Р°Р№Р»С‹
   touch "${test_webroot}/files/test1.jpg"
   touch "${test_webroot}/files/test2.jpg"
 
-  # Mock для DOMAIN
+  # Mock РґР»СЏ DOMAIN
   # shellcheck disable=SC2034
   DOMAIN="example.com"
 
-  # Вызываем функцию
+  # Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ
   local output
   output=$(_generate_session_block "morning" "3" "204800" "test1.jpg test2.jpg")
 
-  # Проверяем наличие ключевых элементов
+  # РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ РєР»СЋС‡РµРІС‹С… СЌР»РµРјРµРЅС‚РѕРІ
   if echo "$output" | grep -q "delay"; then
-    pass "_generate_session_block: содержит delay"
+    pass "_generate_session_block: СЃРѕРґРµСЂР¶РёС‚ delay"
     ((TESTS_PASSED++)) || true
   else
-    fail "_generate_session_block: отсутствует delay"
+    fail "_generate_session_block: РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚ delay"
   fi
 
   if echo "$output" | grep -q "/tool fetch"; then
-    pass "_generate_session_block: содержит fetch"
+    pass "_generate_session_block: СЃРѕРґРµСЂР¶РёС‚ fetch"
     ((TESTS_PASSED++)) || true
   else
-    fail "_generate_session_block: отсутствует fetch"
+    fail "_generate_session_block: РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚ fetch"
   fi
 
   rm -rf "$test_webroot" "$test_config_dir"
 }
 
-# ── Тест: MikroTik скрипт содержит сессии ───────────────────
+# в”Ђв”Ђ РўРµСЃС‚: MikroTik СЃРєСЂРёРїС‚ СЃРѕРґРµСЂР¶РёС‚ СЃРµСЃСЃРёРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_mikrotik_has_sessions() {
-  info "Тестирование сессий в MikroTik скрипте..."
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СЃРµСЃСЃРёР№ РІ MikroTik СЃРєСЂРёРїС‚Рµ..."
 
   local test_id="mikrotik-$$-$RANDOM"
   local test_webroot="/tmp/test-decoy-${test_id}"
@@ -865,7 +865,7 @@ test_mikrotik_has_sessions() {
   mkdir -p "$test_config_dir"
   DECOY_CONFIG="${test_config_dir}/decoy.json"
 
-  # Создаём тестовый конфиг
+  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ РєРѕРЅС„РёРі
   cat >"$DECOY_CONFIG" <<EOF
 {
   "template": "portal",
@@ -891,50 +891,50 @@ test_mikrotik_has_sessions() {
 }
 EOF
 
-  # Создаём тестовые файлы
+  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Рµ С„Р°Р№Р»С‹
   touch "${test_webroot}/files/test1.jpg"
   touch "${test_webroot}/files/test2.jpg"
 
-  # Mock для DOMAIN
+  # Mock РґР»СЏ DOMAIN
   # shellcheck disable=SC2034
   DOMAIN="example.com"
 
-  # Вызываем функцию и ловим вывод
+  # Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ Рё Р»РѕРІРёРј РІС‹РІРѕРґ
   local output
   output=$(decoy_print_mikrotik_script 2>&1 || true)
 
-  # Проверяем наличие нескольких fetch (сессии)
+  # РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ РЅРµСЃРєРѕР»СЊРєРёС… fetch (СЃРµСЃСЃРёРё)
   local fetch_count
   fetch_count=$(echo "$output" | grep -c "fetch" || echo "0")
 
   if [[ "$fetch_count" -ge 3 ]]; then
-    pass "decoy_print_mikrotik_script: содержит сессии (${fetch_count} fetch)"
+    pass "decoy_print_mikrotik_script: СЃРѕРґРµСЂР¶РёС‚ СЃРµСЃСЃРёРё (${fetch_count} fetch)"
     ((TESTS_PASSED++)) || true
   else
-    fail "decoy_print_mikrotik_script: недостаточно fetch (${fetch_count} < 3)"
+    fail "decoy_print_mikrotik_script: РЅРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ fetch (${fetch_count} < 3)"
   fi
 
-  # Проверяем наличие HEAD запросов
+  # РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ HEAD Р·Р°РїСЂРѕСЃРѕРІ
   if echo "$output" | grep -q "mode=keep-result=no"; then
-    pass "decoy_print_mikrotik_script: содержит HEAD-запросы"
+    pass "decoy_print_mikrotik_script: СЃРѕРґРµСЂР¶РёС‚ HEAD-Р·Р°РїСЂРѕСЃС‹"
     ((TESTS_PASSED++)) || true
   else
-    pass "decoy_print_mikrotik_script: HEAD-запросы могут отсутствовать (random)"
+    pass "decoy_print_mikrotik_script: HEAD-Р·Р°РїСЂРѕСЃС‹ РјРѕРіСѓС‚ РѕС‚СЃСѓС‚СЃС‚РІРѕРІР°С‚СЊ (random)"
     ((TESTS_PASSED++)) || true
   fi
 
   rm -rf "$test_webroot" "$test_config_dir"
 }
 
-# ── Основная функция ─────────────────────────────────────────
+# в”Ђв”Ђ РћСЃРЅРѕРІРЅР°СЏ С„СѓРЅРєС†РёСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 main() {
   echo ""
-  echo -e "${YELLOW}╔══════════════════════════════════════════════════════╗${PLAIN}"
-  echo -e "${YELLOW}║        CubiVeil Unit Tests - Decoy Site Module     ║${PLAIN}"
-  echo -e "${YELLOW}╚══════════════════════════════════════════════════════╝${PLAIN}"
+  echo -e "${YELLOW}в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—${PLAIN}"
+  echo -e "${YELLOW}в•‘        CubiVeil Unit Tests - Decoy Site Module     в•‘${PLAIN}"
+  echo -e "${YELLOW}в•љв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ќ${PLAIN}"
   echo ""
 
-  # ── Запуск тестов ─────────────────────────────────────────
+  # в”Ђв”Ђ Р—Р°РїСѓСЃРє С‚РµСЃС‚РѕРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
   test_files_exist
   echo ""
 
@@ -998,21 +998,21 @@ main() {
   test_mikrotik_has_sessions
   echo ""
 
-  # ── Итоги ───────────────────────────────────────────────
+  # в”Ђв”Ђ РС‚РѕРіРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
   echo ""
-  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
-  echo -e "${GREEN}Пройдено: $TESTS_PASSED${PLAIN}"
+  echo -e "${YELLOW}в”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓ${PLAIN}"
+  echo -e "${GREEN}РџСЂРѕР№РґРµРЅРѕ: $TESTS_PASSED${PLAIN}"
   if [[ $TESTS_FAILED -gt 0 ]]; then
-    echo -e "${RED}Провалено:  $TESTS_FAILED${PLAIN}"
+    echo -e "${RED}РџСЂРѕРІР°Р»РµРЅРѕ:  $TESTS_FAILED${PLAIN}"
   fi
-  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
+  echo -e "${YELLOW}в”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓ${PLAIN}"
   echo ""
 
   if [[ $TESTS_FAILED -gt 0 ]]; then
-    echo -e "${RED}❌ Тесты провалены${PLAIN}"
+    echo -e "${RED}вќЊ РўРµСЃС‚С‹ РїСЂРѕРІР°Р»РµРЅС‹${PLAIN}"
     exit 1
   else
-    echo -e "${GREEN}✅ Все тесты пройдены${PLAIN}"
+    echo -e "${GREEN}вњ… Р’СЃРµ С‚РµСЃС‚С‹ РїСЂРѕР№РґРµРЅС‹${PLAIN}"
     exit 0
   fi
 }
