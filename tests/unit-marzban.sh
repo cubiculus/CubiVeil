@@ -19,8 +19,14 @@ PLAIN='\033[0m'
 
 # ── Функции вывода ────────────────────────────────────────────
 info() { echo -e "${CYAN}[INFO]${PLAIN} $*" >&2; }
-pass() { echo -e "${GREEN}[PASS]${PLAIN} $*" >&2; ((TESTS_PASSED++)) || true; }
-fail() { echo -e "${RED}[FAIL]${PLAIN} $*" >&2; ((TESTS_FAILED++)) || true; }
+pass() {
+  echo -e "${GREEN}[PASS]${PLAIN} $*" >&2
+  ((TESTS_PASSED++)) || true
+}
+fail() {
+  echo -e "${RED}[FAIL]${PLAIN} $*" >&2
+  ((TESTS_FAILED++)) || true
+}
 warn() { echo -e "${YELLOW}[WARN]${PLAIN} $*" >&2; }
 
 # ── Путь к проекту и модулю ──────────────────────────────────
@@ -39,7 +45,10 @@ log_success() { echo "[SUCCESS] $1" >&2; }
 log_error() { echo "[ERROR] $1" >&2; }
 
 pkg_check() { return 1; }
-svc_restart() { echo "[MOCK] svc_restart $1" >&2; return 0; }
+svc_restart() {
+  echo "[MOCK] svc_restart $1" >&2
+  return 0
+}
 
 # ── Загрузка модуля ──────────────────────────────────────────
 # shellcheck source=lib/modules/marzban/install.sh
@@ -106,7 +115,10 @@ test_marzban_restart() {
   info "Тестирование marzban_restart..."
 
   called=0
-  svc_restart() { called=1; return 0; }
+  svc_restart() {
+    called=1
+    return 0
+  }
 
   marzban_restart
 
@@ -122,7 +134,10 @@ test_module_update() {
   info "Тестирование module_update..."
 
   called=0
-  marzban_restart() { called=1; return 0; }
+  marzban_restart() {
+    called=1
+    return 0
+  }
 
   module_update
 

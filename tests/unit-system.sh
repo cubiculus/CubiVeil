@@ -325,7 +325,10 @@ test_pkg_update() {
   info "Тестирование pkg_update..."
 
   apt_args=()
-  apt-get() { apt_args=("$@"); return 0; }
+  apt-get() {
+    apt_args=("$@")
+    return 0
+  }
 
   pkg_update
 
@@ -342,7 +345,10 @@ test_pkg_upgrade() {
   info "Тестирование pkg_upgrade..."
 
   apt_args=()
-  apt-get() { apt_args=("$@"); return 0; }
+  apt-get() {
+    apt_args=("$@")
+    return 0
+  }
   sed() { return 0; }
 
   pkg_upgrade
@@ -360,7 +366,10 @@ test_pkg_full_upgrade() {
   info "Тестирование pkg_full_upgrade..."
 
   apt_args=()
-  apt-get() { apt_args=("$@"); return 0; }
+  apt-get() {
+    apt_args=("$@")
+    return 0
+  }
   sed() { return 0; }
 
   pkg_full_upgrade

@@ -56,30 +56,30 @@ module_configure() {
 
 module_enable() {
   log_step "decoy_enable" "Запуск сайта-прикрытия"
-  
+
   # Проверяем что nginx установлен
   if ! command -v nginx &>/dev/null; then
     log_warn "nginx not installed — skipping decoy-site"
     return 0
   fi
-  
+
   # Проверяем что конфиг существует
   if [[ ! -f "$NGINX_CONF" ]]; then
     log_warn "Decoy nginx config not found: $NGINX_CONF"
     log_warn "Skipping decoy-site — you can configure manually later"
     return 0
   fi
-  
+
   rm -f /etc/nginx/sites-enabled/default
   ln -sf "$NGINX_CONF" "$NGINX_ENABLED"
-  
+
   # Проверяем конфиг nginx
   if ! nginx -t >/dev/null 2>&1; then
     log_error "Ошибка конфигурации nginx"
     log_warn "Decoy-site disabled due to nginx config error"
-    return 0  # Не ошибка — продолжаем
+    return 0 # Не ошибка — продолжаем
   fi
-  
+
   systemctl enable nginx >/dev/null 2>&1
   systemctl reload nginx
 

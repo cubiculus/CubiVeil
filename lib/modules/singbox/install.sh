@@ -9,9 +9,9 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 [[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]] && source "${SCRIPT_DIR}/lib/core/system.sh"
-[[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]   && source "${SCRIPT_DIR}/lib/core/log.sh"
-[[ -f "${SCRIPT_DIR}/lib/utils.sh" ]]      && source "${SCRIPT_DIR}/lib/utils.sh"
-[[ -f "${SCRIPT_DIR}/lib/security.sh" ]]   && source "${SCRIPT_DIR}/lib/security.sh"
+[[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]] && source "${SCRIPT_DIR}/lib/core/log.sh"
+[[ -f "${SCRIPT_DIR}/lib/utils.sh" ]] && source "${SCRIPT_DIR}/lib/utils.sh"
+[[ -f "${SCRIPT_DIR}/lib/security.sh" ]] && source "${SCRIPT_DIR}/lib/security.sh"
 
 # ── Конфигурация ─────────────────────────────────────────────
 SINGBOX_BINARY="/usr/local/bin/sing-box"
@@ -37,9 +37,9 @@ singbox_get_version() {
   # ── Кэш ───────────────────────────────────────────────────
   if [[ -f "$CACHE_FILE" ]]; then
     local cache_age
-    cache_age=$(( $(date +%s) - $(stat -c %Y "$CACHE_FILE") ))
+    cache_age=$(($(date +%s) - $(stat -c %Y "$CACHE_FILE")))
     if [[ $cache_age -lt $CACHE_MAX_AGE ]]; then
-      SB_TAG=$(jq -r '.tag'    "$CACHE_FILE" 2>/dev/null || true)
+      SB_TAG=$(jq -r '.tag' "$CACHE_FILE" 2>/dev/null || true)
       SB_SHA256=$(jq -r '.sha256' "$CACHE_FILE" 2>/dev/null || true)
       if [[ -n "$SB_TAG" && "$SB_TAG" != "null" ]]; then
         info "Using cached Sing-box version: $SB_TAG" >&2
@@ -64,17 +64,17 @@ singbox_get_version() {
     SB_TAG=$(echo "$api_response" | jq -r '.tag_name // empty' 2>/dev/null || true)
   fi
   if [[ -z "$SB_TAG" ]]; then
-    SB_TAG=$(echo "$api_response" | grep '"tag_name"' | head -1 \
-      | sed 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/' || true)
+    SB_TAG=$(echo "$api_response" | grep '"tag_name"' | head -1 |
+      sed 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/' || true)
   fi
 
   # Fallback: последний тег напрямую через git ls-remote
   if [[ -z "$SB_TAG" ]]; then
     warn "GitHub API failed, trying git ls-remote..." >&2
     SB_TAG=$(git ls-remote --tags --refs \
-      "https://github.com/SagerNet/sing-box.git" 2>/dev/null \
-      | awk '{print $2}' | grep -v '\^{}' | grep '/v' \
-      | sort -V | tail -1 | sed 's|refs/tags/||' || true)
+      "https://github.com/SagerNet/sing-box.git" 2>/dev/null |
+      awk '{print $2}' | grep -v '\^{}' | grep '/v' |
+      sort -V | tail -1 | sed 's|refs/tags/||' || true)
   fi
 
   if [[ -z "$SB_TAG" ]]; then
@@ -216,7 +216,7 @@ singbox_install() {
 
   # Разбираем
   local sb_tag sb_ver sb_url sb_sha256
-  IFS='|' read -r sb_tag sb_ver sb_url sb_sha256 <<< "$version_info"
+  IFS='|' read -r sb_tag sb_ver sb_url sb_sha256 <<<"$version_info"
 
   # Дополнительная проверка что URL не пустой
   if [[ -z "$sb_url" ]]; then
@@ -294,13 +294,13 @@ EOF
 singbox_enable() {
   log_step "singbox_enable" "Enabling Sing-box"
   [[ ! -f "/etc/systemd/system/sing-box.service" ]] && singbox_create_service
-  svc_enable  "$SINGBOX_SERVICE"
-  svc_start   "$SINGBOX_SERVICE"
+  svc_enable "$SINGBOX_SERVICE"
+  svc_start "$SINGBOX_SERVICE"
   log_success "Sing-box enabled and started"
 }
 
 singbox_disable() {
-  svc_stop    "$SINGBOX_SERVICE" || true
+  svc_stop "$SINGBOX_SERVICE" || true
   svc_disable "$SINGBOX_SERVICE" 2>/dev/null || true
 }
 
@@ -334,7 +334,7 @@ singbox_update() {
   version_info=$(singbox_get_version)
 
   local sb_tag sb_ver sb_url sb_sha256
-  IFS='|' read -r sb_tag sb_ver sb_url sb_sha256 <<< "$version_info"
+  IFS='|' read -r sb_tag sb_ver sb_url sb_sha256 <<<"$version_info"
 
   if [[ "$cur_ver" == *"$sb_tag"* ]]; then
     log_info "Sing-box already up to date: $sb_tag"
@@ -352,11 +352,11 @@ singbox_update() {
 }
 
 # ── Модульный интерфейс ───────────────────────────────────────
-module_install()  { singbox_install; }
-module_configure(){ singbox_configure; }
-module_enable()   { singbox_enable; }
-module_disable()  { singbox_disable; }
-module_update()   { singbox_update; }
-module_remove()   { singbox_remove; }
-module_status()   { singbox_status; }
-module_reload()   { singbox_reload; }
+module_install() { singbox_install; }
+module_configure() { singbox_configure; }
+module_enable() { singbox_enable; }
+module_disable() { singbox_disable; }
+module_update() { singbox_update; }
+module_remove() { singbox_remove; }
+module_status() { singbox_status; }
+module_reload() { singbox_reload; }

@@ -54,10 +54,10 @@ pkg_update() {
   # Подавляем все интерактивные диалоги
   export DEBIAN_FRONTEND=noninteractive
   export UCF_FORCE_CONFFOLD=1
-  
+
   # Опции dpkg для автоматического выбора старых конфигов
   local DPKG_OPTS='-o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold'
-  
+
   apt-get update -qq $DPKG_OPTS >/dev/null 2>&1
 }
 

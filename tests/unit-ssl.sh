@@ -19,8 +19,14 @@ PLAIN='\033[0m'
 
 # ── Функции вывода ───────────────────────────────────────────
 info() { echo -e "${CYAN}[INFO]${PLAIN} $*" >&2; }
-pass() { echo -e "${GREEN}[PASS]${PLAIN} $*" >&2; ((TESTS_PASSED++)) || true; }
-fail() { echo -e "${RED}[FAIL]${PLAIN} $*" >&2; ((TESTS_FAILED++)) || true; }
+pass() {
+  echo -e "${GREEN}[PASS]${PLAIN} $*" >&2
+  ((TESTS_PASSED++)) || true
+}
+fail() {
+  echo -e "${RED}[FAIL]${PLAIN} $*" >&2
+  ((TESTS_FAILED++)) || true
+}
 warn() { echo -e "${YELLOW}[WARN]${PLAIN} $*" >&2; }
 
 # ── Путь к проекту и модулю ──────────────────────────────────
@@ -40,9 +46,18 @@ log_error() { echo "[ERROR] $1" >&2; }
 log_warn() { echo "[WARN] $1" >&2; }
 
 cmd_check() { return 1; }
-pkg_install_packages() { echo "[MOCK] pkg_install_packages: $*" >&2; return 0; }
-svc_restart_if_active() { echo "[MOCK] svc_restart_if_active: $1" >&2; return 0; }
-systemctl() { echo "[MOCK] systemctl: $*" >&2; return 0; }
+pkg_install_packages() {
+  echo "[MOCK] pkg_install_packages: $*" >&2
+  return 0
+}
+svc_restart_if_active() {
+  echo "[MOCK] svc_restart_if_active: $1" >&2
+  return 0
+}
+systemctl() {
+  echo "[MOCK] systemctl: $*" >&2
+  return 0
+}
 
 # ── Загрузка модуля ──────────────────────────────────────────
 # shellcheck source=lib/modules/ssl/install.sh
@@ -120,7 +135,11 @@ test_ssl_enable_dev_mode() {
   touch "$tmp_dir/cert.pem"
 
   local called=0
-  svc_restart_if_active() { called=1; echo "[MOCK] svc_restart_if_active: $1" >&2; return 0; }
+  svc_restart_if_active() {
+    called=1
+    echo "[MOCK] svc_restart_if_active: $1" >&2
+    return 0
+  }
 
   if ! ssl_enable; then
     fail "ssl_enable вернул ошибку в dev режиме"

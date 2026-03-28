@@ -66,7 +66,7 @@ marzban_install() {
     log_error "Failed to download Marzban installation script"
     log_warn "Continuing without Marzban — you can install manually later:"
     log_warn "  curl -sfL https://github.com/Gozargah/Marzban-scripts/raw/master/marzban.sh | bash -s install --yes"
-    return 0  # Не ошибка — продолжаем установку
+    return 0 # Не ошибка — продолжаем установку
   fi
 
   chmod +x "$MARZBAN_INSTALL_SCRIPT"
@@ -79,7 +79,7 @@ marzban_install() {
     log_warn "You can install Marzban manually later:"
     log_warn "  bash $MARZBAN_INSTALL_SCRIPT install --yes"
     rm -f "$MARZBAN_INSTALL_SCRIPT"
-    return 0  # Не ошибка — продолжаем установку
+    return 0 # Не ошибка — продолжаем установку
   fi
 
   # Очищаем временный файл
@@ -127,7 +127,7 @@ marzban_configure_env() {
     log_warn ".env file not found, creating..."
     mkdir -p "$MARZBAN_CONFIG_DIR"
     # Создаём новый .env файл с базовыми настройками
-    cat > "$MARZBAN_ENV_FILE" <<EOF
+    cat >"$MARZBAN_ENV_FILE" <<EOF
 # Marzban Configuration
 MARZBAN_HOST=${domain}
 MARZBAN_PORT=${PANEL_PORT}
@@ -144,10 +144,10 @@ EOF
     # Файл существует — обновляем переменные
     local temp_env
     temp_env=$(mktemp)
-    
+
     # Копируем существующий файл
     cp "$MARZBAN_ENV_FILE" "$temp_env"
-    
+
     # Функция для обновления или добавления переменной
     _update_var() {
       local var="$1"
@@ -155,10 +155,10 @@ EOF
       if grep -q "^${var}=" "$temp_env" 2>/dev/null; then
         sed -i "s|^${var}=.*|${var}=${value}|" "$temp_env"
       else
-        echo "${var}=${value}" >> "$temp_env"
+        echo "${var}=${value}" >>"$temp_env"
       fi
     }
-    
+
     # Обновляем переменные
     _update_var "MARZBAN_HOST" "$domain"
     _update_var "MARZBAN_PORT" "$PANEL_PORT"
@@ -169,17 +169,17 @@ EOF
     _update_var "SUBSCRIPTION_PORT" "$SUB_PORT"
     _update_var "SUDO_USERNAME" "$sudo_username"
     _update_var "SUDO_PASSWORD" "$sudo_password"
-    
+
     # Копируем обратно
-    cat "$temp_env" > "$MARZBAN_ENV_FILE"
+    cat "$temp_env" >"$MARZBAN_ENV_FILE"
     rm -f "$temp_env"
-    
+
     log_success "Marzban .env updated with domain=$domain, panel=$PANEL_PORT, sub=$SUB_PORT"
   fi
-  
+
   # Сохраняем учётные данные в файл
   mkdir -p /etc/cubiveil
-  cat > /etc/cubiveil/admin.credentials <<EOF
+  cat >/etc/cubiveil/admin.credentials <<EOF
 MARZBAN_USERNAME=${sudo_username}
 MARZBAN_PASSWORD=${sudo_password}
 EOF
