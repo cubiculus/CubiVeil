@@ -130,9 +130,27 @@ ssl_generate() {
   log_step "ssl_generate" "Generating SSL certificate for ${domain}"
 
   # Открываем порт 80 для валидации Let's Encrypt
+  # Важно: открываем ДО запуска certbot и ждём применения правил
   if [[ -f "${SCRIPT_DIR}/lib/modules/firewall/install.sh" ]]; then
     source "${SCRIPT_DIR}/lib/modules/firewall/install.sh"
     firewall_open_port 80 tcp "Let's Encrypt validation"
+
+    # Дополнительно открываем через ufw напрямую (на случай если firewall ещё не настроен)
+    if command -v ufw &>/dev/null; then
+      ufw allow 80/tcp >/dev/null 2>&1 || true
+    fi
+
+    # Ждём применения правил файрвола
+    sleep 2
+  fi
+
+  # Проверяем что nginx слушает порт 80
+  if command -v nginx &>/dev/null && command -v ss &>/dev/null; then
+    if ! ss -tlnp | grep -q ':80 '; then
+      log_warn "Nginx is not listening on port 80, trying to reload..."
+      systemctl reload nginx >/dev/null 2>&1 || systemctl restart nginx >/dev/null 2>&1 || true
+      sleep 1
+    fi
   fi
 
   # Параметры Certbot
