@@ -113,7 +113,7 @@ marzban_install() {
 
   # Проверяем наличие предыдущей установки и удаляем если есть
   if docker ps -a --format '{{.Names}}' | grep -q "^marzban$"; then
-    log_info "Removing existing Marzban installation..."
+    log_info "Removing existing Marzban container..."
     docker stop marzban >/dev/null 2>&1 || true
     docker rm marzban >/dev/null 2>&1 || true
   fi
@@ -124,12 +124,18 @@ marzban_install() {
     docker volume rm marzban >/dev/null 2>&1 || true
   fi
 
-  # Запускаем установку с выводом ошибок
-  # Marzban installer не поддерживает --yes, поэтому используем автоматический режим через env
+  # Удаляем существующую директорию установки (/opt/marzban)
+  if [[ -d /opt/marzban ]]; then
+    log_info "Removing existing Marzban directory /opt/marzban..."
+    rm -rf /opt/marzban
+  fi
+
+  # Запускаем установку с автоматическим подтверждением
+  # Marzban installer не поддерживает --yes, поэтому используем pipe с 'y'
   export MARZBAN_TELEGRAM_ENABLED=0
   export MARZBAN_USERS_ENABLED=0
 
-  if ! bash "$MARZBAN_INSTALL_SCRIPT" install 2>&1; then
+  if ! echo "y" | bash "$MARZBAN_INSTALL_SCRIPT" install 2>&1; then
     log_error "Marzban installation failed"
     log_warn "You can install Marzban manually later:"
     log_warn "  bash $MARZBAN_INSTALL_SCRIPT install"
