@@ -354,8 +354,8 @@ system_install_base_dependencies() {
 module_install() {
   log_step "module_install" "Installing system module"
 
-  # Обновляем индекс пакетов
-  pkg_update
+  # Полное обновление системы (включая upgrade пакетов)
+  system_full_update
 
   # Устанавливаем базовые зависимости
   system_install_base_dependencies
