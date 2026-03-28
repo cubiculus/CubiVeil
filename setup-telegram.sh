@@ -167,19 +167,26 @@ step_prompt_telegram_config() {
   fi
 
   # Проверка валидности токена через API
-  # Пробуем с CA cert, затем без (для разных окружений)
-  local _tg_response _curl_exit
+  # Используем || true чтобы set -e не прерывал скрипт при сетевых ошибках
+  local _tg_response="" _curl_exit=0
+
+  # Пробуем с системным CA bundle
   _tg_response=$(curl -sf --max-time 10 \
     --cacert /etc/ssl/certs/ca-certificates.crt \
-    "https://api.telegram.org/bot${TG_TOKEN}/getMe" 2>/dev/null) || \
-  _tg_response=$(curl -sf --max-time 10 \
-    "https://api.telegram.org/bot${TG_TOKEN}/getMe" 2>/dev/null)
-  _curl_exit=$?
+    "https://api.telegram.org/bot${TG_TOKEN}/getMe" 2>/dev/null) || true
 
-  if [[ $_curl_exit -ne 0 ]]; then
-    warning "$(get_tg_str WARN_NETWORK_UNREACHABLE_RU)"
-    read -rp "$(get_tg_str PROMPT_CONTINUE_NO_CHECK_RU) " _skip_verify
-    [[ "$_skip_verify" =~ ^[yY]$ ]] || err "$(get_tg_str ERR_TG_TOKEN_INVALID_RU)"
+  # Fallback без CA bundle
+  if [[ -z "$_tg_response" ]]; then
+    _tg_response=$(curl -sf --max-time 10 \
+      "https://api.telegram.org/bot${TG_TOKEN}/getMe" 2>/dev/null) || true
+  fi
+
+  if [[ -z "$_tg_response" ]]; then
+    # Сервер не достигает api.telegram.org
+    warn "Не удалось подключиться к api.telegram.org."
+    warn "Возможно, Telegram заблокирован на этом сервере."
+    warn "Токен будет сохранён без проверки."
+    # Не выходим — продолжаем установку
   elif echo "$_tg_response" | grep -q '"ok":false'; then
     err "$(get_tg_str ERR_TG_TOKEN_INVALID_RU)"
   else
