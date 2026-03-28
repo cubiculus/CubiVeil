@@ -216,7 +216,7 @@ singbox_install() {
 
   # Разбираем
   # shellcheck disable=SC2034
-  local sb_tag sb_ver sb_url sb_sha256
+  local sb_tag sb_url sb_sha256
   IFS='|' read -r sb_tag sb_ver sb_url sb_sha256 <<<"$version_info"
 
   # Дополнительная проверка что URL не пустой
