@@ -604,7 +604,7 @@ step_install_singbox() { _step_singbox; }
 step_generate_keys_and_ports() { _generate_keys_and_ports; }
 step_install_marzban() { _step_marzban; }
 step_ssl() { _step_ssl; }
-step_configure() { _step_ssl; }
+step_configure() { :; }
 step_decoy_site() { _step_decoy; }
 step_traffic_shaping() { _step_traffic_shaping; }
 step_telegram() { _step_telegram; }

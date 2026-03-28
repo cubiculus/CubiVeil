@@ -83,7 +83,7 @@ ssl_generate_self_signed() {
 
   # Генерируем приватный ключ и сертификат
   openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout "${SSL_SELFIGNED_DIR}/privkey.pem" \
+    -keyout "${SSL_SELFIGNED_DIR}/key.pem" \
     -out "${SSL_SELFIGNED_DIR}/cert.pem" \
     -subj "/CN=${domain}/O=CubiVeil Dev/C=US" \
     -addext "subjectAltName=DNS:${domain},DNS:localhost,IP:127.0.0.1" \
@@ -98,7 +98,7 @@ ssl_generate_self_signed() {
   cp "${SSL_SELFIGNED_DIR}/cert.pem" "${SSL_SELFIGNED_DIR}/fullchain.pem"
 
   # Устанавливаем правильные права
-  chmod 600 "${SSL_SELFIGNED_DIR}/privkey.pem"
+  chmod 600 "${SSL_SELFIGNED_DIR}/key.pem"
   chmod 644 "${SSL_SELFIGNED_DIR}/cert.pem"
   chmod 644 "${SSL_SELFIGNED_DIR}/fullchain.pem"
 

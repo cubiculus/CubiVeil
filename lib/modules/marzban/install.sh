@@ -74,12 +74,51 @@ marzban_install() {
   # Запускаем установку в автоматическом режиме
   log_info "Running Marzban installation..."
 
-  if ! bash "$MARZBAN_INSTALL_SCRIPT" install --yes >/dev/null 2>&1; then
+  # Сначала устанавливаем необходимые зависимости
+  log_info "Installing Marzban dependencies..."
+  pkg_install_packages "python3" "python3-pip" "python3-venv" "git" "curl" "wget" "unzip" "docker.io" "docker-compose" || {
+    log_warn "Failed to install some dependencies, continuing anyway..."
+  }
+
+  # Проверяем и запускаем Docker
+  log_info "Checking Docker service..."
+  if systemctl is-active --quiet docker; then
+    log_info "Docker is already running"
+  else
+    log_info "Starting Docker service..."
+    systemctl enable docker >/dev/null 2>&1
+    systemctl start docker || {
+      log_error "Failed to start Docker service"
+      log_warn "Marzban requires Docker. Please start Docker manually:"
+      log_warn "  sudo systemctl enable docker && sudo systemctl start docker"
+      return 1
+    }
+  fi
+
+  # Проверяем что Docker работает
+  if ! docker info >/dev/null 2>&1; then
+    log_error "Docker is not working properly"
+    log_warn "Please check Docker installation and try again"
+    return 1
+  fi
+
+  # Добавляем текущего пользователя в группу docker если нужно
+  if ! groups | grep -q docker; then
+    log_info "Adding user to docker group..."
+    usermod -aG docker "$USER" || {
+      log_warn "Failed to add user to docker group"
+      log_warn "You may need to run Docker commands with sudo"
+    }
+  fi
+
+  # Запускаем установку с выводом ошибок
+  if ! bash "$MARZBAN_INSTALL_SCRIPT" install --yes 2>&1; then
     log_error "Marzban installation failed"
     log_warn "You can install Marzban manually later:"
     log_warn "  bash $MARZBAN_INSTALL_SCRIPT install --yes"
+    log_warn "  Or check logs: journalctl -u marzban -n 50"
     rm -f "$MARZBAN_INSTALL_SCRIPT"
-    return 0 # Не ошибка — продолжаем установку
+    return 1 # Это ошибка — Marzban критически важен
   fi
 
   # Очищаем временный файл
