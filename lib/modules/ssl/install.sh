@@ -129,22 +129,7 @@ ssl_generate() {
 
   log_step "ssl_generate" "Generating SSL certificate for ${domain}"
 
-  # Открываем порт 80 для валидации Let's Encrypt
-  # Важно: открываем ДО запуска certbot и ждём применения правил
-  if [[ -f "${SCRIPT_DIR}/lib/modules/firewall/install.sh" ]]; then
-    source "${SCRIPT_DIR}/lib/modules/firewall/install.sh"
-    firewall_open_port 80 tcp "Let's Encrypt validation"
-
-    # Дополнительно открываем через ufw напрямую (на случай если firewall ещё не настроен)
-    if command -v ufw &>/dev/null; then
-      ufw allow 80/tcp >/dev/null 2>&1 || true
-    fi
-
-    # Ждём применения правил файрвола
-    sleep 2
-  fi
-
-  # Проверяем что nginx слушает порт 80
+  # Порт 80 уже открыт в module_install, проверяем что nginx слушает
   if command -v nginx &>/dev/null && command -v ss &>/dev/null; then
     if ! ss -tlnp | grep -q ':80 '; then
       log_warn "Nginx is not listening on port 80, trying to reload..."
@@ -179,20 +164,7 @@ ssl_generate() {
   if ! certbot_output=$("${certbot_opts[@]}" 2>&1); then
     log_error "Failed to generate SSL certificate for ${domain}"
     log_error "Certbot output: ${certbot_output}"
-
-    # Закрываем порт 80
-    if [[ -f "${SCRIPT_DIR}/lib/modules/firewall/install.sh" ]]; then
-      source "${SCRIPT_DIR}/lib/modules/firewall/install.sh"
-      firewall_close_port 80 tcp
-    fi
-
     return 1
-  fi
-
-  # Закрываем порт 80 после успешной генерации
-  if [[ -f "${SCRIPT_DIR}/lib/modules/firewall/install.sh" ]]; then
-    source "${SCRIPT_DIR}/lib/modules/firewall/install.sh"
-    firewall_close_port 80 tcp
   fi
 
   log_success "SSL certificate generated for ${domain}"
@@ -251,12 +223,10 @@ ssl_configure_renewal() {
 ssl_configure() {
   log_step "ssl_configure" "Configuring SSL module"
 
-  # В dev-режиме генерируем самоподписные сертификаты
   if [[ "${DEV_MODE:-false}" == "true" ]]; then
     ssl_generate_self_signed
   else
-    # В production режиме настраиваем webroot для Let's Encrypt
-    ssl_configure_webroot
+    # Webroot уже создан в module_install, только настраиваем renewal
     ssl_configure_renewal
   fi
 
@@ -449,12 +419,29 @@ ssl_is_active() {
 module_install() {
   ssl_install
 
-  # В dev-режиме генерируем самоподписной сертификат
   if [[ "${DEV_MODE:-false}" == "true" ]]; then
     ssl_generate_self_signed
   else
-    # В production-режиме генерируем Let's Encrypt
-    ssl_generate "${DOMAIN:-}" "${LE_EMAIL:-}"
+    # 1. Создаём webroot ДО запуска certbot
+    ssl_configure_webroot
+
+    # 2. Открываем порт 80 и перезагружаем UFW
+    ufw allow 80/tcp comment "Let's Encrypt validation" >/dev/null 2>&1
+    ufw reload >/dev/null 2>&1
+    log_info "Port 80 opened for Let's Encrypt"
+    sleep 2
+
+    # 3. Получаем сертификат
+    local _ssl_result=0
+    ssl_generate "${DOMAIN:-}" "${LE_EMAIL:-}" || _ssl_result=$?
+
+    # 4. Закрываем порт 80 в любом случае
+    ufw delete allow 80/tcp >/dev/null 2>&1
+    ufw reload >/dev/null 2>&1
+    log_info "Port 80 closed"
+
+    # 5. Пробрасываем ошибку если certbot упал
+    return $_ssl_result
   fi
 }
 
