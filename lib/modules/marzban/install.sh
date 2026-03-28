@@ -144,8 +144,8 @@ marzban_install() {
     >"$_marzban_log" 2>&1 &
   local _marzban_bg_pid=$!
 
-  # Ждём "Application startup complete" до 120 секунд
-  local _max_wait=120
+  # Ждём "Application startup complete" до 10 секунд
+  local _max_wait=10
   local _started=false
   local _container
   local _start_time
