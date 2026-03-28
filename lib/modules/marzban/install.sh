@@ -144,8 +144,8 @@ marzban_install() {
     >"$_marzban_log" 2>&1 &
   local _marzban_bg_pid=$!
 
-  # Ждём "Application startup complete" до 10 секунд
-  local _max_wait=10
+  # Ждём, пока контейнер станет запущенным (до 120 секунд)
+  local _max_wait=120
   local _started=false
   local _container
   local _start_time
@@ -162,13 +162,13 @@ marzban_install() {
 
     # Контейнер может называться marzban или marzban_marzban_1 (docker-compose v1)
     _container=$(docker ps -a --format '{{.Names}}' | grep -E '^marzban(_marzban_1)?$' | head -1)
-    if [[ -n "$_container" ]] && docker logs "$_container" 2>/dev/null | grep -q "Application startup complete"; then
+    if [[ -n "$_container" ]] && docker inspect -f '{{.State.Running}}' "$_container" 2>/dev/null | grep -q '^true$'; then
       _started=true
       break
     fi
 
     echo -ne "\rWaiting for Marzban... ${_elapsed}s"
-    sleep 1
+    sleep 2
   done
   echo -ne "\r"
 
