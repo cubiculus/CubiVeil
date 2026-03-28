@@ -135,10 +135,6 @@ marzban_install() {
   export MARZBAN_TELEGRAM_ENABLED=0
   export MARZBAN_USERS_ENABLED=0
 
-  # Экспортируем переменные для запуска docker compose в фоне
-  export COMPOSE_UP_FLAGS="-d"
-  export DOCKER_COMPOSE_UP_FLAGS="-d"
-
   if ! echo "y" | bash "$MARZBAN_INSTALL_SCRIPT" install 2>&1; then
     log_error "Marzban installation failed"
     log_warn "You can install Marzban manually later:"
