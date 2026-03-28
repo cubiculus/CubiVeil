@@ -62,9 +62,11 @@ marzban_install() {
   # Загружаем официальный скрипт установки
   log_info "Downloading Marzban installation script..."
 
-  if ! curl -sfL "https://github.com/Gozargah/Marzban-scripts/raw/master/marzban.sh" -o "$MARZBAN_INSTALL_SCRIPT" 2>/dev/null; then
+  if ! curl -sfL --connect-timeout 10 --max-time 60 "https://github.com/Gozargah/Marzban-scripts/raw/master/marzban.sh" -o "$MARZBAN_INSTALL_SCRIPT" 2>/dev/null; then
     log_error "Failed to download Marzban installation script"
-    return 1
+    log_warn "Continuing without Marzban — you can install manually later:"
+    log_warn "  curl -sfL https://github.com/Gozargah/Marzban-scripts/raw/master/marzban.sh | bash -s install --yes"
+    return 0  # Не ошибка — продолжаем установку
   fi
 
   chmod +x "$MARZBAN_INSTALL_SCRIPT"
@@ -74,8 +76,10 @@ marzban_install() {
 
   if ! bash "$MARZBAN_INSTALL_SCRIPT" install --yes >/dev/null 2>&1; then
     log_error "Marzban installation failed"
+    log_warn "You can install Marzban manually later:"
+    log_warn "  bash $MARZBAN_INSTALL_SCRIPT install --yes"
     rm -f "$MARZBAN_INSTALL_SCRIPT"
-    return 1
+    return 0  # Не ошибка — продолжаем установку
   fi
 
   # Очищаем временный файл
