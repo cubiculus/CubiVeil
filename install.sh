@@ -136,6 +136,7 @@ fi
 
 DEV_MODE="false"
 DRY_RUN="false"
+DEBUG_MODE="false"
 DEV_DOMAIN="dev.cubiveil.local"
 DOMAIN=""
 INSTALL_DECOY="true"
@@ -175,6 +176,7 @@ _parse_args_early() {
     case "$1" in
     --dev) DEV_MODE="true" ;;
     --dry-run) DRY_RUN="true" ;;
+    --debug | -v) DEBUG_MODE="true" ;;
     --domain=*) DOMAIN="${1#*=}" ;;
     --no-decoy) INSTALL_DECOY="false" ;;
     --no-traffic-shaping) INSTALL_TRAFFIC_SHAPING="false" ;;
@@ -187,6 +189,12 @@ _parse_args_early() {
     esac
     shift
   done
+
+  # Включаем режим отладки bash если указан флаг --debug
+  if [[ "$DEBUG_MODE" == "true" ]]; then
+    set -x
+    export CUBIVEIL_LOG_LEVEL="DEBUG"
+  fi
 
   # Set default language to English in dev mode
   if [[ "$DEV_MODE" == "true" ]]; then
@@ -203,6 +211,7 @@ CubiVeil Installer — Marzban + Sing-box
 Options:
   --dev                 Dev mode: self-signed SSL, no domain required
   --dry-run             Simulate install without changing the system
+  --debug, -v           Enable debug mode (verbose bash output + DEBUG logs)
   --domain=NAME         Set domain (default in dev mode: ${DEV_DOMAIN})
   --no-decoy            Skip decoy-site installation
   --no-traffic-shaping  Skip traffic-shaping module
@@ -212,9 +221,10 @@ Options:
 Examples:
   sudo bash install.sh
   sudo bash install.sh --dev
-  sudo bash install.sh --dev --dry-run
+  sudo bash install.sh --debug --dry-run
   sudo bash install.sh --domain=panel.example.com
   sudo bash install.sh --telegram
+  sudo bash install.sh --debug 2>&1 | tee install_debug.log
 EOF
 }
 
@@ -451,8 +461,8 @@ prompt_inputs() {
 
 # Экспортируем глобальные переменные, нужные модулям
 _export_globals() {
-  export LANG_NAME DEV_MODE DRY_RUN DOMAIN LE_EMAIL SERVER_IP
-  export INSTALL_SCRIPT_DIR
+  export LANG_NAME DEV_MODE DRY_RUN DEBUG_MODE DOMAIN LE_EMAIL SERVER_IP
+  export INSTALL_SCRIPT_DIR CUBIVEIL_LOG_LEVEL
 }
 
 # run_module <name> — источник, configure, enable
