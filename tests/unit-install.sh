@@ -447,12 +447,12 @@ test_telegram_integration() {
     warn "install.sh: РЅРµ СѓРїРѕРјРёРЅР°РµС‚ setup-telegram.sh"
   fi
 
-  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ INSTALL_TG РїРµСЂРµРјРµРЅРЅР°СЏ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
-  if grep -q "INSTALL_TG" "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: РёСЃРїРѕР»СЊР·СѓРµС‚ INSTALL_TG РїРµСЂРµРјРµРЅРЅСѓСЋ"
+  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ INSTALL_TELEGRAM РїРµСЂРµРјРµРЅРЅР°СЏ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
+  if grep -q "INSTALL_TELEGRAM" "${SCRIPT_DIR}/install.sh"; then
+    pass "install.sh: РёСЃРїРѕР»СЊР·СѓРµС‚ INSTALL_TELEGRAM РїРµСЂРµРјРµРЅРЅСѓСЋ"
     ((TESTS_PASSED++)) || true
   else
-    warn "install.sh: INSTALL_TG РїРµСЂРµРјРµРЅРЅР°СЏ РЅРµ РЅР°Р№РґРµРЅР°"
+    warn "install.sh: INSTALL_TELEGRAM РїРµСЂРµРјРµРЅРЅР°СЏ РЅРµ РЅР°Р№РґРµРЅР°"
   fi
 }
 
@@ -470,7 +470,7 @@ test_dry_run_simulation() {
   prompt_inputs() {
     export DOMAIN="test.example.com"
     export LE_EMAIL="test@example.com"
-    export INSTALL_TG="n"
+    export INSTALL_TELEGRAM="n"
   }
   step_check_ip_neighborhood() { :; }
   step_system_update() { :; }
