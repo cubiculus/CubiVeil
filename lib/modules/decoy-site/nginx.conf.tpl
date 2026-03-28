@@ -30,36 +30,34 @@ server {
     add_header Referrer-Policy         "{{REFERRER_POLICY}}" always;
     add_header X-XSS-Protection        "1; mode=block"       always;
 
-    location / {
-        try_files $uri $uri/ =404;
-    }
+    error_page 404 /404.html;
+    location = /404.html { internal; }
 
-    # Файлы скачиваются без кэширования — каждый запрос создаёт трафик
-    location /files/ {
-        add_header Cache-Control "no-store, no-cache, must-revalidate" always;
-        add_header Pragma        "no-cache"                            always;
-        try_files $uri =404;
-    }
-
-    # Обработка POST (форма логина) — редирект обратно с fake-ошибкой
+    # POST на форму логина — редирект с fake-ошибкой
     location = / {
         limit_except GET HEAD {
-            # POST на логин — возвращаем 302 как будто неверный пароль
             return 302 /?error=invalid_credentials;
         }
         try_files $uri $uri/ =404;
     }
 
-    # Динамические маршруты — возвращаем index.html (SPA-поведение)
-    location /audit/ {
-        try_files $uri $uri/ /index.html;
+    # POST на upload — редирект как будто ошибка
+    location = /files/upload {
+        limit_except GET HEAD {
+            return 302 /files/upload/?error=upload_failed;
+        }
+        try_files $uri $uri/ =404;
     }
 
-    location /files/upload {
-        limit_except GET HEAD {
-            return 302 /files/?error=upload_failed;
-        }
-        try_files $uri =404;
+    # Динамические разделы — отдаём index.html
+    location /files/ {
+        add_header Cache-Control "no-store, no-cache, must-revalidate" always;
+        add_header Pragma "no-cache" always;
+        try_files $uri $uri/index.html =404;
+    }
+
+    location /audit/ {
+        try_files $uri $uri/index.html =404;
     }
 
     location ~ /\. { deny all; }

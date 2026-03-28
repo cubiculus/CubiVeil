@@ -104,6 +104,7 @@ decoy_build_webroot() {
   _generate_docs  # PDF документы
   _generate_video # MP4/MP3 файлы
   _generate_aux "$site_name"
+  _generate_inner_pages "$template" "$site_name" "$accent_color" "$copyright_year"
 
   find "$DECOY_WEBROOT" -type f -exec chmod 644 {} \;
   find "$DECOY_WEBROOT" -type d -exec chmod 755 {} \;
@@ -347,6 +348,236 @@ _write_minimal_ico() {
   printf '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' >>"$output"
   # Прозрачность (маска)
   dd if=/dev/zero bs=1024 count=1 status=none >>"$output" 2>/dev/null
+}
+
+# ── Внутренние страницы / Inner Pages ───────────────────────
+
+_generate_inner_pages() {
+  local template="$1" site_name="$2" accent="$3" year="$4"
+
+  # Общие CSS переменные для всех страниц
+  local css_vars="--accent:${accent};--accent-dim:${accent}22;"
+
+  # Список fake-файлов для /files/
+  local fake_files=()
+  while IFS= read -r f; do
+    fake_files+=("$f")
+  done < <(find "${DECOY_WEBROOT}/files" -maxdepth 1 -type f -printf '%f\n' 2>/dev/null | head -10)
+
+  # Генерируем fake строки таблицы файлов
+  local files_rows=""
+  for fname in "${fake_files[@]}"; do
+    local ext="${fname##*.}"
+    local size_mb
+    size_mb=$(gen_range 10 500)
+    local date_offset
+    date_offset=$(gen_range 1 30)
+    local fdate
+    fdate=$(date -d "-${date_offset} days" +"%Y-%m-%d" 2>/dev/null || date +"%Y-%m-%d")
+    local icon="📄"
+    [[ "$ext" == "jpg" || "$ext" == "png" ]] && icon="🖼"
+    [[ "$ext" == "mp4" ]] && icon="🎬"
+    [[ "$ext" == "mp3" ]] && icon="🎵"
+    [[ "$ext" == "pdf" ]] && icon="📕"
+    files_rows+="<tr><td>${icon} <a href='/files/${fname}'>${fname}</a></td>"
+    files_rows+="<td>${size_mb} MB</td><td>${fdate}</td>"
+    files_rows+="<td><button onclick='return false' class='btn-sm'>⬇ Download</button></td></tr>"
+  done
+
+  # Fake строки для /audit/logs
+  local log_rows=""
+  local log_actions=("LOGIN" "LOGOUT" "UPLOAD" "DELETE" "DOWNLOAD" "SHARE" "RENAME" "MOVE")
+  local log_users=("admin" "system" "api_user" "backup_agent" "monitor")
+  local log_ips=("10.0.0.1" "192.168.1.1" "172.16.0.5" "10.10.0.2")
+  for i in $(seq 1 20); do
+    local action="${log_actions[$((RANDOM % ${#log_actions[@]}))]}"
+    local user="${log_users[$((RANDOM % ${#log_users[@]}))]}"
+    local ip="${log_ips[$((RANDOM % ${#log_ips[@]}))]}"
+    local mins_ago
+    mins_ago=$(gen_range 1 1440)
+    local ltime
+    ltime=$(date -d "-${mins_ago} minutes" +"%Y-%m-%d %H:%M:%S" 2>/dev/null || date +"%Y-%m-%d %H:%M:%S")
+    local status_class="ok"
+    [[ "$((RANDOM % 5))" -eq 0 ]] && status_class="warn"
+    log_rows+="<tr class='${status_class}'><td>${ltime}</td><td>${user}</td>"
+    log_rows+="<td>${action}</td><td>${ip}</td>"
+    log_rows+="<td>$(gen_hex 8)</td></tr>"
+  done
+
+  # Общий <head> для всех страниц
+  _inner_head() {
+    local title="$1"
+    cat <<ENDHEAD
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${title} — ${site_name}</title>
+<style>
+  :root{${css_vars}}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:#0f1117;color:#cdd6f4;min-height:100vh}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .nav{background:#1e2030;border-bottom:1px solid var(--accent)33;padding:0 2rem;
+       display:flex;align-items:center;gap:2rem;height:52px}
+  .nav .logo{color:var(--accent);font-weight:700;font-size:1.1rem;letter-spacing:.05em}
+  .nav a{color:#cdd6f4;font-size:.9rem;opacity:.8}
+  .nav a:hover,.nav a.active{opacity:1;color:var(--accent)}
+  .nav .spacer{flex:1}
+  .nav .user{font-size:.85rem;opacity:.6}
+  .container{max-width:1100px;margin:2rem auto;padding:0 1.5rem}
+  h1{font-size:1.4rem;margin-bottom:1.5rem;color:#fff}
+  .card{background:#1e2030;border:1px solid #313244;border-radius:8px;padding:1.5rem;margin-bottom:1.5rem}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th{text-align:left;padding:.6rem 1rem;border-bottom:1px solid #313244;
+     color:var(--accent);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+  td{padding:.7rem 1rem;border-bottom:1px solid #1e203055}
+  tr:hover td{background:#313244}
+  tr.warn td{color:#f38ba8}
+  tr.ok td{color:#cdd6f4}
+  .btn{background:var(--accent);color:#fff;border:none;padding:.5rem 1.2rem;
+       border-radius:5px;cursor:pointer;font-size:.9rem}
+  .btn:hover{opacity:.85}
+  .btn-sm{background:transparent;border:1px solid var(--accent)66;color:var(--accent);
+          padding:.25rem .7rem;border-radius:4px;cursor:pointer;font-size:.8rem}
+  .breadcrumb{font-size:.85rem;opacity:.5;margin-bottom:1rem}
+  .breadcrumb a{color:inherit}
+  .alert{padding:.75rem 1rem;border-radius:6px;margin-bottom:1rem;font-size:.9rem}
+  .alert-err{background:#f38ba822;border:1px solid #f38ba844;color:#f38ba8}
+  .form-group{margin-bottom:1rem}
+  .form-group label{display:block;font-size:.85rem;margin-bottom:.35rem;opacity:.7}
+  .form-group input,.form-group select{width:100%;padding:.6rem .9rem;
+    background:#0f1117;border:1px solid #313244;border-radius:5px;color:#cdd6f4;font-size:.9rem}
+  .form-group input:focus{outline:none;border-color:var(--accent)}
+  .footer{text-align:center;padding:2rem;font-size:.8rem;opacity:.3;margin-top:2rem}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <span class="logo">${site_name}</span>
+  <a href="/">Dashboard</a>
+  <a href="/files/">Files</a>
+  <a href="/audit/logs">Audit Log</a>
+  <span class="spacer"></span>
+  <span class="user">admin@system</span>
+</nav>
+ENDHEAD
+  }
+
+  _inner_foot() {
+    cat <<ENDFOOT
+<div class="footer">© ${year} ${site_name}. All rights reserved.</div>
+</body></html>
+ENDFOOT
+  }
+
+  # ── /files/index.html ───────────────────────────────────────
+  mkdir -p "${DECOY_WEBROOT}/files"
+  {
+    _inner_head "File Storage"
+    cat <<ENDFILES
+<div class="container">
+  <div class="breadcrumb"><a href="/">Home</a> / Files</div>
+  <h1>File Storage</h1>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <span style="font-size:.9rem;opacity:.6">${#fake_files[@]} objects</span>
+      <button class="btn" onclick="window.location='/files/upload'">⬆ Upload</button>
+    </div>
+    <table>
+      <thead><tr><th>Name</th><th>Size</th><th>Modified</th><th>Actions</th></tr></thead>
+      <tbody>${files_rows}</tbody>
+    </table>
+  </div>
+</div>
+ENDFILES
+    _inner_foot
+  } >"${DECOY_WEBROOT}/files/index.html"
+
+  # ── /files/upload/index.html ────────────────────────────────
+  mkdir -p "${DECOY_WEBROOT}/files/upload"
+  {
+    _inner_head "Upload File"
+    cat <<ENDUPLOAD
+<div class="container">
+  <div class="breadcrumb"><a href="/">Home</a> / <a href="/files/">Files</a> / Upload</div>
+  <h1>Upload File</h1>
+  <div class="card" style="max-width:520px">
+    <form action="/files/upload" method="post" enctype="multipart/form-data">
+      <div class="form-group">
+        <label>Select file</label>
+        <input type="file" name="file">
+      </div>
+      <div class="form-group">
+        <label>Destination folder</label>
+        <select name="folder">
+          <option>/ (root)</option>
+          <option>/backup</option>
+          <option>/archive</option>
+          <option>/shared</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Description (optional)</label>
+        <input type="text" name="desc" placeholder="File description...">
+      </div>
+      <button class="btn" type="submit">Upload</button>
+      <a href="/files/" style="margin-left:1rem;font-size:.9rem">Cancel</a>
+    </form>
+  </div>
+</div>
+ENDUPLOAD
+    _inner_foot
+  } >"${DECOY_WEBROOT}/files/upload/index.html"
+
+  # ── /audit/logs/index.html ──────────────────────────────────
+  mkdir -p "${DECOY_WEBROOT}/audit/logs"
+  {
+    _inner_head "Audit Log"
+    cat <<ENDAUDIT
+<div class="container">
+  <div class="breadcrumb"><a href="/">Home</a> / Audit Log</div>
+  <h1>Audit Log</h1>
+  <div class="card">
+    <div style="display:flex;gap:1rem;margin-bottom:1rem;align-items:center">
+      <input style="flex:1;padding:.5rem .8rem;background:#0f1117;border:1px solid #313244;
+             border-radius:5px;color:#cdd6f4" placeholder="Filter events...">
+      <select style="padding:.5rem;background:#0f1117;border:1px solid #313244;
+              border-radius:5px;color:#cdd6f4">
+        <option>All events</option>
+        <option>LOGIN</option>
+        <option>UPLOAD</option>
+        <option>DELETE</option>
+      </select>
+      <button class="btn-sm" onclick="return false">Export CSV</button>
+    </div>
+    <table>
+      <thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>IP</th><th>Request ID</th></tr></thead>
+      <tbody>${log_rows}</tbody>
+    </table>
+  </div>
+</div>
+ENDAUDIT
+    _inner_foot
+  } >"${DECOY_WEBROOT}/audit/logs/index.html"
+
+  # ── /404.html ───────────────────────────────────────────────
+  {
+    _inner_head "404 Not Found"
+    cat <<END404
+<div class="container" style="text-align:center;padding-top:4rem">
+  <div style="font-size:4rem;opacity:.2;margin-bottom:1rem">404</div>
+  <h1 style="margin-bottom:.5rem">Page Not Found</h1>
+  <p style="opacity:.5;margin-bottom:2rem">The requested resource could not be found.</p>
+  <a href="/" class="btn">← Back to Dashboard</a>
+</div>
+END404
+    _inner_foot
+  } >"${DECOY_WEBROOT}/404.html"
+
+  log_info "Inner pages generated: /files/, /files/upload, /audit/logs, /404.html"
 }
 
 # ── Nginx конфигурация ───────────────────────────────────────
