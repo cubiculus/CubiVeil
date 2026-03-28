@@ -154,14 +154,25 @@ step_prompt_telegram_config() {
     err "$(get_tg_str ERR_TG_TOKEN_FORMAT_RU)"
   fi
 
-  # Проверка валидности токена через API с SSL pinning
-  if ! curl -sf --max-time 5 \
+  # Проверка валидности токена через API
+  # Пробуем с CA cert, затем без (для разных окружений)
+  local _tg_response _curl_exit
+  _tg_response=$(curl -sf --max-time 10 \
     --cacert /etc/ssl/certs/ca-certificates.crt \
-    "https://api.telegram.org/bot${TG_TOKEN}/getMe" >/dev/null 2>&1; then
-    err "$(get_tg_str ERR_TG_TOKEN_INVALID_RU)"
-  fi
+    "https://api.telegram.org/bot${TG_TOKEN}/getMe" 2>/dev/null) || \
+  _tg_response=$(curl -sf --max-time 10 \
+    "https://api.telegram.org/bot${TG_TOKEN}/getMe" 2>/dev/null)
+  _curl_exit=$?
 
-  success "$(get_tg_str OK_TG_TOKEN_VERIFIED_RU)"
+  if [[ $_curl_exit -ne 0 ]]; then
+    warning "$(get_tg_str WARN_NETWORK_UNREACHABLE_RU)"
+    read -rp "$(get_tg_str PROMPT_CONTINUE_NO_CHECK_RU) " _skip_verify
+    [[ "$_skip_verify" =~ ^[yY]$ ]] || err "$(get_tg_str ERR_TG_TOKEN_INVALID_RU)"
+  elif echo "$_tg_response" | grep -q '"ok":false'; then
+    err "$(get_tg_str ERR_TG_TOKEN_INVALID_RU)"
+  else
+    success "$(get_tg_str OK_TG_TOKEN_VERIFIED_RU)"
+  fi
 
   local prompt_chat_id
   prompt_chat_id="$(get_tg_str PROMPT_TG_CHAT_ID_RU)"

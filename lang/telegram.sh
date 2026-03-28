@@ -48,6 +48,12 @@ ERR_TG_TOKEN_FORMAT_RU="Некорректный формат токена Teleg
 ERR_TG_TOKEN_INVALID="Invalid Telegram token. Verify token from @BotFather"
 ERR_TG_TOKEN_INVALID_RU="Токен Telegram недействителен. Проверь токен от @BotFather"
 
+WARN_NETWORK_UNREACHABLE="Could not connect to api.telegram.org. Check network connection."
+WARN_NETWORK_UNREACHABLE_RU="Не удалось подключиться к api.telegram.org. Проверь сетевое подключение."
+
+PROMPT_CONTINUE_NO_CHECK="Continue without token verification? [y/N]"
+PROMPT_CONTINUE_NO_CHECK_RU="Продолжить без проверки токена? [y/N]"
+
 ERR_BOT_FILE_NOT_FOUND="Bot file not found: {PATH}"
 ERR_BOT_FILE_NOT_FOUND_RU="Файл бота не найден: {PATH}"
 
