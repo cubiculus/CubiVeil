@@ -7,46 +7,46 @@
 set -euo pipefail
 
 # ── Определение директории скрипта ───────────────────────────
+# Используем _TG_DIR чтобы избежать коллизий с SCRIPT_DIR из lib/*.sh
 # Когда вызван из install.sh, INSTALL_SCRIPT_DIR уже указывает на корень репо.
 # Когда запущен напрямую, используем BASH_SOURCE.
 if [[ -n "${INSTALL_SCRIPT_DIR:-}" && -d "${INSTALL_SCRIPT_DIR}/lib" ]]; then
-  SCRIPT_DIR="$INSTALL_SCRIPT_DIR"
+  _TG_DIR="$INSTALL_SCRIPT_DIR"
 else
-  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  _TG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 fi
 
 # ── Подключение локализации ──────────────────────────────────
-if [[ -f "${SCRIPT_DIR}/lang/telegram.sh" ]]; then
-  source "${SCRIPT_DIR}/lang/telegram.sh"
-elif [[ -f "${SCRIPT_DIR}/lang/main.sh" ]]; then
-  source "${SCRIPT_DIR}/lang/main.sh"
+if [[ -f "${_TG_DIR}/lang/telegram.sh" ]]; then
+  source "${_TG_DIR}/lang/telegram.sh"
+elif [[ -f "${_TG_DIR}/lang/main.sh" ]]; then
+  source "${_TG_DIR}/lang/main.sh"
 else
-  source "${SCRIPT_DIR}/lib/fallback.sh"
+  source "${_TG_DIR}/lib/fallback.sh"
 fi
 
 # ── Подключение общих модулей ────────────────────────────────
-# Обязательно загружаем в правильном порядке (без вложенных lib/lib путей)
-export TELEGRAM_BOT_lib_SCRIPT_DIR="${SCRIPT_DIR}/lib"
+export TELEGRAM_BOT_lib_SCRIPT_DIR="${_TG_DIR}/lib"
 
-source "${SCRIPT_DIR}/lib/output.sh" || {
+source "${_TG_DIR}/lib/output.sh" || {
   echo -e "\033[0;31m[✗] Не удалось загрузить lib/output.sh\033[0m"
   exit 1
 }
-source "${SCRIPT_DIR}/lib/security.sh" || {
+source "${_TG_DIR}/lib/security.sh" || {
   echo -e "\033[0;31m[✗] Не удалось загрузить lib/security.sh\033[0m"
   exit 1
 }
-source "${SCRIPT_DIR}/lib/common.sh" || {
+source "${_TG_DIR}/lib/common.sh" || {
   echo -e "\033[0;31m[✗] Не удалось загрузить lib/common.sh\033[0m"
   exit 1
 }
-source "${SCRIPT_DIR}/lib/utils.sh" || {
+source "${_TG_DIR}/lib/utils.sh" || {
   err "Не удалось загрузить lib/utils.sh"
 }
-source "${SCRIPT_DIR}/lib/i18n.sh" || {
+source "${_TG_DIR}/lib/i18n.sh" || {
   warn "Не удалось загрузить lib/i18n.sh — локализация может не работать"
 }
-source "${SCRIPT_DIR}/lib/validation.sh" || {
+source "${_TG_DIR}/lib/validation.sh" || {
   warn "Не удалось загрузить lib/validation.sh — валидация может не работать"
 }
 
@@ -225,8 +225,8 @@ step_install_bot() {
 
   mkdir -p /opt/cubiveil-bot/backups
 
-  local BOT_SOURCE="${SCRIPT_DIR}/assets/telegram-bot/bot.py"
-  local BOT_MODULES_DIR="${SCRIPT_DIR}/assets/telegram-bot"
+  local BOT_SOURCE="${_TG_DIR}/assets/telegram-bot/bot.py"
+  local BOT_MODULES_DIR="${_TG_DIR}/assets/telegram-bot"
 
   if [[ ! -f "$BOT_SOURCE" ]]; then
     err "$(get_tg_str ERR_BOT_FILE_NOT_FOUND_RU | sed "s/{PATH}/${BOT_SOURCE}/g")"
@@ -280,7 +280,7 @@ After=network.target marzban.service
 [Service]
 Type=simple
 EnvironmentFile=/etc/cubiveil/bot.env
-Environment="CUBIVEIL_UTILS_DIR=${SCRIPT_DIR}/utils"
+Environment="CUBIVEIL_UTILS_DIR=${_TG_DIR}/utils"
 ExecStart=/usr/bin/python3 /opt/cubiveil-bot/bot.py poll
 Restart=always
 RestartSec=10s
@@ -454,11 +454,11 @@ print_finish() {
 telegram_main() {
   # Выбор языка если не выбран
   if [[ -z "${LANG_NAME:-}" ]]; then
-    if [[ -f "${SCRIPT_DIR}/lang/telegram.sh" ]]; then
+    if [[ -f "${_TG_DIR}/lang/telegram.sh" ]]; then
       # Язык уже выбран в lang/telegram.sh
       :
-    elif [[ -f "${SCRIPT_DIR}/lang/main.sh" ]]; then
-      source "${SCRIPT_DIR}/lang/main.sh"
+    elif [[ -f "${_TG_DIR}/lang/main.sh" ]]; then
+      source "${_TG_DIR}/lang/main.sh"
     fi
   fi
 
