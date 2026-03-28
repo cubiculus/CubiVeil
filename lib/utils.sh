@@ -20,11 +20,15 @@ fi
 
 # ── Генераторы случайных значений ────────────────────────────
 gen_random() {
-  LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w "$1" | head -n 1
+  local length="${1:-16}"
+  [[ "$length" -le 0 ]] && { echo ""; return 0; }
+  LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w "$length" | head -n 1
 }
 
 gen_hex() {
-  LC_ALL=C tr -dc 'a-f0-9' </dev/urandom | fold -w "$1" | head -n 1
+  local length="${1:-16}"
+  [[ "$length" -le 0 ]] && { echo ""; return 0; }
+  LC_ALL=C tr -dc 'a-f0-9' </dev/urandom | fold -w "$length" | head -n 1
 }
 
 gen_port() {
