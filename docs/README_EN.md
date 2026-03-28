@@ -321,6 +321,12 @@ cubiveil/
 │   └── telegram.sh       # Telegram bot localization
 ├── lib/
 │   ├── core/
+│   │   ├── installer/        # Installer modules (new architecture)
+│   │   │   ├── bootstrap.sh  # Repository file download
+│   │   │   ├── cli.sh        # Command-line argument parsing
+│   │   │   ├── orchestrator.sh # Module installation orchestration
+│   │   │   ├── prompt.sh     # Interactive prompts
+│   │   │   └── ui.sh         # UI functions (banner, reports)
 │   │   ├── log.sh        # Logging with localization support
 │   │   └── system.sh     # System functions
 │   ├── modules/
