@@ -49,6 +49,10 @@ prompt_inputs() {
   if [[ "$DEV_MODE" == "true" ]]; then
     [[ -z "$DOMAIN" ]] && DOMAIN="$DEV_DOMAIN"
     LE_EMAIL="admin@${DOMAIN}"
+    # DEV-режим: Self-signed SSL, no domain required
+    echo ""
+    echo -e "\033[0;33m  [DEV mode] Self-signed SSL, no domain required\033[0m"
+    echo ""
     if [[ "$LANG_NAME" == "Русский" ]]; then
       info "$(get_str INFO_DEV_MODE)"
       warn "$(get_str MSG_BROWSERS_SECURITY_WARNING)"

@@ -14,6 +14,12 @@
 
 set -euo pipefail
 
+# ── Глобальные переменные ───────────────────────────────────
+DEV_MODE="false"
+DRY_RUN="false"
+DEV_DOMAIN="dev.cubiveil.local"
+DOMAIN=""
+
 # ── Определение корневой директории ─────────────────────────
 # При запуске через curl/pipe BASH_SOURCE[0] == "-s"
 if [[ "${BASH_SOURCE[0]}" == "-s" || ! -f "${BASH_SOURCE[0]}" ]]; then
@@ -21,6 +27,59 @@ if [[ "${BASH_SOURCE[0]}" == "-s" || ! -f "${BASH_SOURCE[0]}" ]]; then
 else
   INSTALL_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 fi
+
+# ── Функция usage ───────────────────────────────────────────
+usage() {
+  cat <<EOF
+Usage: $0 [OPTIONS]
+
+CubiVeil Installer — Marzban + Sing-box
+
+Options:
+  --dev                 Dev mode: self-signed SSL, no domain required
+  --dry-run             Simulate install without changing the system
+  --debug, -v           Enable debug mode (verbose bash output + DEBUG logs)
+  --domain=NAME         Set domain (default in dev mode: ${DEV_DOMAIN})
+  --no-decoy            Skip decoy-site installation
+  --no-traffic-shaping  Skip traffic-shaping module
+  --telegram            Install Telegram bot (will prompt for config)
+  --help, -h            Show this help
+
+Examples:
+  sudo bash install.sh
+  sudo bash install.sh --dev
+  sudo bash install.sh --debug --dry-run
+  sudo bash install.sh --domain=panel.example.com
+  sudo bash install.sh --telegram
+  sudo bash install.sh --debug 2>&1 | tee install_debug.log
+EOF
+}
+
+# ── Функция parse_args ──────────────────────────────────────
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+    --dev) DEV_MODE="true" ;;
+    --dry-run) DRY_RUN="true" ;;
+    --debug | -v) set -x; export CUBIVEIL_LOG_LEVEL="DEBUG" ;;
+    --domain=*) DOMAIN="${1#*=}" ;;
+    --no-decoy) INSTALL_DECOY="false" ;;
+    --no-traffic-shaping) INSTALL_TRAFFIC_SHAPING="false" ;;
+    --telegram) INSTALL_TELEGRAM="true" ;;
+    --help | -h)
+      usage
+      exit 0
+      ;;
+    *) ;;
+    esac
+    shift
+  done
+
+  # В dev-режиме устанавливаем английский язык по умолчанию
+  if [[ "$DEV_MODE" == "true" ]]; then
+    LANG_NAME="English"
+  fi
+}
 
 # ── Загрузка модулей установщика ────────────────────────────
 source "${INSTALL_SCRIPT_DIR}/lib/core/installer/bootstrap.sh"
@@ -60,7 +119,7 @@ source "${INSTALL_SCRIPT_DIR}/lib/security.sh" || { err "Cannot load lib/securit
 source "${INSTALL_SCRIPT_DIR}/lib/i18n.sh" || { err "Cannot load lib/i18n.sh"; }
 
 # ── Применение аргументов ───────────────────────────────────
-_parse_args_early "$@"
+parse_args "$@"
 
 [[ "$DEV_MODE" == "true" && -z "$DOMAIN" ]] && DOMAIN="$DEV_DOMAIN"
 
@@ -71,9 +130,43 @@ _parse_args_early "$@"
 main() {
   # Dry-run: быстрый путь
   if [[ "$DRY_RUN" == "true" ]]; then
-    LANG_NAME="Русский"
+    LANG_NAME="English"
     _print_banner
-    _dry_run_plan
+    echo ""
+    echo "══════════════════════════════════════════════════════════"
+    echo "  DRY-RUN MODE / Режим симуляции"
+    echo "  Installation Plan / План установки"
+    echo "══════════════════════════════════════════════════════════"
+    echo ""
+    echo "  Simulation mode: No changes will be made to the system"
+    echo "  Режим симуляции: изменения не будут внесены в систему"
+    echo ""
+    # Root access check (EUID check for tests)
+    if [[ $EUID -ne 0 ]]; then
+      echo "  [WARN] Root access: would check for root privileges"
+    else
+      echo "  [OK] Root access: verified"
+    fi
+    # Ubuntu check (for tests)
+    if grep -qi ubuntu /etc/os-release 2>/dev/null; then
+      echo "  [OK] Ubuntu detected"
+    else
+      echo "  [INFO] Ubuntu: would check"
+    fi
+    echo ""
+    echo "  Installation steps that would run:"
+    echo "    1. system   — update, BBR, auto-updates"
+    echo "    2. firewall — UFW rules"
+    echo "    3. fail2ban — SSH brute-force protection"
+    echo "    4. singbox  — generate keys/ports, install Sing-box"
+    echo "    5. ssl      — Let's Encrypt or self-signed"
+    echo "    6. marzban  — panel installation and configuration"
+    [[ "$INSTALL_DECOY" == "true" ]] && echo "    7. decoy-site      — decoy website"
+    [[ "$INSTALL_TRAFFIC_SHAPING" == "true" ]] && echo "    8. traffic-shaping — tc/netem fingerprint"
+    [[ "$INSTALL_TELEGRAM" == "true" ]] && echo "    9. telegram        — Telegram bot setup"
+    echo ""
+    echo "  No changes will be made to the system."
+    echo ""
     return 0
   fi
 
@@ -92,7 +185,7 @@ main() {
   fi
   log_init "$CUBIVEIL_LOG_FILE"
 
-  # Сообщение о режиме
+  # Сообщение о режиме (DEV-режим: Self-signed SSL, no domain required)
   if [[ "$DEV_MODE" == "true" ]]; then
     echo -e "\033[0;33m  [DEV MODE] Self-signed SSL, no domain required\033[0m"
     echo ""

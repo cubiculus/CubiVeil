@@ -308,8 +308,9 @@ test_orchestrator_generate_keys_and_ports() {
   local test_dir
   test_dir=$(mktemp -d)
 
-  # Mock для mkdir
-  mkdir() { command mkdir -p "$test_dir/etc/cubiveil" 2>/dev/null || true; }
+  # Устанавливаем INSTALL_SCRIPT_DIR и TEST_DIR для корректной работы
+  INSTALL_SCRIPT_DIR="${PROJECT_ROOT}"
+  TEST_DIR="$test_dir"
 
   # Mock для unique_port
   unique_port() { echo "$((30000 + RANDOM % 1000))"; }
@@ -324,7 +325,7 @@ test_orchestrator_generate_keys_and_ports() {
 
   _generate_keys_and_ports
 
-  # Проверка что файлы созданы
+  # Проверка что файлы созданы в TEST_DIR
   if [[ -f "$test_dir/etc/cubiveil/reality.json" ]]; then
     pass "_generate_keys_and_ports: reality.json создан"
   else

@@ -125,17 +125,18 @@ test_usage_has_dry_run() {
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: usage СЃРѕРґРµСЂР¶РёС‚ РїСЂРёРјРµСЂС‹ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: usage содержит примеры ───────────────────────────────────────────────
 test_usage_has_examples() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ usage: РЅР°Р»РёС‡РёРµ РїСЂРёРјРµСЂРѕРІ..."
+  info "Тестирование usage: наличие примеров..."
 
   local examples_count
-  examples_count=$(grep -c 'Examples:' "${SCRIPT_DIR}/install.sh" || echo "0")
+  examples_count=$(grep -c 'Examples:' "${SCRIPT_DIR}/install.sh" 2>/dev/null || echo "0")
+  examples_count="${examples_count%%[^0-9]*}"  # Удаляем все нецифровые символы
 
   if [[ "$examples_count" -ge 1 ]]; then
-    pass "install.sh: usage СЃРѕРґРµСЂР¶РёС‚ РїСЂРёРјРµСЂС‹"
+    pass "install.sh: usage содержит примеры"
   else
-    fail "install.sh: usage РЅРµ СЃРѕРґРµСЂР¶РёС‚ РїСЂРёРјРµСЂС‹"
+    fail "install.sh: usage не содержит примеры"
   fi
 }
 

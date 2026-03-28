@@ -33,6 +33,12 @@ gen_range() {
 # ── Профиль: выбор шаблона и генерация идентичности ─────────
 
 decoy_generate_profile() {
+  # Проверяем наличие jq для работы с JSON
+  if ! command -v jq &>/dev/null; then
+    log_error "jq not found — required for decoy-site configuration"
+    return 1
+  fi
+
   local templates=("portal" "dashboard" "admin" "storage")
   # $RANDOM допустим — выбор из массива, не криптография
   local template="${templates[$((RANDOM % 4))]}"
@@ -92,6 +98,13 @@ decoy_generate_profile() {
 }
 EOF
   chmod 600 "$DECOY_CONFIG"
+
+  # Проверяем что конфиг записан корректно
+  if ! jq -e . "$DECOY_CONFIG" >/dev/null 2>&1; then
+    log_error "Failed to write valid decoy config JSON"
+    return 1
+  fi
+
   log_info "Профиль: шаблон=${template} имя='${site_name}' цвет=${accent_color}"
 }
 

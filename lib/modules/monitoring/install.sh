@@ -100,15 +100,21 @@ monitor_check_services() {
 monitor_service_status() {
   local service="$1"
 
+  if [[ -z "$service" ]]; then
+    log_warn "monitor_service_status: service name required"
+    echo "not installed"
+    return 2
+  fi
+
   if svc_active "$service"; then
     echo "active"
     return 0
   elif svc_exists "$service"; then
     echo "inactive"
-    return 1
+    return 0
   else
     echo "not installed"
-    return 2
+    return 0
   fi
 }
 

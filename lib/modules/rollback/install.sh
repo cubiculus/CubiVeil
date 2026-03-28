@@ -112,7 +112,7 @@ rollback_select_backup() {
 
     if [[ "$selection" == "q" ]]; then
       log_info "Rollback cancelled"
-      exit 0
+      return 1
     fi
 
     if [[ -n "${BACKUP_MAP[$selection]}" ]]; then

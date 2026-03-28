@@ -194,7 +194,13 @@ _step_telegram() {
 _generate_keys_and_ports() {
   source "${INSTALL_SCRIPT_DIR}/lib/utils.sh"
 
-  mkdir -p /etc/cubiveil
+  # Поддержка тестового режима — запись в TEST_DIR вместо /etc/cubiveil
+  local _config_dir="/etc/cubiveil"
+  if [[ -n "${TEST_DIR:-}" ]]; then
+    _config_dir="${TEST_DIR}/etc/cubiveil"
+  fi
+
+  mkdir -p "$_config_dir"
 
   # Reality keypair
   local _private_key=""
@@ -204,7 +210,7 @@ _generate_keys_and_ports() {
   fi
   [[ -z "$_private_key" ]] && _private_key=$(generate_secure_key 32 2>/dev/null || openssl rand -base64 32)
 
-  cat >/etc/cubiveil/reality.json <<EOF
+  cat >"$_config_dir/reality.json" <<EOF
 {
   "private_key": "${_private_key}",
   "sni": "www.microsoft.com"
@@ -212,7 +218,7 @@ _generate_keys_and_ports() {
 EOF
 
   # Сохраняем домен
-  cat >/etc/cubiveil/domain.json <<EOF
+  cat >"$_config_dir/domain.json" <<EOF
 {
   "domain": "${DOMAIN:-0.0.0.0}",
   "email": "${LE_EMAIL:-}",
@@ -226,7 +232,7 @@ EOF
   PANEL_PORT=$(unique_port)
   SUB_PORT=$(unique_port)
 
-  cat >/etc/cubiveil/ports.json <<EOF
+  cat >"$_config_dir/ports.json" <<EOF
 {
   "trojan":        ${TROJAN_PORT},
   "shadowsocks":   ${SS_PORT},

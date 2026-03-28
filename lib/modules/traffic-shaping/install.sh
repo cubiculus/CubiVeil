@@ -19,7 +19,12 @@ fi
 if [[ -f "${SCRIPT_DIR}/lib/utils.sh" ]]; then
   source "${SCRIPT_DIR}/lib/utils.sh"
 fi
-source "${MODULE_DIR}/persist.sh"
+if [[ -f "${MODULE_DIR}/persist.sh" ]]; then
+  source "${MODULE_DIR}/persist.sh"
+else
+  log_error "persist.sh not found — traffic-shaping module is incomplete"
+  return 1 2>/dev/null || exit 1
+fi
 
 TS_CONFIG="/etc/cubiveil/traffic-shaping.json"
 TS_SERVICE="cubiveil-tc"

@@ -17,11 +17,26 @@ set -euo pipefail
 get_str() {
   local key="$1"
   local ru_key="${key}_RU"
+  local result=""
 
   if [[ "$LANG_NAME" == "Русский" ]]; then
-    echo "${!ru_key:-${!key}}"
+    # Проверяем существование переменной перед использованием
+    if [[ -v ru_key ]]; then
+      result="${!ru_key}"
+    elif [[ -v key ]]; then
+      result="${!key}"
+    else
+      result="[$key]"
+    fi
+    echo "$result"
   else
-    echo "${!key}"
+    # English / default
+    if [[ -v key ]]; then
+      result="${!key}"
+    else
+      result="[$key]"
+    fi
+    echo "$result"
   fi
 }
 
@@ -32,6 +47,7 @@ get_str() {
 msg() {
   local key="$1"
   local default="${2:-}"
+  local result=""
 
   # Проверяем есть ли массив MSG
   if declare -p MSG 2>/dev/null | grep -q 'declare -A'; then
@@ -40,10 +56,21 @@ msg() {
     # Проверяем обычные переменные
     local ru_key="${key}_RU"
     if [[ "$LANG_NAME" == "Русский" ]]; then
-      echo "${!ru_key:-${!key:-$default}}"
+      if [[ -v ru_key ]]; then
+        result="${!ru_key}"
+      elif [[ -v key ]]; then
+        result="${!key}"
+      else
+        result="$default"
+      fi
     else
-      echo "${!key:-$default}"
+      if [[ -v key ]]; then
+        result="${!key}"
+      else
+        result="$default"
+      fi
     fi
+    echo "$result"
   fi
 }
 

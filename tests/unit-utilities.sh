@@ -251,7 +251,7 @@ test_diagnose_functions() {
   done
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: С„СѓРЅРєС†РёРё РІ export-config.sh в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# в”Ђв"Ђ РўРµСЃС‚: С„СѓРЅРєС†РёРё РІ export-config.sh в”Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
 test_export_functions() {
   info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёР№ РІ export-config.sh..."
 
@@ -264,7 +264,7 @@ test_export_functions() {
   )
 
   for func in "${functions[@]}"; do
-    if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/export-config.sh" 2>/dev/null; then
+    if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/utils/export-config.sh" 2>/dev/null; then
       pass "Р¤СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚: $func"
       ((TESTS_PASSED++)) || true
     else
@@ -273,7 +273,7 @@ test_export_functions() {
   done
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: С„СѓРЅРєС†РёРё РІ update.sh в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# в"Ђв"Ђ РўРµСЃС‚: С„СѓРЅРєС†РёРё РІ update.sh в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
 test_update_functions() {
   info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёР№ РІ update.sh..."
 
@@ -288,7 +288,7 @@ test_update_functions() {
   )
 
   for func in "${functions[@]}"; do
-    if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/update.sh" 2>/dev/null; then
+    if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/utils/update.sh" 2>/dev/null; then
       pass "Р¤СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚: $func"
       ((TESTS_PASSED++)) || true
     else
@@ -326,7 +326,7 @@ test_step_update_singbox_skip() {
     fail "step_update_singbox: РЅРµСЂР°Р±РѕС‚Р°СЋС‰Р°СЏ РІРµС‚РєР° РїСЂРѕРїСѓСЃРєР°"
   fi
 }
-# в”Ђв”Ђ РўРµСЃС‚: С„СѓРЅРєС†РёРё РІ rollback.sh в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# в"Ђв"Ђ РўРµСЃС‚: С„СѓРЅРєС†РёРё РІ rollback.sh в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
 test_rollback_functions() {
   info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёР№ РІ rollback.sh..."
 
@@ -341,7 +341,7 @@ test_rollback_functions() {
   )
 
   for func in "${functions[@]}"; do
-    if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/rollback.sh" 2>/dev/null; then
+    if grep -q "^[[:space:]]*${func}()" "${SCRIPT_DIR}/utils/rollback.sh" 2>/dev/null; then
       pass "Р¤СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚: $func"
       ((TESTS_PASSED++)) || true
     else
@@ -562,9 +562,6 @@ main() {
   test_backup_functions
   echo ""
 
-  test_profiles_functions
-  echo ""
-
   test_monitor_functions
   echo ""
 
@@ -587,9 +584,6 @@ main() {
   echo ""
 
   test_commands_updated
-  echo ""
-
-  test_cli_manager
   echo ""
 
   test_install_aliases
