@@ -32,6 +32,9 @@
 ### Установка
 
 ```bash
+# Установка git (если не установлен)
+sudo apt update && sudo apt install -y git
+
 # Клонирование репозитория
 git clone https://github.com/cubiculus/cubiveil.git
 cd cubiveil

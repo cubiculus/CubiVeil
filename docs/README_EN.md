@@ -57,6 +57,9 @@ The project provides:
 ### Installation
 
 ```bash
+# Install git (if not installed)
+sudo apt update && sudo apt install -y git
+
 # Clone repository
 git clone https://github.com/cubiculus/cubiveil.git
 cd cubiveil
