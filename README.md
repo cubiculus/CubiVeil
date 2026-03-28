@@ -121,6 +121,9 @@ sudo bash install.sh --debug
 # Режим отладки + симуляция (без изменений в системе)
 sudo bash install.sh --debug --dry-run
 
+# Режим отладки + dev-режим (тестирование с подробным выводом)
+sudo bash install.sh --debug --dev
+
 # Пропустить установку сайта-прикрытия
 sudo bash install.sh --no-decoy
 

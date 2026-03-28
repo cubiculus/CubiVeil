@@ -129,6 +129,9 @@ sudo bash install.sh --debug
 # Debug mode + simulation (no system changes)
 sudo bash install.sh --debug --dry-run
 
+# Debug mode + dev mode (testing with verbose output)
+sudo bash install.sh --debug --dev
+
 # Skip decoy-site installation
 sudo bash install.sh --no-decoy
 
