@@ -832,6 +832,20 @@ _print_finish() {
       echo "══════════════════════════════════════════════════════════"
       # shellcheck disable=SC1090
       source "$_mikrotik_mod"
+
+      # Сохраняем скрипт в файл
+      if declare -f decoy_save_mikrotik_script >/dev/null; then
+        decoy_save_mikrotik_script "/etc/cubiveil/mikrotik-decoy.rsc"
+        echo ""
+        echo "  Скрипт сохранён: /etc/cubiveil/mikrotik-decoy.rsc"
+        echo "  Для импорта в MikroTik:"
+        echo "    1. Скопируйте файл на компьютер"
+        echo "    2. В WinBox: Files → перетащите mikrotik-decoy.rsc"
+        echo "    3. В Terminal: /import file-name= mikrotik-decoy.rsc"
+      fi
+
+      # Вывод в терминал
+      echo ""
       declare -f decoy_print_mikrotik_script >/dev/null && decoy_print_mikrotik_script || true
       echo "══════════════════════════════════════════════════════════"
     fi

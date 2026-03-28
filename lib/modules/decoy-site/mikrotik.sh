@@ -157,3 +157,22 @@ add name="cv-cleanup" \
 # ══════════════════════════════════════════════════════════════
 MIKROTIK
 }
+
+# Сохранение MikroTik скрипта в файл
+decoy_save_mikrotik_script() {
+  local output_file="${1:-/etc/cubiveil/mikrotik-decoy.rsc}"
+
+  # Генерируем скрипт и сохраняем в файл
+  {
+    echo "# ══════════════════════════════════════════════════════════════"
+    echo "# CubiVeil — MikroTik RouterOS Traffic Imitation Script"
+    echo "# Generated: $(date '+%Y-%m-%d %H:%M:%S')"
+    echo "# Domain: ${DOMAIN}"
+    echo "# ══════════════════════════════════════════════════════════════"
+    echo ""
+    decoy_print_mikrotik_script
+  } > "$output_file"
+
+  chmod 644 "$output_file" 2>/dev/null || true
+  log_info "MikroTik script saved to: $output_file"
+}
