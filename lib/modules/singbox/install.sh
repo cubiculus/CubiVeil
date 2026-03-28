@@ -333,8 +333,8 @@ singbox_update() {
   local version_info
   version_info=$(singbox_get_version)
 
-  local sb_tag sb_ver sb_url sb_sha256
-  IFS='|' read -r sb_tag sb_ver sb_url sb_sha256 <<<"$version_info"
+  local sb_tag sb_url sb_sha256
+  IFS='|' read -r sb_tag _ sb_url sb_sha256 <<<"$version_info"
 
   if [[ "$cur_ver" == *"$sb_tag"* ]]; then
     log_info "Sing-box already up to date: $sb_tag"
