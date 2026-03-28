@@ -135,34 +135,37 @@ marzban_install() {
   export MARZBAN_TELEGRAM_ENABLED=0
   export MARZBAN_USERS_ENABLED=0
 
-  if ! echo "y" | bash "$MARZBAN_INSTALL_SCRIPT" install 2>&1; then
-    log_error "Marzban installation failed"
-    log_warn "You can install Marzban manually later:"
-    log_warn "  bash $MARZBAN_INSTALL_SCRIPT install"
-    log_warn "  Or check logs: journalctl -u marzban -n 50"
+  log_info "Running Marzban installation (background)..."
+  echo "y" | bash "$MARZBAN_INSTALL_SCRIPT" install 2>&1 &
+  local _marzban_bg_pid=$!
+
+  # Ждём "Application startup complete" до 120 секунд
+  local _max_wait=120
+  local _waited=0
+  local _started=false
+  while [[ $_waited -lt $_max_wait ]]; do
+    if docker logs marzban 2>/dev/null | grep -q "Application startup complete"; then
+      _started=true
+      break
+    fi
+    sleep 3
+    ((_waited += 3)) || true
+  done
+
+  # Убиваем зависший foreground-процесс docker compose up
+  # Контейнер при этом продолжает работать
+  kill "$_marzban_bg_pid" 2>/dev/null || true
+  wait "$_marzban_bg_pid" 2>/dev/null || true
+
+  if [[ "$_started" != "true" ]]; then
+    log_error "Marzban did not start within ${_max_wait}s"
+    log_warn "Check logs: docker logs marzban"
     rm -f "$MARZBAN_INSTALL_SCRIPT"
-    return 1 # Это ошибка — Marzban критически важен
+    return 1
   fi
 
   # Очищаем временный файл
   rm -f "$MARZBAN_INSTALL_SCRIPT"
-
-  # Ожидаем полную инициализацию Marzban (до 60 секунд)
-  log_info "Waiting for Marzban to fully initialize..."
-  local max_attempts=30
-  local attempt=0
-  while [[ $attempt -lt $max_attempts ]]; do
-    if docker logs marzban 2>/dev/null | grep -q "Application startup complete"; then
-      log_success "Marzban initialized successfully"
-      break
-    fi
-    sleep 2
-    ((attempt++)) || true
-  done
-
-  if [[ $attempt -eq $max_attempts ]]; then
-    log_warn "Marzban initialization timeout, but continuing..."
-  fi
 
   log_success "Marzban installed successfully"
 }
