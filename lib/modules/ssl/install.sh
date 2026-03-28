@@ -46,6 +46,9 @@ SSL_CONFIG_DIR="/etc/letsencrypt"
 # shellcheck disable=SC2034
 SSL_ACCOUNT_DIR="${SSL_CONFIG_DIR}/accounts"
 
+# Пути для самоподписных сертификатов (dev-режим)
+SSL_SELFIGNED_DIR="/var/lib/marzban/certs"
+
 # Имя сервиса (для systemd таймера)
 # shellcheck disable=SC2034
 SSL_RENEW_SERVICE="certbot-renew"
@@ -67,6 +70,41 @@ ssl_install() {
   pkg_install_packages "certbot" "openssl" "ca-certificates"
 
   log_success "Certbot installed successfully"
+}
+
+# Генерация самоподписного сертификата (dev-режим)
+ssl_generate_self_signed() {
+  local domain="${DOMAIN:-localhost}"
+  
+  log_step "ssl_generate_self_signed" "Generating self-signed certificate for ${domain}"
+  
+  # Создаём директорию
+  mkdir -p "$SSL_SELFIGNED_DIR"
+  
+  # Генерируем приватный ключ и сертификат
+  openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout "${SSL_SELFIGNED_DIR}/privkey.pem" \
+    -out "${SSL_SELFIGNED_DIR}/cert.pem" \
+    -subj "/CN=${domain}/O=CubiVeil Dev/C=US" \
+    -addext "subjectAltName=DNS:${domain},DNS:localhost,IP:127.0.0.1" \
+    >/dev/null 2>&1
+  
+  if [[ $? -ne 0 ]]; then
+    log_error "Failed to generate self-signed certificate"
+    return 1
+  fi
+  
+  # Создаём fullchain (копия cert.pem для совместимости)
+  cp "${SSL_SELFIGNED_DIR}/cert.pem" "${SSL_SELFIGNED_DIR}/fullchain.pem"
+  
+  # Устанавливаем правильные права
+  chmod 600 "${SSL_SELFIGNED_DIR}/privkey.pem"
+  chmod 644 "${SSL_SELFIGNED_DIR}/cert.pem"
+  chmod 644 "${SSL_SELFIGNED_DIR}/fullchain.pem"
+  
+  log_success "Self-signed certificate generated at ${SSL_SELFIGNED_DIR}"
+  log_info "Certificate valid for 365 days"
+  log_warn "Browsers will show security warning — this is expected in dev mode"
 }
 
 # ── Генерация сертификатов / Certificate Generation ─────────
@@ -298,9 +336,19 @@ ssl_remove() {
 ssl_enable() {
   log_step "ssl_enable" "Enabling SSL module"
 
-  # Проверяем наличие сертификатов
-  local cert_count
-  cert_count=$(find "${SSL_CERT_DIR}" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
+  local cert_count=0
+  
+  # В dev-режиме проверяем самоподписные сертификаты
+  if [[ "${DEV_MODE:-false}" == "true" ]]; then
+    if [[ -f "${SSL_SELFIGNED_DIR}/cert.pem" ]]; then
+      cert_count=1
+      log_info "Self-signed certificate found at ${SSL_SELFIGNED_DIR}"
+    fi
+  else
+    # В production-режиме проверяем Let's Encrypt
+    # Используем || true чтобы предотвратить падение при отсутствии директории
+    cert_count=$(find "${SSL_CERT_DIR}" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l || echo 0)
+  fi
 
   if [[ $cert_count -eq 0 ]]; then
     log_warn "No SSL certificates found"
@@ -371,7 +419,18 @@ ssl_is_active() {
 # ── Модульный интерфейс / Module Interface ─────────────────
 
 # Стандартный интерфейс модуля
-module_install() { ssl_install; }
+module_install() {
+  ssl_install
+  
+  # В dev-режиме генерируем самоподписной сертификат
+  if [[ "${DEV_MODE:-false}" == "true" ]]; then
+    ssl_generate_self_signed
+  else
+    # В production-режиме генерируем Let's Encrypt
+    ssl_generate "${DOMAIN:-}" "${LE_EMAIL:-}"
+  fi
+}
+
 module_configure() { ssl_configure; }
 module_enable() { ssl_enable; }
 module_disable() { ssl_disable; }

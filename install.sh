@@ -464,12 +464,21 @@ run_module() {
 
   if [[ "$DRY_RUN" == "true" ]]; then
     info "[DRY-RUN] Would run: ${name}::install, configure, enable"
+    unset -f module_install module_configure module_enable module_disable \
+      module_update module_remove module_status module_health_check 2>/dev/null || true
     return 0
   fi
 
-  declare -f module_install >/dev/null && module_install
-  declare -f module_configure >/dev/null && module_configure
-  declare -f module_enable >/dev/null && module_enable
+  # Каждый шаг с явной обработкой ошибок — предотвращаем молчаливое завершение
+  if declare -f module_install >/dev/null; then
+    module_install || { warn "module_install failed for ${name}, continuing"; }
+  fi
+  if declare -f module_configure >/dev/null; then
+    module_configure || { warn "module_configure failed for ${name}, continuing"; }
+  fi
+  if declare -f module_enable >/dev/null; then
+    module_enable || { warn "module_enable failed for ${name}, continuing"; }
+  fi
 
   # Сбрасываем функции модуля, чтобы следующий модуль не унаследовал
   unset -f module_install module_configure module_enable module_disable \
@@ -584,6 +593,15 @@ _generate_keys_and_ports() {
 }
 EOF
 
+  # Сохраняем домен
+  cat >/etc/cubiveil/domain.json <<EOF
+{
+  "domain": "${DOMAIN:-0.0.0.0}",
+  "email": "${LE_EMAIL:-}",
+  "dev_mode": "${DEV_MODE:-false}"
+}
+EOF
+
   # Уникальные порты
   TROJAN_PORT=$(unique_port)
   SS_PORT=$(unique_port)
@@ -685,8 +703,25 @@ _print_finish() {
   echo "══════════════════════════════════════════════════════════"
   echo ""
 
-  local _panel_url="https://${DOMAIN}:${PANEL_PORT:-8080}"
-  local _sub_url="https://${DOMAIN}:${SUB_PORT:-8081}/subscription"
+  # Читаем домен и порты из файлов если переменные не установлены
+  local _domain="${DOMAIN:-}"
+  local _panel_port="${PANEL_PORT:-8080}"
+  local _sub_port="${SUB_PORT:-8081}"
+  
+  # Читаем из domain.json если домен не установлен
+  if [[ -z "$_domain" && -f "/etc/cubiveil/domain.json" ]]; then
+    _domain=$(jq -r '.domain' "/etc/cubiveil/domain.json" 2>/dev/null || echo "0.0.0.0")
+  fi
+  [[ -z "$_domain" ]] && _domain="0.0.0.0"
+  
+  # Читаем из ports.json если порты не установлены
+  if [[ -f "/etc/cubiveil/ports.json" ]]; then
+    _panel_port=$(jq -r '.panel' "/etc/cubiveil/ports.json" 2>/dev/null || echo "8080")
+    _sub_port=$(jq -r '.subscription' "/etc/cubiveil/ports.json" 2>/dev/null || echo "8081")
+  fi
+
+  local _panel_url="https://${_domain}:${_panel_port}"
+  local _sub_url="https://${_domain}:${_sub_port}/subscription"
 
   if [[ "$LANG_NAME" == "Русский" ]]; then
     echo "  $(get_str SUCCESS_PANEL_URL_RU)     ${_panel_url}"
@@ -720,6 +755,25 @@ _print_finish() {
     if [[ "$INSTALL_TELEGRAM" != "true" ]]; then
       echo "    $(get_str MSG_NEXT_STEP_TELEGRAM)"
     fi
+  fi
+  
+  # Вывод данных админа если файл существует
+  if [[ -f "/etc/cubiveil/admin.credentials" ]]; then
+    echo ""
+    echo "══════════════════════════════════════════════════════════"
+    if [[ "$LANG_NAME" == "Русский" ]]; then
+      echo "  $(get_str MSG_ADMIN_CREDENTIALS_RU)"
+    else
+      echo "  $(get_str MSG_ADMIN_CREDENTIALS)"
+    fi
+    echo "══════════════════════════════════════════════════════════"
+    local _admin_user _admin_pass
+    _admin_user=$(grep "MARZBAN_USERNAME" /etc/cubiveil/admin.credentials 2>/dev/null | cut -d= -f2 || echo "N/A")
+    _admin_pass=$(grep "MARZBAN_PASSWORD" /etc/cubiveil/admin.credentials 2>/dev/null | cut -d= -f2 || echo "N/A")
+    echo "  Username: ${_admin_user}"
+    echo "  Password: ${_admin_pass}"
+    echo "══════════════════════════════════════════════════════════"
+    echo ""
   fi
 
   # MikroTik скрипт (если decoy установлен)

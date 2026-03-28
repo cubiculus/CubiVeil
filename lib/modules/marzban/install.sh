@@ -90,39 +90,97 @@ marzban_install() {
 marzban_configure_env() {
   log_step "marzban_configure_env" "Configuring Marzban .env"
 
+  # Читаем порты из /etc/cubiveil/ports.json если файл существует
+  local ports_file="/etc/cubiveil/ports.json"
+  if [[ -f "$ports_file" ]]; then
+    PANEL_PORT=$(jq -r '.panel' "$ports_file" 2>/dev/null || echo "8080")
+    SUB_PORT=$(jq -r '.subscription' "$ports_file" 2>/dev/null || echo "8081")
+    TROJAN_PORT=$(jq -r '.trojan' "$ports_file" 2>/dev/null || echo "8443")
+    SS_PORT=$(jq -r '.shadowsocks' "$ports_file" 2>/dev/null || echo "8082")
+    log_info "Loaded ports from $ports_file"
+  fi
+
+  # Читаем домен из переменных окружения или из /etc/cubiveil/domain.json
+  local domain="${DOMAIN:-}"
+  local domain_file="/etc/cubiveil/domain.json"
+  if [[ -z "$domain" && -f "$domain_file" ]]; then
+    domain=$(jq -r '.domain' "$domain_file" 2>/dev/null || echo "")
+  fi
+  [[ -z "$domain" ]] && domain="0.0.0.0"
+
+  # Генерируем учётные данные админа если не заданы
+  local sudo_username="${SUDO_USERNAME:-admin}"
+  local sudo_password="${SUDO_PASSWORD:-}"
+  if [[ -z "$sudo_password" ]]; then
+    # Генерируем случайный пароль
+    sudo_password=$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9' | head -c 12)
+    export SUDO_USERNAME="$sudo_username"
+    export SUDO_PASSWORD="$sudo_password"
+  fi
+
   # Проверяем наличие .env файла
   if [[ ! -f "$MARZBAN_ENV_FILE" ]]; then
     log_warn ".env file not found, creating..."
     mkdir -p "$MARZBAN_CONFIG_DIR"
-    touch "$MARZBAN_ENV_FILE"
-  fi
-
-  # Устанавливаем переменные окружения если их нет
-  local env_vars=(
-    "MARZBAN_HOST"
-    "MARZBAN_PORT"
-    "MARZBAN_API_PORT"
-    "SINGBOX_PORT"
-    "TROJAN_PORT"
-    "SS_PORT"
-  )
-
-  local configured=false
-  for var in "${env_vars[@]}"; do
-    if grep -q "^${var}=" "$MARZBAN_ENV_FILE" 2>/dev/null; then
-      log_debug "${var} already configured"
-    else
-      configured=true
-    fi
-  done
-
-  if [[ "$configured" == "true" ]]; then
-    log_info "Marzban .env configured"
+    # Создаём новый .env файл с базовыми настройками
+    cat > "$MARZBAN_ENV_FILE" <<EOF
+# Marzban Configuration
+MARZBAN_HOST=${domain}
+MARZBAN_PORT=${PANEL_PORT}
+MARZBAN_API_PORT=${PANEL_PORT}
+SINGBOX_PORT=${PANEL_PORT}
+TROJAN_PORT=${TROJAN_PORT}
+SS_PORT=${SS_PORT}
+SUBSCRIPTION_PORT=${SUB_PORT}
+SUDO_USERNAME=${sudo_username}
+SUDO_PASSWORD=${sudo_password}
+EOF
+    log_success "Marzban .env created with domain=$domain, panel=$PANEL_PORT, sub=$SUB_PORT"
   else
-    log_info "Marzban .env already configured"
+    # Файл существует — обновляем переменные
+    local temp_env
+    temp_env=$(mktemp)
+    
+    # Копируем существующий файл
+    cp "$MARZBAN_ENV_FILE" "$temp_env"
+    
+    # Функция для обновления или добавления переменной
+    _update_var() {
+      local var="$1"
+      local value="$2"
+      if grep -q "^${var}=" "$temp_env" 2>/dev/null; then
+        sed -i "s|^${var}=.*|${var}=${value}|" "$temp_env"
+      else
+        echo "${var}=${value}" >> "$temp_env"
+      fi
+    }
+    
+    # Обновляем переменные
+    _update_var "MARZBAN_HOST" "$domain"
+    _update_var "MARZBAN_PORT" "$PANEL_PORT"
+    _update_var "MARZBAN_API_PORT" "$PANEL_PORT"
+    _update_var "SINGBOX_PORT" "$PANEL_PORT"
+    _update_var "TROJAN_PORT" "$TROJAN_PORT"
+    _update_var "SS_PORT" "$SS_PORT"
+    _update_var "SUBSCRIPTION_PORT" "$SUB_PORT"
+    _update_var "SUDO_USERNAME" "$sudo_username"
+    _update_var "SUDO_PASSWORD" "$sudo_password"
+    
+    # Копируем обратно
+    cat "$temp_env" > "$MARZBAN_ENV_FILE"
+    rm -f "$temp_env"
+    
+    log_success "Marzban .env updated with domain=$domain, panel=$PANEL_PORT, sub=$SUB_PORT"
   fi
-
-  log_success "Marzban environment configured"
+  
+  # Сохраняем учётные данные в файл
+  mkdir -p /etc/cubiveil
+  cat > /etc/cubiveil/admin.credentials <<EOF
+MARZBAN_USERNAME=${sudo_username}
+MARZBAN_PASSWORD=${sudo_password}
+EOF
+  chmod 600 /etc/cubiveil/admin.credentials
+  log_success "Admin credentials saved to /etc/cubiveil/admin.credentials"
 }
 
 # Настройка SSL для Marzban
@@ -156,6 +214,18 @@ marzban_enable() {
   log_step "marzban_enable" "Enabling Marzban service"
 
   svc_enable_start "$MARZBAN_SERVICE"
+
+  # Ждём пока Marzban запустится
+  log_info "Waiting for Marzban to start..."
+  sleep 5
+
+  # Проверяем статус сервиса
+  if svc_is_active "$MARZBAN_SERVICE"; then
+    log_success "Marzban service is running"
+  else
+    log_error "Marzban service failed to start"
+    return 1
+  fi
 
   log_success "Marzban service enabled and started"
 }

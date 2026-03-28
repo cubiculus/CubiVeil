@@ -621,6 +621,9 @@ MSG_NEXT_STEP_TELEGRAM_RU="4. Установите Telegram-бот: bash setup-t
 MSG_MIKROTIK_SCRIPT="MikroTik RouterOS script (decoy-site):"
 MSG_MIKROTIK_SCRIPT_RU="MikroTik RouterOS скрипт (decoy-site):"
 
+MSG_ADMIN_CREDENTIALS="Marzban Admin Credentials:"
+MSG_ADMIN_CREDENTIALS_RU="Данные администратора Marzban:"
+
 MSG_FAILED_DOWNLOAD="Failed to download: {FILE}"
 MSG_FAILED_DOWNLOAD_RU="Не удалось загрузить: {FILE}"
 
