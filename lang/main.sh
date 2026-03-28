@@ -947,8 +947,8 @@ MSG_SINGBOX_INSTALLED_RU="Установлено: \${sb_tag}"
 MSG_SINGBOX_INSTALLING="Installing Sing-box"
 MSG_SINGBOX_INSTALLING_RU="Устанавливаю Sing-box"
 
-MSG_SINGBOX_ALREADY_INSTALLED="Sing-box already installed: \$$1"
-MSG_SINGBOX_ALREADY_INSTALLED_RU="Sing-box уже установлен: \$$1"
+MSG_SINGBOX_ALREADY_INSTALLED="Sing-box already installed: \${sb_tag}"
+MSG_SINGBOX_ALREADY_INSTALLED_RU="Sing-box уже установлен: \${sb_tag}"
 
 MSG_SINGBOX_CONFIGURING="Configuring Sing-box"
 MSG_SINGBOX_CONFIGURING_RU="Настраиваю Sing-box"
