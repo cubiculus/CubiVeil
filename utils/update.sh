@@ -328,10 +328,126 @@ step_install_update() {
 }
 
 # ══════════════════════════════════════════════════════════════
-# ШАГ 7: Завершение
+# ШАГ 7: Обновление Marzban
+# ══════════════════════════════════════════════════════════════
+step_update_marzban() {
+  step_title "7" "Обновление Marzban" "Update Marzban"
+
+  read -rp "  Обновить Marzban до последней версии? [y/N]: " update_marzban
+
+  if [[ "${update_marzban,,}" != "y" ]]; then
+    info "Пропуск обновления Marzban"
+    return 0
+  fi
+
+  # Проверяем, установлен ли Marzban
+  if [[ ! -f "/opt/marzban/.env" ]]; then
+    warn "Marzban не найден"
+    return 0
+  fi
+
+  # Проверяем наличие команды marzban
+  if command -v marzban &>/dev/null; then
+    info "Выполнение marzban upgrade..."
+    
+    # Запускаем обновление Marzban
+    if marzban upgrade 2>&1; then
+      success "Marzban обновлён"
+    else
+      warn "Не удалось обновить Marzban через marzban upgrade"
+      info "Попробуйте вручную: marzban upgrade"
+    fi
+  else
+    warn "Команда marzban не найдена в PATH"
+    info "Попробуйте обновить вручную: bash /opt/marzban/marzban.sh upgrade"
+  fi
+}
+
+# ══════════════════════════════════════════════════════════════
+# ШАГ 8: Обновление sing-box
+# ══════════════════════════════════════════════════════════════
+step_update_singbox() {
+  step_title "8" "Обновление sing-box" "Update sing-box"
+
+  read -rp "  Обновить sing-box до последней версии? [y/N]: " update_singbox
+
+  if [[ "${update_singbox,,}" != "y" ]]; then
+    info "Пропуск обновления sing-box"
+    return 0
+  fi
+
+  # Проверяем, установлен ли sing-box
+  if [[ ! -x "/usr/local/bin/sing-box" ]]; then
+    warn "sing-box не найден в /usr/local/bin/sing-box"
+    return 0
+  fi
+
+  # Получаем текущую версию
+  local current_version
+  current_version=$(/usr/local/bin/sing-box version 2>/dev/null | head -1 || echo "unknown")
+  info "Текущая версия: ${current_version}"
+
+  # Загружаем модуль sing-box для обновления
+  local singbox_module="${CUBIVEIL_DIR}/lib/modules/singbox/install.sh"
+  
+  if [[ -f "$singbox_module" ]]; then
+    info "Выполнение обновления sing-box..."
+    
+    # Source модуля и вызов функции обновления
+    # shellcheck disable=SC1090
+    source "$singbox_module"
+    
+    if declare -f singbox_update &>/dev/null; then
+      if singbox_update; then
+        success "sing-box обновлён"
+      else
+        warn "Не удалось обновить sing-box"
+      fi
+    else
+      warn "Функция singbox_update не найдена"
+    fi
+  else
+    warn "Модуль sing-box не найден: $singbox_module"
+    info "Попробуйте обновить вручную через reinstall"
+  fi
+}
+
+# ══════════════════════════════════════════════════════════════
+# ШАГ 9: Перезапуск сервисов
+# ══════════════════════════════════════════════════════════════
+step_restart_services() {
+  step_title "9" "Перезапуск сервисов" "Restart services"
+
+  read -rp "  Перезапустить сервисы сейчас? [y/N]: " restart
+
+  if [[ "${restart,,}" != "y" ]]; then
+    info "Сервисы не перезапущены. Перезапустите вручную после обновления."
+    return 0
+  fi
+
+  local services=("marzban" "sing-box" "cubiveil-bot")
+  
+  for service in "${services[@]}"; do
+    if systemctl is-active --quiet "$service" 2>/dev/null; then
+      info "Перезапуск $service..."
+      if systemctl restart "$service" 2>/dev/null; then
+        success "$service перезапущен"
+      else
+        warn "Не удалось перезапустить $service"
+      fi
+    else
+      info "$service не активен — пропуск"
+    fi
+  done
+
+  success "Перезапуск завершён"
+}
+
+# ══════════════════════════════════════════════════════════════
+# ШАГ 10: Завершение
 # ══════════════════════════════════════════════════════════════
 step_finish() {
-  step_title "7" "$(get_str "MSG_TITLE_FINISH")" "$(get_str "MSG_TITLE_FINISH")"
+  step_title "10" "$(get_str "MSG_TITLE_FINISH")" "$(get_str "MSG_TITLE_FINISH")"
 
   success "$(get_str "MSG_MSG_SUCCESS")"
   info "$(get_str "MSG_INFO_BACKUP_CREATED") ${BACKUP_PATH}"
@@ -340,15 +456,21 @@ step_finish() {
   echo "  $(get_str "MSG_INFO_ROLLBACK_FROM")"
   echo "  bash ${SCRIPT_DIR}/rollback.sh ${BACKUP_PATH}"
 
-  # Перезапуск сервисов если требуется
-  read -rp "  $(get_str "MSG_WARNING_RESTART_SERVICES") [y/N]: " restart
-
-  if [[ "${restart,,}" == "y" ]]; then
-    info "$(get_str "MSG_INFO_RESTARTING")"
-    systemctl restart marzban 2>/dev/null || true
-    systemctl restart cubiveil-bot 2>/dev/null || true
-    success "$(get_str "MSG_INFO_SERVICES_RESTARTED")"
-  fi
+  echo ""
+  echo "══════════════════════════════════════════════════════════"
+  echo "  Статус сервисов:"
+  echo "══════════════════════════════════════════════════════════"
+  
+  for service in marzban sing-box cubiveil-bot; do
+    if systemctl is-active --quiet "$service" 2>/dev/null; then
+      echo -e "  ${GREEN}●${PLAIN} $service — активен"
+    else
+      echo -e "  ${YELLOW}○${PLAIN} $service — не активен"
+    fi
+  done
+  
+  echo "══════════════════════════════════════════════════════════"
+  echo ""
 }
 
 # ══════════════════════════════════════════════════════════════
@@ -362,6 +484,9 @@ main() {
   step_create_backup
   step_download_update
   step_install_update
+  step_update_marzban
+  step_update_singbox
+  step_restart_services
   step_finish
 }
 
