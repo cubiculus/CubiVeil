@@ -14,6 +14,7 @@ utils/
 ├── monitor.sh         # Мониторинг сервера
 ├── diagnose.sh        # Диагностика проблем
 ├── backup.sh          # Резервное копирование
+├── decoy-rotate.sh    # Управление ротацией decoy-site
 └── README.md          # Этот файл
 ```
 
@@ -115,6 +116,47 @@ sudo bash utils/backup.sh list      # список
 sudo bash utils/backup.sh restore   # восстановить
 sudo bash utils/backup.sh cleanup   # очистка
 ```
+
+### decoy-rotate.sh — управление ротацией decoy-site
+
+Управление сайтом-прикрытием и ротацией файлов.
+
+```bash
+# Статус
+sudo bash utils/decoy-rotate.sh status
+
+# Принудительная ротация
+sudo bash utils/decoy-rotate.sh rotate
+
+# Список файлов
+sudo bash utils/decoy-rotate.sh files
+
+# Конфигурация
+sudo bash utils/decoy-rotate.sh config
+
+# Управление
+sudo bash utils/decoy-rotate.sh enable      # Включить ротацию
+sudo bash utils/decoy-rotate.sh disable     # Выключить ротацию
+sudo bash utils/decoy-rotate.sh restart     # Перезапустить таймер
+
+# Настройка
+sudo bash utils/decoy-rotate.sh set-interval 6     # Интервал (часы)
+sudo bash utils/decoy-rotate.sh set-limit 5000     # Лимит (MB)
+sudo bash utils/decoy-rotate.sh set-weight jpg 4   # Вес типа
+
+# Очистка
+sudo bash utils/decoy-rotate.sh cleanup     # Очистка старых файлов
+sudo bash utils/decoy-rotate.sh regenerate  # Перегенерация всех файлов
+```
+
+**Telegram-бот:**
+
+После установки доступны команды:
+- `/decoy` — меню управления decoy-site
+- `/decoy_status` — статус ротации
+- `/decoy_rotate` — принудительная ротация
+- `/decoy_files` — список файлов
+- `/decoy_config` — конфигурация
 
 ## 🔧 Управление профилями
 

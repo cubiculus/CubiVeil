@@ -44,6 +44,21 @@ CALLBACK_SETTINGS_DISK = "settings_disk"
 CALLBACK_NAV_BACK = "nav_back"
 CALLBACK_NAV_MAIN = "nav_main"
 
+# Decoy Site callbacks / Callback сайта-прикрытия
+CALLBACK_DECOY_MAIN = "decoy_main"
+CALLBACK_DECOY_STATUS = "decoy_status"
+CALLBACK_DECOY_ROTATE = "decoy_rotate"
+CALLBACK_DECOY_FILES = "decoy_files"
+CALLBACK_DECOY_CONFIG = "decoy_config"
+CALLBACK_DECOY_SETTINGS = "decoy_settings"
+CALLBACK_DECOY_INTERVAL = "decoy_interval"
+CALLBACK_DECOY_LIMIT = "decoy_limit"
+CALLBACK_DECOY_WEIGHTS = "decoy_weights"
+CALLBACK_DECOY_ENABLE = "decoy_enable"
+CALLBACK_DECOY_DISABLE = "decoy_disable"
+CALLBACK_DECOY_CLEANUP = "decoy_cleanup"
+CALLBACK_DECOY_REGENERATE = "decoy_regenerate"
+
 
 def build_main_menu():
     """
@@ -319,6 +334,125 @@ def build_logs_lines_keyboard(service: str, lines: int = 50):
             ],
             [
                 {"text": "◀️ Back", "callback_data": CALLBACK_MAIN_LOGS}
+            ]
+        ]
+    }
+
+
+def build_decoy_menu():
+    """
+    Build Decoy Site main menu keyboard
+    Returns dict for JSON serialization
+    """
+    return {
+        "inline_keyboard": [
+            [
+                {"text": "📊 Status", "callback_data": CALLBACK_DECOY_STATUS},
+                {"text": "🔄 Rotate Now", "callback_data": CALLBACK_DECOY_ROTATE}
+            ],
+            [
+                {"text": "📁 Files List", "callback_data": CALLBACK_DECOY_FILES},
+                {"text": "⚙️ Settings", "callback_data": CALLBACK_DECOY_SETTINGS}
+            ],
+            [
+                {"text": "📄 Config", "callback_data": CALLBACK_DECOY_CONFIG}
+            ],
+            [
+                {"text": "◀️ Back", "callback_data": CALLBACK_NAV_MAIN}
+            ]
+        ]
+    }
+
+
+def build_decoy_settings_menu():
+    """
+    Build Decoy Settings menu keyboard
+    Returns dict for JSON serialization
+    """
+    return {
+        "inline_keyboard": [
+            [
+                {"text": "🔔 Interval", "callback_data": CALLBACK_DECOY_INTERVAL},
+                {"text": "💾 Size Limit", "callback_data": CALLBACK_DECOY_LIMIT}
+            ],
+            [
+                {"text": "⚖️ File Weights", "callback_data": CALLBACK_DECOY_WEIGHTS}
+            ],
+            [
+                {"text": "✅ Enable", "callback_data": CALLBACK_DECOY_ENABLE},
+                {"text": "🔴 Disable", "callback_data": CALLBACK_DECOY_DISABLE}
+            ],
+            [
+                {"text": "◀️ Back", "callback_data": CALLBACK_DECOY_MAIN}
+            ]
+        ]
+    }
+
+
+def build_decoy_weights_menu():
+    """
+    Build Decoy file weights selection keyboard
+    Returns dict for JSON serialization
+    """
+    return {
+        "inline_keyboard": [
+            [
+                {"text": "🖼️ JPG", "callback_data": "decoy_weight:jpg"},
+                {"text": "📄 PDF", "callback_data": "decoy_weight:pdf"}
+            ],
+            [
+                {"text": "🎬 MP4", "callback_data": "decoy_weight:mp4"},
+                {"text": "🎵 MP3", "callback_data": "decoy_weight:mp3"}
+            ],
+            [
+                {"text": "◀️ Back", "callback_data": CALLBACK_DECOY_SETTINGS}
+            ]
+        ]
+    }
+
+
+def build_decoy_weight_edit_keyboard(file_type: str, current_weight: int):
+    """
+    Build keyboard for editing specific file type weight
+    Args:
+        file_type: Type (jpg, pdf, mp4, mp3)
+        current_weight: Current weight value
+    Returns dict for JSON serialization
+    """
+    type_names = {"jpg": "🖼️ JPG", "pdf": "📄 PDF", "mp4": "🎬 MP4", "mp3": "🎵 MP3"}
+    type_name = type_names.get(file_type, file_type)
+
+    return {
+        "inline_keyboard": [
+            [
+                {"text": "◀️ -1", "callback_data": f"decoy_weight_dec:{file_type}"},
+                {"text": f"Current: {current_weight}", "callback_data": "weight_info"},
+                {"text": "➡️ +1", "callback_data": f"decoy_weight_inc:{file_type}"}
+            ],
+            [
+                {"text": "⏮️ -5", "callback_data": f"decoy_weight_dec5:{file_type}"},
+                {"text": "➡️ +5", "callback_data": f"decoy_weight_inc5:{file_type}"}
+            ],
+            [
+                {"text": "◀️ Back", "callback_data": CALLBACK_DECOY_WEIGHTS}
+            ]
+        ]
+    }
+
+
+def build_decoy_advanced_menu():
+    """
+    Build Decoy advanced actions menu (cleanup, regenerate)
+    Returns dict for JSON serialization
+    """
+    return {
+        "inline_keyboard": [
+            [
+                {"text": "🧹 Cleanup Old", "callback_data": CALLBACK_DECOY_CLEANUP},
+                {"text": "🔄 Regenerate All", "callback_data": CALLBACK_DECOY_REGENERATE}
+            ],
+            [
+                {"text": "◀️ Back", "callback_data": CALLBACK_DECOY_SETTINGS}
             ]
         ]
     }

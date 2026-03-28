@@ -29,6 +29,11 @@ from keyboards import (
     build_profile_actions_keyboard,
     build_backup_actions_keyboard,
     build_logs_lines_keyboard,
+    build_decoy_menu,
+    build_decoy_settings_menu,
+    build_decoy_weights_menu,
+    build_decoy_weight_edit_keyboard,
+    build_decoy_advanced_menu,
     # Callback constants
     CALLBACK_MAIN_STATUS,
     CALLBACK_MAIN_MONITOR,
@@ -99,6 +104,13 @@ COMMAND_EXPORT_CONFIG = "/export"
 COMMAND_IMPORT_CONFIG = "/import"
 COMMAND_INSTALL_ALIASES = "/install_aliases"
 
+# Decoy Site commands / Команды сайта-прикрытия
+COMMAND_DECOY = "/decoy"
+COMMAND_DECOY_STATUS = "/decoy_status"
+COMMAND_DECOY_ROTATE = "/decoy_rotate"
+COMMAND_DECOY_FILES = "/decoy_files"
+COMMAND_DECOY_CONFIG = "/decoy_config"
+
 # Progress bar settings / Настройки прогресс-бара
 PROGRESS_BAR_WIDTH = 10
 PROGRESS_BAR_FILLED = "█"
@@ -151,6 +163,9 @@ SERVICE_NAMES = {
 # Local modules - profiles
 from profiles import MarzbanClient
 
+# Local modules - decoy
+from decoy import DecoyManager
+
 
 class CommandHandler:
     """Handles Telegram bot commands and callbacks"""
@@ -166,6 +181,7 @@ class CommandHandler:
         self.health = health_checker
         self.logs = logs_manager
         self.marzban = MarzbanClient()
+        self.decoy = DecoyManager()
 
         # Pending actions (for confirmations)
         self.pending_actions: Dict[str, dict] = {}
@@ -375,6 +391,15 @@ class CommandHandler:
             self._import_config(command)
         elif cmd == COMMAND_INSTALL_ALIASES:
             self._install_aliases()
+        # Decoy Site commands
+        elif cmd in (COMMAND_DECOY, COMMAND_DECOY_STATUS):
+            self._decoy_menu(chat_id)
+        elif cmd == COMMAND_DECOY_ROTATE:
+            self._decoy_rotate(chat_id)
+        elif cmd == COMMAND_DECOY_FILES:
+            self._decoy_files(chat_id)
+        elif cmd == COMMAND_DECOY_CONFIG:
+            self._decoy_config(chat_id)
         # Profile commands
         elif cmd == COMMAND_ENABLE:
             self._enable_command(command)
@@ -462,6 +487,18 @@ class CommandHandler:
             self._profiles()
         elif data == CALLBACK_MAIN_SETTINGS:
             self._settings_menu()
+        elif data == CALLBACK_DECOY_MAIN:
+            self._decoy_menu(chat_id, message_id)
+        elif data == CALLBACK_DECOY_STATUS:
+            self._decoy_status(chat_id, message_id)
+        elif data == CALLBACK_DECOY_ROTATE:
+            self._decoy_rotate(chat_id, message_id)
+        elif data == CALLBACK_DECOY_FILES:
+            self._decoy_files(chat_id, message_id)
+        elif data == CALLBACK_DECOY_CONFIG:
+            self._decoy_config(chat_id, message_id)
+        elif data == CALLBACK_DECOY_SETTINGS:
+            self._decoy_settings_menu(chat_id, message_id)
 
     # ═══════════════════════════════════════════════════════════════════════════
     # Backup Menu Handlers / Меню бэкапов
@@ -1392,3 +1429,122 @@ class CommandHandler:
             self.telegram.send(message)
         else:
             self.telegram.send(f"❌ Failed to create profile <code>{username}</code>\nUsername may already exist")
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # Decoy Site Handlers / Обработка Decoy Site
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    def _decoy_menu(self, chat_id, message_id=None):
+        """Show Decoy Site main menu"""
+        if not self.decoy.is_configured():
+            self.telegram.send(
+                chat_id,
+                "❌ Decoy Site not configured\n"
+                "Run: install.sh --decoy",
+                reply_markup=build_back_button()
+            )
+            return
+
+        self.telegram.send(
+            chat_id,
+            "🎭 <b>Decoy Site Management</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "Manage rotation and files",
+            reply_markup=build_decoy_menu()
+        )
+
+    def _decoy_status(self, chat_id, message_id=None):
+        """Show Decoy Site status"""
+        status = self.decoy.get_status()
+
+        if not status["configured"]:
+            self.telegram.send(
+                chat_id,
+                "❌ Decoy Site not configured\n"
+                "Run: install.sh --decoy"
+            )
+            return
+
+        message = "🎭 <b>Decoy Site Status</b>\n"
+        message += "━━━━━━━━━━━━━━━━━━━━━\n"
+        message += f"Rotation: {'✅ Enabled' if status['enabled'] else '❌ Disabled'}\n"
+        message += f"Timer: {'🟢 Active' if status['timer_active'] else '🔴 Inactive'}\n"
+        message += f"Interval: {status['interval_hours']} hours\n"
+        message += f"Files: {status['file_count']} ({status['total_size_mb']} MB)\n"
+        message += f"Limit: {status['max_size_mb']} MB\n"
+
+        if status["last_rotation"]:
+            message += f"Last rotation: {status['last_rotation']}\n"
+
+        if status["files_by_type"]:
+            message += "\n📁 By type:\n"
+            for ftype, count in status["files_by_type"].items():
+                message += f"  {ftype.upper()}: {count}\n"
+
+        self.telegram.send(chat_id, message, reply_markup=build_decoy_menu())
+
+    def _decoy_rotate(self, chat_id, message_id=None):
+        """Trigger immediate rotation"""
+        self.telegram.answer_callback(chat_id, "🔄 Starting rotation...")
+
+        success, message = self.decoy.rotate_now()
+
+        if success:
+            self.telegram.send(chat_id, f"✅ {message}\n\nUse /decoy_status to see results")
+        else:
+            self.telegram.send(chat_id, f"❌ {message}")
+
+    def _decoy_files(self, chat_id, message_id=None):
+        """Show list of decoy files"""
+        files = self.decoy.get_files_list(limit=20)
+
+        if not files:
+            self.telegram.send(
+                chat_id,
+                "📁 No files found\n"
+                "Run rotation or regenerate files",
+                reply_markup=build_decoy_menu()
+            )
+            return
+
+        message = "📁 <b>Decoy Files</b>\n"
+        message += "━━━━━━━━━━━━━━━━━━━━━\n"
+
+        for f in files[:15]:
+            message += f"{f['type_display']} {f['name']}\n"
+            message += f"   Size: {f['size_mb']} MB | Modified: {f['modified'][:10]}\n"
+
+        if len(files) > 15:
+            message += f"\n... and {len(files) - 15} more files"
+
+        self.telegram.send(chat_id, message, reply_markup=build_decoy_menu())
+
+    def _decoy_config(self, chat_id, message_id=None):
+        """Show decoy configuration"""
+        config = self.decoy._load_config()
+
+        if not config:
+            self.telegram.send(chat_id, "❌ Failed to load configuration")
+            return
+
+        # Format config as code block
+        config_text = json.dumps(config, indent=2)
+
+        # Truncate if too long
+        if len(config_text) > 4000:
+            config_text = config_text[:4000] + "\n... (truncated)"
+
+        message = f"⚙️ <b>Decoy Configuration</b>\n\n"
+        message += f"<pre>{config_text}</pre>"
+
+        self.telegram.send(chat_id, message, reply_markup=build_decoy_menu())
+
+    def _decoy_settings_menu(self, chat_id, message_id=None):
+        """Show Decoy Settings menu"""
+        self.telegram.send(
+            chat_id,
+            "⚙️ <b>Decoy Settings</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "Configure rotation parameters",
+            reply_markup=build_decoy_settings_menu()
+        )
