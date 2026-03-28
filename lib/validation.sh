@@ -64,12 +64,15 @@ validate_chat_id() {
   local chat_id="$1"
 
   # Проверка формата: только цифры, возможно с минусом для групп
-  # Используем совместимый regex без {n,m} для старых версий bash
   [[ ! "$chat_id" =~ ^-?[0-9]+$ ]] && return 1
 
   # Проверка длины: от 1 до 13 цифр (без знака)
-  local digits="${chat_id#-}"  # Удаляем минус если есть
-  [[ ${#digits} -lt 1 || ${#digits} -gt 13 ]] && return 1
+  local digits
+  digits="${chat_id#-}"  # Удаляем минус если есть
+  local len=${#digits}
+  if [[ $len -lt 1 ]] || [[ $len -gt 13 ]]; then
+    return 1
+  fi
 
   return 0
 }
