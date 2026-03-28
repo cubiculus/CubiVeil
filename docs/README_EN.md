@@ -42,7 +42,7 @@ The project provides:
 - 💾 Automatic backup
 - 🤖 Telegram bot for server management
 - 🛠 Utility suite for maintenance
-- 🎭 Decoy site with realistic traffic generation (decoy-site)
+- 🎭 Decoy site with realistic traffic generation
 - 🌐 Traffic shaping for unique server "fingerprint"
 
 ## ⚡ Quick Start
@@ -53,6 +53,7 @@ The project provides:
 - **Privileges:** root (sudo)
 - **Domain:** for panel and SSL certificates
 - **DNS:** A record pointing to server IP
+- **Port 80:** must be open for SSL (opens automatically)
 
 ### Installation
 
@@ -73,7 +74,7 @@ The installer will automatically:
 2. Update system
 3. Configure firewall and Fail2ban
 4. Install Sing-box and Marzban
-5. Configure Let's Encrypt SSL certificates
+5. Configure Let's Encrypt SSL certificates (port 80 opens automatically)
 6. Generate keys and configurations
 
 ### Dev Mode (for testing)
@@ -99,6 +100,13 @@ To test the installer without making changes to the system:
 ```bash
 sudo bash install.sh --dry-run
 ```
+
+**Dry-run Mode:**
+- ✅ No changes made to the system
+- ✅ Shows all steps that will be executed
+- ✅ Checks environment and dependencies
+- ✅ Safe to run on any system
+- ✅ Can be combined with `--dev`
 
 **Dry-run Mode:**
 - ✅ No system changes made
@@ -308,47 +316,60 @@ cubiveil/
 │       ├── commands.py
 │       ├── metrics.py
 │       └── ...
+├── lang/
+│   ├── main.sh           # Main localization (EN/RU)
+│   └── telegram.sh       # Telegram bot localization
 ├── lib/
 │   ├── core/
-│   │   ├── log.sh
-│   │   └── system.sh
+│   │   ├── log.sh        # Logging with localization support
+│   │   └── system.sh     # System functions
 │   ├── modules/
-│   │   ├── backup/
-│   │   ├── decoy-site/
-│   │   ├── fail2ban/
-│   │   ├── firewall/
-│   │   ├── marzban/
-│   │   ├── monitoring/
-│   │   ├── rollback/
-│   │   ├── singbox/
-│   │   ├── ssl/
-│   │   ├── system/
-│   │   └── traffic-shaping/
-│   ├── common.sh
-│   ├── fallback.sh
-│   ├── i18n.sh
-│   ├── install-steps.sh
-│   ├── output.sh
-│   ├── security.sh
-│   ├── utils.sh
-│   └── validation.sh
+│   │   ├── backup/           # Backup module
+│   │   ├── decoy-site/       # Decoy site module
+│   │   ├── fail2ban/         # Fail2ban module
+│   │   ├── firewall/         # UFW firewall module
+│   │   ├── marzban/          # Marzban panel module
+│   │   ├── monitoring/       # Resource monitoring
+│   │   ├── rollback/         # Version rollback
+│   │   ├── singbox/          # Sing-box core
+│   │   ├── ssl/              # SSL certificates (Let's Encrypt)
+│   │   ├── system/           # System module
+│   │   └── traffic-shaping/  # Traffic shaping
+│   ├── common.sh         # Common functions
+│   ├── fallback.sh       # Fallback functions
+│   ├── i18n.sh           # Internationalization API
+│   ├── output.sh         # Output functions (unified style)
+│   ├── security.sh       # Security functions
+│   ├── utils.sh          # Utilities
+│   └── validation.sh     # Data validation
 ├── utils/
-│   ├── cubiveil.sh
-│   ├── install-aliases.sh
-│   ├── update.sh
-│   ├── rollback.sh
-│   ├── export-config.sh
-│   ├── import-config.sh
-│   ├── monitor.sh
-│   ├── diagnose.sh
-│   ├── manage-profiles.sh
-│   ├── backup.sh
+│   ├── cubiveil.sh           # CLI manager
+│   ├── install-aliases.sh    # Alias installation
+│   ├── update.sh             # CubiVeil update
+│   ├── rollback.sh           # Version rollback
+│   ├── export-config.sh      # Config export
+│   ├── import-config.sh      # Config import
+│   ├── monitor.sh            # Resource monitoring
+│   ├── diagnose.sh           # Problem diagnosis
+│   ├── manage-profiles.sh    # Profile management
+│   ├── backup.sh             # Backups
 │   └── README.md
 ├── tests/
+│   ├── unit-lang.sh          # Localization tests
+│   ├── unit-install.sh       # Installer tests
+│   ├── unit-telegram.sh      # Telegram bot tests
+│   └── ...
+├── docs/
+│   ├── README_EN.md          # English documentation
+│   └── ...
 ├── .github/workflows/
-│   └── ci.yml
-├── install.sh
-├── setup-telegram.sh
+│   └── ci.yml                # CI/CD pipeline
+├── install.sh                # Main installer
+├── setup-telegram.sh         # Telegram bot setup
+├── run-tests.sh              # Run tests
+├── .pre-commit-config.yaml   # Pre-commit hooks
+└── README.md                 # Documentation (RU)
+```
 ├── lang.sh
 ├── run-tests.sh
 └── README.md

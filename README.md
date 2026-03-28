@@ -27,6 +27,16 @@
 
 **CubiVeil** — это комплексное решение для развёртывания и управления инфраструктурой на базе **Marzban** и **Sing-box** на серверах Ubuntu.
 
+Проект предоставляет:
+- 🚀 Автоматическую установку всех компонентов
+- 🔒 Настройку firewall, Fail2ban и SSL-сертификатов
+- 📊 Мониторинг ресурсов и алерты
+- 💾 Автоматическое резервное копирование
+- 🤖 Telegram-бот для управления сервером
+- 🛠 Набор утилит для обслуживания
+- 🎭 Сайт-прикрытие с генерацией трафика (decoy-site)
+- 🌐 Traffic shaping для уникального "почерка" сервера
+
 ## ⚡ Быстрый старт
 
 ### Установка
@@ -43,15 +53,13 @@ cd cubiveil
 sudo bash install.sh
 ```
 
-Проект предоставляет:
-- 🚀 Автоматическую установку всех компонентов
-- 🔒 Настройку firewall, Fail2ban и SSL-сертификатов
-- 📊 Мониторинг ресурсов и алерты
-- 💾 Автоматическое резервное копирование
-- 🤖 Telegram-бот для управления сервером
-- 🛠 Набор утилит для обслуживания
-- 🎭 Сайт-прикрытие с генерацией трафика (decoy-site)
-- 🌐 Traffic shaping для уникального "почерка" сервера
+Установщик автоматически:
+1. Проверит окружение
+2. Обновит систему
+3. Настроит firewall и Fail2ban
+4. Установит Sing-box и Marzban
+5. Настроит SSL-сертификаты Let's Encrypt (порт 80 открывается автоматически)
+6. Сгенерирует ключи и конфигурации
 
 ### Требования
 
@@ -59,14 +67,7 @@ sudo bash install.sh
 - **Права:** root (sudo)
 - **Домен:** для панели и SSL-сертификатов
 - **DNS:** A-запись домена на IP сервера
-
-Установщик автоматически:
-1. Проверит окружение
-2. Обновит систему
-3. Настроит firewall и Fail2ban
-4. Установит Sing-box и Marzban
-5. Настроит SSL-сертификаты Let's Encrypt
-6. Сгенерирует ключи и конфигурации
+- **Порт 80:** должен быть открыт для получения SSL (открывается автоматически)
 
 ### Dev-режим (для тестирования)
 
@@ -300,50 +301,59 @@ cubiveil/
 │       ├── commands.py
 │       ├── metrics.py
 │       └── ...
+├── lang/
+│   ├── main.sh           # Основная локализация (EN/RU)
+│   └── telegram.sh       # Локализация Telegram-бота
 ├── lib/
 │   ├── core/
-│   │   ├── log.sh
-│   │   └── system.sh
+│   │   ├── log.sh        # Логирование с поддержкой локализации
+│   │   └── system.sh     # Системные функции
 │   ├── modules/
-│   │   ├── backup/
-│   │   ├── decoy-site/
-│   │   ├── fail2ban/
-│   │   ├── firewall/
-│   │   ├── marzban/
-│   │   ├── monitoring/
-│   │   ├── rollback/
-│   │   ├── singbox/
-│   │   ├── ssl/
-│   │   ├── system/
-│   │   └── traffic-shaping/
-│   ├── common.sh
-│   ├── fallback.sh
-│   ├── i18n.sh
-│   ├── install-steps.sh
-│   ├── output.sh
-│   ├── security.sh
-│   ├── utils.sh
-│   └── validation.sh
+│   │   ├── backup/           # Резервное копирование
+│   │   ├── decoy-site/       # Сайт-прикрытие
+│   │   ├── fail2ban/         # Fail2ban
+│   │   ├── firewall/         # UFW firewall
+│   │   ├── marzban/          # Marzban панель
+│   │   ├── monitoring/       # Мониторинг ресурсов
+│   │   ├── rollback/         # Откат версий
+│   │   ├── singbox/          # Sing-box ядро
+│   │   ├── ssl/              # SSL сертификаты (Let's Encrypt)
+│   │   ├── system/           # Системный модуль
+│   │   └── traffic-shaping/  # Traffic shaping
+│   ├── common.sh         # Общие функции
+│   ├── fallback.sh       # Fallback функции
+│   ├── i18n.sh           # Интернационализация API
+│   ├── output.sh         # Функции вывода (единый стиль)
+│   ├── security.sh       # Функции безопасности
+│   ├── utils.sh          # Утилиты
+│   └── validation.sh     # Валидация данных
 ├── utils/
-│   ├── cubiveil.sh
-│   ├── install-aliases.sh
-│   ├── update.sh
-│   ├── rollback.sh
-│   ├── export-config.sh
-│   ├── import-config.sh
-│   ├── monitor.sh
-│   ├── diagnose.sh
-│   ├── manage-profiles.sh
-│   ├── backup.sh
+│   ├── cubiveil.sh           # CLI-менеджер
+│   ├── install-aliases.sh    # Установка алиасов
+│   ├── update.sh             # Обновление CubiVeil
+│   ├── rollback.sh           # Откат версии
+│   ├── export-config.sh      # Экспорт конфигурации
+│   ├── import-config.sh      # Импорт конфигурации
+│   ├── monitor.sh            # Мониторинг ресурсов
+│   ├── diagnose.sh           # Диагностика проблем
+│   ├── manage-profiles.sh    # Управление профилями
+│   ├── backup.sh             # Бэкапы
 │   └── README.md
 ├── tests/
+│   ├── unit-lang.sh          # Тесты локализации
+│   ├── unit-install.sh       # Тесты установщика
+│   ├── unit-telegram.sh      # Тесты Telegram-бота
+│   └── ...
+├── docs/
+│   ├── README_EN.md          # English documentation
+│   └── ...
 ├── .github/workflows/
-│   └── ci.yml
-├── install.sh
-├── setup-telegram.sh
-├── lang.sh
-├── run-tests.sh
-└── README.md
+│   └── ci.yml                # CI/CD pipeline
+├── install.sh                # Основной установщик
+├── setup-telegram.sh         # Установка Telegram-бота
+├── run-tests.sh              # Запуск тестов
+├── .pre-commit-config.yaml   # Pre-commit hooks
+└── README.md                 # Документация (RU)
 ```
 
 ## 🧪 Тестирование
