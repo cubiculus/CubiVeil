@@ -136,8 +136,12 @@ marzban_install() {
   export MARZBAN_USERS_ENABLED=0
 
   # Модифицируем скрипт для запуска в фоне (добавляем -d к docker compose up)
-  sed -i 's/docker compose up/docker compose up -d/g' "$MARZBAN_INSTALL_SCRIPT" 2>/dev/null || true
-  sed -i 's/docker-compose up/docker-compose up -d/g' "$MARZBAN_INSTALL_SCRIPT" 2>/dev/null || true
+  # Применяем после того как скрипт скачает файлы, но до запуска
+  {
+    echo 'export COMPOSE_UP_FLAGS="-d"'
+    echo 'export DOCKER_COMPOSE_UP_FLAGS="-d"'
+  } | cat - "$MARZBAN_INSTALL_SCRIPT" > "${MARZBAN_INSTALL_SCRIPT}.tmp" && \
+  mv "${MARZBAN_INSTALL_SCRIPT}.tmp" "$MARZBAN_INSTALL_SCRIPT"
 
   if ! echo "y" | bash "$MARZBAN_INSTALL_SCRIPT" install 2>&1; then
     log_error "Marzban installation failed"
