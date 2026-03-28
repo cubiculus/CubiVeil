@@ -105,20 +105,49 @@ jq() {
 
 # Mock РґР»СЏ СЃРёСЃС‚РµРјРЅС‹С… РєРѕРјР°РЅРґ
 mkdir() {
-  command mkdir -p "$@" 2>/dev/null || true
+  local dir="$1"
+  # РћР±СЂР°Р±РѕС‚РєР° -p С„Р»Р°РіР°
+  if [[ "$1" == "-p" ]]; then
+    dir="$2"
+  fi
+  # РЎРѕР·РґР°РµРј РґРёСЂРµРєС‚РѕСЂРёСЋ РµСЃР»Рё РѕРЅР° РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚
+  if [[ ! -d "$dir" ]]; then
+    command mkdir -p "$dir" 2>/dev/null || true
+  fi
 }
+
 cat() {
-  local output=""
-  # Р•СЃР»Рё stdin РЅРµ С‚РµСЂРјРёРЅР°Р» - СЌС‚Рѕ heredoc РёР»Рё pipe
-  if [[ ! -t 0 ]]; then
-    # Р§РёС‚Р°РµРј РІРµСЃСЊ stdin
-    output=$(command cat 2>/dev/null)
-    # РџСЂРѕРІРµСЂСЏРµРј РµСЃС‚СЊ Р»Рё РїРµСЂРµРЅР°РїСЂР°РІР»РµРЅРёРµ РІС‹РІРѕРґР° (РґР»СЏ heredoc РІ С„Р°Р№Р»Рµ)
-    # Р’ bash СЌС‚Рѕ РЅРµР»СЊР·СЏ РїРµСЂРµС…РІР°С‚РёС‚СЊ, РїРѕСЌС‚РѕРјСѓ РїСЂРѕСЃС‚Рѕ РІС‹РІРѕРґРёРј
-    echo "$output"
-  else
-    # Р§С‚РµРЅРёРµ РёР· С„Р°Р№Р»Р°
+  # РџСЂРѕРІРµСЂСЏРµРј РµСЃС‚СЊ Р»Рё РїРµСЂРµРЅР°РїСЂР°РІР»РµРЅРёРµ РІ С„Р°Р№Р» (> С„Р°Р№Р»)
+  local args=("$@")
+  local redirect_file=""
+  local is_heredoc=false
+
+  # РџСЂРѕРІРµСЂСЏРµРј Р°СЂРіСѓРјРµРЅС‚С‹ РЅР° РЅР°Р»РёС‡РёРµ >
+  for i in "${!args[@]}"; do
+    if [[ "${args[$i]}" == ">" ]]; then
+      redirect_file="${args[$((i+1))]}"
+      is_heredoc=true
+      break
+    fi
+  done
+
+  # Р•СЃР»Рё heredoc/redirect РІ С„Р°Р№Р»
+  if $is_heredoc && [[ -n "$redirect_file" ]]; then
+    # Р§РёС‚Р°РµРј stdin Рё РїРёС€РµРј РІ С„Р°Р№Р»
+    local content
+    content=$(command cat)
+    echo "$content" > "$redirect_file" 2>/dev/null || true
+    return 0
+  fi
+
+  # Р•СЃР»Рё С‡С‚РµРЅРёРµ РёР· С„Р°Р№Р»Р°
+  if [[ $# -gt 0 ]] && [[ -f "$1" ]]; then
     command cat "$@" 2>/dev/null || echo ""
+  # Р•СЃР»Рё stdin (pipe)
+  elif [[ ! -t 0 ]]; then
+    command cat 2>/dev/null
+  else
+    echo ""
   fi
 }
 chmod() { return 0; }
