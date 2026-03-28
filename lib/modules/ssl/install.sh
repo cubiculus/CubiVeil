@@ -137,6 +137,7 @@ ssl_generate() {
 
   # Параметры Certbot
   local certbot_opts=(
+    certbot
     certonly
     --non-interactive
     --agree-tos
