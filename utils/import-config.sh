@@ -12,8 +12,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "${SCRIPT_DIR}")"
 
-if [[ -f "${PROJECT_DIR}/lang.sh" ]]; then
-  source "${PROJECT_DIR}/lang.sh"
+if [[ -f "${PROJECT_DIR}/lang/main.sh" ]]; then
+  source "${PROJECT_DIR}/lang/main.sh"
 else
   source "${PROJECT_DIR}/lib/fallback.sh"
 fi

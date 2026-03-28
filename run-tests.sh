@@ -55,7 +55,7 @@ run_unit_tests() {
     "test-install-modes.sh:install.sh режимы"
     "unit-utils.sh:lib/utils.sh"
     "unit-install-steps.sh:lib/install-steps.sh"
-    "unit-lang.sh:lang.sh"
+    "unit-lang.sh:lang/main.sh"
     "unit-install.sh:install.sh"
     "unit-telegram.sh:setup-telegram.sh"
     "unit-decoy-site.sh:decoy-site module"

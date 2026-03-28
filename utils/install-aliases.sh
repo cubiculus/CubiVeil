@@ -15,8 +15,8 @@ PROJECT_DIR="$(dirname "${SCRIPT_DIR}")"
 # Подключаем i18n модуль для единых функций локализации
 if [[ -f "${PROJECT_DIR}/lib/i18n.sh" ]]; then
   source "${PROJECT_DIR}/lib/i18n.sh"
-elif [[ -f "${PROJECT_DIR}/lang.sh" ]]; then
-  source "${PROJECT_DIR}/lang.sh"
+elif [[ -f "${PROJECT_DIR}/lang/main.sh" ]]; then
+  source "${PROJECT_DIR}/lang/main.sh"
 else
   source "${PROJECT_DIR}/lib/fallback.sh"
 fi

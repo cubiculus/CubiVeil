@@ -1,8 +1,10 @@
 #!/bin/bash
 # shellcheck disable=SC2034
 # ╔═══════════════════════════════════════════════════════════╗
-# ║              CubiVeil — Localization                      ║
+# ║         CubiVeil — Main Localization                      ║
 # ║                   EN / RU strings                         ║
+# ║                                                           ║
+# ║  Основной файл локализации для install.sh и утилит        ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 set -euo pipefail

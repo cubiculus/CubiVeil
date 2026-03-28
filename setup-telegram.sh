@@ -1,21 +1,24 @@
 #!/bin/bash
 # ╔═══════════════════════════════════════════════════════════╗
-# ║          CubiVeil — Telegram Bot Setup                   ║
-# ║          github.com/cubiculus/cubiveil                   ║
+# ║          CubiVeil — Telegram Bot Setup                    ║
+# ║          github.com/cubiculus/cubiveil                    ║
 # ╚═══════════════════════════════════════════════════════════╝
 
 set -euo pipefail
 
-# ── Подключение локализации ───────────────────────────────────
+# ── Определение директории скрипта ───────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [[ -f "${SCRIPT_DIR}/lang.sh" ]]; then
-  source "${SCRIPT_DIR}/lang.sh"
+
+# ── Подключение локализации ──────────────────────────────────
+if [[ -f "${SCRIPT_DIR}/lang/telegram.sh" ]]; then
+  source "${SCRIPT_DIR}/lang/telegram.sh"
+elif [[ -f "${SCRIPT_DIR}/lang/main.sh" ]]; then
+  source "${SCRIPT_DIR}/lang/main.sh"
 else
-  # Fallback если файл локализации отсутствует
   source "${SCRIPT_DIR}/lib/fallback.sh"
 fi
 
-# ── Подключение общих модулей ─────────────────────────────────
+# ── Подключение общих модулей ────────────────────────────────
 source "${SCRIPT_DIR}/lib/common.sh" || {
   echo -e "\033[0;31m[✗] Не удалось загрузить lib/common.sh\033[0m"
   exit 1
@@ -35,83 +38,139 @@ source "${SCRIPT_DIR}/lib/validation.sh" || {
 }
 
 # ══════════════════════════════════════════════════════════════
+# Вспомогательные функции
+# ══════════════════════════════════════════════════════════════
+
+# Печать заголовка Telegram
+print_banner_telegram() {
+  echo ""
+  echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${PLAIN}"
+  echo -e "${GREEN}║     CubiVeil — Telegram Bot Setup                   ║${PLAIN}"
+  echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${PLAIN}"
+  echo ""
+}
+
+# Шаг установки с локализацией
+tg_step() {
+  local step_num="$1"
+  local total_steps="$2"
+  local ru="$3"
+  local en="$4"
+
+  if [[ "$LANG_NAME" == "Русский" ]]; then
+    step_module "$step_num" "$total_steps" "$ru"
+  else
+    step_module "$step_num" "$total_steps" "$en"
+  fi
+}
+
+# Ожидание запуска systemd-сервиса с таймером
+wait_for_service() {
+  local svc="$1"
+  local max_wait="${2:-30}"
+  local start_ts
+  start_ts=$(date +%s)
+
+  while true; do
+    if systemctl is-active --quiet "$svc"; then
+      success "$(get_tg_str OK_SERVICE_ACTIVE | sed "s/{SERVICE}/${svc}/g")"
+      return 0
+    fi
+    local now_ts
+    now_ts=$(date +%s)
+    local elapsed=$((now_ts - start_ts))
+    if [[ $elapsed -ge $max_wait ]]; then
+      warning "$(get_tg_str WARN_SERVICE_TIMEOUT | sed "s/{SERVICE}/${svc}/g" | sed "s/{SECONDS}/${max_wait}/g")"
+      return 1
+    fi
+    echo -ne "\rWaiting for $svc... ${elapsed}s"
+    sleep 1
+  done
+}
+
+# ══════════════════════════════════════════════════════════════
 # ШАГ 1: Проверка окружения
 # ══════════════════════════════════════════════════════════════
 step_check_environment() {
-  step_title "1" "Проверка окружения" "Environment check"
+  local _ru _en
+  _ru="$(get_tg_str STEP_TITLE_ENV_CHECK_RU)"
+  _en="$(get_tg_str STEP_TITLE_ENV_CHECK)"
+  tg_step 1 4 "$_ru" "$_en"
 
   # Проверка root
   if [[ $EUID -ne 0 ]]; then
-    err "$ERR_ROOT_RU" "$ERR_ROOT"
+    err "$(get_tg_str ERR_ROOT_TG_RU)"
   fi
 
   # Проверка что Marzban установлен
   if [[ ! -f /opt/marzban/.env ]]; then
-    err "$(get_str ERR_MARZBAN_NOT_FOUND ERR_MARZBAN_NOT_FOUND_RU)"
+    err "$(get_tg_str ERR_MARZBAN_NOT_FOUND_TG_RU)"
   fi
 
   # Проверка Python3
   if ! command -v python3 &>/dev/null; then
-    err "$(get_str ERR_PYTHON3_NOT_FOUND ERR_PYTHON3_NOT_FOUND_RU)"
+    err "$(get_tg_str ERR_PYTHON3_NOT_FOUND_TG_RU)"
   fi
 
   # Проверка curl
   if ! command -v curl &>/dev/null; then
-    err "$(get_str ERR_CURL_NOT_FOUND ERR_CURL_NOT_FOUND_RU)"
+    err "$(get_tg_str ERR_CURL_NOT_FOUND_TG_RU)"
   fi
 
-  ok "Окружение проверено"
+  success "$(get_tg_str OK_ENV_CHECKED_RU)"
 }
 
 # ══════════════════════════════════════════════════════════════
 # ШАГ 2: Ввод данных Telegram
 # ══════════════════════════════════════════════════════════════
 step_prompt_telegram_config() {
-  step_title "2" "Настройка Telegram" "Telegram configuration"
+  local _ru _en
+  _ru="$(get_tg_str STEP_TITLE_TG_CONFIG_RU)"
+  _en="$(get_tg_str STEP_TITLE_TG_CONFIG)"
+  tg_step 2 4 "$_ru" "$_en"
 
-  info "$(get_setup_str INFO_TG_BOT)"
+  info "$(get_tg_str INFO_TG_BOT_RU)"
 
   local prompt_token
-  prompt_token="$(get_setup_str PROMPT_TG_TOKEN)"
+  prompt_token="$(get_tg_str PROMPT_TG_TOKEN_RU)"
   read -rp "$prompt_token" TG_TOKEN
   TG_TOKEN="${TG_TOKEN// /}"
 
   # Валидация формата токена Telegram
   if [[ ! "$TG_TOKEN" =~ ^[0-9]+:[A-Za-z0-9_-]{35}$ ]]; then
-    err "$(get_setup_str ERR_TG_TOKEN_FORMAT)"
+    err "$(get_tg_str ERR_TG_TOKEN_FORMAT_RU)"
   fi
 
   # Проверка валидности токена через API с SSL pinning
-  # Используем доверенный CA и pinning публичного ключа
   if ! curl -sf --max-time 5 \
     --cacert /etc/ssl/certs/ca-certificates.crt \
     "https://api.telegram.org/bot${TG_TOKEN}/getMe" >/dev/null 2>&1; then
-    err "$(get_setup_str ERR_TG_TOKEN_INVALID)"
+    err "$(get_tg_str ERR_TG_TOKEN_INVALID_RU)"
   fi
 
-  ok "$(get_setup_str OK_TG_TOKEN_VERIFIED)"
+  success "$(get_tg_str OK_TG_TOKEN_VERIFIED_RU)"
 
   local prompt_chat_id
-  prompt_chat_id="$(get_setup_str PROMPT_TG_CHAT_ID)"
+  prompt_chat_id="$(get_tg_str PROMPT_TG_CHAT_ID_RU)"
   read -rp "$prompt_chat_id" TG_CHAT_ID
   TG_CHAT_ID="${TG_CHAT_ID// /}"
 
-  # Валидация Chat ID через модуль validation.sh
+  # Валидация Chat ID
   while ! validate_chat_id "$TG_CHAT_ID"; do
-    warn "$(get_setup_str WARN_INVALID_CHAT_ID)"
+    warning "$(get_tg_str WARN_INVALID_CHAT_ID_RU)"
     read -rp "$prompt_chat_id" TG_CHAT_ID
     TG_CHAT_ID="${TG_CHAT_ID// /}"
   done
 
   local prompt_report
-  prompt_report="$(get_setup_str PROMPT_REPORT_TIME)"
+  prompt_report="$(get_tg_str PROMPT_REPORT_TIME_RU)"
   read -rp "$prompt_report" REPORT_TIME
   REPORT_TIME="${REPORT_TIME// /}"
   [[ -z "$REPORT_TIME" ]] && REPORT_TIME="09:00"
 
-  # Валидация времени через модуль validation.sh
+  # Валидация времени
   while ! validate_time "$REPORT_TIME"; do
-    warn "$(get_setup_str WARN_INVALID_TIME)"
+    warning "$(get_tg_str WARN_INVALID_TIME_RU)"
     read -rp "$prompt_report" REPORT_TIME
     REPORT_TIME="${REPORT_TIME// /}"
     [[ -z "$REPORT_TIME" ]] && REPORT_TIME="09:00"
@@ -122,15 +181,11 @@ step_prompt_telegram_config() {
   REPORT_MIN=$(echo "$REPORT_TIME" | cut -d: -f2)
 
   echo ""
-  local info_alerts
-  local prompt_cpu
-  local prompt_ram
-  local prompt_disk
-  info_alerts="$(get_setup_str INFO_ALERT_THRESHOLDS)"
-  prompt_cpu="$(get_setup_str PROMPT_ALERT_CPU)"
-  prompt_ram="$(get_setup_str PROMPT_ALERT_RAM)"
-  prompt_disk="$(get_setup_str PROMPT_ALERT_DISK)"
-  info "$info_alerts"
+  info "$(get_tg_str INFO_ALERT_THRESHOLDS_RU)"
+  local prompt_cpu prompt_ram prompt_disk
+  prompt_cpu="$(get_tg_str PROMPT_ALERT_CPU_RU)"
+  prompt_ram="$(get_tg_str PROMPT_ALERT_RAM_RU)"
+  prompt_disk="$(get_tg_str PROMPT_ALERT_DISK_RU)"
   read -rp "$prompt_cpu" ALERT_CPU
   ALERT_CPU="${ALERT_CPU// /}"
   [[ -z "$ALERT_CPU" ]] && ALERT_CPU=80
@@ -142,32 +197,28 @@ step_prompt_telegram_config() {
   [[ -z "$ALERT_DISK" ]] && ALERT_DISK=90
 
   echo ""
-  ok "$(get_setup_str OK_TG_CONFIGURED_RU)"
-  ok "$(get_setup_str OK_TG_CONFIGURED_SHORT_RU)"
-  if [[ "$LANG_NAME" != "Русский" ]]; then
-    ok "$(get_setup_str OK_TG_CONFIGURED)"
-    ok "$(get_setup_str OK_TG_CONFIGURED_SHORT)"
-  fi
+  success "$(get_tg_str OK_TG_CONFIGURED_RU | sed "s/{REPORT_TIME}/${REPORT_TIME}/g")"
+  success "$(get_tg_str OK_TG_CONFIGURED_SHORT_RU | sed "s/{ALERT_CPU}/${ALERT_CPU}/g" | sed "s/{ALERT_RAM}/${ALERT_RAM}/g" | sed "s/{ALERT_DISK}/${ALERT_DISK}/g")"
 }
 
 # ══════════════════════════════════════════════════════════════
 # ШАГ 3: Установка бота
 # ══════════════════════════════════════════════════════════════
 step_install_bot() {
-  step_title "3" "Установка бота" "Bot installation"
+  local _ru _en
+  _ru="$(get_tg_str STEP_TITLE_BOT_INSTALL_RU)"
+  _en="$(get_tg_str STEP_TITLE_BOT_INSTALL)"
+  tg_step 3 4 "$_ru" "$_en"
 
   mkdir -p /opt/cubiveil-bot/backups
 
-  # ── Python-скрипт бота ────────────────────────────────────
-  # Используем модульную версию из assets/telegram-bot/
   local BOT_SOURCE="${SCRIPT_DIR}/assets/telegram-bot/bot.py"
   local BOT_MODULES_DIR="${SCRIPT_DIR}/assets/telegram-bot"
 
   if [[ ! -f "$BOT_SOURCE" ]]; then
-    err "Файл бота не найден: $BOT_SOURCE"
+    err "$(get_tg_str ERR_BOT_FILE_NOT_FOUND_RU | sed "s/{PATH}/${BOT_SOURCE}/g")"
   fi
 
-  # Копируем основной файл бота
   cp "$BOT_SOURCE" /opt/cubiveil-bot/bot.py
   chmod +x /opt/cubiveil-bot/bot.py
 
@@ -176,17 +227,22 @@ step_install_bot() {
     if [[ -f "${BOT_MODULES_DIR}/${module}" ]]; then
       cp "${BOT_MODULES_DIR}/${module}" /opt/cubiveil-bot/${module}
       chmod +x /opt/cubiveil-bot/${module}
+    else
+      warning "$(get_tg_str WARN_BOT_MODULE_NOT_FOUND_RU | sed "s/{MODULE}/${module}/g")"
     fi
   done
 
-  ok "Python-скрипт бота установлен из assets/telegram-bot/"
+  success "$(get_tg_str OK_BOT_INSTALLED_RU)"
 }
 
 # ══════════════════════════════════════════════════════════════
 # ШАГ 4: Настройка systemd и cron
 # ══════════════════════════════════════════════════════════════
 step_configure_services() {
-  step_title "4" "Настройка сервисов" "Service configuration"
+  local _ru _en
+  _ru="$(get_tg_str STEP_TITLE_SERVICE_CONFIG_RU)"
+  _en="$(get_tg_str STEP_TITLE_SERVICE_CONFIG)"
+  tg_step 4 4 "$_ru" "$_en"
 
   # ── Безопасный файл с чувствительными данными ───────────
   mkdir -p /etc/cubiveil
@@ -200,9 +256,9 @@ EOF
   chmod 600 /etc/cubiveil/bot.env
   chown root:root /etc/cubiveil/bot.env
 
-  ok "Файл с чувствительными данными создан (/etc/cubiveil/bot.env, 0600)"
+  success "$(get_tg_str OK_SENSITIVE_FILE_CREATED_RU | sed "s/{PATH}\/etc\/cubiveil\/bot.env/\/etc\/cubiveil\/bot.env/g")"
 
-  # ── Systemd сервис с EnvironmentFile ───────────────────
+  # ── Systemd сервис ───────────────────────────────────────
   cat >/etc/systemd/system/cubiveil-bot.service <<EOF
 [Unit]
 Description=CubiVeil Telegram Bot
@@ -210,7 +266,6 @@ After=network.target marzban.service
 
 [Service]
 Type=simple
-# Чувствительные данные в защищённом файле с правами 0600
 EnvironmentFile=/etc/cubiveil/bot.env
 Environment="CUBIVEIL_UTILS_DIR=${SCRIPT_DIR}/utils"
 ExecStart=/usr/bin/python3 /opt/cubiveil-bot/bot.py poll
@@ -218,14 +273,11 @@ Restart=always
 RestartSec=10s
 StandardOutput=journal
 StandardError=journal
-# Защита от утечек через дампы
 ProtectHome=true
 ProtectSystem=strict
-# Ограничиваем доступ только к бэкапам и состоянию (read-only к БД для чтения)
 ReadWritePaths=/opt/cubiveil-bot/backups /opt/cubiveil-bot
 ReadOnlyPaths=/var/lib/marzban/db.sqlite3
 NoNewPrivileges=true
-# Ограничение частоты логов
 LogRateLimitInterval=30s
 LogRateLimitBurst=1000
 
@@ -233,27 +285,23 @@ LogRateLimitBurst=1000
 WantedBy=multi-user.target
 EOF
 
-  ok "Systemd сервис создан"
+  success "$(get_tg_str OK_SYSTEMD_CREATED_RU)"
 
   # ── Ротация логов через journald ─────────────────────────
   mkdir -p /etc/systemd/journald.d
   cat >/etc/systemd/journald.d/cubiveil-limit.conf <<EOF
-# Ограничение размера логов для CubiVeil
 [Journal]
-# Максимум 1ГБ на все логи системы
 SystemMaxUse=1G
-# Хранить логи 14 дней
 MaxFileSec=2week
 EOF
 
   systemctl kill -s SIGHUP systemd-journald 2>/dev/null || true
 
-  ok "Ротация логов journald настроена"
+  success "$(get_tg_str OK_JOURNALD_CONFIGURED_RU)"
 
   # ── Ротация логов через logrotate ────────────────────────
   if command -v logrotate &>/dev/null; then
     cat >/etc/logrotate.d/cubiveil-services <<EOF
-# Ротация логов CubiVeil сервисов
 /var/log/journal/*/cubiveil-bot.service.log {
   weekly
   rotate 4
@@ -265,7 +313,7 @@ EOF
   maxage 30
 }
 EOF
-    ok "Ротация логов настроена (logrotate: 4 недели, 50МБ)"
+    success "$(get_tg_str OK_LOGROTATE_CONFIGURED_RU | sed "s/{WEEKS}/4/g" | sed "s/{SIZE}/50МБ/g")"
   fi
 
   # ── Cron: ежедневный отчёт + проверка алертов ────────────
@@ -278,88 +326,38 @@ EOF
   systemctl daemon-reload
   systemctl enable cubiveil-bot --now >/dev/null 2>&1
 
-  ok "Telegram-бот запущен (systemd: cubiveil-bot)"
-  ok "Ежедневный отчёт + бэкап: ${REPORT_TIME} UTC"
-  ok "Алерты каждые 15 мин: CPU>${ALERT_CPU}% RAM>${ALERT_RAM}% Диск>${ALERT_DISK}%"
-  ok "Команды: /status /backup /users /restart /help"
-}
-
-# Функция для шагов Telegram-установки с локализацией
-setup_step() {
-  local step_num="$1"
-  local total_steps="$2"
-  local ru="$3"
-  local en="$4"
-
-  if [[ "$LANG_NAME" == "Русский" ]]; then
-    step_module "$step_num" "$total_steps" "$ru"
-  else
-    step_module "$step_num" "$total_steps" "$en"
-  fi
-}
-
-# Ждем, пока systemd-сервис запустится, с отображением таймера
-wait_for_service() {
-  local svc="$1"
-  local max_wait="${2:-30}"
-  local start_ts
-  start_ts=$(date +%s)
-
-  while true; do
-    if systemctl is-active --quiet "$svc"; then
-      success "$svc is active"
-      return 0
-    fi
-    local now_ts
-    now_ts=$(date +%s)
-    local elapsed=$((now_ts - start_ts))
-    if [[ $elapsed -ge $max_wait ]]; then
-      warning "$svc did not become active in ${max_wait}s"
-      return 1
-    fi
-    echo -ne "\rWaiting for $svc... ${elapsed}s"
-    sleep 1
-  done
+  success "$(get_tg_str OK_BOT_STARTED_RU | sed "s/{SERVICE}/cubiveil-bot/g")"
+  success "$(get_tg_str OK_DAILY_REPORT_RU | sed "s/{TIME}/${REPORT_TIME}/g")"
+  success "$(get_tg_str OK_ALERTS_CONFIGURED_RU | sed "s/{CPU}/${ALERT_CPU}/g" | sed "s/{RAM}/${ALERT_RAM}/g" | sed "s/{DISK}/${ALERT_DISK}/g")"
+  success "$(get_tg_str OK_COMMANDS_RU)"
 }
 
 # ══════════════════════════════════════════════════════════════
-# Точка входа / Entry point
+# Финальный вывод
 # ══════════════════════════════════════════════════════════════
-telegram_main() {
-  # Выбор языка если не выбран
-  if [[ -z "${LANG_NAME:-}" ]]; then
-    if [[ -f "${SCRIPT_DIR}/lang.sh" ]]; then
-      select_language
-    fi
-  fi
-
-  print_banner_telegram
-  step_check_environment
-  step_prompt_telegram_config
-  step_install_bot
-  step_configure_services
+print_finish() {
+  echo ""
 
   # Итоговая сводка предупреждений
   if [[ ${#WARNINGS[@]} -gt 0 ]]; then
     echo ""
-    echo -e "${YELLOW}⚠ Warnings during Telegram install:${PLAIN}"
+    echo -e "${YELLOW}$(get_tg_str FINAL_WARNINGS_TITLE_RU)${PLAIN}"
     for _warn in "${WARNINGS[@]}"; do
       echo -e "  - ${_warn}"
     done
     echo ""
   fi
 
-  echo ""
+  echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${PLAIN}"
   if [[ "$LANG_NAME" == "Русский" ]]; then
-    echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${PLAIN}"
-    echo -e "${GREEN}║      Telegram-бот установлен успешно! 🎉             ║${PLAIN}"
+    echo -e "${GREEN}║  $(get_tg_str FINAL_SUCCESS_TITLE_RU)$(printf '%*s' $((48 - ${#$(get_tg_str FINAL_SUCCESS_TITLE_RU)})) '')║${PLAIN}"
     echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${PLAIN}"
     echo ""
-    echo -e "${CYAN}  БОТ${PLAIN}"
-    echo -e "  Статус: ${GREEN}systemctl status cubiveil-bot${PLAIN}"
-    echo -e "  Логи:   ${GREEN}journalctl -u cubiveil-bot -f${PLAIN}"
+    echo -e "${CYAN}  $(get_tg_str FINAL_BOT_SECTION_RU)${PLAIN}"
+    echo -e "  $(get_tg_str FINAL_STATUS_RU): ${GREEN}systemctl status cubiveil-bot${PLAIN}"
+    echo -e "  $(get_tg_str FINAL_LOGS_RU):   ${GREEN}journalctl -u cubiveil-bot -f${PLAIN}"
     echo ""
-    echo -e "${CYAN}  КОМАНДЫ${PLAIN}"
+    echo -e "${CYAN}  $(get_tg_str FINAL_COMMANDS_SECTION_RU)${PLAIN}"
     echo -e "  /status  — CPU, RAM, диск, uptime"
     echo -e "  /monitor — детальный мониторинг"
     echo -e "  /backup  — меню бэкапов"
@@ -374,8 +372,8 @@ telegram_main() {
     echo -e "  /set_cpu — порог CPU alert"
     echo -e "  /set_ram — порог RAM alert"
     echo -e "  /set_disk — порог Disk alert"
-    echo -e ""
-    echo -e "${CYAN}  ПРОФИЛИ${PLAIN}"
+    echo ""
+    echo -e "${CYAN}  $(get_tg_str FINAL_PROFILES_SECTION_RU)${PLAIN}"
     echo -e "  /enable  — включить профиль"
     echo -e "  /disable — отключить профиль"
     echo -e "  /extend  — продлить профиль"
@@ -384,21 +382,20 @@ telegram_main() {
     echo -e "  /traffic — расход трафика"
     echo -e "  /subscription — ссылка на подписку"
     echo -e "  /create  — создать новый профиль"
-    echo -e ""
+    echo ""
     echo -e "  /help    — эта справка"
     echo ""
-    echo -e "${YELLOW}  Используйте кнопки в меню для навигации!${PLAIN}"
+    echo -e "${YELLOW}  $(get_tg_str FINAL_NAVIGATION_RU)${PLAIN}"
     echo ""
   else
-    echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${PLAIN}"
-    echo -e "${GREEN}║      Telegram bot installed successfully! 🎉         ║${PLAIN}"
+    echo -e "${GREEN}║  $(get_tg_str FINAL_SUCCESS_TITLE)$(printf '%*s' $((48 - ${#$(get_tg_str FINAL_SUCCESS_TITLE)})) '')║${PLAIN}"
     echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${PLAIN}"
     echo ""
-    echo -e "${CYAN}  BOT${PLAIN}"
-    echo -e "  Status: ${GREEN}systemctl status cubiveil-bot${PLAIN}"
-    echo -e "  Logs:   ${GREEN}journalctl -u cubiveil-bot -f${PLAIN}"
+    echo -e "${CYAN}  $(get_tg_str FINAL_BOT_SECTION)${PLAIN}"
+    echo -e "  $(get_tg_str FINAL_STATUS): ${GREEN}systemctl status cubiveil-bot${PLAIN}"
+    echo -e "  $(get_tg_str FINAL_LOGS):   ${GREEN}journalctl -u cubiveil-bot -f${PLAIN}"
     echo ""
-    echo -e "${CYAN}  COMMANDS${PLAIN}"
+    echo -e "${CYAN}  $(get_tg_str FINAL_COMMANDS_SECTION)${PLAIN}"
     echo -e "  /status  — CPU, RAM, disk, uptime"
     echo -e "  /monitor — detailed monitoring"
     echo -e "  /backup  — backup menu"
@@ -413,8 +410,8 @@ telegram_main() {
     echo -e "  /set_cpu — CPU alert threshold"
     echo -e "  /set_ram — RAM alert threshold"
     echo -e "  /set_disk — Disk alert threshold"
-    echo -e ""
-    echo -e "${CYAN}  PROFILES${PLAIN}"
+    echo ""
+    echo -e "${CYAN}  $(get_tg_str FINAL_PROFILES_SECTION)${PLAIN}"
     echo -e "  /enable  — enable profile"
     echo -e "  /disable — disable profile"
     echo -e "  /extend  — extend profile"
@@ -423,20 +420,43 @@ telegram_main() {
     echo -e "  /traffic — traffic usage"
     echo -e "  /subscription — subscription link"
     echo -e "  /create  — create new profile"
-    echo -e ""
+    echo ""
     echo -e "  /help    — this help"
     echo ""
-    echo -e "${YELLOW}  Use menu buttons for navigation!${PLAIN}"
+    echo -e "${YELLOW}  $(get_tg_str FINAL_NAVIGATION)${PLAIN}"
     echo ""
   fi
   echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${PLAIN}"
+}
+
+# ══════════════════════════════════════════════════════════════
+# Точка входа / Entry point
+# ══════════════════════════════════════════════════════════════
+telegram_main() {
+  # Выбор языка если не выбран
+  if [[ -z "${LANG_NAME:-}" ]]; then
+    if [[ -f "${SCRIPT_DIR}/lang/telegram.sh" ]]; then
+      # Язык уже выбран в lang/telegram.sh
+      :
+    elif [[ -f "${SCRIPT_DIR}/lang/main.sh" ]]; then
+      source "${SCRIPT_DIR}/lang/main.sh"
+    fi
+  fi
+
+  print_banner_telegram
+  step_check_environment
+  step_prompt_telegram_config
+  step_install_bot
+  step_configure_services
+
+  print_finish
 }
 
 main() {
   telegram_main "$@"
 }
 
-# Запускаем main только если скрипт запущен напрямую, а не через source
+# Запускаем main только если скрипт запущен напрямую
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   main "$@"
 fi

@@ -239,10 +239,10 @@ fi
 # Загрузка библиотек
 # ══════════════════════════════════════════════════════════════
 
-if [[ -f "${INSTALL_SCRIPT_DIR}/lang.sh" ]]; then
-  source "${INSTALL_SCRIPT_DIR}/lang.sh"
+if [[ -f "${INSTALL_SCRIPT_DIR}/lang/main.sh" ]]; then
+  source "${INSTALL_SCRIPT_DIR}/lang/main.sh"
 else
-  # Fallback если lang.sh отсутствует
+  # Fallback если lang/main.sh отсутствует
   source "${INSTALL_SCRIPT_DIR}/lib/fallback.sh" 2>/dev/null || true
 fi
 
