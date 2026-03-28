@@ -5,14 +5,17 @@ set -euo pipefail
 # ║          github.com/cubiculus/cubiveil                   ║
 # ╚═══════════════════════════════════════════════════════════╝
 
+# ── Определение директории скрипта ──────────────────────────────
+UTILS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # ── Подключение локализации (если доступно) ───────────────────────
-if [[ -f "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")/../}/lib/i18n.sh" ]]; then
-  source "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")/../}/lib/i18n.sh"
+if [[ -f "${UTILS_SCRIPT_DIR}/i18n.sh" ]]; then
+  source "${UTILS_SCRIPT_DIR}/i18n.sh"
 fi
 
 # ── Подключение модуля валидации ──────────────────────────────────
-if [[ -f "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")/../}/lib/validation.sh" ]]; then
-  source "${SCRIPT_DIR:-$(dirname "${BASH_SOURCE[0]}")/../}/lib/validation.sh"
+if [[ -f "${UTILS_SCRIPT_DIR}/validation.sh" ]]; then
+  source "${UTILS_SCRIPT_DIR}/validation.sh"
 fi
 
 # ── Генераторы случайных значений ────────────────────────────
