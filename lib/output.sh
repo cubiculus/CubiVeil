@@ -21,6 +21,7 @@ readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'
 readonly YELLOW='\033[0;33m'
 readonly BLUE='\033[0;34m'
+readonly CYAN='\033[0;36m'
 readonly PLAIN='\033[0m'
 
 # ── Константы иконок / Icon constants ────────────────────────
@@ -100,10 +101,10 @@ step() {
     local step_num="$1"
     local total_steps="$2"
     local title="$3"
-    echo -e "\n${BLUE}══ [${step_num}/${total_steps}] ${title} ══${PLAIN}"
+    echo -e "\n${CYAN}══ [${step_num}/${total_steps}] ${title} ══${PLAIN}"
   else
     local title="$1"
-    echo -e "\n${BLUE}══ ${title} ══${PLAIN}"
+    echo -e "\n${CYAN}══ ${title} ══${PLAIN}"
   fi
 }
 
