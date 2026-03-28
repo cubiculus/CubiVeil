@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2034
 # ╔═══════════════════════════════════════════════════════════╗
 # ║          CubiVeil — Output Functions                      ║
 # ║          github.com/cubiculus/cubiveil                   ║
@@ -15,7 +16,6 @@ fi
 _CUBIVEIL_OUTPUT_LOADED=1
 
 # ── Цвета / Colors ───────────────────────────────────────────
-# shellcheck disable=SC2034
 # ANSI color codes for terminal output
 readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'

@@ -349,11 +349,13 @@ ssl_enable() {
     fi
   else
     # В production-режиме проверяем Let's Encrypt
-    # Используем || true чтобы предотвратить падение при отсутствии директории
+    # Используем || echo 0 чтобы гарантированно получить число
     cert_count=$(find "${SSL_CERT_DIR}" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l || echo 0)
+    cert_count="${cert_count//[^0-9]/}"
+    cert_count="${cert_count:-0}"
   fi
 
-  if [[ $cert_count -eq 0 ]]; then
+  if (( cert_count == 0 )); then
     log_warn "No SSL certificates found"
     return 0
   fi

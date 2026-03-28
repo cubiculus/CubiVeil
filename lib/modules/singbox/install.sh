@@ -215,6 +215,7 @@ singbox_install() {
   version_info=$(singbox_get_version)
 
   # Разбираем
+  # shellcheck disable=SC2034
   local sb_tag sb_ver sb_url sb_sha256
   IFS='|' read -r sb_tag sb_ver sb_url sb_sha256 <<<"$version_info"
 
