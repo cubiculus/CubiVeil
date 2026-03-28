@@ -111,6 +111,19 @@ marzban_install() {
     }
   fi
 
+  # Проверяем наличие предыдущей установки и удаляем если есть
+  if docker ps -a --format '{{.Names}}' | grep -q "^marzban$"; then
+    log_info "Removing existing Marzban installation..."
+    docker stop marzban >/dev/null 2>&1 || true
+    docker rm marzban >/dev/null 2>&1 || true
+  fi
+
+  # Удаляем существующий volume если есть
+  if docker volume ls --format '{{.Name}}' | grep -q "^marzban$"; then
+    log_info "Removing existing Marzban volume..."
+    docker volume rm marzban >/dev/null 2>&1 || true
+  fi
+
   # Запускаем установку с выводом ошибок
   # Marzban installer не поддерживает --yes, поэтому используем автоматический режим через env
   export MARZBAN_TELEGRAM_ENABLED=0
@@ -127,6 +140,23 @@ marzban_install() {
 
   # Очищаем временный файл
   rm -f "$MARZBAN_INSTALL_SCRIPT"
+
+  # Ожидаем полную инициализацию Marzban (до 60 секунд)
+  log_info "Waiting for Marzban to fully initialize..."
+  local max_attempts=30
+  local attempt=0
+  while [[ $attempt -lt $max_attempts ]]; do
+    if docker logs marzban 2>/dev/null | grep -q "Application startup complete"; then
+      log_success "Marzban initialized successfully"
+      break
+    fi
+    sleep 2
+    ((attempt++)) || true
+  done
+
+  if [[ $attempt -eq $max_attempts ]]; then
+    log_warn "Marzban initialization timeout, but continuing..."
+  fi
 
   log_success "Marzban installed successfully"
 }
