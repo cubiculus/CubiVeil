@@ -96,24 +96,41 @@ log_debug() {
   _log_write "DEBUG" "$*"
 }
 
-# Логирование уровня INFO
+# Логирование уровня INFO (с поддержкой локализации)
 log_info() {
-  _log_write "INFO" "$*"
+  local msg="$*"
+  # Пробуем получить локализованную строку если передан ключ MSG_*
+  if [[ "$msg" == MSG_* ]] && declare -f get_str >/dev/null 2>&1; then
+    msg="$(get_str "$msg" 2>/dev/null || echo "$msg")"
+  fi
+  _log_write "INFO" "$msg"
 }
 
-# Логирование уровня WARN
+# Логирование уровня WARN (с поддержкой локализации)
 log_warn() {
-  _log_write "WARN" "$*"
+  local msg="$*"
+  if [[ "$msg" == MSG_* ]] && declare -f get_str >/dev/null 2>&1; then
+    msg="$(get_str "$msg" 2>/dev/null || echo "$msg")"
+  fi
+  _log_write "WARN" "$msg"
 }
 
-# Логирование уровня ERROR
+# Логирование уровня ERROR (с поддержкой локализации)
 log_error() {
-  _log_write "ERROR" "$*"
+  local msg="$*"
+  if [[ "$msg" == MSG_* ]] && declare -f get_str >/dev/null 2>&1; then
+    msg="$(get_str "$msg" 2>/dev/null || echo "$msg")"
+  fi
+  _log_write "ERROR" "$msg"
 }
 
-# Логирование уровня SUCCESS
+# Логирование уровня SUCCESS (с поддержкой локализации)
 log_success() {
-  _log_write "SUCCESS" "$*"
+  local msg="$*"
+  if [[ "$msg" == MSG_* ]] && declare -f get_str >/dev/null 2>&1; then
+    msg="$(get_str "$msg" 2>/dev/null || echo "$msg")"
+  fi
+  _log_write "SUCCESS" "$msg"
 }
 
 # ── Логирование с выводом в консоль / Console Logging ────
@@ -122,19 +139,31 @@ log_success() {
 
 # Информационное сообщение (консоль + лог)
 log_console_info() {
-  echo -e "ℹ️  $*"
-  log_info "$*"
+  local msg="$*"
+  # Пробуем получить локализованную строку если передан ключ MSG_*
+  if [[ "$msg" == MSG_* ]] && declare -f get_str >/dev/null 2>&1; then
+    msg="$(get_str "$msg" 2>/dev/null || echo "$msg")"
+  fi
+  echo -e "ℹ️  ${msg}"
+  log_info "$msg"
 }
 
 # Успешное сообщение (консоль + лог)
 log_console_success() {
-  echo -e "${GREEN}✅${PLAIN} $*"
-  log_success "$*"
+  local msg="$*"
+  if [[ "$msg" == MSG_* ]] && declare -f get_str >/dev/null 2>&1; then
+    msg="$(get_str "$msg" 2>/dev/null || echo "$msg")"
+  fi
+  echo -e "${GREEN}✅${PLAIN} ${msg}"
+  log_success "$msg"
 }
 
 # Предупреждение (консоль + лог)
 log_console_warning() {
   local msg="$*"
+  if [[ "$msg" == MSG_* ]] && declare -f get_str >/dev/null 2>&1; then
+    msg="$(get_str "$msg" 2>/dev/null || echo "$msg")"
+  fi
   echo -e "${YELLOW}⚠️${PLAIN} ${msg}"
   log_warn "${msg}"
   WARNINGS+=("${msg}")
@@ -142,8 +171,12 @@ log_console_warning() {
 
 # Ошибка (консоль + лог)
 log_console_error() {
-  echo -e "${RED}❌${PLAIN} $*" >&2
-  log_error "$*"
+  local msg="$*"
+  if [[ "$msg" == MSG_* ]] && declare -f get_str >/dev/null 2>&1; then
+    msg="$(get_str "$msg" 2>/dev/null || echo "$msg")"
+  fi
+  echo -e "${RED}❌${PLAIN} ${msg}" >&2
+  log_error "$msg"
 }
 
 # ── Функции совместимости / Compatibility Functions ────────
@@ -224,9 +257,18 @@ log_step_title() {
 }
 
 # Простой заголовок шага с логированием (совместимость)
+# Поддерживает локализацию через get_str() если передан ключ
+# Использование: log_step "MSG_KEY" "Message"
 log_step() {
   local step_key="$1"
   local msg="${2:-$1}"
+
+  # Пробуем получить локализованную строку если ключ отличается от сообщения
+  if [[ "$step_key" != "$msg" || "$step_key" == MSG_* ]]; then
+    if declare -f get_str >/dev/null 2>&1; then
+      msg="$(get_str "$step_key" 2>/dev/null || echo "$msg")"
+    fi
+  fi
 
   # Показываем визуальный разделитель только для верхнего уровня (по умолчанию скрыто)
   if [[ "${CUBIVEIL_HIDE_LOG_STEP:-true}" != "true" ]]; then
