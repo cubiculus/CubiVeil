@@ -74,8 +74,9 @@ module_enable() {
   ln -sf "$NGINX_CONF" "$NGINX_ENABLED"
 
   # Проверяем конфиг nginx
-  if ! nginx -t >/dev/null 2>&1; then
-    log_error "Ошибка конфигурации nginx"
+  local nginx_test_output
+  if ! nginx_test_output=$(nginx -t 2>&1); then
+    log_error "Ошибка конфигурации nginx: $nginx_test_output"
     log_warn "Decoy-site disabled due to nginx config error"
     return 0 # Не ошибка — продолжаем
   fi
