@@ -145,10 +145,8 @@ test_module_functions_usage() {
     "step_bbr"
     "step_firewall"
     "step_fail2ban"
-    "step_install_singbox"
-    "step_generate_keys_and_ports"
-    "step_install_marzban"
     "step_ssl"
+    "step_install_sui"
     "step_configure"
     "step_decoy_site"
     "step_traffic_shaping"
@@ -162,7 +160,7 @@ test_module_functions_usage() {
     fi
   done
 
-  if [[ $found -ge 15 ]]; then
+  if [[ $found -ge 12 ]]; then
     pass "install.sh: РёСЃРїРѕР»СЊР·СѓРµС‚ С„СѓРЅРєС†РёРё РёР· РјРѕРґСѓР»РµР№ ($found/${#required_functions[@]})"
     ((TESTS_PASSED++)) || true
   else
@@ -190,7 +188,7 @@ test_installation_steps_order() {
     "prompt_inputs"
     "step_check_ip_neighborhood"
     "step_system_update"
-    "step_install_marzban"
+    "step_install_sui"
     "step_finish"
   )
 
@@ -479,8 +477,8 @@ test_dry_run_simulation() {
   step_firewall() { :; }
   step_fail2ban() { :; }
   step_install_singbox() { :; }
-  step_generate_keys_and_ports() { :; }
-  step_install_marzban() { :; }
+  step_ssl() { :; }
+  step_install_sui() { :; }
   step_ssl() { :; }
   step_configure() { :; }
   step_finish() { :; }

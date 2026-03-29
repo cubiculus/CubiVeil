@@ -236,11 +236,11 @@ test_orchestrator_load() {
 
     source "$ORCHESTRATOR_PATH"
 
-    # Проверка что функции существуют
+    # Проверка что функции существуют (обновлено для s-ui)
     if declare -f _export_globals >/dev/null && \
        declare -f step_module >/dev/null && \
        declare -f run_module >/dev/null && \
-       declare -f _generate_keys_and_ports >/dev/null; then
+       declare -f _install_sui_panel >/dev/null; then
       pass "orchestrator.sh: все функции определены"
     else
       fail "orchestrator.sh: функции не найдены"
@@ -299,65 +299,7 @@ test_orchestrator_step_module() {
 }
 
 # ════════════════════════════════════════════════════════════
-#  ТЕСТ 8: orchestrator.sh — _generate_keys_and_ports
-# ════════════════════════════════════════════════════════════
-test_orchestrator_generate_keys_and_ports() {
-  info "Тестирование _generate_keys_and_ports..."
-
-  # Создаём временную директорию для тестов
-  local test_dir
-  test_dir=$(mktemp -d)
-
-  # Устанавливаем INSTALL_SCRIPT_DIR и TEST_DIR для корректной работы
-  INSTALL_SCRIPT_DIR="${PROJECT_ROOT}"
-  TEST_DIR="$test_dir"
-
-  # Mock для unique_port
-  unique_port() { echo "$((30000 + RANDOM % 1000))"; }
-
-  # Mock для generate_secure_key
-  generate_secure_key() { echo "mock_key_$(head -c 8 /dev/urandom | xxd -p)"; }
-
-  DOMAIN="test.example.com"
-  LE_EMAIL="test@example.com"
-  DEV_MODE="true"
-  LANG_NAME="English"
-
-  _generate_keys_and_ports
-
-  # Проверка что файлы созданы в TEST_DIR
-  if [[ -f "$test_dir/etc/cubiveil/reality.json" ]]; then
-    pass "_generate_keys_and_ports: reality.json создан"
-  else
-    fail "_generate_keys_and_ports: reality.json не создан"
-  fi
-
-  if [[ -f "$test_dir/etc/cubiveil/domain.json" ]]; then
-    pass "_generate_keys_and_ports: domain.json создан"
-  else
-    fail "_generate_keys_and_ports: domain.json не создан"
-  fi
-
-  if [[ -f "$test_dir/etc/cubiveil/ports.json" ]]; then
-    pass "_generate_keys_and_ports: ports.json создан"
-  else
-    fail "_generate_keys_and_ports: ports.json не создан"
-  fi
-
-  # Проверка что порты установлены
-  if [[ -n "$TROJAN_PORT" && -n "$SS_PORT" && \
-        -n "$PANEL_PORT" && -n "$SUB_PORT" ]]; then
-    pass "_generate_keys_and_ports: порты установлены (Trojan=$TROJAN_PORT, SS=$SS_PORT, Panel=$PANEL_PORT, Sub=$SUB_PORT)"
-  else
-    fail "_generate_keys_and_ports: порты не установлены"
-  fi
-
-  # Очистка
-  rm -rf "$test_dir"
-}
-
-# ════════════════════════════════════════════════════════════
-#  ТЕСТ 9: ui.sh — загрузка модуля
+#  ТЕСТ 8: ui.sh — загрузка модуля
 # ════════════════════════════════════════════════════════════
 test_ui_load() {
   info "Тестирование загрузки ui.sh..."
