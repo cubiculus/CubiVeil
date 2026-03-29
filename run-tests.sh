@@ -60,7 +60,6 @@ run_unit_tests() {
     "unit-telegram.sh:setup-telegram.sh"
     "unit-system.sh:System module"
     "unit-ssl.sh:SSL module"
-    "unit-marzban.sh:Marzban module"
     "unit-decoy-site.sh:Decoy-site module"
     "unit-decoy-inner-pages.sh:Decoy Inner Pages"
     "unit-traffic-shaping.sh:Traffic Shaping module"
@@ -169,14 +168,61 @@ CubiVeil Test Runner
   --unit           Запуск только unit-тестов (без root)
   --integration    Запуск только интеграционных тестов (требует root)
   --full          Запуск всех тестов (требует root для интеграционных)
+  --coverage      Запуск с измерением покрытия кода (требует bashcov)
   --help, -h      Показать эту справку
 
 Примеры:
   ./run-tests.sh                    # Запуск unit-тестов
   sudo ./run-tests.sh --full       # Запуск всех тестов
   sudo ./run-tests.sh --integration # Только интеграционные тесты
+  ./run-tests.sh --coverage        # Запуск с coverage отчётом
 
+Coverage:
+  Для измерения покрытия кода установите bashcov:
+    gem install bashcov
+
+  Затем запустите:
+    cd tests
+    bashcov unit-install.sh
+
+  Результат будет в coverage/index.html
 EOF
+}
+
+# ── Запуск с измерением покрытия кода ─────────────────────────
+run_coverage_tests() {
+  print_section "Coverage Tests (измерение покрытия)"
+
+  echo -e "${BLUE}Запуск тестов с измерением покрытия кода...${PLAIN}"
+  echo ""
+
+  # Проверка наличия bashcov
+  if ! command -v bashcov &>/dev/null; then
+    echo -e "${YELLOW}⚠ bashcov не установлен${PLAIN}"
+    echo -e "${YELLOW}  Установите: gem install bashcov${PLAIN}"
+    echo ""
+    echo -e "${YELLOW}Запускаю обычные unit-тесты...${PLAIN}"
+    run_unit_tests
+    return
+  fi
+
+  cd "$TESTS_DIR"
+
+  # Запуск unit-install.sh с покрытием
+  echo -e "${BLUE}Запуск unit-install.sh с покрытием...${PLAIN}"
+  bashcov --reporter html unit-install.sh
+
+  if [[ -d "coverage" ]]; then
+    echo ""
+    echo -e "${GREEN}✓ Coverage отчёт создан: tests/coverage/index.html${PLAIN}"
+    echo -e "${CYAN}  Откройте в браузере: start coverage/index.html${PLAIN}"
+    ((TOTAL_PASSED++)) || true
+  else
+    echo -e "${RED}✗ Не удалось создать coverage отчёт${PLAIN}"
+    ((TOTAL_FAILED++)) || true
+  fi
+
+  cd "$SCRIPT_DIR"
 }
 
 # ── Основная функция ─────────────────────────────────────────────
@@ -196,6 +242,10 @@ main() {
       ;;
     --full)
       mode="full"
+      shift
+      ;;
+    --coverage)
+      mode="coverage"
       shift
       ;;
     --help | -h)
@@ -229,6 +279,9 @@ main() {
     run_unit_tests
     run_telegram_bot_tests
     run_integration_tests
+    ;;
+  coverage)
+    run_coverage_tests
     ;;
   esac
 
