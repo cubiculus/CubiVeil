@@ -21,13 +21,19 @@ fi
 # ── Генераторы случайных значений ────────────────────────────
 gen_random() {
   local length="${1:-16}"
-  [[ "$length" -le 0 ]] && { echo ""; return 0; }
+  [[ "$length" -le 0 ]] && {
+    echo ""
+    return 0
+  }
   LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w "$length" | head -n 1 || true
 }
 
 gen_hex() {
   local length="${1:-16}"
-  [[ "$length" -le 0 ]] && { echo ""; return 0; }
+  [[ "$length" -le 0 ]] && {
+    echo ""
+    return 0
+  }
   LC_ALL=C tr -dc 'a-f0-9' </dev/urandom | fold -w "$length" | head -n 1 || true
 }
 

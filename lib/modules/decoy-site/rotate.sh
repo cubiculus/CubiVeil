@@ -66,7 +66,7 @@ _decoy_can_rotate() {
 _decoy_get_total_size_mb() {
   local total_kb
   total_kb=$(du -sk "${DECOY_WEBROOT}/files" 2>/dev/null | cut -f1)
-  echo $(( ${total_kb:-0} / 1024 ))
+  echo $((${total_kb:-0} / 1024))
 }
 
 # Получить максимальный размер из конфигурации
@@ -95,7 +95,7 @@ _decoy_enforce_size_limit() {
   while [[ "${current_size_mb}" -gt "${max_size_mb}" ]]; do
     # Находим самый старый файл
     local oldest_file
-    oldest_file=$(find "${DECOY_WEBROOT}/files" -type f -printf '%T+ %p\n' 2>/dev/null | \
+    oldest_file=$(find "${DECOY_WEBROOT}/files" -type f -printf '%T+ %p\n' 2>/dev/null |
       sort | head -n1 | cut -d' ' -f2-)
 
     if [[ -z "$oldest_file" || ! -f "$oldest_file" ]]; then
@@ -137,48 +137,48 @@ _generate_rotated_file() {
   new_file="${target_dir}/${fname}"
 
   case "$file_type" in
-    jpg)
-      seed=$(gen_hex 6)
-      if command -v convert &>/dev/null; then
-        convert -size 4000x3000 \
-          "plasma:#${seed}-${accent_color:1}" \
-          -quality 88 "$new_file" 2>/dev/null && echo "$new_file" && return 0
-      fi
-      # Fallback
-      local size
-      size=$(gen_range 5 15)
-      dd if=/dev/urandom of="$new_file" bs=1M count="$size" status=none 2>/dev/null && echo "$new_file"
-      ;;
-    pdf)
-      # Минимальный PDF + случайные данные
-      local target_size
-      target_size=$(jq -r ".rotation.types.pdf.size_min_mb // 50" "$DECOY_CONFIG" 2>/dev/null || echo "50")
-      {
-        printf '%%PDF-1.4\n'
-        printf '1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n'
-        printf '2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n'
-        printf '3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R>>endobj\n'
-        printf 'xref\n0 4\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n193\n%%%%EOF\n'
-      } >"$new_file"
-      dd if=/dev/urandom bs=1M count="$target_size" status=none >>"$new_file" 2>/dev/null && echo "$new_file"
-      ;;
-    mp4)
-      # Заглушка MP4 + случайные данные
-      local target_size
-      target_size=$(jq -r ".rotation.types.mp4.size_min_mb // 100" "$DECOY_CONFIG" 2>/dev/null || echo "100")
-      printf '\x00\x00\x00\x1cftypisom\x00\x00\x02\x00isomiso2mp41' >"$new_file"
-      dd if=/dev/urandom bs=1M count="$target_size" status=none >>"$new_file" 2>/dev/null && echo "$new_file"
-      ;;
-    mp3)
-      # Заглушка MP3 + случайные данные
-      local target_size
-      target_size=$(jq -r ".rotation.types.mp3.size_min_mb // 10" "$DECOY_CONFIG" 2>/dev/null || echo "10")
-      printf 'ID3\x03\x00\x00\x00\x00\x00\x00' >"$new_file"
-      dd if=/dev/urandom bs=1M count="$target_size" status=none >>"$new_file" 2>/dev/null && echo "$new_file"
-      ;;
-    *)
-      return 1
-      ;;
+  jpg)
+    seed=$(gen_hex 6)
+    if command -v convert &>/dev/null; then
+      convert -size 4000x3000 \
+        "plasma:#${seed}-${accent_color:1}" \
+        -quality 88 "$new_file" 2>/dev/null && echo "$new_file" && return 0
+    fi
+    # Fallback
+    local size
+    size=$(gen_range 5 15)
+    dd if=/dev/urandom of="$new_file" bs=1M count="$size" status=none 2>/dev/null && echo "$new_file"
+    ;;
+  pdf)
+    # Минимальный PDF + случайные данные
+    local target_size
+    target_size=$(jq -r ".rotation.types.pdf.size_min_mb // 50" "$DECOY_CONFIG" 2>/dev/null || echo "50")
+    {
+      printf '%%PDF-1.4\n'
+      printf '1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n'
+      printf '2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n'
+      printf '3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R>>endobj\n'
+      printf 'xref\n0 4\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n193\n%%%%EOF\n'
+    } >"$new_file"
+    dd if=/dev/urandom bs=1M count="$target_size" status=none >>"$new_file" 2>/dev/null && echo "$new_file"
+    ;;
+  mp4)
+    # Заглушка MP4 + случайные данные
+    local target_size
+    target_size=$(jq -r ".rotation.types.mp4.size_min_mb // 100" "$DECOY_CONFIG" 2>/dev/null || echo "100")
+    printf '\x00\x00\x00\x1cftypisom\x00\x00\x02\x00isomiso2mp41' >"$new_file"
+    dd if=/dev/urandom bs=1M count="$target_size" status=none >>"$new_file" 2>/dev/null && echo "$new_file"
+    ;;
+  mp3)
+    # Заглушка MP3 + случайные данные
+    local target_size
+    target_size=$(jq -r ".rotation.types.mp3.size_min_mb // 10" "$DECOY_CONFIG" 2>/dev/null || echo "10")
+    printf 'ID3\x03\x00\x00\x00\x00\x00\x00' >"$new_file"
+    dd if=/dev/urandom bs=1M count="$target_size" status=none >>"$new_file" 2>/dev/null && echo "$new_file"
+    ;;
+  *)
+    return 1
+    ;;
   esac
 }
 
@@ -199,14 +199,14 @@ _select_file_type() {
     if [[ "$enabled" == "true" && "$weight" -gt 0 ]]; then
       enabled_types+=("$type")
       # Добавляем тип в массив weight раз
-      for ((i=0; i<weight; i++)); do
+      for ((i = 0; i < weight; i++)); do
         total_weight=$((total_weight + 1))
       done
     fi
   done
 
   if [[ ${#enabled_types[@]} -eq 0 ]]; then
-    echo "jpg"  # Fallback
+    echo "jpg" # Fallback
     return
   fi
 

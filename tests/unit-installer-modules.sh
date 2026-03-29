@@ -28,7 +28,10 @@ log_error() { echo "[ERROR] $1" >&2; }
 step() { echo "[STEP] $*" >&2; }
 ok() { echo "[OK] $*" >&2; }
 warn() { echo "[WARN] $*" >&2; }
-err() { echo "[ERR] $*" >&2; return 1; }
+err() {
+  echo "[ERR] $*" >&2
+  return 1
+}
 info() { echo "[INFO] $*" >&2; }
 success() { echo "[SUCCESS] $*" >&2; }
 warning() { echo "[WARNING] $*" >&2; }
@@ -83,10 +86,10 @@ test_bootstrap_load() {
     source "$BOOTSTRAP_PATH"
 
     # Проверка что функции существуют
-    if declare -f is_curl_install >/dev/null && \
-       declare -f ensure_file >/dev/null && \
-       declare -f setup_remote_install >/dev/null && \
-       declare -f handle_setup_error >/dev/null; then
+    if declare -f is_curl_install >/dev/null &&
+      declare -f ensure_file >/dev/null &&
+      declare -f setup_remote_install >/dev/null &&
+      declare -f handle_setup_error >/dev/null; then
       pass "bootstrap.sh: все функции определены"
     else
       fail "bootstrap.sh: функции не найдены"
@@ -137,9 +140,9 @@ test_cli_load() {
     source "$CLI_PATH"
 
     # Проверка что функции существуют
-    if declare -f _parse_args_early >/dev/null && \
-       declare -f _usage >/dev/null && \
-       declare -f parse_args >/dev/null; then
+    if declare -f _parse_args_early >/dev/null &&
+      declare -f _usage >/dev/null &&
+      declare -f parse_args >/dev/null; then
       pass "cli.sh: все функции определены"
     else
       fail "cli.sh: функции не найдены"
@@ -237,10 +240,10 @@ test_orchestrator_load() {
     source "$ORCHESTRATOR_PATH"
 
     # Проверка что функции существуют (обновлено для s-ui)
-    if declare -f _export_globals >/dev/null && \
-       declare -f step_module >/dev/null && \
-       declare -f run_module >/dev/null && \
-       declare -f _install_sui_panel >/dev/null; then
+    if declare -f _export_globals >/dev/null &&
+      declare -f step_module >/dev/null &&
+      declare -f run_module >/dev/null &&
+      declare -f _install_sui_panel >/dev/null; then
       pass "orchestrator.sh: все функции определены"
     else
       fail "orchestrator.sh: функции не найдены"
@@ -268,9 +271,9 @@ test_orchestrator_export_globals() {
   _export_globals
 
   # Проверка что переменные экспортированы
-  if [[ "$LANG_NAME" == "Русский" && \
-        "$DEV_MODE" == "true" && \
-        "$DOMAIN" == "test.example.com" ]]; then
+  if [[ "$LANG_NAME" == "Русский" &&
+    "$DEV_MODE" == "true" &&
+    "$DOMAIN" == "test.example.com" ]]; then
     pass "_export_globals: переменные установлены"
   else
     fail "_export_globals: переменные не установлены"
@@ -308,9 +311,9 @@ test_ui_load() {
     source "$UI_PATH"
 
     # Проверка что функции существуют
-    if declare -f _dry_run_plan >/dev/null && \
-       declare -f _print_finish >/dev/null && \
-       declare -f step_finish >/dev/null; then
+    if declare -f _dry_run_plan >/dev/null &&
+      declare -f _print_finish >/dev/null &&
+      declare -f step_finish >/dev/null; then
       pass "ui.sh: все функции определены"
     else
       fail "ui.sh: функции не найдены"
@@ -366,9 +369,9 @@ test_prompt_load() {
     source "$PROMPT_PATH"
 
     # Проверка что функции существуют
-    if declare -f _select_language >/dev/null && \
-       declare -f _print_banner >/dev/null && \
-       declare -f prompt_inputs >/dev/null; then
+    if declare -f _select_language >/dev/null &&
+      declare -f _print_banner >/dev/null &&
+      declare -f prompt_inputs >/dev/null; then
       pass "prompt.sh: все функции определены"
     else
       fail "prompt.sh: функции не найдены"

@@ -61,7 +61,10 @@ parse_args() {
     case "$1" in
     --dev) DEV_MODE="true" ;;
     --dry-run) DRY_RUN="true" ;;
-    --debug | -v) set -x; export CUBIVEIL_LOG_LEVEL="DEBUG" ;;
+    --debug | -v)
+      set -x
+      export CUBIVEIL_LOG_LEVEL="DEBUG"
+      ;;
     --domain=*) DOMAIN="${1#*=}" ;;
     --no-decoy) INSTALL_DECOY="false" ;;
     --no-traffic-shaping) INSTALL_TRAFFIC_SHAPING="false" ;;

@@ -125,7 +125,7 @@ cat() {
   # РџСЂРѕРІРµСЂСЏРµРј Р°СЂРіСѓРјРµРЅС‚С‹ РЅР° РЅР°Р»РёС‡РёРµ >
   for i in "${!args[@]}"; do
     if [[ "${args[$i]}" == ">" ]]; then
-      redirect_file="${args[$((i+1))]}"
+      redirect_file="${args[$((i + 1))]}"
       is_heredoc=true
       break
     fi
@@ -136,7 +136,7 @@ cat() {
     # Р§РёС‚Р°РµРј stdin Рё РїРёС€РµРј РІ С„Р°Р№Р»
     local content
     content=$(command cat)
-    echo "$content" > "$redirect_file" 2>/dev/null || true
+    echo "$content" >"$redirect_file" 2>/dev/null || true
     return 0
   fi
 

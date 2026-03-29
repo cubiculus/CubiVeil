@@ -262,7 +262,7 @@ EOF
   local templates_dir="${PROJECT_ROOT}/lib/modules/decoy-site/templates"
   mkdir -p "$templates_dir"
   if [[ ! -f "${templates_dir}/portal.html" ]]; then
-    echo '<html><body><h1>{{SITE_NAME}}</h1></body></html>' > "${templates_dir}/portal.html"
+    echo '<html><body><h1>{{SITE_NAME}}</h1></body></html>' >"${templates_dir}/portal.html"
   fi
 
   # Вызываем decoy_build_webroot

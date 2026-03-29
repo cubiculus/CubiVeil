@@ -143,7 +143,7 @@ module_configure() {
 
   # Экспортируем информацию о панели для последующего использования
   mkdir -p /etc/cubiveil
-  cat > /etc/cubiveil/s-ui.credentials <<EOF
+  cat >/etc/cubiveil/s-ui.credentials <<EOF
 SUI_PANEL_PORT=${SUI_PANEL_PORT}
 SUI_SUB_PORT=${SUI_SUB_PORT}
 SUI_PATH=${SUI_PATH}

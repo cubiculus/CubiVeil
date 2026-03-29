@@ -326,7 +326,7 @@ test_no_empty_strings() {
 
   local empty_count
   empty_count=$(grep -cE '^[A-Z_]+=""$' "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null || echo "0")
-  empty_count="${empty_count%%[^0-9]*}"  # Оставляем только цифры
+  empty_count="${empty_count%%[^0-9]*}" # Оставляем только цифры
 
   if [[ "$empty_count" -eq 0 ]]; then
     pass "Пустые строки локализации отсутствуют"

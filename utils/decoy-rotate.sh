@@ -161,14 +161,14 @@ cmd_files() {
   printf "   %-30s %10s %s\n" "Имя" "Размер" "Дата"
   echo "   ──────────────────────────────────────────────────"
 
-  find "${DECOY_WEBROOT}/files" -type f -printf '%T+ %s %p\n' 2>/dev/null | \
+  find "${DECOY_WEBROOT}/files" -type f -printf '%T+ %s %p\n' 2>/dev/null |
     sort -r | head -20 | while read -r timestamp size path; do
-      local filename size_mb date
-      filename=$(basename "$path")
-      size_mb=$((size / 1048576))
-      date=$(echo "$timestamp" | cut -d'+' -f1 | cut -d'.' -f1 | sed 's/T/ /')
-      printf "   %-30s %8d MB %s\n" "$filename" "$size_mb" "$date"
-    done
+    local filename size_mb date
+    filename=$(basename "$path")
+    size_mb=$((size / 1048576))
+    date=$(echo "$timestamp" | cut -d'+' -f1 | cut -d'.' -f1 | sed 's/T/ /')
+    printf "   %-30s %8d MB %s\n" "$filename" "$size_mb" "$date"
+  done
 
   echo ""
 
@@ -208,7 +208,7 @@ cmd_enable() {
 
   # Обновляем конфиг
   local tmp_file="${DECOY_CONFIG}.tmp"
-  if jq '.rotation.enabled = true' "$DECOY_CONFIG" > "$tmp_file" 2>/dev/null; then
+  if jq '.rotation.enabled = true' "$DECOY_CONFIG" >"$tmp_file" 2>/dev/null; then
     mv "$tmp_file" "$DECOY_CONFIG"
     chmod 600 "$DECOY_CONFIG"
     log_success "Ротация включена"
@@ -219,8 +219,8 @@ cmd_enable() {
   fi
 
   # Включаем таймер
-  if systemctl enable "${DECOY_ROTATE_TIMER}.timer" >/dev/null 2>&1 && \
-     systemctl start "${DECOY_ROTATE_TIMER}.timer" 2>/dev/null; then
+  if systemctl enable "${DECOY_ROTATE_TIMER}.timer" >/dev/null 2>&1 &&
+    systemctl start "${DECOY_ROTATE_TIMER}.timer" 2>/dev/null; then
     log_success "Таймер ротации запущен"
   else
     log_warn "Таймер не запущен (возможно, не установлен)"
@@ -235,7 +235,7 @@ cmd_disable() {
 
   # Обновляем конфиг
   local tmp_file="${DECOY_CONFIG}.tmp"
-  if jq '.rotation.enabled = false' "$DECOY_CONFIG" > "$tmp_file" 2>/dev/null; then
+  if jq '.rotation.enabled = false' "$DECOY_CONFIG" >"$tmp_file" 2>/dev/null; then
     mv "$tmp_file" "$DECOY_CONFIG"
     chmod 600 "$DECOY_CONFIG"
     log_success "Ротация выключена"
@@ -246,8 +246,8 @@ cmd_disable() {
   fi
 
   # Выключаем таймер
-  if systemctl stop "${DECOY_ROTATE_TIMER}.timer" 2>/dev/null && \
-     systemctl disable "${DECOY_ROTATE_TIMER}.timer" 2>/dev/null; then
+  if systemctl stop "${DECOY_ROTATE_TIMER}.timer" 2>/dev/null &&
+    systemctl disable "${DECOY_ROTATE_TIMER}.timer" 2>/dev/null; then
     log_success "Таймер ротации остановлен"
   fi
 }
@@ -281,7 +281,7 @@ cmd_set_interval() {
   log_step "decoy_set_interval" "Установка интервала: ${hours} ч."
 
   local tmp_file="${DECOY_CONFIG}.tmp"
-  if jq ".rotation.interval_hours = ${hours}" "$DECOY_CONFIG" > "$tmp_file" 2>/dev/null; then
+  if jq ".rotation.interval_hours = ${hours}" "$DECOY_CONFIG" >"$tmp_file" 2>/dev/null; then
     mv "$tmp_file" "$DECOY_CONFIG"
     chmod 600 "$DECOY_CONFIG"
     log_success "Интервал установлен: ${hours} ч."
@@ -311,7 +311,7 @@ cmd_set_limit() {
   log_step "decoy_set_limit" "Установка лимита: ${limit} MB"
 
   local tmp_file="${DECOY_CONFIG}.tmp"
-  if jq ".max_total_files_mb = ${limit}" "$DECOY_CONFIG" > "$tmp_file" 2>/dev/null; then
+  if jq ".max_total_files_mb = ${limit}" "$DECOY_CONFIG" >"$tmp_file" 2>/dev/null; then
     mv "$tmp_file" "$DECOY_CONFIG"
     chmod 600 "$DECOY_CONFIG"
     log_success "Лимит размера установлен: ${limit} MB"
@@ -355,7 +355,7 @@ cmd_set_weight() {
 
   local tmp_file="${DECOY_CONFIG}.tmp"
   if jq ".rotation.types.${file_type}.weight = ${weight} | .rotation.types.${file_type}.enabled = ${enabled}" \
-      "$DECOY_CONFIG" > "$tmp_file" 2>/dev/null; then
+    "$DECOY_CONFIG" >"$tmp_file" 2>/dev/null; then
     mv "$tmp_file" "$DECOY_CONFIG"
     chmod 600 "$DECOY_CONFIG"
     log_success "Вес ${file_type} установлен: ${weight}"
@@ -475,50 +475,50 @@ main() {
   shift || true
 
   case "$command" in
-    status)
-      cmd_status
-      ;;
-    rotate)
-      cmd_rotate
-      ;;
-    files)
-      cmd_files
-      ;;
-    config)
-      cmd_config
-      ;;
-    enable)
-      cmd_enable
-      ;;
-    disable)
-      cmd_disable
-      ;;
-    restart)
-      cmd_restart
-      ;;
-    set-interval)
-      cmd_set_interval "$@"
-      ;;
-    set-limit)
-      cmd_set_limit "$@"
-      ;;
-    set-weight)
-      cmd_set_weight "$@"
-      ;;
-    cleanup)
-      cmd_cleanup
-      ;;
-    regenerate)
-      cmd_regenerate
-      ;;
-    help|--help|-h)
-      cmd_help
-      ;;
-    *)
-      log_error "Неизвестная команда: $command"
-      echo "Используйте '$0 help' для справки"
-      exit 1
-      ;;
+  status)
+    cmd_status
+    ;;
+  rotate)
+    cmd_rotate
+    ;;
+  files)
+    cmd_files
+    ;;
+  config)
+    cmd_config
+    ;;
+  enable)
+    cmd_enable
+    ;;
+  disable)
+    cmd_disable
+    ;;
+  restart)
+    cmd_restart
+    ;;
+  set-interval)
+    cmd_set_interval "$@"
+    ;;
+  set-limit)
+    cmd_set_limit "$@"
+    ;;
+  set-weight)
+    cmd_set_weight "$@"
+    ;;
+  cleanup)
+    cmd_cleanup
+    ;;
+  regenerate)
+    cmd_regenerate
+    ;;
+  help | --help | -h)
+    cmd_help
+    ;;
+  *)
+    log_error "Неизвестная команда: $command"
+    echo "Используйте '$0 help' для справки"
+    exit 1
+    ;;
   esac
 }
 

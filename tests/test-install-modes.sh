@@ -131,7 +131,7 @@ test_usage_has_examples() {
 
   local examples_count
   examples_count=$(grep -c 'Examples:' "${SCRIPT_DIR}/install.sh" 2>/dev/null || echo "0")
-  examples_count="${examples_count%%[^0-9]*}"  # Удаляем все нецифровые символы
+  examples_count="${examples_count%%[^0-9]*}" # Удаляем все нецифровые символы
 
   if [[ "$examples_count" -ge 1 ]]; then
     pass "install.sh: usage содержит примеры"

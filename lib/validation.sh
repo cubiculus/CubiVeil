@@ -71,7 +71,7 @@ validate_chat_id() {
 
   # Проверка длины: от 1 до 13 цифр (без знака)
   local digits
-  digits="${chat_id#-}"  # Удаляем минус если есть
+  digits="${chat_id#-}" # Удаляем минус если есть
   local len=${#digits}
   if [[ $len -lt 1 ]] || [[ $len -gt 13 ]]; then
     return 1

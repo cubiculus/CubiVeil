@@ -14,6 +14,7 @@ source "${PROJECT_ROOT}/lib/test-utils.sh"
 MODULE_PATH="${PROJECT_ROOT}/lib/modules/decoy-site/install.sh"
 GENERATE_PATH="${PROJECT_ROOT}/lib/modules/decoy-site/generate.sh"
 ROTATE_PATH="${PROJECT_ROOT}/lib/modules/decoy-site/rotate.sh"
+# shellcheck disable=SC2034  # MIKROTIK_PATH зарезервирован для будущих тестов
 MIKROTIK_PATH="${PROJECT_ROOT}/lib/modules/decoy-site/mikrotik.sh"
 
 if [[ ! -f "$MODULE_PATH" ]]; then
@@ -65,26 +66,25 @@ jq() {
   while [[ $i -le $# ]]; do
     local arg="${!i}"
     case "$arg" in
-      -r|--raw-output)
-        use_raw=true
-        ;;
-      -c|--compact-output)
-        ;;
-      -e|--exit-status)
-        # Флаг exit-status, игнорируем
-        ;;
-      -f|--from-file)
-        # Чтение фильтра из файла (не поддерживаем)
-        ((i++))
-        ;;
-      *)
-        # Первый не-флаг аргумент - фильтр, второй - файл
-        if [[ -z "$filter" ]]; then
-          filter="$arg"
-        else
-          file="$arg"
-        fi
-        ;;
+    -r | --raw-output)
+      use_raw=true
+      ;;
+    -c | --compact-output) ;;
+    -e | --exit-status)
+      # Флаг exit-status, игнорируем
+      ;;
+    -f | --from-file)
+      # Чтение фильтра из файла (не поддерживаем)
+      ((i++))
+      ;;
+    *)
+      # Первый не-флаг аргумент - фильтр, второй - файл
+      if [[ -z "$filter" ]]; then
+        filter="$arg"
+      else
+        file="$arg"
+      fi
+      ;;
     esac
     ((i++))
   done
@@ -101,15 +101,15 @@ jq() {
 
   # Для тестов без файла возвращаем моковые значения
   case "$filter" in
-    "."|". "*) cat "$file" 2>/dev/null || echo "{}" ;;  # Валидация JSON
-    *".template"*) echo "portal" ;;
-    *".site_name"*) echo "Test Site" ;;
-    *".accent_color"*) echo "#4a90d9" ;;
-    *".max_total_files_mb"*) echo "5000" ;;
-    *".rotation.types.jpg.enabled"*) echo "true" ;;
-    *".rotation.types.pdf.enabled"*) echo "true" ;;
-    *".rotation.types.mp4.enabled"*) echo "true" ;;
-    *) echo "" ;;
+  "." | ". "*) cat "$file" 2>/dev/null || echo "{}" ;; # Валидация JSON
+  *".template"*) echo "portal" ;;
+  *".site_name"*) echo "Test Site" ;;
+  *".accent_color"*) echo "#4a90d9" ;;
+  *".max_total_files_mb"*) echo "5000" ;;
+  *".rotation.types.jpg.enabled"*) echo "true" ;;
+  *".rotation.types.pdf.enabled"*) echo "true" ;;
+  *".rotation.types.mp4.enabled"*) echo "true" ;;
+  *) echo "" ;;
   esac
   return 0
 }
@@ -153,7 +153,7 @@ shuf() {
 du() {
   # Для расчёта размера директории
   if [[ "$*" == *"-sk"* ]]; then
-    echo "1048576	/tmp/test/files"  # 1GB в KB
+    echo "1048576	/tmp/test/files" # 1GB в KB
   elif [[ "$*" == *"-m"* ]]; then
     echo "1024	/tmp/test/files/file1.jpg"
   else
@@ -180,7 +180,7 @@ command() { return 1; } # command -v convert не найден
 # Mock для gen_hex и gen_range
 gen_hex() {
   local len="${1:-8}"
-  head -c "$((len/2))" /dev/urandom | xxd -p | head -c "$len"
+  head -c "$((len / 2))" /dev/urandom | xxd -p | head -c "$len"
 }
 gen_range() {
   local min="$1"
@@ -197,14 +197,15 @@ test_module_load() {
   info "Тестирование загрузки модуля decoy-site..."
 
   # Источник install.sh
+  # shellcheck disable=SC1090
   source "$MODULE_PATH"
 
   # Проверка что функции существуют
-  if declare -f module_install >/dev/null && \
-     declare -f module_configure >/dev/null && \
-     declare -f module_enable >/dev/null && \
-     declare -f module_disable >/dev/null && \
-     declare -f module_status >/dev/null; then
+  if declare -f module_install >/dev/null &&
+    declare -f module_configure >/dev/null &&
+    declare -f module_enable >/dev/null &&
+    declare -f module_disable >/dev/null &&
+    declare -f module_status >/dev/null; then
     pass "Decoy Site module: все функции контракта определены"
   else
     fail "Decoy Site module: функции контракта не найдены"
@@ -219,11 +220,13 @@ test_decoy_generate_profile() {
 
   # Устанавливаем TEST_MODE для использования временных директорий
   export TEST_MODE="true"
-  export TEST_DECOY_DIR="$(mktemp -d)"
+  TEST_DECOY_DIR="$(mktemp -d)"
+  export TEST_DECOY_DIR
   export DECOY_CONFIG="${TEST_DECOY_DIR}/decoy.json"
   export DECOY_WEBROOT="${TEST_DECOY_DIR}/webroot"
 
   # Источник generate.sh
+  # shellcheck disable=SC1090
   source "$GENERATE_PATH"
 
   # Запускаем функцию
@@ -249,62 +252,61 @@ test_decoy_generate_profile() {
   echo "[DEBUG] Config content:" >&2
   cat "$DECOY_CONFIG" >&2
 
-    # Проверка полей
-    local template site_name accent_color max_files_mb
-    template=$(jq -r '.template' "$DECOY_CONFIG")
-    site_name=$(jq -r '.site_name' "$DECOY_CONFIG")
-    accent_color=$(jq -r '.accent_color' "$DECOY_CONFIG")
-    max_files_mb=$(jq -r '.max_total_files_mb' "$DECOY_CONFIG")
+  # Проверка полей
+  local template site_name accent_color max_files_mb
+  template=$(jq -r '.template' "$DECOY_CONFIG")
+  site_name=$(jq -r '.site_name' "$DECOY_CONFIG")
+  accent_color=$(jq -r '.accent_color' "$DECOY_CONFIG")
+  max_files_mb=$(jq -r '.max_total_files_mb' "$DECOY_CONFIG")
 
-    if [[ -n "$template" && "$template" != "null" ]]; then
-      pass "decoy_generate_profile: template = ${template}"
-    else
-      fail "decoy_generate_profile: template не задан"
-    fi
+  if [[ -n "$template" && "$template" != "null" ]]; then
+    pass "decoy_generate_profile: template = ${template}"
+  else
+    fail "decoy_generate_profile: template не задан"
+  fi
 
-    if [[ -n "$site_name" && "$site_name" != "null" ]]; then
-      pass "decoy_generate_profile: site_name = ${site_name}"
-    else
-      fail "decoy_generate_profile: site_name не задан"
-    fi
+  if [[ -n "$site_name" && "$site_name" != "null" ]]; then
+    pass "decoy_generate_profile: site_name = ${site_name}"
+  else
+    fail "decoy_generate_profile: site_name не задан"
+  fi
 
-    if [[ -n "$accent_color" && "$accent_color" =~ ^#[0-9a-fA-F]{6}$ ]]; then
-      pass "decoy_generate_profile: accent_color = ${accent_color}"
-    else
-      fail "decoy_generate_profile: accent_color не задан"
-    fi
+  if [[ -n "$accent_color" && "$accent_color" =~ ^#[0-9a-fA-F]{6}$ ]]; then
+    pass "decoy_generate_profile: accent_color = ${accent_color}"
+  else
+    fail "decoy_generate_profile: accent_color не задан"
+  fi
 
-    # Проверка max_total_files_mb
-    if [[ "$max_files_mb" == "5000" ]]; then
-      pass "decoy_generate_profile: max_total_files_mb = 5000"
-    else
-      fail "decoy_generate_profile: max_total_files_mb = ${max_files_mb:-не задан}"
-    fi
+  # Проверка max_total_files_mb
+  if [[ "$max_files_mb" == "5000" ]]; then
+    pass "decoy_generate_profile: max_total_files_mb = 5000"
+  else
+    fail "decoy_generate_profile: max_total_files_mb = ${max_files_mb:-не задан}"
+  fi
 
-    # Проверка rotation.types
-    local jpg_enabled pdf_enabled mp4_enabled mp3_enabled
-    jpg_enabled=$(jq -r '.rotation.types.jpg.enabled' "$DECOY_CONFIG")
-    pdf_enabled=$(jq -r '.rotation.types.pdf.enabled' "$DECOY_CONFIG")
-    mp4_enabled=$(jq -r '.rotation.types.mp4.enabled' "$DECOY_CONFIG")
-    mp3_enabled=$(jq -r '.rotation.types.mp3.enabled' "$DECOY_CONFIG")
+  # Проверка rotation.types
+  local jpg_enabled pdf_enabled mp4_enabled
+  jpg_enabled=$(jq -r '.rotation.types.jpg.enabled' "$DECOY_CONFIG")
+  pdf_enabled=$(jq -r '.rotation.types.pdf.enabled' "$DECOY_CONFIG")
+  mp4_enabled=$(jq -r '.rotation.types.mp4.enabled' "$DECOY_CONFIG")
 
-    if [[ "$jpg_enabled" == "true" ]]; then
-      pass "decoy_generate_profile: rotation.types.jpg.enabled = true"
-    else
-      fail "decoy_generate_profile: rotation.types.jpg.enabled = ${jpg_enabled:-не задан}"
-    fi
+  if [[ "$jpg_enabled" == "true" ]]; then
+    pass "decoy_generate_profile: rotation.types.jpg.enabled = true"
+  else
+    fail "decoy_generate_profile: rotation.types.jpg.enabled = ${jpg_enabled:-не задан}"
+  fi
 
-    if [[ "$pdf_enabled" == "true" ]]; then
-      pass "decoy_generate_profile: rotation.types.pdf.enabled = true"
-    else
-      fail "decoy_generate_profile: rotation.types.pdf.enabled = ${pdf_enabled:-не задан}"
-    fi
+  if [[ "$pdf_enabled" == "true" ]]; then
+    pass "decoy_generate_profile: rotation.types.pdf.enabled = true"
+  else
+    fail "decoy_generate_profile: rotation.types.pdf.enabled = ${pdf_enabled:-не задан}"
+  fi
 
-    if [[ "$mp4_enabled" == "true" ]]; then
-      pass "decoy_generate_profile: rotation.types.mp4.enabled = true"
-    else
-      fail "decoy_generate_profile: rotation.types.mp4.enabled = ${mp4_enabled:-не задан}"
-    fi
+  if [[ "$mp4_enabled" == "true" ]]; then
+    pass "decoy_generate_profile: rotation.types.mp4.enabled = true"
+  else
+    fail "decoy_generate_profile: rotation.types.mp4.enabled = ${mp4_enabled:-не задан}"
+  fi
 
   # Очистка
   rm -rf "$TEST_DECOY_DIR"
@@ -318,7 +320,8 @@ test_select_file_type() {
 
   # Устанавливаем TEST_MODE для использования временных директорий
   export TEST_MODE="true"
-  export TEST_DECOY_DIR="$(mktemp -d)"
+  TEST_DECOY_DIR="$(mktemp -d)"
+  export TEST_DECOY_DIR
   export DECOY_CONFIG="${TEST_DECOY_DIR}/decoy.json"
 
   # Создаём тестовый конфиг
@@ -336,19 +339,20 @@ test_select_file_type() {
 EOF
 
   # Источник rotate.sh
+  # shellcheck disable=SC1090
   source "$ROTATE_PATH"
 
   # Запускаем функцию несколько раз и собираем статистику
   local jpg_count=0 pdf_count=0 mp4_count=0
   local iterations=100
 
-  for ((i=0; i<iterations; i++)); do
+  for ((i = 0; i < iterations; i++)); do
     local result
     result=$(_select_file_type)
     case "$result" in
-      jpg) jpg_count=$((jpg_count + 1)) ;;
-      pdf) pdf_count=$((pdf_count + 1)) ;;
-      mp4) mp4_count=$((mp4_count + 1)) ;;
+    jpg) jpg_count=$((jpg_count + 1)) ;;
+    pdf) pdf_count=$((pdf_count + 1)) ;;
+    mp4) mp4_count=$((mp4_count + 1)) ;;
     esac
   done
 
@@ -380,7 +384,7 @@ EOF
 EOF
 
   local all_jpg=true
-  for ((i=0; i<10; i++)); do
+  for ((i = 0; i < 10; i++)); do
     local result
     result=$(_select_file_type)
     if [[ "$result" != "jpg" ]]; then
@@ -407,7 +411,8 @@ test_decoy_enforce_size_limit() {
 
   # Устанавливаем TEST_MODE для использования временных директорий
   export TEST_MODE="true"
-  export TEST_DECOY_DIR="$(mktemp -d)"
+  TEST_DECOY_DIR="$(mktemp -d)"
+  export TEST_DECOY_DIR
   export DECOY_CONFIG="${TEST_DECOY_DIR}/decoy.json"
   export DECOY_WEBROOT="${TEST_DECOY_DIR}/webroot"
 
@@ -423,10 +428,13 @@ EOF
   # Mock для du — возвращает 200MB (больше лимита)
   du() {
     if [[ "$*" == *"-sk"* ]]; then
-      echo "204800	${test_webroot}/files"  # 200MB в KB
+      # shellcheck disable=SC2154
+      echo "204800	${test_webroot}/files" # 200MB в KB
     elif [[ "$*" == *"-m"* ]]; then
+      # shellcheck disable=SC2154
       echo "50	${test_webroot}/files/file1.jpg"
     else
+      # shellcheck disable=SC2154
       echo "200M	${test_webroot}/files"
     fi
   }
@@ -436,12 +444,14 @@ EOF
   touch -d "1 day ago" "${DECOY_WEBROOT}/files/newer_file.jpg"
 
   # Источник rotate.sh
+  # shellcheck disable=SC1090
   source "$ROTATE_PATH"
 
   # Запускаем функцию
   _decoy_enforce_size_limit
 
   # Проверяем что старые файлы удалены
+  # shellcheck disable=SC2034
   local remaining_files
   remaining_files=$(find "${DECOY_WEBROOT}/files" -type f 2>/dev/null | wc -l)
 
@@ -461,7 +471,8 @@ test_decoy_rotate_once() {
 
   # Устанавливаем TEST_MODE для использования временных директорий
   export TEST_MODE="true"
-  export TEST_DECOY_DIR="$(mktemp -d)"
+  TEST_DECOY_DIR="$(mktemp -d)"
+  export TEST_DECOY_DIR
   export DECOY_CONFIG="${TEST_DECOY_DIR}/decoy.json"
   export DECOY_WEBROOT="${TEST_DECOY_DIR}/webroot"
 
@@ -511,6 +522,7 @@ EOF
   }
 
   # Источник rotate.sh
+  # shellcheck disable=SC1090
   source "$ROTATE_PATH"
 
   # Запускаем ротацию
@@ -531,7 +543,8 @@ test_generate_rotated_file() {
 
   # Устанавливаем TEST_MODE для использования временных директорий
   export TEST_MODE="true"
-  export TEST_DECOY_DIR="$(mktemp -d)"
+  TEST_DECOY_DIR="$(mktemp -d)"
+  export TEST_DECOY_DIR
   export DECOY_CONFIG="${TEST_DECOY_DIR}/decoy.json"
   export DECOY_WEBROOT="${TEST_DECOY_DIR}/webroot"
 
@@ -553,6 +566,7 @@ test_generate_rotated_file() {
 EOF
 
   # Источник rotate.sh
+  # shellcheck disable=SC1090
   source "$ROTATE_PATH"
 
   # Тестируем генерацию каждого типа
@@ -613,7 +627,8 @@ test_decoy_build_webroot_cleanup() {
 
   # Устанавливаем TEST_MODE для использования временных директорий
   export TEST_MODE="true"
-  export TEST_DECOY_DIR="$(mktemp -d)"
+  TEST_DECOY_DIR="$(mktemp -d)"
+  export TEST_DECOY_DIR
   export DECOY_CONFIG="${TEST_DECOY_DIR}/decoy.json"
   export DECOY_WEBROOT="${TEST_DECOY_DIR}/webroot"
 
@@ -647,6 +662,7 @@ EOF
   _generate_inner_pages() { return 0; }
 
   # Источник generate.sh
+  # shellcheck disable=SC1090
   source "$GENERATE_PATH"
 
   # Запускаем сборку webroot

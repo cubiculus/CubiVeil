@@ -95,7 +95,7 @@ test_gen_random() {
 
   # Р“РµРЅРµСЂР°С†РёСЏ СЃС‚СЂРѕРєРё РѕРїСЂРµРґРµР»С‘РЅРЅРѕР№ РґР»РёРЅС‹
   local result
-  result=$( gen_random 10 || true )
+  result=$(gen_random 10 || true)
   if [[ ${#result} -eq 10 ]]; then
     pass "gen_random(10): РґР»РёРЅР° = ${#result}"
     ((TESTS_PASSED++)) || true
@@ -113,7 +113,7 @@ test_gen_random() {
 
   # Р Р°Р·РЅС‹Рµ РІС‹Р·РѕРІС‹ РґР°СЋС‚ СЂР°Р·РЅС‹Рµ СЂРµР·СѓР»СЊС‚Р°С‚С‹
   local result2
-  result2=$( gen_random 10 || true )
+  result2=$(gen_random 10 || true)
   if [[ "$result" != "$result2" ]]; then
     pass "gen_random: СЂР°Р·РЅС‹Рµ РІС‹Р·РѕРІС‹ РґР°СЋС‚ СЂР°Р·РЅС‹Рµ СЂРµР·СѓР»СЊС‚Р°С‚С‹"
     ((TESTS_PASSED++)) || true
@@ -128,7 +128,7 @@ test_gen_random_edge_cases() {
 
   # РўРµСЃС‚: РґР»РёРЅР° 1 (РјРёРЅРёРјР°Р»СЊРЅР°СЏ РїРѕР»РµР·РЅР°СЏ)
   local result1
-  result1=$( gen_random 1 || true )
+  result1=$(gen_random 1 || true)
   if [[ ${#result1} -eq 1 ]] && [[ "$result1" =~ ^[a-zA-Z0-9]$ ]]; then
     pass "gen_random(1): РјРёРЅРёРјР°Р»СЊРЅР°СЏ РґР»РёРЅР°"
     ((TESTS_PASSED++)) || true
@@ -138,7 +138,7 @@ test_gen_random_edge_cases() {
 
   # РўРµСЃС‚: РґР»РёРЅР° 0 (РїСѓСЃС‚Р°СЏ СЃС‚СЂРѕРєР°)
   local result0
-  result0=$( gen_random 0 || true )
+  result0=$(gen_random 0 || true)
   if [[ ${#result0} -eq 0 ]]; then
     pass "gen_random(0): РїСѓСЃС‚Р°СЏ СЃС‚СЂРѕРєР°"
     ((TESTS_PASSED++)) || true
@@ -148,7 +148,7 @@ test_gen_random_edge_cases() {
 
   # РўРµСЃС‚: Р±РѕР»СЊС€Р°СЏ РґР»РёРЅР° (100 СЃРёРјРІРѕР»РѕРІ)
   local result_large
-  result_large=$( gen_random 100 || true )
+  result_large=$(gen_random 100 || true)
   if [[ ${#result_large} -eq 100 ]] && [[ "$result_large" =~ ^[a-zA-Z0-9]+$ ]]; then
     pass "gen_random(100): Р±РѕР»СЊС€Р°СЏ РґР»РёРЅР° РєРѕСЂСЂРµРєС‚РЅР°"
     ((TESTS_PASSED++)) || true
@@ -159,16 +159,18 @@ test_gen_random_edge_cases() {
   # РЈРЅРёРєР°Р»СЊРЅС‹Р№ С‚РµСЃС‚ РґР»СЏ gen_random: СЃС‚Р°С‚РёСЃС‚РёС‡РµСЃРєР°СЏ СЂР°РІРЅРѕРјРµСЂРЅРѕСЃС‚СЊ
   info "gen_random: СЃС‚Р°С‚РёСЃС‚РёС‡РµСЃРєР°СЏ РїСЂРѕРІРµСЂРєР°..."
   local digit_count=0
-  for _ in $(seq 1 10); do  # Optimized for WSL (10x faster)
+  for _ in $( # Optimized for WSL (10x faster)
+    seq 1 10
+  ); do
     local sample
-    sample=$( gen_random 1 || true )
+    sample=$(gen_random 1 || true)
     if [[ "$sample" =~ ^[0-9]$ ]]; then
       ((digit_count++)) || true
     fi
   done
 
   # РћР¶РёРґР°РµРј ~36% С†РёС„СЂ (10 РёР· 62 СЃРёРјРІРѕР»РѕРІ), РґРѕРїСѓСЃРєР°РµРј РѕС‚РєР»РѕРЅРµРЅРёРµ 20%
-  if [[ $digit_count -ge 1 && $digit_count -le 5 ]]; then  # Optimized for 10 iterations
+  if [[ $digit_count -ge 1 && $digit_count -le 5 ]]; then # Optimized for 10 iterations
     pass "gen_random: СЃС‚Р°С‚РёСЃС‚РёС‡РµСЃРєР°СЏ СЂР°РІРЅРѕРјРµСЂРЅРѕСЃС‚СЊ (С†РёС„СЂС‹: $digit_count/10)"
     ((TESTS_PASSED++)) || true
   else
@@ -182,7 +184,7 @@ test_gen_hex() {
 
   # Р“РµРЅРµСЂР°С†РёСЏ СЃС‚СЂРѕРєРё РѕРїСЂРµРґРµР»С‘РЅРЅРѕР№ РґР»РёРЅС‹
   local result
-  result=$( gen_hex 16 || true )
+  result=$(gen_hex 16 || true)
   if [[ ${#result} -eq 16 ]]; then
     pass "gen_hex(16): РґР»РёРЅР° = ${#result}"
     ((TESTS_PASSED++)) || true
@@ -205,7 +207,7 @@ test_gen_hex_edge_cases() {
 
   # РўРµСЃС‚: РґР»РёРЅР° 1 (РјРёРЅРёРјР°Р»СЊРЅР°СЏ РїРѕР»РµР·РЅР°СЏ)
   local result1
-  result1=$( gen_hex 1 || true )
+  result1=$(gen_hex 1 || true)
   if [[ ${#result1} -eq 1 ]] && [[ "$result1" =~ ^[a-f0-9]$ ]]; then
     pass "gen_hex(1): РјРёРЅРёРјР°Р»СЊРЅР°СЏ РґР»РёРЅР°"
     ((TESTS_PASSED++)) || true
@@ -215,7 +217,7 @@ test_gen_hex_edge_cases() {
 
   # РўРµСЃС‚: РґР»РёРЅР° 0 (РїСѓСЃС‚Р°СЏ СЃС‚СЂРѕРєР°)
   local result0
-  result0=$( gen_hex 0 || true )
+  result0=$(gen_hex 0 || true)
   if [[ ${#result0} -eq 0 ]]; then
     pass "gen_hex(0): РїСѓСЃС‚Р°СЏ СЃС‚СЂРѕРєР°"
     ((TESTS_PASSED++)) || true
@@ -225,7 +227,7 @@ test_gen_hex_edge_cases() {
 
   # РўРµСЃС‚: Р±РѕР»СЊС€Р°СЏ РґР»РёРЅР° (100 СЃРёРјРІРѕР»РѕРІ)
   local result_large
-  result_large=$( gen_hex 100 || true )
+  result_large=$(gen_hex 100 || true)
   if [[ ${#result_large} -eq 100 ]] && [[ "$result_large" =~ ^[a-f0-9]+$ ]]; then
     pass "gen_hex(100): Р±РѕР»СЊС€Р°СЏ РґР»РёРЅР° РєРѕСЂСЂРµРєС‚РЅР°"
     ((TESTS_PASSED++)) || true
@@ -235,7 +237,7 @@ test_gen_hex_edge_cases() {
 
   # РўРµСЃС‚: С‚РѕР»СЊРєРѕ lowercase СЃРёРјРІРѕР»С‹
   local result_case
-  result_case=$( gen_hex 100 || true )
+  result_case=$(gen_hex 100 || true)
   if [[ ! "$result_case" =~ [A-F] ]]; then
     pass "gen_hex: С‚РѕР»СЊРєРѕ lowercase СЃРёРјРІРѕР»С‹"
     ((TESTS_PASSED++)) || true
@@ -246,16 +248,18 @@ test_gen_hex_edge_cases() {
   # РЈРЅРёРєР°Р»СЊРЅС‹Р№ С‚РµСЃС‚ РґР»СЏ gen_hex: СЃС‚Р°С‚РёСЃС‚РёС‡РµСЃРєР°СЏ СЂР°РІРЅРѕРјРµСЂРЅРѕСЃС‚СЊ
   info "gen_hex: СЃС‚Р°С‚РёСЃС‚РёС‡РµСЃРєР°СЏ РїСЂРѕРІРµСЂРєР°..."
   local digit_count=0
-  for _ in $(seq 1 10); do  # Optimized for WSL (10x faster)
+  for _ in $( # Optimized for WSL (10x faster)
+    seq 1 10
+  ); do
     local sample
-    sample=$( gen_hex 1 || true )
+    sample=$(gen_hex 1 || true)
     if [[ "$sample" =~ ^[0-9]$ ]]; then
       ((digit_count++)) || true
     fi
   done
 
   # РћР¶РёРґР°РµРј ~40% С†РёС„СЂ (10 РёР· 16 СЃРёРјРІРѕР»РѕРІ), РґРѕРїСѓСЃРєР°РµРј РѕС‚РєР»РѕРЅРµРЅРёРµ 25%
-  if [[ $digit_count -ge 2 && $digit_count -le 8 ]]; then  # Optimized for 10 iterations
+  if [[ $digit_count -ge 2 && $digit_count -le 8 ]]; then # Optimized for 10 iterations
     pass "gen_hex: СЃС‚Р°С‚РёСЃС‚РёС‡РµСЃРєР°СЏ СЂР°РІРЅРѕРјРµСЂРЅРѕСЃС‚СЊ (С†РёС„СЂС‹: $digit_count/10)"
     ((TESTS_PASSED++)) || true
   else
@@ -269,7 +273,7 @@ test_gen_port() {
 
   # Р“РµРЅРµСЂР°С†РёСЏ РїРѕСЂС‚Р° РІ РґРёР°РїР°Р·РѕРЅРµ 30000-62000
   local result
-  result=$( gen_port || true )
+  result=$(gen_port || true)
   if [[ "$result" -ge 30000 && "$result" -le 62000 ]]; then
     pass "gen_port: $result РІ РґРёР°РїР°Р·РѕРЅРµ 30000-62000"
     ((TESTS_PASSED++)) || true
@@ -279,7 +283,7 @@ test_gen_port() {
 
   # Р Р°Р·РЅС‹Рµ РІС‹Р·РѕРІС‹ РґР°СЋС‚ СЂР°Р·РЅС‹Рµ СЂРµР·СѓР»СЊС‚Р°С‚С‹ (СЃ РІС‹СЃРѕРєРѕР№ РІРµСЂРѕСЏС‚РЅРѕСЃС‚СЊСЋ)
   local result2
-  result2=$( gen_port || true )
+  result2=$(gen_port || true)
   if [[ "$result" != "$result2" ]]; then
     pass "gen_port: СЂР°Р·РЅС‹Рµ РІС‹Р·РѕРІС‹ РґР°СЋС‚ СЂР°Р·РЅС‹Рµ СЂРµР·СѓР»СЊС‚Р°С‚С‹"
     ((TESTS_PASSED++)) || true
