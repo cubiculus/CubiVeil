@@ -352,13 +352,13 @@ test_install_sh_integration() {
     fail "install.sh: не загружает lib/utils.sh"
   fi
 
-  # Проверка динамической загрузки модулей из lib/modules/
-  # Модули загружаются через переменную $module_file или прямой путь
-  if grep -qE 'source.*lib/modules/|source.*"\$module_file"|source.*\$\{.*\}/install\.sh' "${MODULAR_SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: загружает модули из lib/modules/ (динамически)"
+  # Проверка загрузки модулей из lib/core/ (s-ui архитектура)
+  # install.sh использует lib/core/system.sh, lib/core/log.sh для s-ui
+  if grep -qE 'source.*lib/core/' "${MODULAR_SCRIPT_DIR}/install.sh"; then
+    pass "install.sh: загружает модули из lib/core/ (s-ui архитектура)"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: не загружает модули из lib/modules/"
+    fail "install.sh: не загружает модули из lib/core/"
   fi
 
   # Проверка что install.sh использует функции из модулей

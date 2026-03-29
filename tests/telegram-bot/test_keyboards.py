@@ -15,15 +15,15 @@ from keyboards import (
     build_main_menu,
     build_backup_menu,
     build_logs_menu,
-    build_profiles_menu,
     build_settings_menu,
     build_alerts_submenu,
     build_back_button,
     build_confirm_keyboard,
     build_pagination_keyboard,
-    build_profile_actions_keyboard,
     build_backup_actions_keyboard,
     build_logs_lines_keyboard,
+    build_decoy_menu,
+    build_decoy_settings_menu,
 )
 
 
@@ -35,8 +35,8 @@ class TestKeyboards(unittest.TestCase):
         menu = build_main_menu()
         self.assertIn("inline_keyboard", menu)
         self.assertIsInstance(menu["inline_keyboard"], list)
-        # Should have 4 rows
-        self.assertEqual(len(menu["inline_keyboard"]), 4)
+        # Should have 3 rows (no Users/Profiles after s-ui migration)
+        self.assertEqual(len(menu["inline_keyboard"]), 3)
 
     def test_build_main_menu_buttons(self):
         """Test main menu has all required buttons"""
@@ -49,23 +49,17 @@ class TestKeyboards(unittest.TestCase):
         self.assertEqual(keyboard[0][1]["text"], "📈 Monitor")
         self.assertEqual(keyboard[0][1]["callback_data"], "main_monitor")
 
-        # Check second row
+        # Check second row (no Users button)
         self.assertEqual(keyboard[1][0]["text"], "💾 Backup")
         self.assertEqual(keyboard[1][0]["callback_data"], "main_backup")
-        self.assertEqual(keyboard[1][1]["text"], "👥 Users")
-        self.assertEqual(keyboard[1][1]["callback_data"], "main_users")
+        self.assertEqual(keyboard[1][1]["text"], "📋 Logs")
+        self.assertEqual(keyboard[1][1]["callback_data"], "main_logs")
 
-        # Check third row
-        self.assertEqual(keyboard[2][0]["text"], "📋 Logs")
-        self.assertEqual(keyboard[2][0]["callback_data"], "main_logs")
-        self.assertEqual(keyboard[2][1]["text"], "🏥 Health")
-        self.assertEqual(keyboard[2][1]["callback_data"], "main_health")
-
-        # Check fourth row
-        self.assertEqual(keyboard[3][0]["text"], "👤 Profiles")
-        self.assertEqual(keyboard[3][0]["callback_data"], "main_profiles")
-        self.assertEqual(keyboard[3][1]["text"], "⚙️ Settings")
-        self.assertEqual(keyboard[3][1]["callback_data"], "main_settings")
+        # Check third row (no Profiles button)
+        self.assertEqual(keyboard[2][0]["text"], "🏥 Health")
+        self.assertEqual(keyboard[2][0]["callback_data"], "main_health")
+        self.assertEqual(keyboard[2][1]["text"], "⚙️ Settings")
+        self.assertEqual(keyboard[2][1]["callback_data"], "main_settings")
 
     def test_build_backup_menu_structure(self):
         """Test backup menu has correct structure"""
@@ -88,25 +82,19 @@ class TestKeyboards(unittest.TestCase):
         """Test logs menu has correct structure"""
         menu = build_logs_menu()
         self.assertIn("inline_keyboard", menu)
-        # Should have 4 rows (3 service rows + 1 back)
-        self.assertEqual(len(menu["inline_keyboard"]), 4)
+        # Should have 3 rows (2 service rows + 1 back, no Marzban/Singbox)
+        self.assertEqual(len(menu["inline_keyboard"]), 3)
 
     def test_build_logs_menu_buttons(self):
         """Test logs menu has all required buttons"""
         menu = build_logs_menu()
         keyboard = menu["inline_keyboard"]
 
-        self.assertEqual(keyboard[0][0]["text"], "🅼 Marzban")
-        self.assertEqual(keyboard[0][0]["callback_data"], "logs_marzban")
-        self.assertEqual(keyboard[0][1]["text"], "🆂 Sing-Box")
-        self.assertEqual(keyboard[0][1]["callback_data"], "logs_singbox")
-
-    def test_build_profiles_menu_structure(self):
-        """Test profiles menu has correct structure"""
-        menu = build_profiles_menu()
-        self.assertIn("inline_keyboard", menu)
-        # Should have 3 rows (2 filter rows + 1 back)
-        self.assertEqual(len(menu["inline_keyboard"]), 3)
+        # No Marzban/Sing-box buttons after s-ui migration
+        self.assertEqual(keyboard[0][0]["text"], "🤖 Bot")
+        self.assertEqual(keyboard[0][0]["callback_data"], "logs_bot")
+        self.assertEqual(keyboard[0][1]["text"], "🌐 Nginx")
+        self.assertEqual(keyboard[0][1]["callback_data"], "logs_nginx")
 
     def test_build_settings_menu_structure(self):
         """Test settings menu has correct structure"""
@@ -157,18 +145,6 @@ class TestKeyboards(unittest.TestCase):
         self.assertEqual(keyboard[0][0]["text"], "◀️")
         self.assertEqual(keyboard[0][1]["text"], "5/5")
 
-    def test_build_profile_actions_keyboard(self):
-        """Test profile actions keyboard has correct structure"""
-        menu = build_profile_actions_keyboard("testuser")
-        keyboard = menu["inline_keyboard"]
-        self.assertEqual(len(keyboard), 4)  # 3 action rows + 1 back
-
-        # Check first row
-        self.assertEqual(keyboard[0][0]["text"], "📊 Info")
-        self.assertEqual(keyboard[0][0]["callback_data"], "profile_info:testuser")
-        self.assertEqual(keyboard[0][1]["text"], "⏳ Extend")
-        self.assertEqual(keyboard[0][1]["callback_data"], "profile_extend:testuser")
-
     def test_build_backup_actions_keyboard(self):
         """Test backup actions keyboard has correct structure"""
         menu = build_backup_actions_keyboard("test_backup.sqlite3")
@@ -181,15 +157,27 @@ class TestKeyboards(unittest.TestCase):
 
     def test_build_logs_lines_keyboard(self):
         """Test logs lines keyboard has correct structure"""
-        menu = build_logs_lines_keyboard("marzban", 50)
+        menu = build_logs_lines_keyboard("bot", 50)
         keyboard = menu["inline_keyboard"]
         self.assertEqual(len(keyboard), 3)  # 2 line selection rows + 1 back
 
         # Check first row
         self.assertEqual(keyboard[0][0]["text"], "📄 25 lines")
-        self.assertEqual(keyboard[0][0]["callback_data"], "logs_lines:marzban:25")
+        self.assertEqual(keyboard[0][0]["callback_data"], "logs_lines:bot:25")
         self.assertEqual(keyboard[0][1]["text"], "📄 50 lines")
-        self.assertEqual(keyboard[0][1]["callback_data"], "logs_lines:marzban:50")
+        self.assertEqual(keyboard[0][1]["callback_data"], "logs_lines:bot:50")
+
+    def test_build_decoy_menu_structure(self):
+        """Test decoy menu has correct structure"""
+        menu = build_decoy_menu()
+        self.assertIn("inline_keyboard", menu)
+        self.assertIsInstance(menu["inline_keyboard"], list)
+
+    def test_build_decoy_settings_menu_structure(self):
+        """Test decoy settings menu has correct structure"""
+        menu = build_decoy_settings_menu()
+        self.assertIn("inline_keyboard", menu)
+        self.assertIsInstance(menu["inline_keyboard"], list)
 
     def test_all_menus_valid_json(self):
         """Test all menus can be serialized to JSON"""
@@ -197,10 +185,11 @@ class TestKeyboards(unittest.TestCase):
             build_main_menu(),
             build_backup_menu(),
             build_logs_menu(),
-            build_profiles_menu(),
             build_settings_menu(),
             build_alerts_submenu(),
             build_back_button(),
+            build_decoy_menu(),
+            build_decoy_settings_menu(),
         ]
 
         for menu in menus:
