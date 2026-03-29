@@ -188,13 +188,13 @@ step_create_backup() {
     cp -rp "${CUBIVEIL_DIR}" "${backup_path}/cubiveil" 2>/dev/null || true
   fi
 
-  # Бэкап конфигов Marzban
-  if [[ -d "/opt/marzban" ]]; then
-    cp -rp "/opt/marzban" "${backup_path}/marzban" 2>/dev/null || true
+  # Бэкап конфигов S-UI
+  if [[ -d "/usr/local/s-ui" ]]; then
+    cp -rp "/usr/local/s-ui" "${backup_path}/s-ui" 2>/dev/null || true
   fi
 
   # Бэкап ключей и сертификатов
-  for dir in "/root/.cubiveil-age-key.txt" "/etc/marzban" "/etc/sing-box" "/etc/letsencrypt"; do
+  for dir in "/root/.cubiveil-age-key.txt" "/etc/cubiveil" "/etc/letsencrypt"; do
     if [[ -e "$dir" ]]; then
       cp -rp "$dir" "${backup_path}/$(basename "$dir")" 2>/dev/null || true
     fi
@@ -294,8 +294,8 @@ step_install_update() {
   config_backup=$(mktemp -d)
 
   # Бэкап критических конфигов перед обновлением
-  if [[ -f "/opt/marzban/.env" ]]; then
-    cp "/opt/marzban/.env" "${config_backup}/marzban.env"
+  if [[ -f "/etc/cubiveil/s-ui.credentials" ]]; then
+    cp "/etc/cubiveil/s-ui.credentials" "${config_backup}/s-ui.credentials"
   fi
 
   # Копируем новые файлы
@@ -334,8 +334,8 @@ step_install_update() {
   fi
 
   # Восстанавливаем конфиги
-  if [[ -f "${config_backup}/marzban.env" ]]; then
-    info "Marzban config preserved"
+  if [[ -f "${config_backup}/s-ui.credentials" ]]; then
+    info "S-UI config preserved"
   fi
 
   # Очистка
@@ -345,95 +345,34 @@ step_install_update() {
 }
 
 # ══════════════════════════════════════════════════════════════
-# ШАГ 7: Обновление Marzban
+# ШАГ 7: Обновление S-UI
 # ══════════════════════════════════════════════════════════════
-step_update_marzban() {
-  step_title "7" "Обновление Marzban" "Update Marzban"
+step_update_sui() {
+  step_title "7" "Обновление S-UI" "Update S-UI"
 
-  read -rp "  Обновить Marzban до последней версии? [y/N]: " update_marzban
+  read -rp "  Обновить S-UI до последней версии? [y/N]: " update_sui
 
-  if [[ "${update_marzban,,}" != "y" ]]; then
-    info "Пропуск обновления Marzban"
+  if [[ "${update_sui,,}" != "y" ]]; then
+    info "Пропуск обновления S-UI"
     return 0
   fi
 
-  # Проверяем, установлен ли Marzban
-  if [[ ! -f "/opt/marzban/.env" ]]; then
-    warn "Marzban не найден"
+  # Проверяем, установлена ли S-UI
+  if [[ ! -f "/usr/local/s-ui/s-ui" ]]; then
+    warn "S-UI не найдена"
     return 0
   fi
 
-  # Проверяем наличие команды marzban
-  if command -v marzban &>/dev/null; then
-    info "Выполнение marzban upgrade..."
-
-    # Запускаем обновление Marzban
-    if marzban upgrade 2>&1; then
-      success "Marzban обновлён"
-    else
-      warn "Не удалось обновить Marzban через marzban upgrade"
-      info "Попробуйте вручную: marzban upgrade"
-    fi
-  else
-    warn "Команда marzban не найдена в PATH"
-    info "Попробуйте обновить вручную: bash /opt/marzban/marzban.sh upgrade"
-  fi
+  info "S-UI updates are managed by the official installation script"
+  info "To update manually, run the official install script again:"
+  info "  bash <(curl -Ls https://raw.githubusercontent.com/alireza0/s-ui/master/install.sh)"
 }
 
 # ══════════════════════════════════════════════════════════════
-# ШАГ 8: Обновление sing-box
-# ══════════════════════════════════════════════════════════════
-step_update_singbox() {
-  step_title "8" "Обновление sing-box" "Update sing-box"
-
-  read -rp "  Обновить sing-box до последней версии? [y/N]: " update_singbox
-
-  if [[ "${update_singbox,,}" != "y" ]]; then
-    info "Пропуск обновления sing-box"
-    return 0
-  fi
-
-  # Проверяем, установлен ли sing-box
-  if [[ ! -x "/usr/local/bin/sing-box" ]]; then
-    warn "sing-box не найден в /usr/local/bin/sing-box"
-    return 0
-  fi
-
-  # Получаем текущую версию
-  local current_version
-  current_version=$(/usr/local/bin/sing-box version 2>/dev/null | head -1 || echo "unknown")
-  info "Текущая версия: ${current_version}"
-
-  # Загружаем модуль sing-box для обновления
-  local singbox_module="${CUBIVEIL_DIR}/lib/modules/singbox/install.sh"
-
-  if [[ -f "$singbox_module" ]]; then
-    info "Выполнение обновления sing-box..."
-
-    # Source модуля и вызов функции обновления
-    # shellcheck disable=SC1090
-    source "$singbox_module"
-
-    if declare -f singbox_update &>/dev/null; then
-      if singbox_update; then
-        success "sing-box обновлён"
-      else
-        warn "Не удалось обновить sing-box"
-      fi
-    else
-      warn "Функция singbox_update не найдена"
-    fi
-  else
-    warn "Модуль sing-box не найден: $singbox_module"
-    info "Попробуйте обновить вручную через reinstall"
-  fi
-}
-
-# ══════════════════════════════════════════════════════════════
-# ШАГ 9: Перезапуск сервисов
+# ШАГ 8: Перезапуск сервисов
 # ══════════════════════════════════════════════════════════════
 step_restart_services() {
-  step_title "9" "Перезапуск сервисов" "Restart services"
+  step_title "8" "Перезапуск сервисов" "Restart services"
 
   read -rp "  Перезапустить сервисы сейчас? [y/N]: " restart
 
@@ -442,7 +381,7 @@ step_restart_services() {
     return 0
   fi
 
-  local services=("marzban" "sing-box" "cubiveil-bot")
+  local services=("s-ui" "sing-box" "cubiveil-bot")
 
   for service in "${services[@]}"; do
     if systemctl is-active --quiet "$service" 2>/dev/null; then
@@ -478,7 +417,7 @@ step_finish() {
   echo "  Статус сервисов:"
   echo "══════════════════════════════════════════════════════════"
 
-  for service in marzban sing-box cubiveil-bot; do
+  for service in s-ui sing-box cubiveil-bot; do
     if systemctl is-active --quiet "$service" 2>/dev/null; then
       echo -e "  ${GREEN}●${PLAIN} $service — активен"
     else
@@ -501,8 +440,7 @@ main() {
   step_create_backup
   step_download_update
   step_install_update
-  step_update_marzban
-  step_update_singbox
+  step_update_sui
   step_restart_services
   step_finish
 }

@@ -23,7 +23,7 @@ fi
 # ── Глобальные переменные / Global Variables ────────────────
 
 # Пути для самоподписных сертификатов (dev-режим)
-SSL_SELFIGNED_DIR="/var/lib/marzban/certs"
+SSL_SELFIGNED_DIR="/usr/local/s-ui/cert"
 
 # ── Генерация самоподписного сертификата (dev-режим) ────────
 ssl_generate_self_signed() {
@@ -58,6 +58,26 @@ ssl_generate_self_signed() {
   log_success "Self-signed certificate generated at ${SSL_SELFIGNED_DIR}"
   log_info "Certificate valid for 365 days"
   log_warn "Browsers will show security warning — this is expected in dev mode"
+}
+
+# ── Включение SSL (для тестов и ручного использования) ──────
+ssl_enable() {
+  log_step "ssl_enable" "Enabling SSL module"
+
+  if [[ "${DEV_MODE:-false}" == "true" ]]; then
+    if [[ -f "${SSL_SELFIGNED_DIR}/cert.pem" ]]; then
+      log_info "Self-signed certificate found at ${SSL_SELFIGNED_DIR}"
+      svc_restart_if_active "s-ui" 2>/dev/null || true
+      svc_restart_if_active "sing-box" 2>/dev/null || true
+      log_success "SSL module enabled (dev mode)"
+    else
+      log_warn "No self-signed certificate found"
+      return 1
+    fi
+  else
+    log_info "s-ui manages SSL certificates via ACME"
+    log_success "SSL module enabled (production mode)"
+  fi
 }
 
 # ── Модульный интерфейс / Module Interface ─────────────────

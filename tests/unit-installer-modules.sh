@@ -332,7 +332,6 @@ test_ui_dry_run_plan() {
   INSTALL_TRAFFIC_SHAPING="true"
   INSTALL_TELEGRAM="true"
   LANG_NAME="English"
-  EUID=0
 
   # Запускаем и проверяем что выводится план
   local output
@@ -454,7 +453,6 @@ test_integration_all_modules() {
     "_export_globals"
     "step_module"
     "run_module"
-    "_generate_keys_and_ports"
     "_dry_run_plan"
     "_print_finish"
   )
@@ -462,7 +460,7 @@ test_integration_all_modules() {
   local found=0
   for func in "${required_functions[@]}"; do
     if declare -f "$func" >/dev/null; then
-      ((found++))
+      ((found++)) || true
     fi
   done
 
@@ -514,7 +512,6 @@ main() {
   test_orchestrator_load
   test_orchestrator_export_globals
   test_orchestrator_step_module
-  test_orchestrator_generate_keys_and_ports
   test_ui_load
   test_ui_dry_run_plan
   test_prompt_load

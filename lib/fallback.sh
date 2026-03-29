@@ -54,7 +54,7 @@ print_banner() {
   echo -e "${CYAN}  ╔══════════════════════════════════════════╗${PLAIN}"
   echo -e "${CYAN}  ║            CubiVeil Installer            ║${PLAIN}"
   echo -e "${CYAN}  ║    github.com/cubiculus/cubiveil         ║${PLAIN}"
-  echo -e "${CYAN}  ║    Marzban + Sing-box                    ║${PLAIN}"
+  echo -e "${CYAN}  ║    S-UI Panel (Sing-box)                 ║${PLAIN}"
   echo -e "${CYAN}  ╚══════════════════════════════════════════╝${PLAIN}"
   echo ""
 }

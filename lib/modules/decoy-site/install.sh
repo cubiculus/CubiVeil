@@ -119,7 +119,7 @@ module_status() {
   # Сертификат
   local cert_file
   if [[ "${DEV_MODE:-false}" == "true" ]]; then
-    cert_file="/var/lib/marzban/certs/cert.pem"
+    cert_file="/usr/local/s-ui/cert/cert.pem"
   else
     cert_file="/etc/letsencrypt/live/${DOMAIN:-_}/fullchain.pem"
   fi

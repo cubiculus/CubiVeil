@@ -21,9 +21,9 @@ get_str() {
 
   if [[ "$LANG_NAME" == "Русский" ]]; then
     # Проверяем существование переменной перед использованием
-    if [[ -v ru_key ]]; then
+    if [[ -n "${!ru_key:-}" ]]; then
       result="${!ru_key}"
-    elif [[ -v key ]]; then
+    elif [[ -n "${!key:-}" ]]; then
       result="${!key}"
     else
       result="[$key]"
@@ -31,7 +31,7 @@ get_str() {
     echo "$result"
   else
     # English / default
-    if [[ -v key ]]; then
+    if [[ -n "${!key:-}" ]]; then
       result="${!key}"
     else
       result="[$key]"

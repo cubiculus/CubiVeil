@@ -22,17 +22,17 @@ fi
 gen_random() {
   local length="${1:-16}"
   [[ "$length" -le 0 ]] && { echo ""; return 0; }
-  LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w "$length" | head -n 1
+  LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w "$length" | head -n 1 || true
 }
 
 gen_hex() {
   local length="${1:-16}"
   [[ "$length" -le 0 ]] && { echo ""; return 0; }
-  LC_ALL=C tr -dc 'a-f0-9' </dev/urandom | fold -w "$length" | head -n 1
+  LC_ALL=C tr -dc 'a-f0-9' </dev/urandom | fold -w "$length" | head -n 1 || true
 }
 
 gen_port() {
-  shuf -i 30000-62000 -n 1
+  shuf -i 30000-62000 -n 1 || true
 }
 
 # ── Управление портами ───────────────────────────────────────
@@ -52,8 +52,9 @@ unique_port() {
       continue
     fi
     # Быстрая проверка через ассоциативный массив вместо grep в цикле
+    # Используем { ... || true; } для обработки SIGPIPE
     if [[ -z "${USED_PORTS_MAP[$p]:-}" ]] &&
-      ! ss -tlnp 2>/dev/null | grep -q ":${p} "; then
+      ! { ss -tlnp 2>/dev/null | grep -q ":${p} " || true; }; then
       USED_PORTS_MAP[$p]=1
       echo "$p"
       return

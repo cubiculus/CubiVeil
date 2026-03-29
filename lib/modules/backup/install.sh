@@ -34,13 +34,12 @@ BACKUP_DIR="/var/backups/cubiveil"
 BACKUP_RETENTION_DAYS=30
 BACKUP_ARCHIVE_DIR="${BACKUP_DIR}/archives"
 
-# Пути к данным для бэкапа
-MARZBAN_DIR="/var/lib/marzban"
-MARZBAN_ENV="/opt/marzban/.env"
-MARZBAN_TEMPLATE="/var/lib/marzban/sing-box-template.json"
-SSL_CERT_DIR="/var/lib/marzban/certs"
-CREDENTIALS_FILE="/var/lib/marzban/credentials.age"
-CREDENTIALS_KEY="/var/lib/marzban/credentials.key"
+# Пути к данным для бэкапа (S-UI)
+SUI_DB_DIR="/usr/local/s-ui/db"
+SUI_CONFIG_FILE="${SUI_DB_DIR}/s-ui.db"
+SINGBOX_CONFIG_DIR="/usr/local/s-ui/bin/config"
+SSL_CERT_DIR="/usr/local/s-ui/cert"
+CREDENTIALS_FILE="/etc/cubiveil/s-ui.credentials"
 
 # ── Инициализация / Initialization ─────────────────────────────
 
@@ -96,15 +95,15 @@ backup_check_environment() {
 
   local issues=0
 
-  # Проверяем наличие Marzban
-  if [[ ! -d "$MARZBAN_DIR" ]]; then
-    log_warn "Marzban directory not found: $MARZBAN_DIR"
+  # Проверяем наличие S-UI
+  if [[ ! -d "$SUI_DB_DIR" ]]; then
+    log_warn "S-UI database directory not found: $SUI_DB_DIR"
     ((issues++))
   fi
 
-  # Проверяем наличие Sing-box
-  if [[ ! -x "/usr/local/bin/sing-box" ]]; then
-    log_warn "Sing-box binary not found"
+  # Проверяем наличие sing-box сервиса
+  if ! systemctl list-unit-files | grep -q "sing-box"; then
+    log_warn "sing-box service not found"
     ((issues++))
   fi
 
@@ -139,13 +138,13 @@ backup_check_environment() {
 backup_stop_services() {
   log_step "backup_stop_services" "Stopping services for backup"
 
-  # Останавливаем Marzban
-  if svc_active "marzban"; then
-    svc_stop "marzban"
-    log_info "Marzban stopped"
+  # Останавливаем s-ui
+  if svc_active "s-ui"; then
+    svc_stop "s-ui"
+    log_info "S-UI stopped"
   fi
 
-  # Останавливаем Sing-box
+  # Останавливаем sing-box
   if svc_active "sing-box"; then
     svc_stop "sing-box"
     log_info "Sing-box stopped"
@@ -155,84 +154,62 @@ backup_stop_services() {
   sleep 2
 }
 
-# ── Бэкап Marzban / Backup Marzban ────────────────────────
+# ── Бэкап S-UI / Backup S-UI ────────────────────────────────
 
-# Бэкап базы данных Marzban с проверкой целостности
-backup_marzban_db() {
-  log_step "backup_marzban_db" "Backing up Marzban database"
+# Бэкап базы данных S-UI с проверкой целостности
+backup_sui_db() {
+  log_step "backup_sui_db" "Backing up S-UI database"
 
-  if [[ ! -f "${MARZBAN_DIR}/db.sqlite3" ]]; then
-    log_warn "Marzban database not found"
+  if [[ ! -f "${SUI_DB_DIR}/s-ui.db" ]]; then
+    log_warn "S-UI database not found"
     return 0
   fi
 
-  local backup_db="${BACKUP_DIR}/marzban-db.sqlite3"
+  local backup_db="${BACKUP_DIR}/s-ui.db"
 
   # Копируем базу данных
-  cp "${MARZBAN_DIR}/db.sqlite3" "$backup_db"
+  cp "${SUI_DB_DIR}/s-ui.db" "$backup_db"
 
   # Генерируем SHA256 для проверки целостности
   local hash
   hash=$(sha256sum "$backup_db" 2>/dev/null | awk '{print $1}')
   echo "$hash" >"${backup_db}.sha256"
 
-  log_success "Marzban database backed up (SHA256: ${hash:0:8}...)"
+  log_success "S-UI database backed up (SHA256: ${hash:0:8}...)"
 }
 
-# Бэкап конфигурации Marzban
-backup_marzban_config() {
-  log_step "backup_marzban_config" "Backing up Marzban configuration"
+# Бэкап конфигурации S-UI
+backup_sui_config() {
+  log_step "backup_sui_config" "Backing up S-UI configuration"
 
   local backed_up=false
 
-  # Бэкап .env
-  if [[ -f "$MARZBAN_ENV" ]]; then
-    cp "$MARZBAN_ENV" "${BACKUP_DIR}/marzban.env"
+  # Бэкап credentials
+  if [[ -f "$CREDENTIALS_FILE" ]]; then
+    cp "$CREDENTIALS_FILE" "${BACKUP_DIR}/s-ui.credentials"
 
     # Генерируем SHA256
     local hash
-    hash=$(sha256sum "${BACKUP_DIR}/marzban.env" 2>/dev/null | awk '{print $1}')
-    echo "$hash" >"${BACKUP_DIR}/marzban.env.sha256"
+    hash=$(sha256sum "${BACKUP_DIR}/s-ui.credentials" 2>/dev/null | awk '{print $1}')
+    echo "$hash" >"${BACKUP_DIR}/s-ui.credentials.sha256"
 
     backed_up=true
   fi
 
-  # Бэкап шаблона Sing-box
-  if [[ -f "$MARZBAN_TEMPLATE" ]]; then
-    cp "$MARZBAN_TEMPLATE" "${BACKUP_DIR}/sing-box-template.json"
+  # Бэкап конфигурации sing-box
+  if [[ -d "$SINGBOX_CONFIG_DIR" ]]; then
+    cp -r "$SINGBOX_CONFIG_DIR" "${BACKUP_DIR}/singbox-config"
 
-    # Генерируем SHA256
+    # Генерируем SHA256 для каждого файла
     local hash
-    hash=$(sha256sum "${BACKUP_DIR}/sing-box-template.json" 2>/dev/null | awk '{print $1}')
-    echo "$hash" >"${BACKUP_DIR}/sing-box-template.json.sha256"
+    hash=$(sha256sum "${BACKUP_DIR}/singbox-config"/* 2>/dev/null | awk '{print $1}' | head -1)
+    echo "$hash" >"${BACKUP_DIR}/singbox-config.sha256"
 
     backed_up=true
   fi
 
   if [[ "$backed_up" == "true" ]]; then
-    log_success "Marzban configuration backed up with integrity hashes"
-  fi
-}
-
-# ── Бэкап Sing-box / Backup Sing-box ───────────────────────
-
-# Бэкап конфигурации Sing-box
-backup_singbox_config() {
-  log_step "backup_singbox_config" "Backing up Sing-box configuration"
-
-  local SINGBOX_CONF="/etc/sing-box/config.json"
-
-  if [[ -f "$SINGBOX_CONF" ]]; then
-    cp "$SINGBOX_CONF" "${BACKUP_DIR}/singbox-config.json"
-
-    # Генерируем SHA256
-    local hash
-    hash=$(sha256sum "${BACKUP_DIR}/singbox-config.json" 2>/dev/null | awk '{print $1}')
-    echo "$hash" >"${BACKUP_DIR}/singbox-config.json.sha256"
-
-    log_success "Sing-box configuration backed up (SHA256: ${hash:0:8}...)"
-  else
-    log_warn "Sing-box configuration not found"
+    log_success "S-UI configuration backed up with integrity hashes"
   fi
 }
 
@@ -422,7 +399,7 @@ backup_start_services() {
   fi
 
   # Запускаем Marzban
-  if [[ -d "$MARZBAN_DIR" ]]; then
+  if [[ -d "$S_UI_DIR" ]]; then
     svc_start "marzban"
     log_info "Marzban started"
   fi
@@ -459,9 +436,8 @@ backup_full() {
   backup_stop_services
 
   # Выполняем бэкапы
-  backup_marzban_db
-  backup_marzban_config
-  backup_singbox_config
+  backup_sui_db
+  backup_sui_config
   backup_ssl_certs
   backup_keys
   backup_system_info
@@ -564,8 +540,8 @@ module_quick_backup() {
 
   backup_init
 
-  backup_marzban_db || true
-  backup_marzban_config || true
+  backup_sui_db || true
+  backup_sui_config || true
   backup_ssl_certs || true
 
   backup_create_archive "cubiveil-quick"

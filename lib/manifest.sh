@@ -27,8 +27,7 @@ AVAILABLE_MODULES=(
   "firewall"
   "fail2ban"
   "ssl"
-  "singbox"
-  "marzban"
+  "s-ui"
   "backup"
   "rollback"
   "monitoring"
@@ -41,8 +40,7 @@ MODULE_INFO=(
   "firewall:security_base:none:Файрвол UFW и управление портами"
   "fail2ban:security_base:none:Защита от брутфорса (Fail2ban)"
   "ssl:security_base:firewall:SSL сертификаты (Let's Encrypt)"
-  "singbox:proxy:ssl:Прокси-сервер Sing-box"
-  "marzban:proxy:ssl,singbox:Панель управления Marzban"
+  "s-ui:proxy:ssl:Панель управления S-UI со встроенным Sing-box"
   "backup:utility:none:Резервное копирование данных"
   "rollback:utility:none:Откат к предыдущим бэкапам"
   "monitoring:utility:none:Мониторинг системы и сервисов"
@@ -56,11 +54,10 @@ DEFAULT_INSTALL_ORDER=(
   "firewall"   # 2. Файрвол
   "fail2ban"   # 3. Защита от брутфорса
   "ssl"        # 4. SSL сертификаты (зависит от firewall)
-  "singbox"    # 5. Sing-box (зависит от ssl)
-  "marzban"    # 6. Marzban (зависит от ssl, singbox)
-  "backup"     # 7. Бэкап (установка после настройки)
-  "rollback"   # 8. Rollback (всегда после backup)
-  "monitoring" # 9. Мониторинг (после всех сервисов)
+  "s-ui"       # 5. S-UI панель (зависит от ssl)
+  "backup"     # 6. Бэкап (установка после настройки)
+  "rollback"   # 7. Rollback (всегда после backup)
+  "monitoring" # 8. Мониторинг (после всех сервисов)
 )
 
 # Минимальный набор модулей для базовой установки
@@ -68,8 +65,7 @@ MINIMAL_INSTALL_ORDER=(
   "system"
   "firewall"
   "ssl"
-  "singbox"
-  "marzban"
+  "s-ui"
 )
 
 # ── Функции манифеста / Manifest Functions ─────────────────

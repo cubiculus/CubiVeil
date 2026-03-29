@@ -36,6 +36,7 @@ run_module() {
     _msg_not_found="$(get_str MSG_MODULE_NOT_FOUND | sed "s/{NAME}/$name/g")"
     warning "$_msg_not_found ($module_file)"
     WARNINGS+=("Module not found: $name")
+    echo "Module not found: $name"
     echo -e "${YELLOW}$(get_str MSG_MODULE_SKIPPED)${PLAIN}"
     return 0
   fi
@@ -152,7 +153,7 @@ _install_sui_panel() {
   log_step "install_sui_panel" "Installing s-ui panel"
 
   # Проверяем, установлен ли уже s-ui
-  if [[ -f "/usr/local/x-ui/x-ui" ]]; then
+  if [[ -f "/usr/local/s-ui/s-ui" ]]; then
     log_info "s-ui already installed"
     return 0
   fi
@@ -162,11 +163,11 @@ _install_sui_panel() {
   # Загружаем официальный скрипт установки s-ui
   local _sui_script="/tmp/s-ui-install.sh"
   if ! curl -sfL --connect-timeout 10 --max-time 60 \
-    "https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh" \
+    "https://raw.githubusercontent.com/alireza0/s-ui/master/install.sh" \
     -o "$_sui_script" 2>/dev/null; then
     log_error "Failed to download s-ui installation script"
     log_warn "You can install s-ui manually later:"
-    log_warn "  bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)"
+    log_warn "  bash <(curl -Ls https://raw.githubusercontent.com/alireza0/s-ui/master/install.sh)"
     return 0
   fi
 
@@ -198,7 +199,7 @@ _install_sui_panel() {
       break
     fi
 
-    if systemctl is-active --quiet x-ui 2>/dev/null; then
+    if systemctl is-active --quiet s-ui 2>/dev/null; then
       _started=true
       break
     fi
@@ -214,7 +215,7 @@ _install_sui_panel() {
 
   if [[ "$_started" != "true" ]]; then
     log_error "s-ui did not start within ${_max_wait}s"
-    log_warn "Check: systemctl status x-ui"
+    log_warn "Check: systemctl status s-ui"
     log_warn "Full install log: $_sui_log"
     rm -f "$_sui_script"
     return 1

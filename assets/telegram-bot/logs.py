@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 # Services that can be monitored / Сервисы для мониторинга
 AVAILABLE_SERVICES = {
-    "marzban": "marzban",
+    "s-ui": "s-ui",
     "sing-box": "sing-box",
     "cubiveil-bot": "cubiveil-bot",
     "nginx": "nginx",
@@ -38,7 +38,7 @@ LOG_CHUNK_SIZE = 4000
 
 # Service display names / Отображаемые имена сервисов
 SERVICE_NAMES = {
-    "marzban": "🅼 Marzban",
+    "s-ui": "🆂 S-UI",
     "sing-box": "🆂 Sing-Box",
     "cubiveil-bot": "🤖 Bot",
     "nginx": "🌐 Nginx",

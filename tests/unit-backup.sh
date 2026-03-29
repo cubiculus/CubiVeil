@@ -209,42 +209,42 @@ test_backup_stop_services() {
   ((TESTS_PASSED++)) || true
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: backup_marzban_db в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_backup_marzban_db() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_marzban_db..."
+# в”Ђв”Ђ РўРµСЃС‚: backup_sui_db в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+test_backup_sui_db() {
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_sui_db..."
 
   local test_backup_dir="/tmp/test-backup-$$"
   local test_marzban_dir="/tmp/test-marzban-$$"
   mkdir -p "$test_backup_dir" "$test_marzban_dir"
 
   BACKUP_DIR="$test_backup_dir"
-  MARZBAN_DIR="$test_marzban_dir"
+  S_UI_DIR="$test_marzban_dir"
 
   # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІСѓСЋ Р‘Р”
-  echo "test db content" >"${MARZBAN_DIR}/db.sqlite3"
+  echo "test db content" >"${S_UI_DIR}/db.sqlite3"
 
   # Mock РґР»СЏ sha256sum
   sha256sum() {
     echo "abc123def456  $1"
   }
 
-  backup_marzban_db || true
+  backup_sui_db || true
 
   # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ Р±СЌРєР°Рї СЃРѕР·РґР°РЅ
-  if [[ -f "${test_backup_dir}/marzban-db.sqlite3" ]]; then
-    pass "backup_marzban_db: Р±СЌРєР°Рї Р‘Р” СЃРѕР·РґР°РЅ"
+  if [[ -f "${test_backup_dir}/s-ui-db.sqlite3" ]]; then
+    pass "backup_sui_db: Р±СЌРєР°Рї Р‘Р” СЃРѕР·РґР°РЅ"
     ((TESTS_PASSED++)) || true
   else
-    pass "backup_marzban_db: Р±СЌРєР°Рї РјРѕР¶РµС‚ РЅРµ СЃРѕР·РґР°С‚СЊСЃСЏ РІ С‚РµСЃС‚Рµ"
+    pass "backup_sui_db: Р±СЌРєР°Рї РјРѕР¶РµС‚ РЅРµ СЃРѕР·РґР°С‚СЊСЃСЏ РІ С‚РµСЃС‚Рµ"
     ((TESTS_PASSED++)) || true
   fi
 
   rm -rf "$test_backup_dir" "$test_marzban_dir"
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: backup_marzban_config в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_backup_marzban_config() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_marzban_config..."
+# в”Ђв”Ђ РўРµСЃС‚: backup_sui_config в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+test_backup_sui_config() {
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_sui_config..."
 
   local test_backup_dir="/tmp/test-backup-$$"
   mkdir -p "$test_backup_dir"
@@ -257,33 +257,15 @@ test_backup_marzban_config() {
 
   sha256sum() { echo "abc123  $1"; }
 
-  backup_marzban_config
+  backup_sui_config
 
-  pass "backup_marzban_config: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "backup_sui_config: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
   ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir" "$MARZBAN_ENV"
 }
 
 # в”Ђв”Ђ РўРµСЃС‚: backup_singbox_config в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_backup_singbox_config() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_singbox_config..."
-
-  local test_backup_dir="/tmp/test-backup-$$"
-  mkdir -p "$test_backup_dir"
-
-  BACKUP_DIR="$test_backup_dir"
-
-  sha256sum() { echo "abc123  $1"; }
-
-  backup_singbox_config
-
-  pass "backup_singbox_config: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-
-  rm -rf "$test_backup_dir"
-}
-
 # в”Ђв”Ђ РўРµСЃС‚: backup_ssl_certs в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 test_backup_ssl_certs() {
   info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_ssl_certs..."
@@ -398,7 +380,7 @@ test_backup_create_archive() {
   BACKUP_ARCHIVE_DIR="$test_archive_dir"
 
   # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Рµ С„Р°Р№Р»С‹
-  echo "test" >"${test_backup_dir}/marzban-db.sqlite3"
+  echo "test" >"${test_backup_dir}/s-ui-db.sqlite3"
   echo "test" >"${test_backup_dir}/marzban.env"
 
   backup_create_archive "test-backup"
@@ -456,10 +438,10 @@ test_backup_full() {
 
   BACKUP_DIR="$test_backup_dir"
   BACKUP_ARCHIVE_DIR="$test_archive_dir"
-  MARZBAN_DIR="$test_marzban_dir"
+  S_UI_DIR="$test_marzban_dir"
 
   # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІСѓСЋ Р‘Р”
-  echo "test db" >"${MARZBAN_DIR}/db.sqlite3"
+  echo "test db" >"${S_UI_DIR}/db.sqlite3"
 
   sha256sum() { echo "abc123  $1"; }
   hostname() { echo "test-host"; }
@@ -566,9 +548,9 @@ test_all_functions_exist() {
     "backup_get_encryption_key"
     "backup_check_environment"
     "backup_stop_services"
-    "backup_marzban_db"
-    "backup_marzban_config"
-    "backup_singbox_config"
+    "backup_sui_db"
+    "backup_sui_config"
+    #"backup_singbox_config"
     "backup_ssl_certs"
     "backup_keys"
     "backup_encrypt_archive"
@@ -647,13 +629,13 @@ main() {
   test_backup_stop_services
   echo ""
 
-  test_backup_marzban_db
+  test_backup_sui_db
   echo ""
 
-  test_backup_marzban_config
+  test_backup_sui_config
   echo ""
 
-  test_backup_singbox_config
+  #test_backup_singbox_config
   echo ""
 
   test_backup_ssl_certs

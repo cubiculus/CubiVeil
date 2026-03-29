@@ -16,9 +16,18 @@ if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
 fi
 
 # ── Константы / Constants ───────────────────────────────────
-DECOY_WEBROOT="/var/www/decoy"
-DECOY_CONFIG="/etc/cubiveil/decoy.json"
+# Пути по умолчанию могут быть переопределены через переменные окружения
+DECOY_WEBROOT="${DECOY_WEBROOT:-/var/www/decoy}"
+DECOY_CONFIG="${DECOY_CONFIG:-/etc/cubiveil/decoy.json}"
 DECOY_ROTATE_TIMER="cubiveil-decoy-rotate"
+
+# В тестовом режиме используем временные директории
+if [[ "${TEST_MODE:-false}" == "true" ]]; then
+  TEST_DECOY_DIR="${TEST_DECOY_DIR:-/tmp/test-decoy-$$}"
+  mkdir -p "$TEST_DECOY_DIR"
+  DECOY_WEBROOT="${TEST_DECOY_DIR}/webroot"
+  DECOY_CONFIG="${TEST_DECOY_DIR}/decoy.json"
+fi
 
 # ── Утилиты / Utilities ─────────────────────────────────────
 

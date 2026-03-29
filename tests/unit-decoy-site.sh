@@ -29,6 +29,21 @@ log_warn() { echo "[WARN] $1" >&2; }
 log_info() { echo "[INFO] $1" >&2; }
 log_error() { echo "[ERROR] $1" >&2; }
 
+# Mock для проверки наличия jq
+is_command_available() {
+  [[ "$1" == "jq" ]] && return 0
+  return 1
+}
+
+# Создаём тестовую директорию /etc/cubiveil в temp
+TEST_ETC_CUBIVEIL="/tmp/test-cubiveil-etc-$$"
+mkdir -p "$TEST_ETC_CUBIVEIL"
+
+# Перенаправляем все обращения к /etc/cubiveil в тестовую директорию
+# Используем sed для подмены пути в generate.sh при source
+# Сохраняем оригинальный jq для использования в mock
+_REAL_JQ=$(command -v jq 2>/dev/null || echo "/usr/bin/jq")
+
 # Mock core функций
 pkg_install_packages() {
   echo "[MOCK] pkg_install_packages: $*" >&2
@@ -39,69 +54,63 @@ pkg_install() {
   return 1 # по умолчанию пакет не установлен
 }
 
-# Mock для jq — возвращает корректные значения для всех полей decoy.json
+# Mock для jq — если файл существует используем настоящий jq
 jq() {
-  local filter="$1"
-  local file="${2:-}"
-  # Не логируем чтобы не засорять вывод
-  if [[ "$filter" == *".template"* ]]; then
-    echo "portal"
-  elif [[ "$filter" == *".site_name"* ]]; then
-    echo "Test Site"
-  elif [[ "$filter" == *".accent_color"* ]]; then
-    echo "#4a90d9"
-  elif [[ "$filter" == *".copyright_year"* ]]; then
-    echo "2025"
-  elif [[ "$filter" == *".server_token"* ]]; then
-    echo "nginx"
-  elif [[ "$filter" == *".rotation.enabled"* ]]; then
-    echo "false"
-  elif [[ "$filter" == *".rotation.interval_hours"* ]]; then
-    echo "3"
-  elif [[ "$filter" == *".rotation.files_per_cycle"* ]]; then
-    echo "1"
-  elif [[ "$filter" == *".rotation.types.jpg.enabled"* ]]; then
-    echo "true"
-  elif [[ "$filter" == *".rotation.types.jpg.weight"* ]]; then
-    echo "4"
-  elif [[ "$filter" == *".rotation.types.pdf.enabled"* ]]; then
-    echo "true"
-  elif [[ "$filter" == *".rotation.types.pdf.weight"* ]]; then
-    echo "2"
-  elif [[ "$filter" == *".rotation.types.mp4.enabled"* ]]; then
-    echo "true"
-  elif [[ "$filter" == *".rotation.types.mp4.weight"* ]]; then
-    echo "1"
-  elif [[ "$filter" == *".rotation.types.mp3.enabled"* ]]; then
-    echo "false"
-  elif [[ "$filter" == *".rotation.types.mp3.weight"* ]]; then
-    echo "1"
-  elif [[ "$filter" == *".rotation.types.pdf.size_min_mb"* ]]; then
-    echo "50"
-  elif [[ "$filter" == *".rotation.types.mp4.size_min_mb"* ]]; then
-    echo "100"
-  elif [[ "$filter" == *".rotation.types.mp3.size_min_mb"* ]]; then
-    echo "10"
-  elif [[ "$filter" == *".rotation.types"* ]]; then
-    echo '{"jpg":{"enabled":true,"weight":4},"pdf":{"enabled":true,"weight":2},"mp4":{"enabled":true,"weight":1},"mp3":{"enabled":false,"weight":1}}'
-  elif [[ "$filter" == *".max_total_files_mb"* ]]; then
-    echo "5000"
-  elif [[ "$filter" == *".behavior.speed_kbps_min"* ]]; then
-    echo "200"
-  elif [[ "$filter" == *".behavior.speed_kbps_max"* ]]; then
-    echo "1000"
-  elif [[ "$filter" == *".behavior.session_files"* ]]; then
-    echo "3"
-  elif [[ "$filter" == *".behavior.min_delay_min"* ]]; then
-    echo "5"
-  elif [[ "$filter" == *".behavior.max_delay_min"* ]]; then
-    echo "40"
-  elif [[ "$filter" == *".content_types"* ]]; then
-    echo '["jpg"]'
-  else
-    # Для неизвестных фильтров возвращаем пустоту а не "default"
-    echo ""
+  local filter=""
+  local file=""
+  local i=1
+  local use_raw=false
+
+  # Парсим аргументы как настоящий jq
+  while [[ $i -le $# ]]; do
+    local arg="${!i}"
+    case "$arg" in
+      -r|--raw-output)
+        use_raw=true
+        ;;
+      -c|--compact-output)
+        ;;
+      -e|--exit-status)
+        # Флаг exit-status, игнорируем
+        ;;
+      -f|--from-file)
+        # Чтение фильтра из файла (не поддерживаем)
+        ((i++))
+        ;;
+      *)
+        # Первый не-флаг аргумент - фильтр, второй - файл
+        if [[ -z "$filter" ]]; then
+          filter="$arg"
+        else
+          file="$arg"
+        fi
+        ;;
+    esac
+    ((i++))
+  done
+
+  # Если файл существует, используем настоящий jq
+  if [[ -n "$file" && -f "$file" ]]; then
+    if [[ "$use_raw" == "true" ]]; then
+      "$_REAL_JQ" -r "$filter" "$file"
+    else
+      "$_REAL_JQ" "$filter" "$file"
+    fi
+    return $?
   fi
+
+  # Для тестов без файла возвращаем моковые значения
+  case "$filter" in
+    "."|". "*) cat "$file" 2>/dev/null || echo "{}" ;;  # Валидация JSON
+    *".template"*) echo "portal" ;;
+    *".site_name"*) echo "Test Site" ;;
+    *".accent_color"*) echo "#4a90d9" ;;
+    *".max_total_files_mb"*) echo "5000" ;;
+    *".rotation.types.jpg.enabled"*) echo "true" ;;
+    *".rotation.types.pdf.enabled"*) echo "true" ;;
+    *".rotation.types.mp4.enabled"*) echo "true" ;;
+    *) echo "" ;;
+  esac
   return 0
 }
 
@@ -208,10 +217,11 @@ test_module_load() {
 test_decoy_generate_profile() {
   info "Тестирование decoy_generate_profile..."
 
-  # Создаём временную директорию для теста
-  local test_config_dir
-  test_config_dir=$(mktemp -d)
-  DECOY_CONFIG="${test_config_dir}/decoy.json"
+  # Устанавливаем TEST_MODE для использования временных директорий
+  export TEST_MODE="true"
+  export TEST_DECOY_DIR="$(mktemp -d)"
+  export DECOY_CONFIG="${TEST_DECOY_DIR}/decoy.json"
+  export DECOY_WEBROOT="${TEST_DECOY_DIR}/webroot"
 
   # Источник generate.sh
   source "$GENERATE_PATH"
@@ -219,9 +229,25 @@ test_decoy_generate_profile() {
   # Запускаем функцию
   decoy_generate_profile
 
+  # Отладка: проверим что файл существует
+  if [[ ! -f "$DECOY_CONFIG" ]]; then
+    fail "decoy_generate_profile: конфиг не создан (файл не существует)"
+    return
+  fi
+
+  # Проверка что файл не пустой
+  if [[ ! -s "$DECOY_CONFIG" ]]; then
+    fail "decoy_generate_profile: конфиг пустой"
+    cat "$DECOY_CONFIG" >&2
+    return
+  fi
+
   # Проверка что файл создан
-  if [[ -f "$DECOY_CONFIG" ]]; then
-    pass "decoy_generate_profile: конфиг создан"
+  pass "decoy_generate_profile: конфиг создан"
+
+  # Выведем содержимое для отладки
+  echo "[DEBUG] Config content:" >&2
+  cat "$DECOY_CONFIG" >&2
 
     # Проверка полей
     local template site_name accent_color max_files_mb
@@ -280,12 +306,8 @@ test_decoy_generate_profile() {
       fail "decoy_generate_profile: rotation.types.mp4.enabled = ${mp4_enabled:-не задан}"
     fi
 
-  else
-    fail "decoy_generate_profile: конфиг не создан"
-  fi
-
   # Очистка
-  rm -rf "$test_config_dir"
+  rm -rf "$TEST_DECOY_DIR"
 }
 
 # ════════════════════════════════════════════════════════════
@@ -294,10 +316,10 @@ test_decoy_generate_profile() {
 test_select_file_type() {
   info "Тестирование _select_file_type..."
 
-  # Создаём временную директорию для теста
-  local test_config_dir
-  test_config_dir=$(mktemp -d)
-  DECOY_CONFIG="${test_config_dir}/decoy.json"
+  # Устанавливаем TEST_MODE для использования временных директорий
+  export TEST_MODE="true"
+  export TEST_DECOY_DIR="$(mktemp -d)"
+  export DECOY_CONFIG="${TEST_DECOY_DIR}/decoy.json"
 
   # Создаём тестовый конфиг
   cat >"$DECOY_CONFIG" <<EOF
@@ -374,7 +396,7 @@ EOF
   fi
 
   # Очистка
-  rm -rf "$test_config_dir"
+  rm -rf "$TEST_DECOY_DIR"
 }
 
 # ════════════════════════════════════════════════════════════
@@ -383,12 +405,11 @@ EOF
 test_decoy_enforce_size_limit() {
   info "Тестирование _decoy_enforce_size_limit..."
 
-  # Создаём временную директорию для теста
-  local test_config_dir test_webroot
-  test_config_dir=$(mktemp -d)
-  test_webroot=$(mktemp -d)
-  DECOY_CONFIG="${test_config_dir}/decoy.json"
-  DECOY_WEBROOT="$test_webroot"
+  # Устанавливаем TEST_MODE для использования временных директорий
+  export TEST_MODE="true"
+  export TEST_DECOY_DIR="$(mktemp -d)"
+  export DECOY_CONFIG="${TEST_DECOY_DIR}/decoy.json"
+  export DECOY_WEBROOT="${TEST_DECOY_DIR}/webroot"
 
   mkdir -p "${DECOY_WEBROOT}/files"
 
@@ -429,7 +450,7 @@ EOF
   pass "_decoy_enforce_size_limit: функция выполняется без ошибок"
 
   # Очистка
-  rm -rf "$test_config_dir" "$test_webroot"
+  rm -rf "$TEST_DECOY_DIR"
 }
 
 # ════════════════════════════════════════════════════════════
@@ -438,12 +459,11 @@ EOF
 test_decoy_rotate_once() {
   info "Тестирование decoy_rotate_once..."
 
-  # Создаём временную директорию для теста
-  local test_config_dir test_webroot
-  test_config_dir=$(mktemp -d)
-  test_webroot=$(mktemp -d)
-  DECOY_CONFIG="${test_config_dir}/decoy.json"
-  DECOY_WEBROOT="$test_webroot"
+  # Устанавливаем TEST_MODE для использования временных директорий
+  export TEST_MODE="true"
+  export TEST_DECOY_DIR="$(mktemp -d)"
+  export DECOY_CONFIG="${TEST_DECOY_DIR}/decoy.json"
+  export DECOY_WEBROOT="${TEST_DECOY_DIR}/webroot"
 
   mkdir -p "${DECOY_WEBROOT}/files"
 
@@ -500,7 +520,7 @@ EOF
   pass "decoy_rotate_once: функция выполняется без ошибок"
 
   # Очистка
-  rm -rf "$test_config_dir" "$test_webroot"
+  rm -rf "$TEST_DECOY_DIR"
 }
 
 # ════════════════════════════════════════════════════════════
@@ -509,12 +529,11 @@ EOF
 test_generate_rotated_file() {
   info "Тестирование _generate_rotated_file..."
 
-  # Создаём временную директорию для теста
-  local test_config_dir test_webroot
-  test_config_dir=$(mktemp -d)
-  test_webroot=$(mktemp -d)
-  DECOY_CONFIG="${test_config_dir}/decoy.json"
-  DECOY_WEBROOT="$test_webroot"
+  # Устанавливаем TEST_MODE для использования временных директорий
+  export TEST_MODE="true"
+  export TEST_DECOY_DIR="$(mktemp -d)"
+  export DECOY_CONFIG="${TEST_DECOY_DIR}/decoy.json"
+  export DECOY_WEBROOT="${TEST_DECOY_DIR}/webroot"
 
   mkdir -p "${DECOY_WEBROOT}/files"
 
@@ -583,7 +602,7 @@ EOF
   fi
 
   # Очистка
-  rm -rf "$test_config_dir" "$test_webroot"
+  rm -rf "$TEST_DECOY_DIR"
 }
 
 # ════════════════════════════════════════════════════════════
@@ -592,12 +611,11 @@ EOF
 test_decoy_build_webroot_cleanup() {
   info "Тестирование очистки старых файлов в decoy_build_webroot..."
 
-  # Создаём временную директорию для теста
-  local test_config_dir test_webroot
-  test_config_dir=$(mktemp -d)
-  test_webroot=$(mktemp -d)
-  DECOY_CONFIG="${test_config_dir}/decoy.json"
-  DECOY_WEBROOT="$test_webroot"
+  # Устанавливаем TEST_MODE для использования временных директорий
+  export TEST_MODE="true"
+  export TEST_DECOY_DIR="$(mktemp -d)"
+  export DECOY_CONFIG="${TEST_DECOY_DIR}/decoy.json"
+  export DECOY_WEBROOT="${TEST_DECOY_DIR}/webroot"
 
   mkdir -p "${DECOY_WEBROOT}/files"
 
@@ -646,7 +664,7 @@ EOF
   fi
 
   # Очистка
-  rm -rf "$test_config_dir" "$test_webroot"
+  rm -rf "$TEST_DECOY_DIR"
 }
 
 # ════════════════════════════════════════════════════════════

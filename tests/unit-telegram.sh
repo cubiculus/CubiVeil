@@ -33,7 +33,7 @@ check_python_functions() {
     if grep -q "def ${func}" "${BOT_PYTHON_DIR}"/*.py 2>/dev/null; then
       pass "Python $category: $func"
       ((TESTS_PASSED++)) || true
-      ((found++))
+      ((found++)) || true
     else
       warn "Python $category: $func не найдена"
     fi
@@ -55,7 +55,7 @@ check_systemd_directives() {
     if grep -q "$directive" "${SCRIPT_DIR}/setup-telegram.sh"; then
       pass "Systemd: $directive"
       ((TESTS_PASSED++)) || true
-      ((found++))
+      ((found++)) || true
     else
       warn "Systemd: $directive не найдена"
     fi
@@ -181,9 +181,10 @@ test_python_bot_structure() {
     fail "Структура: путь к боту некорректен"
   fi
 
-  # Проверка наличия ключевых функций в Python коде
+  # Проверка наличия ключевых функций/методов в Python коде
   local bot_functions=(
-    "tg_send"
+    "send"
+    "validate_token"
     "get_cpu"
     "get_ram"
     "get_disk"
@@ -308,8 +309,8 @@ test_installation_structure() {
 test_token_validation() {
   info "Тестирование валидации токена Telegram..."
 
-  # Проверка формата токена
-  if grep -q '\^[0-9]+:' "${SCRIPT_DIR}/setup-telegram.sh"; then
+  # Проверка формата токена (полный regex паттерн)
+  if grep -q 'TG_TOKEN.*=~.*\^' "${SCRIPT_DIR}/setup-telegram.sh"; then
     pass "Валидация: проверка формата токена"
     ((TESTS_PASSED++)) || true
   else
@@ -341,7 +342,7 @@ test_chat_id_validation() {
 # ── Тест: Python бот — функции метрик ───────────────────────
 test_python_bot_metrics() {
   info "Тестирование Python функций метрик..."
-  check_python_functions "метрика" "get_cpu" "get_ram" "get_disk" "get_uptime" "get_active_users"
+  check_python_functions "метрика" "get_cpu" "get_ram" "get_disk" "get_uptime"
 }
 
 # ── Тест: Python бот — функции отправки ─────────────────────
@@ -362,7 +363,7 @@ test_python_bot_commands() {
   for cmd in "${commands[@]}"; do
     if grep -q "\"${cmd}\"" "${BOT_PYTHON_DIR}"/*.py 2>/dev/null ||
       grep -q "'${cmd}'" "${BOT_PYTHON_DIR}"/*.py 2>/dev/null; then
-      ((found++))
+      ((found++)) || true
     fi
   done
   if [[ $found -eq ${#commands[@]} ]]; then

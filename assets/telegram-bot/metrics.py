@@ -18,7 +18,10 @@ logger = logging.getLogger(__name__)
 # ══════════════════════════════════════════════════════════════════════════════
 
 # File paths / Пути к файлам
-DEFAULT_DB_PATH = "/var/lib/marzban/db.sqlite3"
+DEFAULT_DB_PATH = "/usr/local/s-ui/db/s-ui.db"
+
+# S-UI paths / Пути к S-UI
+SUI_DB_DIR = "/usr/local/s-ui/db"
 
 # Time delays in seconds / Временные задержки в секундах
 CPU_READ_DELAY = 0.01  # Minimal delay between CPU readings
@@ -171,4 +174,36 @@ class MetricsCollector:
             return "?"
         except Exception as e:
             logger.error(f"Unexpected error getting uptime: {e}")
+            return "?"
+
+    def get_active_users(self):
+        """
+        Get count of active users from S-UI database
+        Returns:
+            Union[int, str]: Count of active users or "?" if DB not found
+        """
+        try:
+            if not os.path.exists(self.db_path):
+                logger.warning(f"S-UI DB not found: {self.db_path}")
+                return "?"
+
+            conn = sqlite3.connect(self.db_path, timeout=DB_TIMEOUT)
+            cursor = conn.cursor()
+
+            # Count active users (status = 'active')
+            cursor.execute(
+                "SELECT COUNT(*) FROM users WHERE status = 'active'"
+            )
+            result = cursor.fetchone()
+            conn.close()
+
+            if result:
+                return result[0]
+            return 0
+
+        except sqlite3.Error as e:
+            logger.error(f"Database error getting active users: {e}")
+            return "?"
+        except Exception as e:
+            logger.error(f"Unexpected error getting active users: {e}")
             return "?"

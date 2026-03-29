@@ -36,8 +36,7 @@ declare -A MSG=(
   [ERR_NO_ROOT]="Требуется запуск от root"
   [ERR_NO_SOURCE_DIR]="Не указана директория с конфигурацией"
   [ERR_DIR_NOT_FOUND]="Директория не найдена"
-  [ERR_NO_MARZBAN_DIR]="Директория Marzban не найдена в экспорте"
-  [ERR_NO_SINGBOX_DIR]="Директория Sing-box не найдена в экспорте"
+  [ERR_NO_SUI_DIR]="Директория S-UI не найдена в экспорте"
   [ERR_NO_CUBIVEIL_DIR]="Директория CubiVeil не найдена в экспорте"
   [MSG_IMPORTING]="Импорт конфигурации из"
   [MSG_RESTORED]="восстановлен"
@@ -70,51 +69,56 @@ check_environment() {
   export SOURCE_DIR="$source_dir"
 }
 
-# ── Импорт конфигурации Marzban ───────────────────────────────
-import_marzban_config() {
-  step_title "1" "Импорт Marzban" "Marzban Import"
+# ── Импорт конфигурации S-UI ──────────────────────────────────
+import_sui_config() {
+  step_title "1" "Импорт S-UI" "S-UI Import"
 
-  local marzban_source="${SOURCE_DIR}/marzban"
+  local sui_source="${SOURCE_DIR}/s-ui"
 
-  if [[ ! -d "$marzban_source" ]]; then
-    err "${MSG[ERR_NO_MARZBAN_DIR]}"
+  if [[ ! -d "$sui_source" ]]; then
+    err "${MSG[ERR_NO_SUI_DIR]}"
   fi
 
-  info "${MSG[MSG_IMPORTING]}: Marzban..."
-
-  # Восстановление .env
-  if [[ -f "${marzban_source}/.env" ]]; then
-    cp "${marzban_source}/.env" /opt/marzban/.env
-    ok ".env ${MSG[MSG_RESTORED]}"
-  fi
+  info "${MSG[MSG_IMPORTING]}: S-UI..."
 
   # Восстановление базы данных
-  if [[ -f "${marzban_source}/db.sqlite3" ]]; then
-    cp "${marzban_source}/db.sqlite3" /opt/marzban/db.sqlite3
-    ok "db.sqlite3 ${MSG[MSG_RESTORED]}"
+  if [[ -f "${sui_source}/db/s-ui.db" ]]; then
+    mkdir -p /usr/local/s-ui/db
+    cp "${sui_source}/db/s-ui.db" /usr/local/s-ui/db/s-ui.db
+    ok "s-ui.db ${MSG[MSG_RESTORED]}"
   fi
 
-  # Восстановление Xray configs
-  if [[ -d "${marzban_source}/xray_config" ]]; then
-    cp -rp "${marzban_source}/xray_config" /opt/marzban/
-    ok "Xray configs ${MSG[MSG_RESTORED]}"
+  # Восстановление конфигурации sing-box
+  if [[ -d "${sui_source}/bin/config" ]]; then
+    mkdir -p /usr/local/s-ui/bin/config
+    cp -rp "${sui_source}/bin/config/"* /usr/local/s-ui/bin/config/ 2>/dev/null || true
+    ok "Sing-box config ${MSG[MSG_RESTORED]}"
+  fi
+
+  # Восстановление сертификатов
+  if [[ -d "${sui_source}/cert" ]]; then
+    mkdir -p /usr/local/s-ui/cert
+    cp -rp "${sui_source}/cert/"* /usr/local/s-ui/cert/ 2>/dev/null || true
+    ok "SSL certificates ${MSG[MSG_RESTORED]}"
   fi
 }
 
-# ── Импорт конфигурации Sing-box ──────────────────────────────
+# ── Импорт конфигурации Sing-box (legacy) ─────────────────────
 import_singbox_config() {
-  step_title "2" "Импорт Sing-box" "Sing-box Import"
+  step_title "2" "Импорт Sing-box (legacy)" "Sing-box Import (legacy)"
 
   local singbox_source="${SOURCE_DIR}/sing-box"
 
   if [[ ! -d "$singbox_source" ]]; then
-    err "${MSG[ERR_NO_SINGBOX_DIR]}"
+    info "Sing-box config not found, skipping (legacy)"
+    return 0
   fi
 
   info "${MSG[MSG_IMPORTING]}: Sing-box..."
 
   # Восстановление config.json
   if [[ -f "${singbox_source}/config.json" ]]; then
+    mkdir -p /etc/sing-box
     cp "${singbox_source}/config.json" /etc/sing-box/config.json
     ok "config.json ${MSG[MSG_RESTORED]}"
   fi
@@ -148,19 +152,17 @@ import_cubiveil_config() {
 
 # ── Настройка прав доступа ────────────────────────────────────
 set_permissions() {
-  step_title "4" "${MSG[MSG_PERMISSIONS]}" "Setting Permissions"
+  step_title "3" "${MSG[MSG_PERMISSIONS]}" "Setting Permissions"
 
-  # Marzban
-  if [[ -d "/opt/marzban" ]]; then
-    chown -R root:root /opt/marzban
-    chmod 600 /opt/marzban/.env 2>/dev/null || true
-    chmod 600 /opt/marzban/db.sqlite3 2>/dev/null || true
-    ok "Marzban permissions set"
+  # S-UI
+  if [[ -d "/usr/local/s-ui" ]]; then
+    chown -R root:root /usr/local/s-ui
+    ok "S-UI permissions set"
   fi
 
-  # Sing-box
+  # Sing-box (legacy)
   if [[ -d "/etc/sing-box" ]]; then
-    chown -R singbox:singbox /etc/sing-box 2>/dev/null || true
+    chown -R root:root /etc/sing-box 2>/dev/null || true
     ok "Sing-box permissions set"
   fi
 
@@ -179,14 +181,14 @@ set_permissions() {
 
 # ── Перезапуск сервисов ───────────────────────────────────────
 restart_services() {
-  step_title "5" "${MSG[MSG_RESTART]}" "Restarting Services"
+  step_title "4" "${MSG[MSG_RESTART]}" "Restarting Services"
 
   read -rp "  ${MSG[PROMPT_RESTART]}: " confirm
 
   if [[ "${confirm,,}" == "y" ]]; then
     info "Restarting services..."
 
-    systemctl restart marzban 2>/dev/null && ok "Marzban restarted" || warn "Marzban restart failed"
+    systemctl restart s-ui 2>/dev/null && ok "S-UI restarted" || warn "S-UI restart failed"
     systemctl restart sing-box 2>/dev/null && ok "Sing-box restarted" || warn "Sing-box restart failed"
     systemctl restart cubiveil-bot 2>/dev/null && ok "Bot restarted" || warn "Bot restart failed"
   else
@@ -196,7 +198,7 @@ restart_services() {
 
 # ── Завершение ────────────────────────────────────────────────
 step_finish() {
-  step_title "6" "Завершение" "Finish"
+  step_title "5" "Завершение" "Finish"
 
   success "${MSG[MSG_SUCCESS]}"
 
@@ -205,16 +207,16 @@ step_finish() {
   echo "  Imported from: ${SOURCE_DIR}"
   echo ""
   echo "  Next steps:"
-  echo "    1. Check services: systemctl status marzban sing-box cubiveil-bot"
-  echo "    2. Check logs: journalctl -u marzban -u sing-box -u cubiveil-bot -f"
-  echo "    3. Test panel: https://\$(hostname):8080"
+  echo "    1. Check services: systemctl status s-ui sing-box cubiveil-bot"
+  echo "    2. Check logs: journalctl -u s-ui -u sing-box -u cubiveil-bot -f"
+  echo "    3. Test panel: https://\$(hostname):2095/app/"
   echo "  ────────────────────────────────────────────────────────"
 }
 
 # ── Точка входа ───────────────────────────────────────────────
 main() {
   check_environment "$@"
-  import_marzban_config
+  import_sui_config
   import_singbox_config
   import_cubiveil_config
   set_permissions

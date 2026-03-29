@@ -28,12 +28,12 @@ class HealthCheckError(Exception):
 # ══════════════════════════════════════════════════════════════════════════════
 
 # File paths / Пути к файлам
-MARZBAN_DIR = "/opt/marzban"
-MARZBAN_ENV_FILE = os.path.join(MARZBAN_DIR, ".env")
-MARZBAN_DB_FILE = os.path.join(MARZBAN_DIR, "db.sqlite3")
+SUI_DIR = "/usr/local/s-ui"
+SUI_ENV_FILE = "/etc/cubiveil/s-ui.credentials"
+SUI_DB_FILE = "/usr/local/s-ui/db/s-ui.db"
 
 # Default ports / Порты по умолчанию
-DEFAULT_HEALTH_CHECK_PORT = 8080
+DEFAULT_HEALTH_CHECK_PORT = 2095
 
 # Time intervals in seconds / Временные интервалы в секундах
 RESTART_COOLDOWN = 300  # 5 minutes between auto-restarts
@@ -54,7 +54,7 @@ DEFAULT_CONNECTION_TARGETS = [
 ]
 
 # Services to monitor / Сервисы для мониторинга
-MONITORED_SERVICES = ["marzban", "sing-box"]
+MONITORED_SERVICES = ["s-ui", "sing-box"]
 
 # Profile statuses / Статусы профилей
 PROFILE_STATUSES = ["active", "disabled", "limited", "expired"]
@@ -68,17 +68,17 @@ class HealthChecker:
 
     def __init__(self, health_check_port: Optional[int] = None):
         self.health_check_port = health_check_port or self._get_health_check_port()
-        self.marzban_dir = MARZBAN_DIR
+        self.sui_dir = SUI_DIR
         self.last_restart_time: dict = {}
         self.restart_cooldown = RESTART_COOLDOWN
 
     def _get_health_check_port(self) -> int:
-        """Get health check port from Marzban config"""
+        """Get health check port from S-UI config"""
         try:
-            if os.path.exists(MARZBAN_ENV_FILE):
-                with open(MARZBAN_ENV_FILE) as f:
+            if os.path.exists(SUI_ENV_FILE):
+                with open(SUI_ENV_FILE) as f:
                     for line in f:
-                        if line.startswith("HEALTH_CHECK_PORT="):
+                        if line.startswith("SUI_PANEL_PORT="):
                             return int(line.split("=")[1].strip())
         except Exception:  # nosec B110
             logger.debug("Failed to get health check port, using default")
@@ -138,14 +138,14 @@ class HealthChecker:
         }
 
         try:
-            # Read Marzban database
-            if not os.path.exists(MARZBAN_DB_FILE):
-                logger.warning(f"Database not found: {MARZBAN_DB_FILE}")
+            # Read S-UI database
+            if not os.path.exists(SUI_DB_FILE):
+                logger.warning(f"Database not found: {SUI_DB_FILE}")
                 result["error"] = "Database not found"
                 return result
 
             import sqlite3
-            conn = sqlite3.connect(MARZBAN_DB_FILE, timeout=DB_TIMEOUT)
+            conn = sqlite3.connect(SUI_DB_FILE, timeout=DB_TIMEOUT)
             cur = conn.cursor()
 
             cur.execute("""
@@ -183,12 +183,12 @@ class HealthChecker:
         profiles = []
 
         try:
-            if not os.path.exists(MARZBAN_DB_FILE):
-                logger.warning(f"Database not found: {MARZBAN_DB_FILE}")
+            if not os.path.exists(SUI_DB_FILE):
+                logger.warning(f"Database not found: {SUI_DB_FILE}")
                 return profiles
 
             import sqlite3
-            conn = sqlite3.connect(MARZBAN_DB_FILE, timeout=DB_TIMEOUT)
+            conn = sqlite3.connect(SUI_DB_FILE, timeout=DB_TIMEOUT)
             cur = conn.cursor()
 
             cur.execute("""
@@ -265,7 +265,7 @@ class HealthChecker:
         """
         result = {
             "status": "unknown",
-            "marzban": "unknown",
+            "s-ui": "unknown",
             "singbox": "unknown",
             "error": None
         }
@@ -284,7 +284,7 @@ class HealthChecker:
                 try:
                     data = json.loads(response.stdout)
                     result["status"] = data.get("status", "unknown")
-                    result["marzban"] = data.get("marzban", "unknown")
+                    result["s-ui"] = data.get("s-ui", "unknown")
                     result["singbox"] = data.get("singbox", "unknown")
                 except json.JSONDecodeError as e:
                     logger.error(f"Invalid JSON from health endpoint: {e}")

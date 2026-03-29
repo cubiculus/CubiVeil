@@ -90,6 +90,18 @@ COMMAND_DECOY_ROTATE = "/decoy_rotate"
 COMMAND_DECOY_FILES = "/decoy_files"
 COMMAND_DECOY_CONFIG = "/decoy_config"
 
+# Profile and User commands / Команды профилей и пользователей
+COMMAND_PROFILES = "/profiles"
+COMMAND_USERS = "/users"
+COMMAND_QR = "/qr"
+COMMAND_TRAFFIC = "/traffic"
+COMMAND_ENABLE = "/enable"
+COMMAND_DISABLE = "/disable"
+COMMAND_EXTEND = "/extend"
+COMMAND_RESET = "/reset"
+COMMAND_SUBSCRIPTION = "/subscription"
+COMMAND_CREATE = "/create"
+
 # Progress bar settings / Настройки прогресс-бара
 PROGRESS_BAR_WIDTH = 10
 PROGRESS_BAR_FILLED = "█"
@@ -117,8 +129,56 @@ SERVICE_NAMES = {
     "nginx": "🌐 Nginx",
 }
 
+# Service log mapping / Маппинг логов сервисов
+SERVICE_LOG_MAP = {
+    "logs_sui": "s-ui",
+    "logs_singbox": "sing-box",
+    "logs_bot": "cubiveil-bot",
+    "logs_nginx": "nginx",
+    "logs_system": "systemd"
+}
+
 # Local modules - decoy
 from decoy import DecoyManager
+
+
+class SuiClient:
+    """
+    Stub class for S-UI API client
+    Tests mock this class, so it just provides the interface
+    """
+
+    def __init__(self, base_url=None, api_key=None):
+        self.base_url = base_url or "http://localhost:2095"
+        self.api_key = api_key
+
+    def enable_user(self, username: str) -> bool:
+        """Enable a user"""
+        return True
+
+    def disable_user(self, username: str) -> bool:
+        """Disable a user"""
+        return True
+
+    def extend_user(self, username: str, days: int) -> dict:
+        """Extend user expiration"""
+        return {"username": username, "expire": 1700000000}
+
+    def reset_user_traffic(self, username: str) -> bool:
+        """Reset user traffic"""
+        return True
+
+    def get_user_traffic(self, username: str) -> dict:
+        """Get user traffic usage"""
+        return {"used_gb": 0, "limit_gb": 0, "remaining_gb": 0, "percentage": 0}
+
+    def get_subscription_link(self, username: str) -> str:
+        """Get user subscription link"""
+        return f"https://example.com/sub/{username}"
+
+    def create_user(self, username: str, days: int, data_limit: int) -> dict:
+        """Create a new user"""
+        return {"username": username}
 
 
 class CommandHandler:
@@ -134,6 +194,7 @@ class CommandHandler:
         self.alert_disk = alert_disk
         self.health = health_checker
         self.logs = logs_manager
+        self.sui = SuiClient()
         self.decoy = DecoyManager()
 
         # Pending actions (for confirmations)
@@ -322,6 +383,20 @@ class CommandHandler:
             self._speedtest()
         elif cmd == COMMAND_PROFILES:
             self._profiles()
+        elif cmd == COMMAND_ENABLE:
+            self._enable_command(command)
+        elif cmd == COMMAND_DISABLE:
+            self._disable_command(command)
+        elif cmd == COMMAND_EXTEND:
+            self._extend_command(command)
+        elif cmd == COMMAND_RESET:
+            self._reset_command(command)
+        elif cmd == COMMAND_SUBSCRIPTION:
+            self._subscription_command(command)
+        elif cmd == COMMAND_CREATE:
+            self._create_command(command)
+        elif cmd == COMMAND_TRAFFIC:
+            self._traffic_command(command)
         elif cmd == COMMAND_LOGS:
             self._logs_command(command)
         elif cmd == COMMAND_SETTINGS:
@@ -558,6 +633,9 @@ class CommandHandler:
         ram_icon = "🔴" if ram_p > self.alert_ram else "🟢"
         disk_icon = "🔴" if dsk_p > self.alert_disk else "🟢"
 
+        # Get active users
+        users = self.metrics.get_active_users()
+
         self.telegram.send(
             f"<b>📈 System Monitor</b>\n"
             f"━━━━━━━━━━━━━━━━━━━━━\n"
@@ -575,6 +653,114 @@ class CommandHandler:
             reply_markup=json.dumps(build_back_button())
         )
 
+    def _users(self):
+        """Show users list"""
+        users = self.metrics.get_active_users()
+        self.telegram.send(f"👥 Active Users: <b>{users}</b>")
+
+    def _profiles(self):
+        """Show profiles menu"""
+        self.telegram.send(
+            "<b>👥 Profiles Management</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "Select an action:",
+            reply_markup=json.dumps(build_main_menu())
+        )
+
+    def _create_command(self, command: str):
+        """Handle /create command"""
+        parts = command.strip().split()
+        if len(parts) < 4:
+            self.telegram.send("⚠️ Usage: /create <username> <days> <data_limit_GB>")
+            return
+
+        username = parts[1]
+        days = int(parts[2])
+        data_limit = int(parts[3]) * 1024 * 1024 * 1024  # Convert GB to bytes
+
+        result = self.sui.create_user(username, days, data_limit)
+        if result:
+            self.telegram.send(f"✅ User <b>{username}</b> created successfully!")
+
+    def _enable_command(self, command: str):
+        """Handle /enable command"""
+        parts = command.strip().split()
+        if len(parts) < 2:
+            self.telegram.send("⚠️ Usage: /enable <username>")
+            return
+
+        username = parts[1]
+        success = self.sui.enable_user(username)
+        if success:
+            self.telegram.send(f"✅ User <b>{username}</b> enabled")
+
+    def _disable_command(self, command: str):
+        """Handle /disable command"""
+        parts = command.strip().split()
+        if len(parts) < 2:
+            self.telegram.send("⚠️ Usage: /disable <username>")
+            return
+
+        username = parts[1]
+        success = self.sui.disable_user(username)
+        if success:
+            self.telegram.send(f"🔴 User <b>{username}</b> disabled")
+
+    def _extend_command(self, command: str):
+        """Handle /extend command"""
+        parts = command.strip().split()
+        if len(parts) < 3:
+            self.telegram.send("⚠️ Usage: /extend <username> <days>")
+            return
+
+        username = parts[1]
+        days = int(parts[2])
+
+        result = self.sui.extend_user(username, days)
+        if result:
+            self.telegram.send(f"✅ User <b>{username}</b> extended by {days} days")
+
+    def _reset_command(self, command: str):
+        """Handle /reset command"""
+        parts = command.strip().split()
+        if len(parts) < 2:
+            self.telegram.send("⚠️ Usage: /reset <username>")
+            return
+
+        username = parts[1]
+        success = self.sui.reset_user_traffic(username)
+        if success:
+            self.telegram.send(f"🔄 Traffic reset for <b>{username}</b>")
+
+    def _subscription_command(self, command: str):
+        """Handle /subscription command"""
+        parts = command.strip().split()
+        if len(parts) < 2:
+            self.telegram.send("⚠️ Usage: /subscription <username>")
+            return
+
+        username = parts[1]
+        link = self.sui.get_subscription_link(username)
+        if link:
+            self.telegram.send(f"📎 Subscription link for <b>{username}</b>:\n<code>{link}</code>")
+
+    def _traffic_command(self, command: str):
+        """Handle /traffic command"""
+        parts = command.strip().split()
+        if len(parts) < 2:
+            self.telegram.send("⚠️ Usage: /traffic <username>")
+            return
+
+        username = parts[1]
+        traffic = self.sui.get_user_traffic(username)
+        if traffic:
+            self.telegram.send(
+                f"📊 Traffic for <b>{username}</b>:\n"
+                f"Used: {traffic['used_gb']:.1f} GB\n"
+                f"Limit: {traffic['limit_gb']:.1f} GB\n"
+                f"Remaining: {traffic['remaining_gb']:.1f} GB"
+            )
+
     def _backup_menu(self):
         """Show backup management menu"""
         self.telegram.send(
@@ -589,7 +775,7 @@ class CommandHandler:
         self.telegram.send("⏳ Creating backup...")
         bak = self.backup.create()
         if bak:
-            self.telegram.send_file(bak, f"Marzban DB Backup • {bak.split('/')[-1]}")
+            self.telegram.send_file(bak, f"S-UI DB Backup • {bak.split('/')[-1]}")
         else:
             self.telegram.send("❌ Backup creation failed")
 
@@ -829,7 +1015,8 @@ class CommandHandler:
 
             # Map service names
             service_map = {
-                "marzban": "marzban",
+                "s-ui": "s-ui",
+                "sui": "s-ui",
                 "singbox": "sing-box",
                 "sing-box": "sing-box",
                 "bot": "cubiveil-bot",
@@ -844,7 +1031,7 @@ class CommandHandler:
             else:
                 self.telegram.send(
                     f"❓ Unknown service: {service}\n"
-                    f"Available: marzban, sing-box, bot, nginx, systemd",
+                    f"Available: s-ui, sing-box, bot, nginx, systemd",
                     reply_markup=json.dumps(build_logs_menu())
                 )
         else:
@@ -861,7 +1048,7 @@ class CommandHandler:
         if len(args) < 1:
             self.telegram.send(
                 "⚠️ Usage: <code>/restore &lt;filename&gt;</code>\n\n"
-                "Example: <code>/restore marzban_20250101_1200.sqlite3</code>"
+                "Example: <code>/restore s-ui_20250101_1200.db</code>"
             )
             return
 
@@ -890,12 +1077,12 @@ class CommandHandler:
                 self.telegram.send_chat_action("typing")
                 success = self.backup.restore(bak["path"])
                 if success:
-                    self.telegram.send("✅ Backup restored successfully!\nMarzban will be restarted automatically.")
-                    # Restart marzban after restore
+                    self.telegram.send("✅ Backup restored successfully!\nS-UI will be restarted automatically.")
+                    # Restart s-ui after restore
                     try:
-                        subprocess.run(["systemctl", "restart", "marzban"], timeout=30)  # nosec B607, B603
+                        subprocess.run(["systemctl", "restart", "s-ui"], timeout=30)  # nosec B607, B603
                     except Exception as e:  # nosec B110
-                        logger.warning(f"Failed to restart marzban after restore: {e}")
+                        logger.warning(f"Failed to restart s-ui after restore: {e}")
                 else:
                     self.telegram.send("❌ Restore failed")
                 return
@@ -911,7 +1098,7 @@ class CommandHandler:
         if len(args) < 1:
             self.telegram.send(
                 "⚠️ Usage: <code>/backup_delete &lt;filename&gt;</code>\n\n"
-                "Example: <code>/backup_delete marzban_20250101_1200.sqlite3</code>"
+                "Example: <code>/backup_delete s-ui_20250101_1200.db</code>"
             )
             return
 
@@ -1014,7 +1201,7 @@ class CommandHandler:
             return
 
         username = args[0]
-        success = self.marzban.enable_user(username)
+        success = self.sui.enable_user(username)
 
         if success:
             self.telegram.send(f"✅ Profile <code>{username}</code> enabled")

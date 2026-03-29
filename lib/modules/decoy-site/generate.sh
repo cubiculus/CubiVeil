@@ -15,11 +15,20 @@ if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
 fi
 
 # ── Константы / Constants ───────────────────────────────────
-DECOY_WEBROOT="/var/www/decoy"
-DECOY_CONFIG="/etc/cubiveil/decoy.json"
-NGINX_CONF="/etc/nginx/sites-available/cubiveil-decoy"
+# Пути по умолчанию могут быть переопределены через переменные окружения
+DECOY_WEBROOT="${DECOY_WEBROOT:-/var/www/decoy}"
+DECOY_CONFIG="${DECOY_CONFIG:-/etc/cubiveil/decoy.json}"
+NGINX_CONF="${NGINX_CONF:-/etc/nginx/sites-available/cubiveil-decoy}"
 # shellcheck disable=SC2034
 MAX_FILE_SIZE_MB=500
+
+# В тестовом режиме используем временные директории
+if [[ "${TEST_MODE:-false}" == "true" ]]; then
+  TEST_DECOY_DIR="${TEST_DECOY_DIR:-/tmp/test-decoy-$$}"
+  mkdir -p "$TEST_DECOY_DIR"
+  DECOY_WEBROOT="${TEST_DECOY_DIR}/webroot"
+  DECOY_CONFIG="${TEST_DECOY_DIR}/decoy.json"
+fi
 
 # ── Утилиты / Utilities ─────────────────────────────────────
 
@@ -34,7 +43,15 @@ gen_range() {
 
 decoy_generate_profile() {
   # Проверяем наличие jq для работы с JSON
-  if ! command -v jq &>/dev/null; then
+  # Используем функцию is_command_available если есть, иначе command -v
+  local _jq_available=false
+  if type is_command_available &>/dev/null; then
+    is_command_available "jq" && _jq_available=true
+  elif command -v jq &>/dev/null; then
+    _jq_available=true
+  fi
+
+  if [[ "$_jq_available" != "true" ]]; then
     log_error "jq not found — required for decoy-site configuration"
     return 1
   fi
@@ -641,8 +658,8 @@ decoy_write_nginx_conf() {
   # Пути к сертификатам — не копируем, ссылаемся на существующие
   local cert_file key_file
   if [[ "${DEV_MODE:-false}" == "true" ]]; then
-    cert_file="/var/lib/marzban/certs/cert.pem"
-    key_file="/var/lib/marzban/certs/key.pem"
+    cert_file="/usr/local/s-ui/cert/cert.pem"
+    key_file="/usr/local/s-ui/cert/key.pem"
   else
     cert_file="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
     key_file="/etc/letsencrypt/live/${DOMAIN}/privkey.pem"

@@ -30,8 +30,12 @@ from logs import LogsManager
 # ══════════════════════════════════════════════════════════════════════════════
 
 # File paths / Пути к файлам
-DB_PATH = "/var/lib/marzban/db.sqlite3"
+DB_PATH = "/usr/local/s-ui/db/s-ui.db"
 BACKUP_DIR = "/opt/cubiveil-bot/backups"
+
+# S-UI paths / Пути к S-UI
+SUI_DIR = "/usr/local/s-ui"
+SUI_DB_DIR = "/usr/local/s-ui/db"
 
 # Environment variables / Переменные окружения
 ENV_TG_TOKEN = "TG_TOKEN"
@@ -192,7 +196,7 @@ class CubiVeilBot:
         # Create and send backup
         bak = self.backup.create()
         if bak:
-            self.telegram.send_file(bak, f"Marzban DB Backup • {datetime.now().strftime('%d.%m.%Y')}")
+            self.telegram.send_file(bak, f"S-UI DB Backup • {datetime.now().strftime('%d.%m.%Y')}")
         else:
             self.telegram.send("⚠️ Failed to create DB backup")
 

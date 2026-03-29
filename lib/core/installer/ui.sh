@@ -11,7 +11,7 @@ set -euo pipefail
 _dry_run_plan() {
   echo ""
   echo "══════════════════════════════════════════════════════════"
-  echo "  $(get_str MSG_DRY_RUN_TITLE)"
+  echo "  DRY-RUN — $(get_str MSG_DRY_RUN_TITLE)"
   echo "  Installation Plan / План установки"
   echo "══════════════════════════════════════════════════════════"
   echo ""

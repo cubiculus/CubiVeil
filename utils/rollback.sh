@@ -25,7 +25,7 @@ source "${PROJECT_DIR}/lib/utils.sh" || {
 # ── Константы ─────────────────────────────────────────────────
 CUBIVEIL_DIR="/opt/cubiveil"
 BACKUP_DIR="/root/cubiveil-backup"
-MARZBAN_DIR="/opt/marzban"
+SUI_DIR="/usr/local/s-ui"
 
 # ══════════════════════════════════════════════════════════════
 # ШАГ 1: Проверка окружения
@@ -106,19 +106,19 @@ step_validate_backup() {
 
   # Проверяем наличие критических файлов
   local has_cubiveil=false
-  local has_marzban=false
+  local has_sui=false
 
   if [[ -d "${SELECTED_BACKUP}/cubiveil" ]]; then
     has_cubiveil=true
     info "✓ CubiVeil файлы найдены"
   fi
 
-  if [[ -d "${SELECTED_BACKUP}/marzban" ]]; then
-    has_marzban=true
-    info "✓ Marzban конфиги найдены"
+  if [[ -d "${SELECTED_BACKUP}/s-ui" ]]; then
+    has_sui=true
+    info "✓ S-UI конфиги найдены"
   fi
 
-  if [[ "$has_cubiveil" == "false" ]] && [[ "$has_marzban" == "false" ]]; then
+  if [[ "$has_cubiveil" == "false" ]] && [[ "$has_sui" == "false" ]]; then
     err "$(get_str "MSG_ERR_BACKUP_INVALID")"
   fi
 
@@ -127,12 +127,12 @@ step_validate_backup() {
     info "✓ Ключ шифрования age найден"
   fi
 
-  if [[ -d "${SELECTED_BACKUP}/marzban" ]]; then
-    info "✓ Конфиги /etc/marzban найдены"
+  if [[ -d "${SELECTED_BACKUP}/s-ui" ]]; then
+    info "✓ Конфиги S-UI найдены"
   fi
 
-  if [[ -d "${SELECTED_BACKUP}/sing-box" ]]; then
-    info "✓ Конфиги /etc/sing-box найдены"
+  if [[ -d "${SELECTED_BACKUP}/cubiveil" ]]; then
+    info "✓ Конфиги /etc/cubiveil найдены"
   fi
 
   if [[ -d "${SELECTED_BACKUP}/letsencrypt" ]]; then
@@ -172,8 +172,8 @@ step_stop_services() {
   systemctl stop cubiveil-bot 2>/dev/null || true
   info "  ✓ Бот остановлен"
 
-  systemctl stop marzban 2>/dev/null || true
-  info "  ✓ Marzban остановлен"
+  systemctl stop s-ui 2>/dev/null || true
+  info "  ✓ S-UI остановлен"
 
   systemctl stop sing-box 2>/dev/null || true
   info "  ✓ Sing-box остановлен"
@@ -197,12 +197,12 @@ step_restore_files() {
     info "    ✓ CubiVeil восстановлен"
   fi
 
-  # Восстанавливаем Marzban
-  if [[ -d "${SELECTED_BACKUP}/marzban" ]]; then
-    info "  Восстановление Marzban..."
+  # Восстанавливаем S-UI
+  if [[ -d "${SELECTED_BACKUP}/s-ui" ]]; then
+    info "  Восстановление S-UI..."
     # Не удаляем полностью, а merge
-    cp -rp "${SELECTED_BACKUP}/marzban/"* "${MARZBAN_DIR}/" 2>/dev/null || true
-    info "    ✓ Marzban восстановлен"
+    cp -rp "${SELECTED_BACKUP}/s-ui/"* "${SUI_DIR}/" 2>/dev/null || true
+    info "    ✓ S-UI восстановлен"
   fi
 
   # Восстанавливаем ключи шифрования
@@ -221,11 +221,11 @@ step_restore_files() {
   fi
 
   # Восстанавливаем конфиги из /etc если есть
-  if [[ -d "${SELECTED_BACKUP}/marzban" ]]; then
-    info "  Восстановление /etc/marzban..."
-    mkdir -p "/etc/marzban" 2>/dev/null || true
-    cp -rp "${SELECTED_BACKUP}/marzban/"* "/etc/marzban/" 2>/dev/null || true
-    info "    ✓ /etc/marzban восстановлена"
+  if [[ -d "${SELECTED_BACKUP}/cubiveil" ]]; then
+    info "  Восстановление /etc/cubiveil..."
+    mkdir -p "/etc/cubiveil" 2>/dev/null || true
+    cp -rp "${SELECTED_BACKUP}/cubiveil/"* "/etc/cubiveil/" 2>/dev/null || true
+    info "    ✓ /etc/cubiveil восстановлена"
   fi
 
   if [[ -d "${SELECTED_BACKUP}/sing-box" ]]; then
@@ -246,13 +246,13 @@ step_restore_config() {
 
   info "Проверка конфигурации..."
 
-  # Проверяем .env Marzban
-  if [[ -f "${MARZBAN_DIR}/.env" ]]; then
-    info "  ✓ Конфигурация Marzban найдена"
+  # Проверяем конфиг S-UI
+  if [[ -f "${SUI_DIR}/s-ui" ]]; then
+    info "  ✓ Конфигурация S-UI найдена"
   fi
 
   # Проверяем конфиг sing-box
-  if [[ -f "/etc/sing-box/config.json" ]]; then
+  if [[ -d "${SUI_DIR}/bin/config" ]]; then
     info "  ✓ Конфигурация Sing-box найдена"
   fi
 
@@ -271,16 +271,16 @@ step_start_services() {
   systemctl start sing-box 2>/dev/null || true
   info "  ✓ Sing-box запущен"
 
-  systemctl start marzban 2>/dev/null || true
-  info "  ✓ Marzban запущен"
+  systemctl start s-ui 2>/dev/null || true
+  info "  ✓ S-UI запущен"
 
   systemctl start cubiveil-bot 2>/dev/null || true
   info "  ✓ Бот запущен"
 
   # Проверка статуса
   sleep 2
-  if systemctl is-active --quiet marzban; then
-    success "Marzban работает"
+  if systemctl is-active --quiet s-ui; then
+    success "S-UI работает"
   else
     warning "$(get_str "MSG_WARN_SERVICE_NOT_STARTED")"
   fi
@@ -303,7 +303,7 @@ step_finish() {
 
   echo ""
   echo "Проверьте работу сервисов:"
-  echo "  systemctl status marzban"
+  echo "  systemctl status s-ui"
   echo "  systemctl status sing-box"
   echo "  systemctl status cubiveil-bot"
 }

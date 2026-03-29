@@ -33,8 +33,7 @@ source "${PROJECT_DIR}/lib/utils.sh" || {
 }
 
 # ── Константы ─────────────────────────────────────────────────
-MARZBAN_DIR="/opt/marzban"
-SINGBOX_DIR="/etc/sing-box"
+SUI_DIR="/usr/local/s-ui"
 CUBIVEIL_DIR="/opt/cubiveil"
 EXPORT_DIR="/root/cubiveil-export"
 
@@ -55,7 +54,7 @@ declare -A MSG=(
   [MSG_NEXT_STEP]="Следующий шаг"
 
   [ERR_NOT_ROOT]="Требуется запуск от root"
-  [ERR_MARZBAN_NOT_FOUND]="Marzban не найден в ${MARZBAN_DIR}"
+  [ERR_SUI_NOT_FOUND]="S-UI не найдена в ${SUI_DIR}"
   [ERR_NO_CONFIG]="Конфигурация не найдена"
   [ERR_ENCRYPT_FAILED]="Не удалось зашифровать данные"
   [ERR_AGE_NOT_FOUND]="age не установлен — требуется для шифрования"
@@ -80,8 +79,8 @@ step_check_environment() {
     err "${MSG[ERR_AGE_NOT_FOUND]}"
   fi
 
-  if [[ ! -d "${MARZBAN_DIR}" ]]; then
-    err "${MSG[ERR_MARZBAN_NOT_FOUND]}"
+  if [[ ! -d "${SUI_DIR}" ]]; then
+    err "${MSG[ERR_SUI_NOT_FOUND]}"
   fi
 
   success "Окружение проверено"
@@ -126,34 +125,15 @@ step_collect_config() {
   info "${MSG[MSG_COLLECTING]}..."
 
   # Создаём структуру
-  mkdir -p "${EXPORT_PATH}/marzban"
-  mkdir -p "${EXPORT_PATH}/sing-box"
+  mkdir -p "${EXPORT_PATH}/s-ui"
   mkdir -p "${EXPORT_PATH}/cubiveil"
   mkdir -p "${EXPORT_PATH}/system"
 
-  # Копируем конфиг Marzban
-  if [[ -d "${MARZBAN_DIR}" ]]; then
-    info "  Копирование Marzban..."
-    cp -rp "${MARZBAN_DIR}/"* "${EXPORT_PATH}/marzban/" 2>/dev/null || true
-
-    # Отдельно копируем .env
-    if [[ -f "${MARZBAN_DIR}/.env" ]]; then
-      cp "${MARZBAN_DIR}/.env" "${EXPORT_PATH}/marzban/.env"
-    fi
-
-    # Копируем базу данных
-    if [[ -f "${MARZBAN_DIR}/db.sqlite3" ]]; then
-      cp "${MARZBAN_DIR}/db.sqlite3" "${EXPORT_PATH}/marzban/db.sqlite3"
-    fi
-
-    success "  ✓ Marzban скопирован"
-  fi
-
-  # Копируем конфиг Sing-box
-  if [[ -d "${SINGBOX_DIR}" ]]; then
-    info "  Копирование Sing-box..."
-    cp -rp "${SINGBOX_DIR}/"* "${EXPORT_PATH}/sing-box/" 2>/dev/null || true
-    success "  ✓ Sing-box скопирован"
+  # Копируем конфиг S-UI
+  if [[ -d "${SUI_DIR}" ]]; then
+    info "  Копирование S-UI..."
+    cp -rp "${SUI_DIR}/"* "${EXPORT_PATH}/s-ui/" 2>/dev/null || true
+    success "  ✓ S-UI скопирована"
   fi
 
   # Копируем CubiVeil
@@ -182,7 +162,7 @@ step_collect_config() {
     crontab -l 2>/dev/null || echo "N/A"
     echo ""
     echo "## Installed Packages"
-    dpkg -l 2>/dev/null | grep -E "(marzban|sing-box|cubiveil)" || echo "N/A"
+    dpkg -l 2>/dev/null | grep -E "(s-ui|sing-box|cubiveil)" || echo "N/A"
   } >"${EXPORT_PATH}/system/info.txt"
 
   success "  ✓ Системная информация собрана"
@@ -211,19 +191,19 @@ step_collect_keys() {
     info "  ✓ SSL сертификаты скопированы"
   fi
 
-  # Ключи Sing-box
-  if [[ -d "/etc/sing-box" ]]; then
-    for file in /etc/sing-box/*.key /etc/sing-box/*.pem; do
+  # Ключи S-UI (встроенные в панель)
+  if [[ -d "/usr/local/s-ui/cert" ]]; then
+    for file in /usr/local/s-ui/cert/*.key /usr/local/s-ui/cert/*.pem; do
       if [[ -f "$file" ]]; then
         cp "$file" "${EXPORT_PATH}/keys/" 2>/dev/null || true
       fi
     done
-    info "  ✓ Ключи Sing-box скопированы"
+    info "  ✓ Ключи S-UI скопированы"
   fi
 
-  # Ключи из .env (извлекаем имена переменных)
-  if [[ -f "${EXPORT_PATH}/marzban/.env" ]]; then
-    info "  ✓ Ключи из .env сохранены в конфиге"
+  # Ключи Reality из базы S-UI
+  if [[ -f "${EXPORT_PATH}/s-ui/db/s-ui.db" ]]; then
+    info "  ✓ Ключи Reality сохранены в базе S-UI"
   fi
 
   success "Ключи собраны"
@@ -243,10 +223,10 @@ step_generate_manifest() {
   local total_size
   total_size=$(du -sh "${EXPORT_PATH}" 2>/dev/null | cut -f1)
 
-  # Количество пользователей Marzban
+  # Количество пользователей в S-UI
   local user_count=0
-  if [[ -f "${EXPORT_PATH}/marzban/db.sqlite3" ]]; then
-    user_count=$(sqlite3 "${EXPORT_PATH}/marzban/db.sqlite3" \
+  if [[ -f "${EXPORT_PATH}/s-ui/db/s-ui.db" ]]; then
+    user_count=$(sqlite3 "${EXPORT_PATH}/s-ui/db/s-ui.db" \
       "SELECT COUNT(*) FROM users;" 2>/dev/null || echo "0")
   fi
 
@@ -257,13 +237,12 @@ step_generate_manifest() {
   "timestamp": "$(date -Iseconds)",
   "hostname": "$(hostname)",
   "export_size": "${total_size}",
-  "marzban": {
+  "s-ui": {
     "users_count": ${user_count},
-    "db_size": "$(du -sh "${EXPORT_PATH}/marzban/db.sqlite3" 2>/dev/null | cut -f1 || echo "0")"
+    "db_size": "$(du -sh "${EXPORT_PATH}/s-ui/db/s-ui.db" 2>/dev/null | cut -f1 || echo "0")"
   },
   "components": {
-    "marzban": $([[ -d "${EXPORT_PATH}/marzban" ]] && echo "true" || echo "false"),
-    "singbox": $([[ -d "${EXPORT_PATH}/sing-box" ]] && echo "true" || echo "false"),
+    "s-ui": $([[ -d "${EXPORT_PATH}/s-ui" ]] && echo "true" || echo "false"),
     "cubiveil": $([[ -d "${EXPORT_PATH}/cubiveil" ]] && echo "true" || echo "false"),
     "keys": $([[ -d "${EXPORT_PATH}/keys" ]] && echo "true" || echo "false")
   },
@@ -312,8 +291,7 @@ step_encrypt_sensitive() {
 
   # Список файлов для шифрования
   local files_to_encrypt=(
-    "marzban/.env"
-    "marzban/db.sqlite3"
+    "s-ui/db/s-ui.db"
     "keys/.cubiveil-age-key.txt"
   )
 

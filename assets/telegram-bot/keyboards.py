@@ -22,7 +22,7 @@ CALLBACK_BACKUP_RESTORE = "backup_restore"
 CALLBACK_BACKUP_DELETE = "backup_delete"
 CALLBACK_BACKUP_DOWNLOAD = "backup_download"
 
-CALLBACK_LOGS_MARZBAN = "logs_marzban"
+CALLBACK_LOGS_SUI = "logs_sui"
 CALLBACK_LOGS_SINGBOX = "logs_singbox"
 CALLBACK_LOGS_BOT = "logs_bot"
 CALLBACK_LOGS_NGINX = "logs_nginx"

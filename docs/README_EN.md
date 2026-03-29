@@ -33,7 +33,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/cubiculus/cubiveil/main/inst
 
 ## 📋 About
 
-**CubiVeil** is a comprehensive solution for deploying and managing infrastructure based on **s-ui** (alireza0/x-ui) with Xray and Sing-box support on Ubuntu servers.
+**CubiVeil** is a comprehensive solution for deploying and managing infrastructure based on **S-UI** (alireza0/s-ui) with built-in Sing-box on Ubuntu servers.
 
 The project provides:
 - 🚀 Automated installation of all components
@@ -422,13 +422,13 @@ Ensure:
 
 ```bash
 # Check s-ui status
-systemctl status x-ui
+systemctl status s-ui
 
 # View s-ui logs
-journalctl -u x-ui -n 50
+journalctl -u s-ui -n 50
 
 # Check panel port
-netstat -tlnp | grep x-ui
+netstat -tlnp | grep s-ui
 ```
 
 ## 📄 Documentation

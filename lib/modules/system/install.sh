@@ -344,7 +344,7 @@ system_check_ip_neighborhood() {
 system_check_services() {
   log_step "system_check_services" "Checking critical services status"
 
-  local services=("marzban" "sing-box" "ufw" "fail2ban")
+  local services=("s-ui" "sing-box" "ufw" "fail2ban")
   local all_active=true
 
   for service in "${services[@]}"; do
@@ -367,7 +367,7 @@ system_check_services() {
 system_restart_services() {
   log_step "system_restart_services" "Restarting critical services"
 
-  local services=("marzban" "sing-box" "fail2ban")
+  local services=("s-ui" "sing-box" "fail2ban")
 
   for service in "${services[@]}"; do
     if svc_active "$service"; then
