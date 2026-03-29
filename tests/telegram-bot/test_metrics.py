@@ -24,7 +24,7 @@ class TestMetricsCollector(unittest.TestCase):
     def test_initialization(self):
         """Test metrics collector initializes correctly"""
         self.assertIsNotNone(self.metrics.db_path)
-        self.assertEqual(self.metrics.db_path, "/var/lib/marzban/db.sqlite3")
+        self.assertEqual(self.metrics.db_path, "/usr/local/s-ui/db/s-ui.db")
 
     @patch('metrics.open', new_callable=mock_open)
     @patch('time.sleep')

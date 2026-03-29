@@ -228,36 +228,36 @@ class TestProfileCommands(unittest.TestCase):
             self.logs
         )
 
-    @patch('commands.MarzbanClient')
+    @patch('commands.SuiClient')
     def test_enable_command(self, mock_client_class):
         """Test /enable command"""
         mock_client = MagicMock()
         mock_client.enable_user.return_value = True
-        self.handler.marzban = mock_client
+        self.handler.sui = mock_client
 
         self.handler.handle("/enable testuser", "123456")
 
         self.assertGreater(len(self.telegram.messages), 0)
         self.assertIn("enabled", self.telegram.messages[0]["text"])
 
-    @patch('commands.MarzbanClient')
+    @patch('commands.SuiClient')
     def test_disable_command(self, mock_client_class):
         """Test /disable command"""
         mock_client = MagicMock()
         mock_client.disable_user.return_value = True
-        self.handler.marzban = mock_client
+        self.handler.sui = mock_client
 
         self.handler.handle("/disable testuser", "123456")
 
         self.assertGreater(len(self.telegram.messages), 0)
         self.assertIn("disabled", self.telegram.messages[0]["text"])
 
-    @patch('commands.MarzbanClient')
+    @patch('commands.SuiClient')
     def test_extend_command(self, mock_client_class):
         """Test /extend command"""
         mock_client = MagicMock()
         mock_client.extend_user.return_value = {"expire": 1700000000, "username": "testuser"}
-        self.handler.marzban = mock_client
+        self.handler.sui = mock_client
 
         self.handler.handle("/extend testuser 30", "123456")
 
@@ -265,19 +265,19 @@ class TestProfileCommands(unittest.TestCase):
         # Just check the command executed without error
         self.assertTrue(len(self.telegram.messages) > 0)
 
-    @patch('commands.MarzbanClient')
+    @patch('commands.SuiClient')
     def test_reset_command(self, mock_client_class):
         """Test /reset command"""
         mock_client = MagicMock()
         mock_client.reset_user_traffic.return_value = True
-        self.handler.marzban = mock_client
+        self.handler.sui = mock_client
 
         self.handler.handle("/reset testuser", "123456")
 
         self.assertGreater(len(self.telegram.messages), 0)
         self.assertIn("Traffic reset", self.telegram.messages[0]["text"])
 
-    @patch('commands.MarzbanClient')
+    @patch('commands.SuiClient')
     def test_traffic_command(self, mock_client_class):
         """Test /traffic command"""
         mock_client = MagicMock()
@@ -287,31 +287,31 @@ class TestProfileCommands(unittest.TestCase):
             "remaining_gb": 5.0,
             "percentage": 50.0
         }
-        self.handler.marzban = mock_client
+        self.handler.sui = mock_client
 
         self.handler.handle("/traffic testuser", "123456")
 
         self.assertGreater(len(self.telegram.messages), 0)
         self.assertIn("Traffic", self.telegram.messages[0]["text"])
 
-    @patch('commands.MarzbanClient')
+    @patch('commands.SuiClient')
     def test_subscription_command(self, mock_client_class):
         """Test /subscription command"""
         mock_client = MagicMock()
         mock_client.get_subscription_link.return_value = "https://example.com/sub/abc123"
-        self.handler.marzban = mock_client
+        self.handler.sui = mock_client
 
         self.handler.handle("/subscription testuser", "123456")
 
         self.assertGreater(len(self.telegram.messages), 0)
         self.assertIn("Subscription", self.telegram.messages[0]["text"])
 
-    @patch('commands.MarzbanClient')
+    @patch('commands.SuiClient')
     def test_create_command(self, mock_client_class):
         """Test /create command"""
         mock_client = MagicMock()
         mock_client.create_user.return_value = {"username": "newuser"}
-        self.handler.marzban = mock_client
+        self.handler.sui = mock_client
 
         self.handler.handle("/create newuser 30 50", "123456")
 

@@ -24,7 +24,7 @@ class TestLogsManager(unittest.TestCase):
     def test_initialization(self):
         """Test logs manager initializes correctly"""
         self.assertIsNotNone(self.logs.services)
-        self.assertIn("marzban", self.logs.services)
+        self.assertIn("s-ui", self.logs.services)
         self.assertIn("sing-box", self.logs.services)
         self.assertIn("cubiveil-bot", self.logs.services)
         self.assertIn("nginx", self.logs.services)
@@ -46,11 +46,11 @@ class TestLogsManager(unittest.TestCase):
             stderr=""
         )
 
-        success, logs = self.logs.get_service_logs("marzban", 50)
+        success, logs = self.logs.get_service_logs("s-ui", 50)
 
         self.assertTrue(success)
         self.assertIn("<b>", logs)  # HTML formatting
-        self.assertIn("Marzban", logs)
+        self.assertIn("S-UI", logs)
         mock_run.assert_called_once()
 
     @patch('logs.subprocess.run')
@@ -62,7 +62,7 @@ class TestLogsManager(unittest.TestCase):
             stderr=""
         )
 
-        success, logs = self.logs.get_service_logs("marzban", 50)
+        success, logs = self.logs.get_service_logs("s-ui", 50)
 
         self.assertTrue(success)
         self.assertIn("No logs found", logs)
@@ -72,7 +72,7 @@ class TestLogsManager(unittest.TestCase):
         """Test log retrieval timeout"""
         mock_run.side_effect = Exception("Timeout")
 
-        success, logs = self.logs.get_service_logs("marzban", 50)
+        success, logs = self.logs.get_service_logs("s-ui", 50)
 
         self.assertFalse(success)
         self.assertIn("Error", logs)
@@ -94,7 +94,7 @@ class TestLogsManager(unittest.TestCase):
     def test_get_recent_logs(self):
         """Test getting recent logs"""
         # This will fail without actual journalctl, but tests the method exists
-        result = self.logs.get_recent_logs("marzban", 10)
+        result = self.logs.get_recent_logs("s-ui", 10)
         self.assertIsInstance(result, str)
 
     @patch('logs.subprocess.run')
@@ -106,7 +106,7 @@ class TestLogsManager(unittest.TestCase):
             stderr=""
         )
 
-        success, logs = self.logs.search_logs("marzban", "error", 100)
+        success, logs = self.logs.search_logs("s-ui", "error", 100)
 
         self.assertTrue(success)
         self.assertIn("Search results", logs)
@@ -120,7 +120,7 @@ class TestLogsManager(unittest.TestCase):
             MagicMock(returncode=1, stdout="", stderr="")
         ]
 
-        success, logs = self.logs.search_logs("marzban", "xyz123notfound", 100)
+        success, logs = self.logs.search_logs("s-ui", "xyz123notfound", 100)
 
         self.assertTrue(success)  # Not an error, just no matches
         self.assertIn("No matches", logs)
@@ -134,9 +134,9 @@ class TestLogsManager(unittest.TestCase):
             stderr=""
         )
 
-        stats = self.logs.get_log_stats("marzban")
+        stats = self.logs.get_log_stats("s-ui")
 
-        self.assertEqual(stats["service"], "marzban")
+        self.assertEqual(stats["service"], "s-ui")
         self.assertGreater(stats["total_lines"], 0)
 
     @patch('logs.subprocess.run')
@@ -144,7 +144,7 @@ class TestLogsManager(unittest.TestCase):
         """Test clearing service logs"""
         mock_run.return_value = MagicMock(returncode=0)
 
-        result = self.logs.clear_service_logs("marzban")
+        result = self.logs.clear_service_logs("s-ui")
 
         self.assertTrue(result)
         mock_run.assert_called_once()
@@ -159,8 +159,8 @@ class TestLogsConstants(unittest.TestCase):
         sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'telegram-bot'))
         from commands import SERVICE_LOG_MAP
 
-        self.assertIn("logs_marzban", SERVICE_LOG_MAP)
-        self.assertEqual(SERVICE_LOG_MAP["logs_marzban"], "marzban")
+        self.assertIn("logs_sui", SERVICE_LOG_MAP)
+        self.assertEqual(SERVICE_LOG_MAP["logs_sui"], "s-ui")
         self.assertEqual(SERVICE_LOG_MAP["logs_singbox"], "sing-box")
         self.assertEqual(SERVICE_LOG_MAP["logs_bot"], "cubiveil-bot")
         self.assertEqual(SERVICE_LOG_MAP["logs_nginx"], "nginx")
