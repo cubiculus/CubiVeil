@@ -164,7 +164,6 @@ class CubiVeilBot:
         ram_u, ram_t, ram_p = self.metrics.get_ram()
         dsk_u, dsk_t, dsk_p = self.metrics.get_disk()
         uptime = self.metrics.get_uptime()
-        users = self.metrics.get_active_users()
         now = datetime.now().strftime("%d.%m.%Y %H:%M UTC")
 
         # Determine status icons
@@ -186,8 +185,6 @@ class CubiVeilBot:
             f"{ram_icon} RAM:   {ram_u}/{ram_t} MB ({ram_p}%)  {bar(ram_p)}\n"
             f"{disk_icon} Disk:  {dsk_u}/{dsk_t} GB ({dsk_p}%)  {bar(dsk_p)}\n"
             f"⏱ Uptime:  {uptime}\n"
-            f"━━━━━━━━━━━━━━━━━━━━━\n"
-            f"👥 Active users: <b>{users}</b>\n"
             f"━━━━━━━━━━━━━━━━━━━━━\n"
             f"📦 DB backup attached below"
         )

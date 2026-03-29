@@ -12,10 +12,8 @@ Inline keyboards and menus for Telegram bot
 CALLBACK_MAIN_STATUS = "main_status"
 CALLBACK_MAIN_MONITOR = "main_monitor"
 CALLBACK_MAIN_BACKUP = "main_backup"
-CALLBACK_MAIN_USERS = "main_users"
 CALLBACK_MAIN_LOGS = "main_logs"
 CALLBACK_MAIN_HEALTH = "main_health"
-CALLBACK_MAIN_PROFILES = "main_profiles"
 CALLBACK_MAIN_SETTINGS = "main_settings"
 
 CALLBACK_BACKUP_LIST = "backup_list"
@@ -29,11 +27,6 @@ CALLBACK_LOGS_SINGBOX = "logs_singbox"
 CALLBACK_LOGS_BOT = "logs_bot"
 CALLBACK_LOGS_NGINX = "logs_nginx"
 CALLBACK_LOGS_SYSTEM = "logs_system"
-
-CALLBACK_PROFILES_LIST = "profiles_list"
-CALLBACK_PROFILES_ACTIVE = "profiles_active"
-CALLBACK_PROFILES_DISABLED = "profiles_disabled"
-CALLBACK_PROFILES_EXPIRED = "profiles_expired"
 
 CALLBACK_SETTINGS_ALERTS = "settings_alerts"
 CALLBACK_SETTINGS_REPORT = "settings_report"
@@ -73,14 +66,10 @@ def build_main_menu():
             ],
             [
                 {"text": "💾 Backup", "callback_data": CALLBACK_MAIN_BACKUP},
-                {"text": "👥 Users", "callback_data": CALLBACK_MAIN_USERS}
+                {"text": "📋 Logs", "callback_data": CALLBACK_MAIN_LOGS}
             ],
             [
-                {"text": "📋 Logs", "callback_data": CALLBACK_MAIN_LOGS},
-                {"text": "🏥 Health", "callback_data": CALLBACK_MAIN_HEALTH}
-            ],
-            [
-                {"text": "👤 Profiles", "callback_data": CALLBACK_MAIN_PROFILES},
+                {"text": "🏥 Health", "callback_data": CALLBACK_MAIN_HEALTH},
                 {"text": "⚙️ Settings", "callback_data": CALLBACK_MAIN_SETTINGS}
             ]
         ]
@@ -117,37 +106,11 @@ def build_logs_menu():
     return {
         "inline_keyboard": [
             [
-                {"text": "🅼 Marzban", "callback_data": CALLBACK_LOGS_MARZBAN},
-                {"text": "🆂 Sing-Box", "callback_data": CALLBACK_LOGS_SINGBOX}
-            ],
-            [
                 {"text": "🤖 Bot", "callback_data": CALLBACK_LOGS_BOT},
                 {"text": "🌐 Nginx", "callback_data": CALLBACK_LOGS_NGINX}
             ],
             [
                 {"text": "💻 Systemd", "callback_data": CALLBACK_LOGS_SYSTEM}
-            ],
-            [
-                {"text": "◀️ Back", "callback_data": CALLBACK_NAV_BACK}
-            ]
-        ]
-    }
-
-
-def build_profiles_menu():
-    """
-    Build profiles management inline keyboard
-    Returns dict for JSON serialization
-    """
-    return {
-        "inline_keyboard": [
-            [
-                {"text": "📋 All Profiles", "callback_data": CALLBACK_PROFILES_LIST},
-                {"text": "🟢 Active", "callback_data": CALLBACK_PROFILES_ACTIVE}
-            ],
-            [
-                {"text": "🔴 Disabled", "callback_data": CALLBACK_PROFILES_DISABLED},
-                {"text": "⚫ Expired", "callback_data": CALLBACK_PROFILES_EXPIRED}
             ],
             [
                 {"text": "◀️ Back", "callback_data": CALLBACK_NAV_BACK}
@@ -259,34 +222,6 @@ def build_pagination_keyboard(current_page: int, total_pages: int, callback_pref
     buttons.append([{"text": "◀️ Back", "callback_data": CALLBACK_NAV_BACK}])
 
     return {"inline_keyboard": buttons}
-
-
-def build_profile_actions_keyboard(username: str):
-    """
-    Build profile actions keyboard
-    Args:
-        username: Profile username
-    Returns dict for JSON serialization
-    """
-    return {
-        "inline_keyboard": [
-            [
-                {"text": "📊 Info", "callback_data": f"profile_info:{username}"},
-                {"text": "⏳ Extend", "callback_data": f"profile_extend:{username}"}
-            ],
-            [
-                {"text": "⛔ Disable", "callback_data": f"profile_disable:{username}"},
-                {"text": "✅ Enable", "callback_data": f"profile_enable:{username}"}
-            ],
-            [
-                {"text": "🔄 Reset Traffic", "callback_data": f"profile_reset:{username}"},
-                {"text": "📱 QR Code", "callback_data": f"profile_qr:{username}"}
-            ],
-            [
-                {"text": "◀️ Back", "callback_data": CALLBACK_PROFILES_LIST}
-            ]
-        ]
-    }
 
 
 def build_backup_actions_keyboard(filename: str):

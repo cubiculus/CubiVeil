@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>Automated Installation and Management of Marzban + Sing-box</strong>
+  <strong>Automated Installation and Management of s-ui (Xray/Sing-box)</strong>
 </p>
 
 <p align="center">
@@ -33,7 +33,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/cubiculus/cubiveil/main/inst
 
 ## 📋 About
 
-**CubiVeil** is a comprehensive solution for deploying and managing infrastructure based on **Marzban** and **Sing-box** on Ubuntu servers.
+**CubiVeil** is a comprehensive solution for deploying and managing infrastructure based on **s-ui** (alireza0/x-ui) with Xray and Sing-box support on Ubuntu servers.
 
 The project provides:
 - 🚀 Automated installation of all components
@@ -73,8 +73,8 @@ The installer will automatically:
 1. Check environment
 2. Update system
 3. Configure firewall and Fail2ban
-4. Install Sing-box and Marzban
-5. Configure Let's Encrypt SSL certificates (port 80 opens automatically)
+4. Install s-ui panel (with built-in Xray/Sing-box)
+5. Configure Let's Encrypt SSL certificates (via s-ui built-in ACME)
 6. Generate keys and configurations
 
 ### Dev Mode (for testing)
@@ -172,11 +172,10 @@ sudo bash install.sh --debug 2>&1 | tee install_debug.log
 
 | Component | Description |
 |-----------|----------|
-| **Marzban** | User and subscription management panel |
-| **Sing-box** | Core with modern protocol support |
+| **s-ui** | Management panel with built-in Xray/Sing-box |
 | **Fail2ban** | Brute-force attack protection |
 | **UFW** | Firewall |
-| **Let's Encrypt** | SSL certificates |
+| **Let's Encrypt** | SSL certificates (via s-ui ACME) |
 | **Decoy Site** | Decoy website with realistic traffic generation |
 | **Traffic Shaping** | Network parameter control for unique "fingerprint" |
 
@@ -190,10 +189,10 @@ All utilities are located in `utils/` directory:
 | `monitor.sh` | Server resource monitoring |
 | `backup.sh` | Create and restore backups |
 | `diagnose.sh` | Problem diagnostics |
-| `manage-profiles.sh` | User profile management |
 | `export-config.sh` | Configuration export for migration |
 | `update.sh` | Update CubiVeil |
 | `rollback.sh` | Rollback to previous version |
+| `import-config.sh` | Configuration import |
 
 #### Installing Aliases
 
@@ -208,7 +207,6 @@ After installation, available commands:
 - `cv` — help
 - `cv monitor` — monitoring
 - `cv backup create` — create backup
-- `cv profiles list` — profile list
 - `cv diagnose` — diagnostics
 
 ## 🤖 Telegram Bot
@@ -226,32 +224,30 @@ bash setup-telegram.sh
 #### Monitoring
 - `/status` — brief server status
 - `/monitor` — full state snapshot
-- `/services` — all services status
 - `/alerts` — alert status and thresholds
 
 #### Backups
 - `/backup` — create full backup
 - `/backups` — list available backups
 
-#### Users
-- `/users` — list all users
-- `/qr <username>` — QR code for connection
-- `/traffic <username>` — traffic usage
-- `/subscription <username>` — subscription link
-
 #### Management
-- `/restart <service>` — restart service
+- `/restart` — restart s-ui service
 - `/update` — check for updates
 - `/export` — export configuration
 - `/diagnose` — full diagnostics
-- `/enable <username>` — enable profile
-- `/disable <username>` — disable profile
-- `/extend <username> <days>` — extend profile
-- `/reset <username>` — reset traffic
-- `/create <username>` — create new profile
-
-#### Logs
 - `/logs <service> [lines]` — service logs
+
+#### Decoy Site
+- `/decoy` — decoy management menu
+- `/decoy_status` — show decoy status
+- `/decoy_rotate` — rotate decoy files
+- `/decoy_files` — list decoy files
+- `/decoy_config` — show decoy config
+
+#### Settings
+- `/set_cpu <percent>` — CPU threshold
+- `/set_ram <percent>` — RAM threshold
+- `/set_disk <percent>` — Disk threshold
 
 Detailed documentation: [BOT_INTEGRATION.md](../BOT_INTEGRATION.md)
 
@@ -262,7 +258,6 @@ Detailed documentation: [BOT_INTEGRATION.md](../BOT_INTEGRATION.md)
 The bot automatically sends reports at scheduled time (default 09:00 UTC):
 - CPU, RAM, disk usage
 - Server uptime
-- Number of active users
 - Database backup
 
 ### Alerts
@@ -334,12 +329,11 @@ cubiveil/
 │   │   ├── decoy-site/       # Decoy site module
 │   │   ├── fail2ban/         # Fail2ban module
 │   │   ├── firewall/         # UFW firewall module
-│   │   ├── marzban/          # Marzban panel module
 │   │   ├── monitoring/       # Resource monitoring
 │   │   ├── rollback/         # Version rollback
-│   │   ├── singbox/          # Sing-box core
 │   │   ├── ssl/              # SSL certificates (Let's Encrypt)
 │   │   ├── system/           # System module
+│   │   ├── s-ui/             # s-ui panel module
 │   │   └── traffic-shaping/  # Traffic shaping
 │   ├── common.sh         # Common functions
 │   ├── fallback.sh       # Fallback functions
@@ -357,7 +351,6 @@ cubiveil/
 │   ├── import-config.sh      # Config import
 │   ├── monitor.sh            # Resource monitoring
 │   ├── diagnose.sh           # Problem diagnosis
-│   ├── manage-profiles.sh    # Profile management
 │   ├── backup.sh             # Backups
 │   └── README.md
 ├── tests/
@@ -423,6 +416,20 @@ Ensure:
 - Domain A record points to server IP
 - Port 80/443 open in firewall
 - Domain is not internal (not localhost, not .local)
+- Use s-ui web panel to manage SSL certificates
+
+### s-ui Panel Access
+
+```bash
+# Check s-ui status
+systemctl status x-ui
+
+# View s-ui logs
+journalctl -u x-ui -n 50
+
+# Check panel port
+netstat -tlnp | grep x-ui
+```
 
 ## 📄 Documentation
 

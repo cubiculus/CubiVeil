@@ -172,25 +172,3 @@ class MetricsCollector:
         except Exception as e:
             logger.error(f"Unexpected error getting uptime: {e}")
             return "?"
-
-    def get_active_users(self):
-        """Get count of active users from Marzban database"""
-        if not os.path.exists(self.db_path):
-            logger.warning(f"Database not found: {self.db_path}")
-            return "?"
-        try:
-            conn = sqlite3.connect(self.db_path, timeout=DB_TIMEOUT)
-            cur = conn.cursor()
-            cur.execute("SELECT COUNT(*) FROM users WHERE status='active'")
-            count = cur.fetchone()[0]
-            conn.close()
-            return count
-        except sqlite3.Error as e:
-            logger.error(f"Database error: {e}")
-            return "?"
-        except (IOError, OSError) as e:
-            logger.error(f"Error accessing database: {e}")
-            return "?"
-        except Exception as e:
-            logger.error(f"Unexpected error getting users: {e}")
-            return "?"

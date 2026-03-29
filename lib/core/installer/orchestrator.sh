@@ -8,7 +8,7 @@ set -euo pipefail
 
 # ── Глобальные переменные ───────────────────────────────────
 CURRENT_STEP=0
-TOTAL_STEPS=9
+TOTAL_STEPS=8
 WARNINGS=()
 
 # ── Функции ─────────────────────────────────────────────────
@@ -130,28 +130,100 @@ _step_fail2ban() {
   run_module "fail2ban"
 }
 
-_step_singbox() {
-  local _label
-  _label="$(get_str MSG_STEP_4_8_SINGBOX)"
-  step_module "$_label"
-
-  # Генерируем ключи и порты до установки
-  _generate_keys_and_ports
-  run_module "singbox"
-}
-
 _step_ssl() {
   local _label
-  _label="$(get_str MSG_STEP_5_8_SSL)"
+  _label="$(get_str MSG_STEP_4_8_SSL)"
   step_module "$_label"
   run_module "ssl"
 }
 
-_step_marzban() {
+_step_sui() {
   local _label
-  _label="$(get_str MSG_STEP_6_8_MARZBAN)"
+  _label="$(get_str MSG_STEP_5_8_SUI)"
   step_module "$_label"
-  run_module "marzban"
+
+  # Устанавливаем s-ui через официальный скрипт
+  _install_sui_panel
+  run_module "s-ui"
+}
+
+# Установка s-ui панели через официальный скрипт
+_install_sui_panel() {
+  log_step "install_sui_panel" "Installing s-ui panel"
+
+  # Проверяем, установлен ли уже s-ui
+  if [[ -f "/usr/local/x-ui/x-ui" ]]; then
+    log_info "s-ui already installed"
+    return 0
+  fi
+
+  log_info "Downloading s-ui installation script..."
+
+  # Загружаем официальный скрипт установки s-ui
+  local _sui_script="/tmp/s-ui-install.sh"
+  if ! curl -sfL --connect-timeout 10 --max-time 60 \
+    "https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh" \
+    -o "$_sui_script" 2>/dev/null; then
+    log_error "Failed to download s-ui installation script"
+    log_warn "You can install s-ui manually later:"
+    log_warn "  bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)"
+    return 0
+  fi
+
+  chmod +x "$_sui_script"
+
+  log_info "Running s-ui installation..."
+
+  # Запускаем установку в автоматическом режиме
+  local _sui_log="/var/log/cubiveil/s-ui-install.log"
+  mkdir -p "$(dirname "$_sui_log")"
+  log_info "s-ui install log: $_sui_log"
+
+  # Запускаем скрипт в фоновом режиме
+  bash "$_sui_script" >"$_sui_log" 2>&1 &
+  local _sui_bg_pid=$!
+
+  # Ждём, пока сервис станет активным (до 180 секунд)
+  local _max_wait=180
+  local _started=false
+  local _start_time
+  _start_time=$(date +%s)
+
+  while true; do
+    local _now
+    _now=$(date +%s)
+    local _elapsed=$((_now - _start_time))
+
+    if [[ $_elapsed -ge $_max_wait ]]; then
+      break
+    fi
+
+    if systemctl is-active --quiet x-ui 2>/dev/null; then
+      _started=true
+      break
+    fi
+
+    echo -ne "\rWaiting for s-ui... ${_elapsed}s"
+    sleep 2
+  done
+  echo -ne "\r"
+
+  # Убиваем фоновый процесс
+  kill "$_sui_bg_pid" 2>/dev/null || true
+  wait "$_sui_bg_pid" 2>/dev/null || true
+
+  if [[ "$_started" != "true" ]]; then
+    log_error "s-ui did not start within ${_max_wait}s"
+    log_warn "Check: systemctl status x-ui"
+    log_warn "Full install log: $_sui_log"
+    rm -f "$_sui_script"
+    return 1
+  fi
+
+  # Очищаем временный файл
+  rm -f "$_sui_script"
+
+  log_success "s-ui installed successfully"
 }
 
 _step_decoy() {
@@ -189,71 +261,6 @@ _step_telegram() {
   fi
 }
 
-# ── Генерация ключей Reality и портов ───────────────────────
-
-_generate_keys_and_ports() {
-  source "${INSTALL_SCRIPT_DIR}/lib/utils.sh"
-
-  # Поддержка тестового режима — запись в TEST_DIR вместо /etc/cubiveil
-  local _config_dir="/etc/cubiveil"
-  if [[ -n "${TEST_DIR:-}" ]]; then
-    _config_dir="${TEST_DIR}/etc/cubiveil"
-  fi
-
-  mkdir -p "$_config_dir"
-
-  # Reality keypair
-  local _private_key=""
-  if [[ -x "/usr/local/bin/sing-box" ]]; then
-    _private_key=$(/usr/local/bin/sing-box generate reality-keypair 2>/dev/null |
-      grep "PrivateKey:" | awk '{print $2}' || true)
-  fi
-  [[ -z "$_private_key" ]] && _private_key=$(generate_secure_key 32 2>/dev/null || openssl rand -base64 32)
-
-  cat >"$_config_dir/reality.json" <<EOF
-{
-  "private_key": "${_private_key}",
-  "sni": "www.microsoft.com"
-}
-EOF
-
-  # Сохраняем домен
-  cat >"$_config_dir/domain.json" <<EOF
-{
-  "domain": "${DOMAIN:-0.0.0.0}",
-  "email": "${LE_EMAIL:-}",
-  "dev_mode": "${DEV_MODE:-false}"
-}
-EOF
-
-  # Уникальные порты
-  TROJAN_PORT=$(unique_port)
-  SS_PORT=$(unique_port)
-  PANEL_PORT=$(unique_port)
-  SUB_PORT=$(unique_port)
-
-  cat >"$_config_dir/ports.json" <<EOF
-{
-  "trojan":        ${TROJAN_PORT},
-  "shadowsocks":   ${SS_PORT},
-  "panel":         ${PANEL_PORT},
-  "subscription":  ${SUB_PORT}
-}
-EOF
-
-  REALITY_SNI="www.microsoft.com"
-  export TROJAN_PORT SS_PORT PANEL_PORT SUB_PORT REALITY_SNI
-
-  local _ports_msg
-  _ports_msg="$(get_str MSG_PORTS_GENERATED)"
-  _ports_msg="${_ports_msg//\{TROJAN\}/$TROJAN_PORT}"
-  _ports_msg="${_ports_msg//\{SS\}/$SS_PORT}"
-  _ports_msg="${_ports_msg//\{PANEL\}/$PANEL_PORT}"
-  _ports_msg="${_ports_msg//\{SUB\}/$SUB_PORT}"
-  ok "$(get_str OK_REALITY_GENERATED | sed "s/\[REALITY_SNI\]/$REALITY_SNI/g")"
-  ok "$_ports_msg"
-}
-
 # ── Legacy API wrappers (для тестов, совместимости) ─────────
 
 step_check_ip_neighborhood() { _step_system; }
@@ -262,10 +269,8 @@ step_auto_updates() { :; }
 step_bbr() { :; }
 step_firewall() { _step_firewall; }
 step_fail2ban() { _step_fail2ban; }
-step_install_singbox() { _step_singbox; }
-step_generate_keys_and_ports() { _generate_keys_and_ports; }
-step_install_marzban() { _step_marzban; }
 step_ssl() { _step_ssl; }
+step_install_sui() { _step_sui; }
 step_configure() { :; }
 step_decoy_site() { _step_decoy; }
 step_traffic_shaping() { _step_traffic_shaping; }

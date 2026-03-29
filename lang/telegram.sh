@@ -104,8 +104,8 @@ OK_DAILY_REPORT_RU="Ежедневный отчёт + бэкап: {TIME} UTC"
 OK_ALERTS_CONFIGURED="Alerts every 15 min: CPU>{CPU}% RAM>{RAM}% Disk>{DISK}%"
 OK_ALERTS_CONFIGURED_RU="Алерты каждые 15 мин: CPU>{CPU}% RAM>{RAM}% Диск>{DISK}%"
 
-OK_COMMANDS="Commands: /status /backup /users /restart /help"
-OK_COMMANDS_RU="Команды: /status /backup /users /restart /help"
+OK_COMMANDS="Commands: /status /backup /restart /help"
+OK_COMMANDS_RU="Команды: /status /backup /restart /help"
 
 OK_SERVICE_ACTIVE="{SERVICE} is active"
 OK_SERVICE_ACTIVE_RU="{SERVICE} активен"
@@ -170,9 +170,6 @@ FINAL_LOGS_RU="Логи"
 
 FINAL_COMMANDS_SECTION="COMMANDS"
 FINAL_COMMANDS_SECTION_RU="КОМАНДЫ"
-
-FINAL_PROFILES_SECTION="PROFILES"
-FINAL_PROFILES_SECTION_RU="ПРОФИЛИ"
 
 FINAL_NAVIGATION="Use menu buttons for navigation!"
 FINAL_NAVIGATION_RU="Используйте кнопки в меню для навигации!"

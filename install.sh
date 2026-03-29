@@ -3,7 +3,7 @@
 # ║                        CubiVeil                           ║
 # ║               github.com/cubiculus/cubiveil              ║
 # ║                                                           ║
-# ║           Marzban + Sing-box — Unified Installer          ║
+# ║                    s-ui Unified Installer                 ║
 # ╚═══════════════════════════════════════════════════════════╝
 #
 # Единая точка входа. Вся логика установки — в lib/modules/*.
@@ -158,12 +158,11 @@ main() {
     echo "    1. system   — update, BBR, auto-updates"
     echo "    2. firewall — UFW rules"
     echo "    3. fail2ban — SSH brute-force protection"
-    echo "    4. singbox  — generate keys/ports, install Sing-box"
-    echo "    5. ssl      — Let's Encrypt or self-signed"
-    echo "    6. marzban  — panel installation and configuration"
-    [[ "$INSTALL_DECOY" == "true" ]] && echo "    7. decoy-site      — decoy website"
-    [[ "$INSTALL_TRAFFIC_SHAPING" == "true" ]] && echo "    8. traffic-shaping — tc/netem fingerprint"
-    [[ "$INSTALL_TELEGRAM" == "true" ]] && echo "    9. telegram        — Telegram bot setup"
+    echo "    4. ssl      — Let's Encrypt or self-signed"
+    echo "    5. s-ui     — panel installation and configuration"
+    [[ "$INSTALL_DECOY" == "true" ]] && echo "    6. decoy-site      — decoy website"
+    [[ "$INSTALL_TRAFFIC_SHAPING" == "true" ]] && echo "    7. traffic-shaping — tc/netem fingerprint"
+    [[ "$INSTALL_TELEGRAM" == "true" ]] && echo "    8. telegram        — Telegram bot setup"
     echo ""
     echo "  No changes will be made to the system."
     echo ""
@@ -206,9 +205,8 @@ main() {
   step_system_update
   step_firewall
   step_fail2ban
-  step_install_singbox
   step_ssl
-  step_install_marzban
+  step_install_sui
   step_configure
   step_decoy_site
   step_traffic_shaping

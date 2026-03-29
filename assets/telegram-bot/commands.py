@@ -20,13 +20,11 @@ from keyboards import (
     build_main_menu,
     build_backup_menu,
     build_logs_menu,
-    build_profiles_menu,
     build_settings_menu,
     build_alerts_submenu,
     build_back_button,
     build_confirm_keyboard,
     build_pagination_keyboard,
-    build_profile_actions_keyboard,
     build_backup_actions_keyboard,
     build_logs_lines_keyboard,
     build_decoy_menu,
@@ -38,25 +36,17 @@ from keyboards import (
     CALLBACK_MAIN_STATUS,
     CALLBACK_MAIN_MONITOR,
     CALLBACK_MAIN_BACKUP,
-    CALLBACK_MAIN_USERS,
     CALLBACK_MAIN_LOGS,
     CALLBACK_MAIN_HEALTH,
-    CALLBACK_MAIN_PROFILES,
     CALLBACK_MAIN_SETTINGS,
     CALLBACK_BACKUP_LIST,
     CALLBACK_BACKUP_CREATE,
     CALLBACK_BACKUP_RESTORE,
     CALLBACK_BACKUP_DELETE,
     CALLBACK_BACKUP_DOWNLOAD,
-    CALLBACK_LOGS_MARZBAN,
-    CALLBACK_LOGS_SINGBOX,
     CALLBACK_LOGS_BOT,
     CALLBACK_LOGS_NGINX,
     CALLBACK_LOGS_SYSTEM,
-    CALLBACK_PROFILES_LIST,
-    CALLBACK_PROFILES_ACTIVE,
-    CALLBACK_PROFILES_DISABLED,
-    CALLBACK_PROFILES_EXPIRED,
     CALLBACK_SETTINGS_ALERTS,
     CALLBACK_SETTINGS_REPORT,
     CALLBACK_SETTINGS_CPU,
@@ -77,26 +67,15 @@ COMMAND_BACKUP = "/backup"
 COMMAND_BACKUPS = "/backups"
 COMMAND_RESTORE = "/restore"
 COMMAND_BACKUP_DELETE = "/backup_delete"
-COMMAND_USERS = "/users"
 COMMAND_RESTART = "/restart"
 COMMAND_HEALTH = "/health"
 COMMAND_SPEEDTEST = "/speedtest"
-COMMAND_PROFILES = "/profiles"
 COMMAND_HELP = "/help"
 COMMAND_LOGS = "/logs"
 COMMAND_SETTINGS = "/settings"
 COMMAND_SET_CPU = "/set_cpu"
 COMMAND_SET_RAM = "/set_ram"
 COMMAND_SET_DISK = "/set_disk"
-# Profile commands / Команды профилей
-COMMAND_ENABLE = "/enable"
-COMMAND_DISABLE = "/disable"
-COMMAND_EXTEND = "/extend"
-COMMAND_RESET = "/reset"
-COMMAND_QR = "/qr"
-COMMAND_TRAFFIC = "/traffic"
-COMMAND_SUBSCRIPTION = "/subscription"
-COMMAND_CREATE = "/create"
 COMMAND_DIAGNOSE = "/diagnose"
 COMMAND_UPDATE = "/update"
 COMMAND_ROLLBACK = "/rollback"
@@ -124,17 +103,6 @@ MAX_COMMANDS_PER_MINUTE = 10  # Максимум команд в минуту
 SERVICE_RESTART_TIMEOUT = 30
 ERROR_MESSAGE_MAX_LENGTH = 500
 
-# Profile display limit / Лимит отображения профилей
-PROFILE_DISPLAY_LIMIT = 10
-
-# Profile status icons / Иконки статусов профилей
-PROFILE_STATUS_ICONS = {
-    "active": "🟢",
-    "disabled": "🔴",
-    "limited": "🟡",
-    "expired": "⚫",
-}
-
 # Default connection test targets / Цели для проверки соединения по умолчанию
 SPEEDTEST_TARGETS = [
     ("Google", "https://www.google.com"),
@@ -143,25 +111,11 @@ SPEEDTEST_TARGETS = [
     ("Telegram", "https://api.telegram.org"),
 ]
 
-# Service mapping for logs / Маппинг сервисов для логов
-SERVICE_LOG_MAP = {
-    CALLBACK_LOGS_MARZBAN: "marzban",
-    CALLBACK_LOGS_SINGBOX: "sing-box",
-    CALLBACK_LOGS_BOT: "cubiveil-bot",
-    CALLBACK_LOGS_NGINX: "nginx",
-    CALLBACK_LOGS_SYSTEM: "systemd",
-}
-
 # Service display names / Отображаемые имена сервисов
 SERVICE_NAMES = {
-    "marzban": "🅼 Marzban",
-    "sing-box": "🆂 Sing-Box",
     "cubiveil-bot": "🤖 Bot",
     "nginx": "🌐 Nginx",
 }
-
-# Local modules - profiles
-from profiles import MarzbanClient
 
 # Local modules - decoy
 from decoy import DecoyManager
@@ -180,7 +134,6 @@ class CommandHandler:
         self.alert_disk = alert_disk
         self.health = health_checker
         self.logs = logs_manager
-        self.marzban = MarzbanClient()
         self.decoy = DecoyManager()
 
         # Pending actions (for confirmations)
@@ -400,23 +353,6 @@ class CommandHandler:
             self._decoy_files(chat_id)
         elif cmd == COMMAND_DECOY_CONFIG:
             self._decoy_config(chat_id)
-        # Profile commands
-        elif cmd == COMMAND_ENABLE:
-            self._enable_command(command)
-        elif cmd == COMMAND_DISABLE:
-            self._disable_command(command)
-        elif cmd == COMMAND_EXTEND:
-            self._extend_command(command)
-        elif cmd == COMMAND_RESET:
-            self._reset_command(command)
-        elif cmd == COMMAND_QR:
-            self._qr_command(command)
-        elif cmd == COMMAND_TRAFFIC:
-            self._traffic_command(command)
-        elif cmd == COMMAND_SUBSCRIPTION:
-            self._subscription_command(command)
-        elif cmd == COMMAND_CREATE:
-            self._create_command(command)
         elif cmd == COMMAND_HELP:
             self._help()
         else:
@@ -442,10 +378,6 @@ class CommandHandler:
             self._handle_backup_menu(chat_id, message_id, data)
         elif data.startswith("logs_"):
             self._handle_logs_menu(chat_id, message_id, data)
-        elif data.startswith("profile_"):
-            self._handle_profile_menu(chat_id, message_id, data)
-        elif data.startswith("profiles_"):
-            self._handle_profiles_list(chat_id, message_id, data)
         elif data.startswith("settings_"):
             self._handle_settings_menu(chat_id, message_id, data)
         elif data.startswith("nav_"):
@@ -477,14 +409,10 @@ class CommandHandler:
             self._monitor()
         elif data == CALLBACK_MAIN_BACKUP:
             self._backup_menu()
-        elif data == CALLBACK_MAIN_USERS:
-            self._users()
         elif data == CALLBACK_MAIN_LOGS:
             self._logs_menu()
         elif data == CALLBACK_MAIN_HEALTH:
             self._health()
-        elif data == CALLBACK_MAIN_PROFILES:
-            self._profiles()
         elif data == CALLBACK_MAIN_SETTINGS:
             self._settings_menu()
         elif data == CALLBACK_DECOY_MAIN:
@@ -606,7 +534,6 @@ class CommandHandler:
         ram_u, ram_t, ram_p = self.metrics.get_ram()
         dsk_u, dsk_t, dsk_p = self.metrics.get_disk()
         uptime = self.metrics.get_uptime()
-        users = self.metrics.get_active_users()
 
         self.telegram.send(
             f"<b>📊 Server Status</b>\n"
@@ -615,8 +542,7 @@ class CommandHandler:
             f"RAM:    {ram_u}/{ram_t} MB ({ram_p}%)\n"
             f"Disk:   {dsk_u}/{dsk_t} GB ({dsk_p}%)\n"
             f"Uptime: {uptime}\n"
-            f"━━━━━━━━━━━━━━━\n"
-            f"👥 Active: {users}",
+            f"━━━━━━━━━━━━━━━",
             reply_markup=json.dumps(build_main_menu())
         )
 
@@ -626,7 +552,6 @@ class CommandHandler:
         ram_u, ram_t, ram_p = self.metrics.get_ram()
         dsk_u, dsk_t, dsk_p = self.metrics.get_disk()
         uptime = self.metrics.get_uptime()
-        users = self.metrics.get_active_users()
 
         # Status icons
         cpu_icon = "🔴" if cpu > self.alert_cpu else "🟢"
@@ -735,32 +660,22 @@ class CommandHandler:
             reply_markup=json.dumps(build_confirm_keyboard("backup_delete", filename))
         )
 
-    def _users(self):
-        """Send active user count"""
-        users = self.metrics.get_active_users()
-        self.telegram.send(
-            f"👥 <b>Active Users</b>\n"
-            f"━━━━━━━━━━━━━━━\n"
-            f"Current active: <b>{users}</b>",
-            reply_markup=json.dumps(build_main_menu())
-        )
-
     def _restart(self):
-        """Restart Marzban service"""
-        self.telegram.send("🔄 Restarting Marzban...")
+        """Restart services"""
+        self.telegram.send("🔄 Restarting services...")
         try:
             result = subprocess.run(  # nosec B607, B603
-                ["systemctl", "restart", "marzban"],
+                ["systemctl", "restart", "x-ui"],
                 capture_output=True,
                 timeout=SERVICE_RESTART_TIMEOUT
             )
             if result.returncode == 0:
-                self.telegram.send("✅ Marzban restarted successfully")
+                self.telegram.send("✅ s-ui restarted successfully")
             else:
                 stderr = result.stderr.decode()[:ERROR_MESSAGE_MAX_LENGTH] if result.stderr else "Unknown error"
                 self.telegram.send(f"❌ Error:\n<code>{stderr}</code>")
         except subprocess.TimeoutExpired:
-            self.telegram.send("❌ Timeout: Marzban restart took too long")
+            self.telegram.send("❌ Timeout: Restart took too long")
         except Exception as e:
             self.telegram.send(f"❌ Error: {str(e)}")
 
@@ -773,12 +688,10 @@ class CommandHandler:
             "/status  — CPU, RAM, disk, uptime\n"
             "/monitor — Detailed system monitor\n"
             "/backup  — Backup menu\n"
-            "/users   — Active users count\n"
-            "/restart — Restart Marzban\n"
+            "/restart — Restart s-ui\n"
             "/logs    — Logs menu\n"
             "/health  — Full health check\n"
             "/speedtest — Connection test\n"
-            "/profiles — Profiles management\n"
             "/settings — Bot settings\n"
             "/diagnose — Full diagnostics report\n"
             "/update — Update CubiVeil\n"
@@ -786,11 +699,18 @@ class CommandHandler:
             "/export — Export configuration\n"
             "/import <path> — Import configuration\n"
             "\n"
-            "<b>Direct Commands:</b>\n"            "<b>Direct Commands:</b>\n"
+            "<b>Direct Commands:</b>\n"
             "/logs &lt;service&gt; [lines] — Service logs\n"
             "/set_cpu &lt;percent&gt; — CPU threshold\n"
             "/set_ram &lt;percent&gt; — RAM threshold\n"
-            "/set_disk &lt;percent&gt; — Disk threshold",
+            "/set_disk &lt;percent&gt; — Disk threshold\n"
+            "\n"
+            "<b>Decoy Site:</b>\n"
+            "/decoy — Decoy management menu\n"
+            "/decoy_status — Show decoy status\n"
+            "/decoy_rotate — Rotate decoy files\n"
+            "/decoy_files — List decoy files\n"
+            "/decoy_config — Show decoy config",
             reply_markup=json.dumps(build_main_menu())
         )
 
@@ -829,131 +749,6 @@ class CommandHandler:
             "\n".join(results),
             reply_markup=json.dumps(build_back_button())
         )
-
-    def _profiles(self):
-        """Show profiles management menu"""
-        self.telegram.send(
-            "<b>👤 Profiles Management</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n"
-            "Select filter:",
-            reply_markup=json.dumps(build_profiles_menu())
-        )
-
-    def _show_all_profiles(self):
-        """Show all profiles"""
-        if not self.health:
-            self.telegram.send("❌ Health checker not available")
-            return
-
-        profiles = self.health.check_all_profiles()
-        self._format_profiles_message(profiles)
-
-    def _show_profiles_by_status(self, status: str):
-        """Show profiles filtered by status"""
-        if not self.health:
-            self.telegram.send("❌ Health checker not available")
-            return
-
-        all_profiles = self.health.check_all_profiles()
-        filtered = [p for p in all_profiles if p["status"] == status]
-        self._format_profiles_message(filtered, status)
-
-    def _format_profiles_message(self, profiles: list, filter_status: str = None):
-        """Format and send profiles message"""
-        if not profiles:
-            status_text = f" for {filter_status}" if filter_status else ""
-            self.telegram.send(
-                f"📭 No profiles found{status_text}",
-                reply_markup=json.dumps(build_back_button())
-            )
-            return
-
-        # Group by status
-        by_status = {}
-        for p in profiles:
-            status = p["status"]
-            if status not in by_status:
-                by_status[status] = []
-            by_status[status].append(p)
-
-        message = "<b>👥 Profiles</b>\n"
-        message += "━━━━━━━━━━━━━━━━━━━━━\n\n"
-
-        for status in PROFILE_STATUS_ICONS.keys():
-            if status in by_status:
-                icon = PROFILE_STATUS_ICONS.get(status, "⚪")
-                count = len(by_status[status])
-                message += f"{icon} <b>{status.title()}</b>: {count}\n"
-
-                # Show first N profiles
-                for p in by_status[status][:PROFILE_DISPLAY_LIMIT]:
-                    username = p["username"]
-                    used = p.get("used_traffic", 0) / (1024 * 1024 * 1024)  # GB
-                    message += f"   ├─ <code>{username}</code> ({used:.1f} GB)\n"
-
-                if len(by_status[status]) > PROFILE_DISPLAY_LIMIT:
-                    more = len(by_status[status]) - PROFILE_DISPLAY_LIMIT
-                    message += f"   └─ ... and {more} more\n"
-                message += "\n"
-
-        self.telegram.send(message, reply_markup=json.dumps(build_profiles_menu()))
-
-    def _show_profile_info(self, username: str):
-        """Show detailed profile info"""
-        if not self.health:
-            self.telegram.send("❌ Health checker not available")
-            return
-
-        profile = self.health.check_profile_status(username)
-
-        if profile.get("error"):
-            self.telegram.send(f"❌ {profile['error']}")
-            return
-
-        used_gb = profile.get("used_traffic", 0) / (1024 * 1024 * 1024)
-        limit_gb = profile.get("data_limit", 0) / (1024 * 1024 * 1024)
-
-        message = f"<b>👤 Profile: {username}</b>\n"
-        message += "━━━━━━━━━━━━━━━━━━━━━\n"
-        message += f"Status: {PROFILE_STATUS_ICONS.get(profile['status'], '⚪')} {profile['status']}\n"
-        message += f"Used: {used_gb:.2f} GB"
-        if limit_gb > 0:
-            message += f" / {limit_gb:.2f} GB\n"
-            pct = (used_gb / limit_gb) * 100
-            message += f"   {self._progress_bar(pct)}\n"
-        message += "\n"
-
-        if profile.get("expiry"):
-            from datetime import datetime
-            try:
-                expiry = datetime.fromtimestamp(profile["expiry"])
-                message += f"Expires: {expiry.strftime('%Y-%m-%d %H:%M')}\n"
-            except (ValueError, TypeError):
-                message += "Expires: N/A\n"
-
-        self.telegram.send(
-            message,
-            reply_markup=json.dumps(build_profile_actions_keyboard(username))
-        )
-
-    def _confirm_disable_profile(self, username: str):
-        """Confirm profile disable"""
-        self.telegram.send(
-            f"⚠️ <b>Confirm Disable</b>\n\n"
-            f"Disable profile: <code>{username}</code>\n"
-            f"User will lose access!",
-            reply_markup=json.dumps(build_confirm_keyboard("profile_disable", username))
-        )
-
-    def _enable_profile(self, username: str):
-        """Enable profile"""
-        # TODO: Implement enable via Marzban API
-        self.telegram.send(f"⚠️ Enable: Use Marzban panel or /enable {username} command")
-
-    def _show_qr(self, username: str):
-        """Show QR code for profile"""
-        # TODO: Generate QR code
-        self.telegram.send(f"⚠️ QR Code: Use /qr {username} command")
 
     # ═══════════════════════════════════════════════════════════════════════════
     # Logs Commands / Команды логов
@@ -1225,210 +1020,6 @@ class CommandHandler:
             self.telegram.send(f"✅ Profile <code>{username}</code> enabled")
         else:
             self.telegram.send(f"❌ Failed to enable profile <code>{username}</code>\nCheck username and try again")
-
-    def _disable_command(self, command: str):
-        """
-        Handle /disable command
-        Usage: /disable <username>
-        """
-        args = command.split()[1:]
-
-        if len(args) < 1:
-            self.telegram.send("⚠️ Usage: <code>/disable &lt;username&gt;</code>")
-            return
-
-        username = args[0]
-        success = self.marzban.disable_user(username)
-
-        if success:
-            self.telegram.send(f"✅ Profile <code>{username}</code> disabled")
-        else:
-            self.telegram.send(f"❌ Failed to disable profile <code>{username}</code>\nCheck username and try again")
-
-    def _extend_command(self, command: str):
-        """
-        Handle /extend command
-        Usage: /extend <username> <days>
-        """
-        args = command.split()[1:]
-
-        if len(args) < 2:
-            self.telegram.send("⚠️ Usage: <code>/extend &lt;username&gt; &lt;days&gt;</code>\nExample: <code>/extend user123 30</code>")
-            return
-
-        username = args[0]
-        try:
-            days = int(args[1])
-            if days <= 0:
-                self.telegram.send("⚠️ Days must be positive")
-                return
-
-            result = self.marzban.extend_user(username, days)
-
-            if result:
-                new_expiry = result.get("expire")
-                if new_expiry:
-                    expiry_date = datetime.fromtimestamp(new_expiry).strftime("%Y-%m-%d")
-                    self.telegram.send(f"✅ Profile <code>{username}</code> extended by {days} days\nNew expiry: {expiry_date}")
-                else:
-                    self.telegram.send(f"✅ Profile <code>{username}</code> extended by {days} days")
-            else:
-                self.telegram.send(f"❌ Failed to extend profile <code>{username}</code>\nCheck username and try again")
-        except ValueError:
-            self.telegram.send("⚠️ Invalid days value. Use a number")
-        except Exception as e:
-            self.telegram.send(f"❌ Error: {str(e)}")
-
-    def _reset_command(self, command: str):
-        """
-        Handle /reset command
-        Usage: /reset <username>
-        """
-        args = command.split()[1:]
-
-        if len(args) < 1:
-            self.telegram.send("⚠️ Usage: <code>/reset &lt;username&gt;</code>")
-            return
-
-        username = args[0]
-        success = self.marzban.reset_user_traffic(username)
-
-        if success:
-            self.telegram.send(f"✅ Traffic reset for <code>{username}</code>")
-        else:
-            self.telegram.send(f"❌ Failed to reset traffic for <code>{username}</code>\nCheck username and try again")
-
-    def _qr_command(self, command: str):
-        """
-        Handle /qr command
-        Usage: /qr <username>
-        """
-        args = command.split()[1:]
-
-        if len(args) < 1:
-            self.telegram.send("⚠️ Usage: <code>/qr &lt;username&gt;</code>")
-            return
-
-        username = args[0]
-        sub_link = self.marzban.get_subscription_link(username)
-
-        if not sub_link:
-            self.telegram.send(f"❌ Profile <code>{username}</code> not found")
-            return
-
-        qr_url = self.marzban.generate_qr_code_url(sub_link)
-
-        # Download and send QR code
-        try:
-            import urllib.request
-            temp_file = f"/tmp/qr_{username}.png"
-            urllib.request.urlretrieve(qr_url, temp_file)  # nosec B310
-            self.telegram.send_file(temp_file, f"QR Code for {username}")
-            import os
-            os.remove(temp_file)
-        except Exception as e:
-            self.telegram.send(f"❌ Error generating QR: {str(e)}\n\nSubscription link:\n<code>{sub_link}</code>")
-
-    def _traffic_command(self, command: str):
-        """
-        Handle /traffic command
-        Usage: /traffic <username>
-        """
-        args = command.split()[1:]
-
-        if len(args) < 1:
-            self.telegram.send("⚠️ Usage: <code>/traffic &lt;username&gt;</code>")
-            return
-
-        username = args[0]
-        traffic = self.marzban.get_user_traffic(username)
-
-        if not traffic:
-            self.telegram.send(f"❌ Profile <code>{username}</code> not found")
-            return
-
-        message = f"<b>📊 Traffic for {username}</b>\n"
-        message += "━━━━━━━━━━━━━━━━━━━━━\n"
-
-        used_gb = traffic["used_gb"]
-        limit_gb = traffic["limit_gb"]
-        remaining_gb = traffic["remaining_gb"]
-        pct = traffic["percentage"]
-
-        message += f"Used: {used_gb:.2f} GB\n"
-
-        if limit_gb:
-            message += f"Limit: {limit_gb:.2f} GB\n"
-            message += f"Remaining: {remaining_gb:.2f} GB\n"
-            message += f"{self._progress_bar(pct)} {pct:.1f}%\n"
-        else:
-            message += "Limit: ∞ (unlimited)\n"
-
-        self.telegram.send(message)
-
-    def _subscription_command(self, command: str):
-        """
-        Handle /subscription command
-        Usage: /subscription <username>
-        """
-        args = command.split()[1:]
-
-        if len(args) < 1:
-            self.telegram.send("⚠️ Usage: <code>/subscription &lt;username&gt;</code>")
-            return
-
-        username = args[0]
-        sub_link = self.marzban.get_subscription_link(username)
-
-        if not sub_link:
-            self.telegram.send(f"❌ Profile <code>{username}</code> not found")
-            return
-
-        message = f"<b>🔗 Subscription for {username}</b>\n"
-        message += "━━━━━━━━━━━━━━━━━━━━━\n"
-        message += f"<code>{sub_link}</code>\n\n"
-        message += "Click to copy or scan QR with /qr"
-
-        self.telegram.send(message)
-
-    def _create_command(self, command: str):
-        """
-        Handle /create command
-        Usage: /create <username> [days] [limit_gb]
-        """
-        args = command.split()[1:]
-
-        if len(args) < 1:
-            self.telegram.send(
-                "⚠️ Usage: <code>/create &lt;username&gt; [days] [limit_gb]</code>\n"
-                "Example: <code>/create user123 30 50</code>\n"
-                "Defaults: 30 days, unlimited data"
-            )
-            return
-
-        username = args[0]
-        days = int(args[1]) if len(args) >= 2 else 30
-        limit_gb = float(args[2]) if len(args) >= 3 else 0.0
-
-        # Validate username
-        if not username.isalnum() or len(username) < 3:
-            self.telegram.send("⚠️ Username must be at least 3 characters and alphanumeric")
-            return
-
-        result = self.marzban.create_user(username, days, limit_gb)
-
-        if result:
-            message = f"✅ Profile created: <code>{username}</code>\n"
-            message += "━━━━━━━━━━━━━━━━━━━━━\n"
-            message += f"Days: {days}\n"
-            if limit_gb > 0:
-                message += f"Data limit: {limit_gb} GB\n"
-            else:
-                message += "Data limit: ∞ (unlimited)\n"
-            message += "\nUse /qr or /subscription to get connection details"
-            self.telegram.send(message)
-        else:
-            self.telegram.send(f"❌ Failed to create profile <code>{username}</code>\nUsername may already exist")
 
     # ═══════════════════════════════════════════════════════════════════════════
     # Decoy Site Handlers / Обработка Decoy Site
