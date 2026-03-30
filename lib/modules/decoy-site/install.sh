@@ -99,48 +99,39 @@ module_enable() {
 }
 
 module_disable() {
+  log_step "decoy_disable" "Выключение сайта-прикрытия"
+  systemctl stop nginx 2>/dev/null || true
+  systemctl disable nginx 2>/dev/null || true
   rm -f "$NGINX_ENABLED"
-  systemctl reload nginx 2>/dev/null || true
-  systemctl stop "${DECOY_ROTATE_TIMER}.timer" 2>/dev/null || true
-  systemctl disable "${DECOY_ROTATE_TIMER}.timer" 2>/dev/null || true
-  log_info "Сайт-прикрытие отключён"
+  log_success "Сайт-прикрытие выключен"
 }
 
 module_status() {
-  log_step "decoy_status" "Статус сайта-прикрытия"
+  echo "║         Decoy Site — Статус                         ║"
+  echo "╠═════════════════════════════════════════════════════╣"
 
-  # nginx
-  if systemctl is-active --quiet nginx; then
-    log_success "nginx: активен"
+  # nginx статус
+  if systemctl is-active --quiet nginx 2>/dev/null; then
+    echo "║  nginx: Active                                        ║"
   else
-    log_error "nginx: не запущен"
+    echo "║  nginx: Inactive                                      ║"
   fi
 
-  # Сертификат
-  local cert_file
-  if [[ "${DEV_MODE:-false}" == "true" ]]; then
-    cert_file="/usr/local/s-ui/cert/cert.pem"
-  else
-    cert_file="/etc/letsencrypt/live/${DOMAIN:-_}/fullchain.pem"
-  fi
-  if [[ -f "$cert_file" ]]; then
-    local expiry
-    expiry=$(openssl x509 -enddate -noout -in "$cert_file" 2>/dev/null | cut -d= -f2)
-    log_success "Сертификат: действует до ${expiry}"
-  else
-    log_error "Сертификат не найден: ${cert_file}"
-  fi
-
-  # Файлы в webroot
-  local file_count total_size
-  file_count=$(find "${DECOY_WEBROOT}/files" -type f 2>/dev/null | wc -l)
-  total_size=$(du -sh "${DECOY_WEBROOT}/files" 2>/dev/null | cut -f1)
-  log_info "Файлов в /files/: ${file_count} (${total_size:-0})"
-
-  # Таймер ротации
+  # Timer статус
   if systemctl is-active --quiet "${DECOY_ROTATE_TIMER}.timer" 2>/dev/null; then
-    log_success "Ротация: активна"
+    echo "║  Rotation Timer: Active                               ║"
   else
-    log_info "Ротация: отключена (rotation.enabled = false)"
+    echo "║  Rotation Timer: Inactive                             ║"
   fi
+
+  # Конфиг
+  if [[ -f "$DECOY_CONFIG" ]]; then
+    local template site_name
+    template=$(jq -r '.template // "unknown"' "$DECOY_CONFIG" 2>/dev/null || echo "unknown")
+    site_name=$(jq -r '.site_name // "unknown"' "$DECOY_CONFIG" 2>/dev/null || echo "unknown")
+    echo "║  Template: ${template}"
+    echo "║  Site Name: ${site_name}"
+  fi
+
+  echo "╚═════════════════════════════════════════════════════╝"
 }

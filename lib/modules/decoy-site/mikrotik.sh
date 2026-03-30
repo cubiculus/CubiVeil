@@ -1,178 +1,141 @@
 #!/bin/bash
-# CubiVeil — Decoy Site: генерация скрипта для MikroTik RouterOS
-# Читает параметры из decoy.json
-# Вызывается из step_finish()
+# ╔══════════════════════════════════════════════════════╗
+# ║  CubiVeil — Decoy Site: MikroTik Script              ║
+# ║  Генерация скрипта для MikroTik RouterOS             ║
+# ╚══════════════════════════════════════════════════════╝
 
-# ── Подключение зависимостей / Dependencies ─────────────────
+set -euo pipefail
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-# shellcheck disable=SC2034
 MODULE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-if [[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/core/system.sh"
-fi
 if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
   source "${SCRIPT_DIR}/lib/core/log.sh"
 fi
 
-# ── Константы / Constants ───────────────────────────────────
+# ── Константы / Constants ────────────────────────────────────────
 DECOY_WEBROOT="/var/www/decoy"
 DECOY_CONFIG="/etc/cubiveil/decoy.json"
 
-# ── Генерация блока сессий для одного scheduler ─────────────
-
-_generate_session_block() {
-  local window_name="$1"
-  local session_count="$2"
-  local speed_bps="$3"
-  local files=("$4") # массив файлов
-
-  for i in $(seq 1 "$session_count"); do
-    local action_type=$((RANDOM % 100))
-    local delay=$((RANDOM % 40 + 5)) # 5-45 секунд между запросами
-
-    # HEAD запрос (15% шанс)
-    if [[ $action_type -lt 15 ]]; then
-      echo "  :delay ${delay}s"
-      echo "  /tool fetch url=\"https://${DOMAIN}/\" mode=keep-result=no"
-
-    # Намеренный 404 (8% шанс)
-    elif [[ $action_type -lt 23 ]]; then
-      local fake_path
-      fake_path="$(gen_hex 8)"
-      echo "  :delay ${delay}s"
-      echo "  /tool fetch url=\"https://${DOMAIN}/files/${fake_path}\" \
-        dst-path=\"/cv-tmp-${window_name}-${i}.bin\" \
-        limit-bytes-per-second=${speed_bps} \
-        keep-result=no"
-
-    # GET файл (77% шанс)
-    else
-      local file
-      file="${files[$((RANDOM % ${#files[@]}))]}"
-      echo "  :delay ${delay}s"
-      echo "  /tool fetch url=\"https://${DOMAIN}/files/${file}\" \
-        dst-path=\"/cv-tmp-${window_name}-${i}.bin\" \
-        limit-bytes-per-second=${speed_bps} \
-        keep-result=no"
-    fi
-  done
-}
-
-# ── Генерация скрипта MikroTik ─────────────────────────────────
+# ── Генерация MikroTik скрипта ────────────────────────────────────
 
 decoy_print_mikrotik_script() {
-  # Читаем параметры поведения из decoy.json
-  local speed_min session_files
-  speed_min=$(jq -r '.behavior.speed_kbps_min' "$DECOY_CONFIG" 2>/dev/null || echo "200")
-  session_files=$(jq -r '.behavior.session_files' "$DECOY_CONFIG" 2>/dev/null || echo "3")
+  local config_file="${1:-$DECOY_CONFIG}"
 
-  # Получаем список файлов из webroot
-  local files=()
-  mapfile -t files < <(ls "${DECOY_WEBROOT}/files/" 2>/dev/null)
-  local fcount="${#files[@]}"
-
-  if [[ "$fcount" -eq 0 ]]; then
-    log_error "Нет файлов в ${DECOY_WEBROOT}/files/ — сначала запусти module_configure"
+  if [[ ! -f "$config_file" ]]; then
+    log_error "Конфигурация не найдена: $config_file"
     return 1
   fi
 
-  # Временны́е окна из decoy.json
-  # morning: 07–09, day: 12–15, evening: 18–23
-  # Случайные минуты внутри окна для непредсказуемости
-  local m_morning=$((RANDOM % 59))
-  local m_day=$((RANDOM % 59))
-  local m_evening=$((RANDOM % 59))
-  local h_morning=$((RANDOM % 3 + 7))  # 7, 8 или 9
-  local h_day=$((RANDOM % 4 + 12))     # 12–15
-  local h_evening=$((RANDOM % 6 + 18)) # 18–23
+  # Читаем конфигурацию
+  local site_name domain interval_hours
+  site_name=$(jq -r '.site_name // "Decoy Site"' "$config_file" 2>/dev/null || echo "Decoy Site")
+  domain=$(jq -r '.domain // "example.com"' "$config_file" 2>/dev/null || echo "example.com")
+  interval_hours=$(jq -r '.rotation.interval_hours // 3' "$config_file" 2>/dev/null || echo "3")
 
-  # Форматируем время для RouterOS: HH:MM:00
-  local t_morning t_day t_evening
-  printf -v t_morning "%02d:%02d:00" "$h_morning" "$m_morning"
-  printf -v t_day "%02d:%02d:00" "$h_day" "$m_day"
-  printf -v t_evening "%02d:%02d:00" "$h_evening" "$m_evening"
+  # Очищаем имя для использования в комментариях
+  local clean_name
+  clean_name=$(echo "$site_name" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9 ]//g' | tr ' ' '_')
 
-  # limit-bytes-per-second для RouterOS (переводим KB/s → bytes/s)
-  local speed_bps=$((speed_min * 1024))
+  cat <<EOF
+# ═══════════════════════════════════════════════════════════════
+# MikroTik RouterOS Script — Decoy Site Configuration
+# Site: ${site_name}
+# Domain: ${domain}
+# Rotation Interval: ${interval_hours} hours
+# Generated: $(date -Iseconds)
+# ═══════════════════════════════════════════════════════════════
 
-  # Генерируем блоки сессий для каждого окна
-  local session_block_morning session_block_day session_block_evening
-  session_block_morning=$(_generate_session_block "morning" "$session_files" "$speed_bps" "${files[*]}")
-  session_block_day=$(_generate_session_block "day" "$session_files" "$speed_bps" "${files[*]}")
-  session_block_evening=$(_generate_session_block "evening" "$session_files" "$speed_bps" "${files[*]}")
+# Add this script to RouterOS:
+# 1. Upload to Files: /files/upload decoy-config.rsc
+# 2. Import: /import decoy-config.rsc
+# 3. Or copy-paste commands manually
 
-  cat <<MIKROTIK
-# ══════════════════════════════════════════════════════════════
-# CubiVeil — MikroTik RouterOS скрипт имитации трафика
-# Вставить в Terminal роутера целиком (Ctrl+V или New Terminal)
-# Домен: ${DOMAIN}
-# Окна активности: утро(${t_morning}), день(${t_day}), вечер(${t_evening})
-# Сессий за запуск: ${session_files} (3-7 fetch/HEAD/404)
-# ══════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════
+# 1. Address List — Decoy Domain
+# ═══════════════════════════════════════════════════════════════
 
-/system scheduler
+# Add decoy domain to address list (if using DNS)
+# /ip dns static add name="${domain}" address="0.0.0.0"
 
-# Утреннее окно (${t_morning})
-add name="cv-morning" \
-  start-time=${t_morning} \
-  interval=24:00:00 \
-  on-event="{
-${session_block_morning}
-  }" \
-  comment="CubiVeil decoy morning" \
-  disabled=no
+# ═══════════════════════════════════════════════════════════════
+# 2. Firewall Rules — Log Decoy Access
+# ═══════════════════════════════════════════════════════════════
 
-# Дневное окно (${t_day})
-add name="cv-day" \
-  start-time=${t_day} \
-  interval=24:00:00 \
-  on-event="{
-${session_block_day}
-  }" \
-  comment="CubiVeil decoy day" \
-  disabled=no
+# Log connections to decoy site (port 443)
+/ip firewall filter add chain=input dst-port=443 protocol=tcp \
+    action=log log-prefix="DECOY_ACCESS:" \
+    comment="Log decoy site access"
 
-# Вечернее окно (${t_evening})
-add name="cv-evening" \
-  start-time=${t_evening} \
-  interval=24:00:00 \
-  on-event="{
-${session_block_evening}
-  }" \
-  comment="CubiVeil decoy evening" \
-  disabled=no
+# Optionally drop after logging
+# /ip firewall filter add chain=input dst-port=443 protocol=tcp \
+#     action=drop comment="Drop decoy access"
 
-# Ежедневная очистка временных файлов
-add name="cv-cleanup" \
-  start-time=03:00:00 \
-  interval=24:00:00 \
-  on-event="/file remove [/file find name~\"cv-tmp\"]" \
-  comment="CubiVeil decoy cleanup" \
-  disabled=no
+# ═══════════════════════════════════════════════════════════════
+# 3. Scheduled Task — Periodic Check
+# ═══════════════════════════════════════════════════════════════
 
-# ══════════════════════════════════════════════════════════════
-# Проверка: /system scheduler print
-# Удаление:  /system scheduler remove [/system scheduler find comment~"CubiVeil"]
-# ══════════════════════════════════════════════════════════════
-MIKROTIK
+# Create scheduled task to check decoy status
+/system scheduler add name="decoy-check" interval="${interval_hours}h:0m:0s" \
+    on-event="/log info message=\\\"Decoy site check: ${clean_name}\\\"" \
+    comment="Check decoy site status"
+
+# ═══════════════════════════════════════════════════════════════
+# 4. Email Alert (if SMTP configured)
+# ═══════════════════════════════════════════════════════════════
+
+# Send email alert on decoy access (requires SMTP setup)
+# /tool e-mail send to="admin@example.com" \
+#     subject="Decoy Site Access Alert" \
+#     body="Decoy site \${site_name} was accessed at [/system clock get time]"
+
+# ═══════════════════════════════════════════════════════════════
+# 5. Netwatch — Monitor Decoy Site
+# ═══════════════════════════════════════════════════════════════
+
+# Monitor decoy site availability
+/tool netwatch add host="${domain}" interval=60s timeout=3s \
+    comment="Monitor decoy site" \
+    on-down="/log warning message=\\\"Decoy site ${clean_name} is DOWN\\\""
+
+# ═══════════════════════════════════════════════════════════════
+# End of MikroTik Script
+# ═══════════════════════════════════════════════════════════════
+EOF
 }
 
-# Сохранение MikroTik скрипта в файл
 decoy_save_mikrotik_script() {
   local output_file="${1:-/etc/cubiveil/mikrotik-decoy.rsc}"
+  local config_file="${2:-$DECOY_CONFIG}"
 
-  # Генерируем скрипт и сохраняем в файл
-  {
-    echo "# ══════════════════════════════════════════════════════════════"
-    echo "# CubiVeil — MikroTik RouterOS Traffic Imitation Script"
-    echo "# Generated: $(date '+%Y-%m-%d %H:%M:%S')"
-    echo "# Domain: ${DOMAIN}"
-    echo "# ══════════════════════════════════════════════════════════════"
-    echo ""
-    decoy_print_mikrotik_script
-  } >"$output_file"
+  log_step "decoy_mikrotik" "Генерация MikroTik скрипта"
 
-  chmod 644 "$output_file" 2>/dev/null || true
-  log_info "MikroTik script saved to: $output_file"
+  # Создаём директорию если не существует
+  mkdir -p "$(dirname "$output_file")"
+
+  # Генерируем скрипт
+  if decoy_print_mikrotik_script "$config_file" > "$output_file"; then
+    chmod 644 "$output_file"
+    log_success "MikroTik скрипт сохранён: $output_file"
+    return 0
+  else
+    log_error "Не удалось создать MikroTik скрипт"
+    return 1
+  fi
 }
+
+# Если скрипт вызван напрямую
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  case "${1:-print}" in
+    print)
+      decoy_print_mikrotik_script "${2:-}"
+      ;;
+    save)
+      decoy_save_mikrotik_script "${2:-}" "${3:-}"
+      ;;
+    *)
+      echo "Usage: $0 [print|save] [config_file] [output_file]"
+      exit 1
+      ;;
+  esac
+fi
