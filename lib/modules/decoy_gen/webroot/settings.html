@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Стремительный Космос Бокс - Настройки</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">📁</span>
+                <span class="logo-text">Стремительный Космос Бокс</span>
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Добро пожаловать</a>
+                <a href="files.html" class="nav-link">Файлы</a>
+                <a href="stats.html" class="nav-link">Статистика</a>
+                <a href="users.html" class="nav-link">Пользователи</a>
+                <a href="login.html" class="nav-link btn-login">Войти</a>
+            </nav>
+        </header>
+
+        <main class="main">
+            <h1>Настройки</h1>
+
+            <div class="settings-grid">
+                <div class="settings-card">
+                    <h3>👤 Профиль</h3>
+                    <div class="form-group">
+                        <label>Имя пользователя</label>
+                        <input type="text" value="admin" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" value="admin@Стремительный Космос Бокс.com">
+                    </div>
+                    <button class="btn btn-primary">Сохранить</button>
+                </div>
+
+                <div class="settings-card">
+                    <h3>🔒 Безопасность</h3>
+                    <div class="form-group">
+                        <label>Текущий пароль</label>
+                        <input type="password">
+                    </div>
+                    <div class="form-group">
+                        <label>Новый пароль</label>
+                        <input type="password">
+                    </div>
+                    <div class="form-group">
+                        <label>Двухфакторная аутентификация</label>
+                        <label class="toggle-label">
+                            <input type="checkbox">
+                            <span class="toggle-slider"></span>
+                            <span>Включить 2FA</span>
+                        </label>
+                    </div>
+                    <button class="btn btn-primary">Изменить пароль</button>
+                </div>
+
+                <div class="settings-card">
+                    <h3>🎨 Внешний вид</h3>
+                    <div class="form-group">
+                        <label>Тема</label>
+                        <select>
+                            <option>Светлая</option>
+                            <option>Тёмная</option>
+                            <option>Автоматически</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Язык</label>
+                        <select>
+                            <option>Русский</option>
+                            <option>English</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h3>📬 Уведомления</h3>
+                    <div class="form-group">
+                        <label class="toggle-label">
+                            <input type="checkbox" checked>
+                            <span class="toggle-slider"></span>
+                            <span>Email уведомления</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="toggle-label">
+                            <input type="checkbox" checked>
+                            <span class="toggle-slider"></span>
+                            <span>Уведомления о новых файлах</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="toggle-label">
+                            <input type="checkbox">
+                            <span class="toggle-slider"></span>
+                            <span>Уведомления о входах</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h3>💾 Хранилище</h3>
+                    <p>Использовано: 15.39 TB из 19.24 TB</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 65%"></div>
+                    </div>
+                    <button class="btn btn-secondary">Очистить кэш</button>
+                </div>
+
+                <div class="settings-card danger">
+                    <h3>⚠️ Опасная зона</h3>
+                    <p>Эти действия нельзя отменить</p>
+                    <button class="btn btn-danger">Удалить аккаунт</button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 Стремительный Космос Бокс. Все права защищены.</p>
+        </footer>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="settings.js"></script>
+</body>
+</html>

@@ -11,33 +11,22 @@ import time
 import logging
 from typing import Tuple, Union
 
+from constants import (
+    DEFAULT_DB_PATH,
+    SUI_DB_DIR,
+    CPU_READ_DELAY,
+    DB_TIMEOUT,
+    DISK_CHECK_TIMEOUT,
+    PROC_STAT_PATH,
+    PROC_MEMINFO_PATH,
+    PROC_UPTIME_PATH,
+    KB_TO_MB_DIVISOR,
+    SECONDS_PER_DAY,
+    SECONDS_PER_HOUR,
+    SECONDS_PER_MINUTE,
+)
+
 logger = logging.getLogger(__name__)
-
-# ══════════════════════════════════════════════════════════════════════════════
-# Constants / Константы
-# ══════════════════════════════════════════════════════════════════════════════
-
-# File paths / Пути к файлам
-DEFAULT_DB_PATH = "/usr/local/s-ui/db/s-ui.db"
-
-# S-UI paths / Пути к S-UI
-SUI_DB_DIR = "/usr/local/s-ui/db"
-
-# Time delays in seconds / Временные задержки в секундах
-CPU_READ_DELAY = 0.01  # Minimal delay between CPU readings
-DB_TIMEOUT = 5  # Database connection timeout
-DISK_CHECK_TIMEOUT = 5  # Disk check command timeout
-
-# File paths / Системные файлы
-PROC_STAT_PATH = "/proc/stat"
-PROC_MEMINFO_PATH = "/proc/meminfo"
-PROC_UPTIME_PATH = "/proc/uptime"
-
-# Unit conversion / Конвертация единиц
-KB_TO_MB_DIVISOR = 1024  # Convert kB to MB
-SECONDS_PER_DAY = 86400
-SECONDS_PER_HOUR = 3600
-SECONDS_PER_MINUTE = 60
 
 
 class MetricsError(Exception):

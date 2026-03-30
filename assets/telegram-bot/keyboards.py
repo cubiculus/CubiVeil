@@ -52,6 +52,12 @@ CALLBACK_DECOY_DISABLE = "decoy_disable"
 CALLBACK_DECOY_CLEANUP = "decoy_cleanup"
 CALLBACK_DECOY_REGENERATE = "decoy_regenerate"
 
+# Profiles callbacks / Callback профилей
+CALLBACK_PROFILES_LIST = "profiles_list"
+CALLBACK_PROFILES_ACTIVE = "profiles_active"
+CALLBACK_PROFILES_DISABLED = "profiles_disabled"
+CALLBACK_PROFILES_EXPIRED = "profiles_expired"
+
 
 def build_main_menu():
     """

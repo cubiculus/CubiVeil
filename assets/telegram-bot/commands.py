@@ -53,6 +53,11 @@ from keyboards import (
     CALLBACK_SETTINGS_RAM,
     CALLBACK_SETTINGS_DISK,
     CALLBACK_NAV_BACK,
+    CALLBACK_DECOY_MAIN,
+    CALLBACK_PROFILES_LIST,
+    CALLBACK_PROFILES_ACTIVE,
+    CALLBACK_PROFILES_DISABLED,
+    CALLBACK_PROFILES_EXPIRED,
 )
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -851,7 +856,7 @@ class CommandHandler:
         self.telegram.send("🔄 Restarting services...")
         try:
             result = subprocess.run(  # nosec B607, B603
-                ["systemctl", "restart", "x-ui"],
+                ["systemctl", "restart", "s-ui"],
                 capture_output=True,
                 timeout=SERVICE_RESTART_TIMEOUT
             )

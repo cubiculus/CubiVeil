@@ -24,48 +24,39 @@ from alert_state import AlertStateManager
 from commands import CommandHandler
 from health_check import HealthChecker
 from logs import LogsManager
+from constants import (
+    DB_PATH,
+    BACKUP_DIR,
+    SUI_DIR,
+    SUI_DB_DIR,
+    ENV_TG_TOKEN,
+    ENV_TG_CHAT_ID,
+    ENV_ALERT_CPU,
+    ENV_ALERT_RAM,
+    ENV_ALERT_DISK,
+    DEFAULT_ALERT_CPU,
+    DEFAULT_ALERT_RAM,
+    DEFAULT_ALERT_DISK,
+    THRESHOLD_MIN,
+    THRESHOLD_MAX,
+    HEALTH_CHECK_INTERVAL,
+    POLL_ERROR_DELAY,
+    REQUEST_TIMEOUT,
+    PROGRESS_BAR_WIDTH,
+    PROGRESS_BAR_FILLED,
+    PROGRESS_BAR_EMPTY,
+    STATUS_ICON_ALERT,
+    STATUS_ICON_OK,
+)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Constants / Константы
+# Service display names / Отображаемые имена сервисов
 # ══════════════════════════════════════════════════════════════════════════════
 
-# File paths / Пути к файлам
-DB_PATH = "/usr/local/s-ui/db/s-ui.db"
-BACKUP_DIR = "/opt/cubiveil-bot/backups"
-
-# S-UI paths / Пути к S-UI
-SUI_DIR = "/usr/local/s-ui"
-SUI_DB_DIR = "/usr/local/s-ui/db"
-
-# Environment variables / Переменные окружения
-ENV_TG_TOKEN = "TG_TOKEN"
-ENV_TG_CHAT_ID = "TG_CHAT_ID"
-ENV_ALERT_CPU = "ALERT_CPU"
-ENV_ALERT_RAM = "ALERT_RAM"
-ENV_ALERT_DISK = "ALERT_DISK"
-
-# Alert thresholds defaults / Пороги уведомлений по умолчанию
-DEFAULT_ALERT_CPU = 80
-DEFAULT_ALERT_RAM = 85
-DEFAULT_ALERT_DISK = 90
-
-# Threshold validation bounds / Границы проверки порогов
-THRESHOLD_MIN = 0
-THRESHOLD_MAX = 100
-
-# Time intervals in seconds / Временные интервалы в секундах
-HEALTH_CHECK_INTERVAL = 300  # 5 minutes
-POLL_ERROR_DELAY = 5
-REQUEST_TIMEOUT = 30
-
-# Progress bar settings / Настройки прогресс-бара
-PROGRESS_BAR_WIDTH = 10
-PROGRESS_BAR_FILLED = "█"
-PROGRESS_BAR_EMPTY = "░"
-
-# Status icons / Иконки статусов
-STATUS_ICON_ALERT = "🔴"
-STATUS_ICON_OK = "🟢"
+SERVICE_NAMES = {
+    "cubiveil-bot": "🤖 Bot",
+    "nginx": "🌐 Nginx",
+}
 
 
 class CubiVeilBot:

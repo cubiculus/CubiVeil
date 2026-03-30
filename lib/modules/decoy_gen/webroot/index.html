@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Стремительный Космос Бокс - Корпоративное хранилище</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">📁</span>
+                <span class="logo-text">Стремительный Космос Бокс</span>
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="nav-link active">Добро пожаловать</a>
+                <a href="files.html" class="nav-link">Файлы</a>
+                <a href="stats.html" class="nav-link">Статистика</a>
+                <a href="users.html" class="nav-link">Пользователи</a>
+                <a href="login.html" class="nav-link btn-login">Войти</a>
+            </nav>
+        </header>
+
+        <main class="main">
+            <section class="hero">
+                <h1>Добро пожаловать, Стремительный Космос Бокс</h1>
+                <p class="hero-subtitle">Корпоративное хранилище</p>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-value" id="storage-value">19.24 TB</span>
+                        <span class="stat-label">Хранилище</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="users-value">290</span>
+                        <span class="stat-label">Пользователи</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="files-value">215513</span>
+                        <span class="stat-label">Файлы</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="traffic-value">1.37 GB</span>
+                        <span class="stat-label">Трафик/день</span>
+                    </div>
+                </div>
+
+                <div class="cta-buttons">
+                    <a href="files.html" class="btn btn-primary">Файлы</a>
+                    <a href="login.html" class="btn btn-secondary">Войти</a>
+                </div>
+            </section>
+
+            <section class="features">
+                <div class="feature">
+                    <span class="feature-icon">🔒</span>
+                    <h3>Безопасность</h3>
+                    <p>Надёжное шифрование и защита данных</p>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">⚡</span>
+                    <h3>Скорость</h3>
+                    <p>Быстрый доступ к вашим файлам</p>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">🔄</span>
+                    <h3>Синхронизация</h3>
+                    <p>Автоматическая синхронизация между устройствами</p>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 Стремительный Космос Бокс. Все права защищены.</p>
+        </footer>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

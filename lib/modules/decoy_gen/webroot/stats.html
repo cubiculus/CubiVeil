@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Стремительный Космос Бокс - Статистика</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">📁</span>
+                <span class="logo-text">Стремительный Космос Бокс</span>
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Добро пожаловать</a>
+                <a href="files.html" class="nav-link">Файлы</a>
+                <a href="stats.html" class="nav-link active">Статистика</a>
+                <a href="users.html" class="nav-link">Пользователи</a>
+                <a href="login.html" class="nav-link btn-login">Войти</a>
+            </nav>
+        </header>
+
+        <main class="main">
+            <h1>Статистика</h1>
+
+            <div class="stats-overview">
+                <div class="stat-card large">
+                    <span class="stat-icon">💾</span>
+                    <span class="stat-value">19.24 TB</span>
+                    <span class="stat-label">Хранилище</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 65%"></div>
+                    </div>
+                    <span class="stat-detail">15.39 TB использовано</span>
+                </div>
+
+                <div class="stat-card large">
+                    <span class="stat-icon">👥</span>
+                    <span class="stat-value">290</span>
+                    <span class="stat-label">Пользователи</span>
+                    <div class="stat-detail">
+                        <span class="stat-sub">156 активных</span>
+                        <span class="stat-sub">26 онлайн</span>
+                    </div>
+                </div>
+
+                <div class="stat-card large">
+                    <span class="stat-icon">📄</span>
+                    <span class="stat-value">215513</span>
+                    <span class="stat-label">Файлы</span>
+                    <div class="stat-detail">17241 папок</div>
+                </div>
+
+                <div class="stat-card large">
+                    <span class="stat-icon">📊</span>
+                    <span class="stat-value">1.37 GB</span>
+                    <span class="stat-label">Трафик/день</span>
+                    <div class="stat-detail">Средний трафик</div>
+                </div>
+            </div>
+
+            <div class="stats-charts">
+                <div class="chart-card">
+                    <h3>Активность пользователей</h3>
+                    <div class="chart-placeholder" id="activity-chart">
+                        <div class="bar-chart">
+                            <div class="bar" style="height: 60%"></div>
+                            <div class="bar" style="height: 80%"></div>
+                            <div class="bar" style="height: 45%"></div>
+                            <div class="bar" style="height: 90%"></div>
+                            <div class="bar" style="height: 70%"></div>
+                            <div class="bar" style="height: 85%"></div>
+                            <div class="bar" style="height: 55%"></div>
+                        </div>
+                        <div class="chart-labels">
+                            <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3>Использование хранилища</h3>
+                    <div class="chart-placeholder" id="storage-chart">
+                        <div class="donut-chart">
+                            <svg viewBox="0 0 36 36">
+                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--color-border)" stroke-width="2"/>
+                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-dasharray="65, 100"/>
+                            </svg>
+                            <span class="donut-value">65%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-details">
+                <h3>Детальная статистика</h3>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Значение</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Всего пользователей</td>
+                            <td>290</td>
+                        </tr>
+                        <tr>
+                            <td>Активных пользователей</td>
+                            <td>156</td>
+                        </tr>
+                        <tr>
+                            <td>Онлайн сейчас</td>
+                            <td>26</td>
+                        </tr>
+                        <tr>
+                            <td>Всего файлов</td>
+                            <td>215513</td>
+                        </tr>
+                        <tr>
+                            <td>Всего папок</td>
+                            <td>17241</td>
+                        </tr>
+                        <tr>
+                            <td>Общий объём</td>
+                            <td>19.24 TB</td>
+                        </tr>
+                        <tr>
+                            <td>Использовано</td>
+                            <td>15.39 TB</td>
+                        </tr>
+                        <tr>
+                            <td>Свободно</td>
+                            <td>3.85 TB</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 Стремительный Космос Бокс. Все права защищены.</p>
+        </footer>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="stats.js"></script>
+</body>
+</html>

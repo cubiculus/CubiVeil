@@ -1,0 +1,182 @@
+/* CubiVeil Admin Panel Template - Control Panel Style */
+
+:root {
+    --color-primary: #7c3aed;
+    --color-secondary: #5b21b6;
+    --color-accent: #a855f7;
+    --color-background: #0f0a1f;
+    --color-text: #f5f3ff;
+    --color-border: #2e1065;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--color-background);
+    color: var(--color-text);
+    line-height: 1.6;
+}
+
+/* Admin Layout */
+.admin-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.admin-sidebar {
+    background: linear-gradient(180deg, #1e1b4b 0%, #0f0a1f 100%);
+    border-right: 1px solid var(--color-border);
+    padding: 1.5rem;
+}
+
+.admin-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.admin-logo .logo-icon { font-size: 1.75rem; }
+.admin-logo .logo-text { font-size: 1.1rem; font-weight: 700; color: var(--color-accent); }
+
+.admin-nav { display: flex; flex-direction: column; gap: 0.25rem; }
+.admin-link {
+    color: #c4b5fd;
+    padding: 0.875rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.admin-link:hover, .admin-link.active {
+    background: var(--color-primary);
+    color: white;
+    text-decoration: none;
+}
+
+/* Main Content */
+.admin-main {
+    padding: 1.5rem 2rem;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.admin-header h1 { font-size: 1.5rem; font-weight: 600; }
+
+/* Admin Stats */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(168, 85, 247, 0.1));
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+}
+
+.stat-value { font-size: 2rem; font-weight: 700; color: var(--color-accent); }
+.stat-label { font-size: 0.75rem; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.5rem; display: block; }
+
+/* Buttons */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-primary { background: var(--color-primary); color: white; }
+.btn-primary:hover { background: var(--color-secondary); }
+.btn-secondary { background: rgba(255,255,255,0.1); color: white; border: 1px solid var(--color-border); }
+
+/* Files */
+.files-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+.file-item {
+    background: rgba(46, 16, 101, 0.3);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.file-item:hover { border-color: var(--color-accent); transform: translateY(-2px); }
+.file-icon { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+.file-name { font-size: 0.85rem; word-break: break-word; }
+.file-meta { font-size: 0.75rem; color: #a78bfa; }
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    border-top: 1px solid var(--color-border);
+    color: #a78bfa;
+    font-size: 0.8rem;
+}
+
+/* Login */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f0a1f 100%);
+}
+.login-container {
+    background: rgba(30, 27, 75, 0.5);
+    padding: 2.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    max-width: 420px;
+    width: 100%;
+}
+.login-header { text-align: center; margin-bottom: 2rem; }
+.login-header .logo-icon { font-size: 3rem; }
+.login-header h1 { font-weight: 700; margin-top: 0.5rem; color: var(--color-accent); }
+.form-group { margin-bottom: 1.25rem; }
+.form-group label { display: block; margin-bottom: 0.5rem; font-size: 0.875rem; color: #a78bfa; }
+.form-group input {
+    width: 100%;
+    padding: 0.875rem;
+    background: rgba(15, 10, 31, 0.5);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    color: white;
+    font-size: 1rem;
+}
+.form-group input:focus { outline: none; border-color: var(--color-accent); }
+.error-message {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    padding: 0.75rem;
+    margin-top: 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+@media (max-width: 1200px) { .admin-layout { grid-template-columns: 1fr; } .admin-sidebar { display: none; } }
+@media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .stats-grid { grid-template-columns: 1fr; } }

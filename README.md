@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>Автоматизированная установка и управление s-ui (Xray/Sing-box)</strong>
+  <strong>Автоматизированная установка и управление s-ui (Sing-box)</strong>
 </p>
 
 <p align="center">

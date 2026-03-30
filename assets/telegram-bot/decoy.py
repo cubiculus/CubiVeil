@@ -11,16 +11,14 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict, Any, List
 import logging
 
+from constants import (
+    DECOY_CONFIG,
+    DECOY_WEBROOT,
+    DECOY_TIMER,
+    DECOY_ROTATE_SCRIPT,
+)
+
 logger = logging.getLogger(__name__)
-
-# ══════════════════════════════════════════════════════════════════════════════
-# Constants / Константы
-# ══════════════════════════════════════════════════════════════════════════════
-
-DECOY_CONFIG = "/etc/cubiveil/decoy.json"
-DECOY_WEBROOT = "/var/www/decoy"
-DECOY_TIMER = "cubiveil-decoy-rotate"
-DECOY_ROTATE_SCRIPT = "/usr/local/lib/cubiveil/decoy-rotate.sh"
 
 # File type display names / Отображаемые имена типов файлов
 FILE_TYPE_NAMES = {
@@ -133,7 +131,8 @@ class DecoyManager:
                 last_dt = datetime.fromisoformat(last_rotated.replace('Z', '+00:00'))
                 next_dt = last_dt + timedelta(hours=status["interval_hours"])
                 status["next_rotation"] = next_dt.isoformat()
-            except (ValueError, TypeError):
+            except (ValueError, TypeError) as e:
+                logger.debug(f"Failed to parse last rotation time: {e}")
                 pass
 
         # Timer status
@@ -161,7 +160,8 @@ class DecoyManager:
                             # Count by type
                             ext = f.rsplit('.', 1)[-1].lower() if '.' in f else "other"
                             by_type[ext] = by_type.get(ext, 0) + 1
-                        except OSError:
+                        except OSError as e:
+                            logger.debug(f"Failed to get file size for {filepath}: {e}")
                             pass
 
                 status["file_count"] = file_count
@@ -199,7 +199,8 @@ class DecoyManager:
                         "size_mb": round(stat.st_size / (1024 * 1024), 2),
                         "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
                     })
-                except OSError:
+                except OSError as e:
+                    logger.debug(f"Failed to get file info for {filepath}: {e}")
                     pass
 
                 if len(files) >= limit:
@@ -360,13 +361,15 @@ class DecoyManager:
             try:
                 parts = output.split("удалено файлов")[1].split(",")[0].strip()
                 stats["deleted"] = int(parts)
-            except (ValueError, IndexError):
+            except (ValueError, IndexError) as e:
+                logger.debug(f"Failed to parse deleted files count: {e}")
                 pass
         if "освобождено" in output:
             try:
                 parts = output.split("освобождено ~")[1].split("MB")[0].strip()
                 stats["freed_mb"] = int(parts)
-            except (ValueError, IndexError):
+            except (ValueError, IndexError) as e:
+                logger.debug(f"Failed to parse freed space: {e}")
                 pass
 
         if success:

@@ -1,0 +1,11 @@
+{
+  "template": "auto",
+  "lang": "ru",
+  "color_theme": "auto",
+  "base_hue": null,
+  "users_count": null,
+  "files_count": null,
+  "storage_size": null,
+  "seed": null,
+  "output_dir": "./webroot"
+}

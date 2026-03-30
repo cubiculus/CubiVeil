@@ -16,51 +16,29 @@ import logging
 from datetime import datetime
 from typing import Optional, Dict, List, Any
 
+from constants import (
+    SUI_DIR,
+    SUI_ENV_FILE,
+    SUI_DB_FILE,
+    DEFAULT_HEALTH_CHECK_PORT,
+    RESTART_COOLDOWN,
+    CONNECTION_TIMEOUT,
+    SERVICE_CHECK_TIMEOUT,
+    SERVICE_RESTART_TIMEOUT,
+    HEALTH_ENDPOINT_TIMEOUT,
+    DB_TIMEOUT,
+    DEFAULT_CONNECTION_TARGETS,
+    MONITORED_SERVICES,
+    PROFILE_STATUSES,
+    PROFILE_DISPLAY_LIMIT,
+)
+
 logger = logging.getLogger(__name__)
 
 
 class HealthCheckError(Exception):
     """Custom exception for health check errors"""
     pass
-
-# ══════════════════════════════════════════════════════════════════════════════
-# Constants / Константы
-# ══════════════════════════════════════════════════════════════════════════════
-
-# File paths / Пути к файлам
-SUI_DIR = "/usr/local/s-ui"
-SUI_ENV_FILE = "/etc/cubiveil/s-ui.credentials"
-SUI_DB_FILE = "/usr/local/s-ui/db/s-ui.db"
-
-# Default ports / Порты по умолчанию
-DEFAULT_HEALTH_CHECK_PORT = 2095
-
-# Time intervals in seconds / Временные интервалы в секундах
-RESTART_COOLDOWN = 300  # 5 minutes between auto-restarts
-CONNECTION_TIMEOUT = 10  # Default connection timeout
-SERVICE_CHECK_TIMEOUT = 10  # Service status check timeout
-SERVICE_RESTART_TIMEOUT = 60  # Service restart timeout
-HEALTH_ENDPOINT_TIMEOUT = 15  # Health endpoint check timeout
-
-# Database timeout / Таймаут базы данных
-DB_TIMEOUT = 5
-
-# Default targets for connection tests / Цели для проверки соединения
-DEFAULT_CONNECTION_TARGETS = [
-    ("Google", "https://www.google.com"),
-    ("Cloudflare", "https://www.cloudflare.com"),
-    ("GitHub", "https://www.github.com"),
-    ("Telegram", "https://api.telegram.org"),
-]
-
-# Services to monitor / Сервисы для мониторинга
-MONITORED_SERVICES = ["s-ui", "sing-box"]
-
-# Profile statuses / Статусы профилей
-PROFILE_STATUSES = ["active", "disabled", "limited", "expired"]
-
-# Profile display limit / Лимит отображения профилей
-PROFILE_DISPLAY_LIMIT = 10
 
 
 class HealthChecker:

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{SITE_NAME}} - {{STATS_TITLE}}</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">📁</span>
+                <span class="logo-text">{{SITE_NAME}}</span>
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">{{WELCOME_TEXT}}</a>
+                <a href="files.html" class="nav-link">{{FILES_TITLE}}</a>
+                <a href="stats.html" class="nav-link active">{{STATS_TITLE}}</a>
+                <a href="users.html" class="nav-link">{{USERS_TITLE}}</a>
+                <a href="login.html" class="nav-link btn-login">{{LOGIN_BUTTON}}</a>
+            </nav>
+        </header>
+
+        <main class="main">
+            <h1>{{STATS_TITLE}}</h1>
+
+            <div class="stats-overview">
+                <div class="stat-card large">
+                    <span class="stat-icon">💾</span>
+                    <span class="stat-value">{{TOTAL_STORAGE}}</span>
+                    <span class="stat-label">{{STORAGE_LABEL}}</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 65%"></div>
+                    </div>
+                    <span class="stat-detail">{{USED_STORAGE}} использовано</span>
+                </div>
+
+                <div class="stat-card large">
+                    <span class="stat-icon">👥</span>
+                    <span class="stat-value">{{TOTAL_USERS}}</span>
+                    <span class="stat-label">{{USERS_LABEL}}</span>
+                    <div class="stat-detail">
+                        <span class="stat-sub">{{ACTIVE_USERS}} активных</span>
+                        <span class="stat-sub">{{ONLINE_USERS}} онлайн</span>
+                    </div>
+                </div>
+
+                <div class="stat-card large">
+                    <span class="stat-icon">📄</span>
+                    <span class="stat-value">{{TOTAL_FILES}}</span>
+                    <span class="stat-label">{{FILES_LABEL}}</span>
+                    <div class="stat-detail">{{TOTAL_FOLDERS}} папок</div>
+                </div>
+
+                <div class="stat-card large">
+                    <span class="stat-icon">📊</span>
+                    <span class="stat-value">{{DAILY_TRAFFIC}}</span>
+                    <span class="stat-label">{{TRAFFIC_LABEL}}/день</span>
+                    <div class="stat-detail">Средний трафик</div>
+                </div>
+            </div>
+
+            <div class="stats-charts">
+                <div class="chart-card">
+                    <h3>Активность пользователей</h3>
+                    <div class="chart-placeholder" id="activity-chart">
+                        <div class="bar-chart">
+                            <div class="bar" style="height: 60%"></div>
+                            <div class="bar" style="height: 80%"></div>
+                            <div class="bar" style="height: 45%"></div>
+                            <div class="bar" style="height: 90%"></div>
+                            <div class="bar" style="height: 70%"></div>
+                            <div class="bar" style="height: 85%"></div>
+                            <div class="bar" style="height: 55%"></div>
+                        </div>
+                        <div class="chart-labels">
+                            <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3>Использование хранилища</h3>
+                    <div class="chart-placeholder" id="storage-chart">
+                        <div class="donut-chart">
+                            <svg viewBox="0 0 36 36">
+                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--color-border)" stroke-width="2"/>
+                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-dasharray="65, 100"/>
+                            </svg>
+                            <span class="donut-value">65%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-details">
+                <h3>Детальная статистика</h3>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Значение</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Всего пользователей</td>
+                            <td>{{TOTAL_USERS}}</td>
+                        </tr>
+                        <tr>
+                            <td>Активных пользователей</td>
+                            <td>{{ACTIVE_USERS}}</td>
+                        </tr>
+                        <tr>
+                            <td>Онлайн сейчас</td>
+                            <td>{{ONLINE_USERS}}</td>
+                        </tr>
+                        <tr>
+                            <td>Всего файлов</td>
+                            <td>{{TOTAL_FILES}}</td>
+                        </tr>
+                        <tr>
+                            <td>Всего папок</td>
+                            <td>{{TOTAL_FOLDERS}}</td>
+                        </tr>
+                        <tr>
+                            <td>Общий объём</td>
+                            <td>{{TOTAL_STORAGE}}</td>
+                        </tr>
+                        <tr>
+                            <td>Использовано</td>
+                            <td>{{USED_STORAGE}}</td>
+                        </tr>
+                        <tr>
+                            <td>Свободно</td>
+                            <td>{{FREE_STORAGE}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 {{SITE_NAME}}. Все права защищены.</p>
+        </footer>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="stats.js"></script>
+</body>
+</html>
