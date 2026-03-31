@@ -30,12 +30,6 @@ BACKUP_ARCHIVE_DIR="${BACKUP_DIR}/archives"
 ROLLBACK_TEMP_DIR="${BACKUP_DIR}/temp"
 
 # Пути для восстановления
-MARZBAN_DIR="/var/lib/marzban"
-MARZBAN_ENV="/opt/marzban/.env"
-MARZBAN_TEMPLATE="/var/lib/marzban/sing-box-template.json"
-SSL_CERT_DIR="/var/lib/marzban/certs"
-CREDENTIALS_FILE="/var/lib/marzban/credentials.age"
-CREDENTIALS_KEY="/var/lib/marzban/credentials.key"
 
 # ── Инициализация / Initialization ─────────────────────────────
 
@@ -178,31 +172,17 @@ rollback_verify_integrity() {
 
   local issues=0
 
-  # Проверяем SHA256 базы данных Marzban
-  if [[ -f "${ROLLBACK_TEMP_DIR}/marzban-db.sqlite3" ]] &&
-    [[ -f "${ROLLBACK_TEMP_DIR}/marzban-db.sqlite3.sha256" ]]; then
     local expected_hash
-    expected_hash=$(cat "${ROLLBACK_TEMP_DIR}/marzban-db.sqlite3.sha256")
 
-    if ! verify_sha256 "${ROLLBACK_TEMP_DIR}/marzban-db.sqlite3" "$expected_hash"; then
-      log_warn "Marzban database integrity check FAILED"
       ((issues++))
     else
-      log_success "Marzban database integrity verified"
     fi
   fi
 
-  # Проверяем SHA256 конфигурации Marzban
-  if [[ -f "${ROLLBACK_TEMP_DIR}/marzban.env" ]] &&
-    [[ -f "${ROLLBACK_TEMP_DIR}/marzban.env.sha256" ]]; then
     local expected_hash
-    expected_hash=$(cat "${ROLLBACK_TEMP_DIR}/marzban.env.sha256")
 
-    if ! verify_sha256 "${ROLLBACK_TEMP_DIR}/marzban.env" "$expected_hash"; then
-      log_warn "Marzban configuration integrity check FAILED"
       ((issues++))
     else
-      log_success "Marzban configuration integrity verified"
     fi
   fi
 
@@ -234,10 +214,6 @@ rollback_verify_integrity() {
 rollback_stop_services() {
   log_step "rollback_stop_services" "Stopping services for rollback"
 
-  # Останавливаем Marzban
-  if svc_active "marzban"; then
-    svc_stop "marzban"
-    log_info "Marzban stopped"
   fi
 
   # Останавливаем Sing-box
@@ -250,16 +226,10 @@ rollback_stop_services() {
   sleep 2
 }
 
-# ── Восстановление Marzban / Restore Marzban ───────────────
 
-# Восстановление базы данных Marzban
-rollback_marzban_db() {
-  log_step "rollback_marzban_db" "Restoring Marzban database"
 
-  local backup_db="${ROLLBACK_TEMP_DIR}/marzban-db.sqlite3"
 
   if [[ ! -f "$backup_db" ]]; then
-    log_warn "Marzban database backup not found"
     return 1
   fi
 
@@ -269,48 +239,28 @@ rollback_marzban_db() {
     expected_hash=$(cat "${backup_db}.sha256")
 
     if ! verify_sha256 "$backup_db" "$expected_hash"; then
-      log_error "Marzban database integrity check failed, aborting restore"
       return 1
     fi
   fi
 
-  # Останавливаем Marzban если активен
-  if svc_active "marzban"; then
-    svc_stop "marzban"
   fi
 
   # Копируем базу данных
-  cp "$backup_db" "${MARZBAN_DIR}/db.sqlite3"
 
   # Устанавливаем права
-  chmod 640 "${MARZBAN_DIR}/db.sqlite3"
-  chown root:root "${MARZBAN_DIR}/db.sqlite3"
 
-  log_success "Marzban database restored"
 }
 
-# Восстановление конфигурации Marzban
-rollback_marzban_config() {
-  log_step "rollback_marzban_config" "Restoring Marzban configuration"
 
   # Проверяем целостность .env
-  if [[ -f "${ROLLBACK_TEMP_DIR}/marzban.env.sha256" ]]; then
     local expected_hash
-    expected_hash=$(cat "${ROLLBACK_TEMP_DIR}/marzban.env.sha256")
 
-    if ! verify_sha256 "${ROLLBACK_TEMP_DIR}/marzban.env" "$expected_hash"; then
-      log_error "Marzban .env integrity check failed, skipping restore"
       return 1
     fi
   fi
 
   # Восстанавливаем .env
-  if [[ -f "${ROLLBACK_TEMP_DIR}/marzban.env" ]]; then
-    cp "${ROLLBACK_TEMP_DIR}/marzban.env" "$MARZBAN_ENV"
-    chmod 640 "$MARZBAN_ENV"
-    log_success "Marzban .env restored"
   else
-    log_warn "Marzban .env backup not found"
   fi
 
   # Проверяем целостность шаблона Sing-box
@@ -326,8 +276,6 @@ rollback_marzban_config() {
 
   # Восстанавливаем шаблон Sing-box
   if [[ -f "${ROLLBACK_TEMP_DIR}/sing-box-template.json" ]]; then
-    cp "${ROLLBACK_TEMP_DIR}/sing-box-template.json" "$MARZBAN_TEMPLATE"
-    chmod 640 "$MARZBAN_TEMPLATE"
     log_success "Sing-box template restored"
   else
     log_warn "Sing-box template backup not found"
@@ -447,10 +395,6 @@ rollback_start_services() {
     log_info "Sing-box started"
   fi
 
-  # Запускаем Marzban
-  if [[ -d "$MARZBAN_DIR" ]]; then
-    svc_start "marzban"
-    log_info "Marzban started"
   fi
 
   # Ждём запуска
@@ -482,8 +426,6 @@ rollback_full() {
   rollback_stop_services
 
   # Восстанавливаем данные
-  rollback_marzban_db
-  rollback_marzban_config
   rollback_singbox_config
   rollback_ssl_certs
   rollback_keys
@@ -529,8 +471,6 @@ rollback_latest() {
   rollback_stop_services
 
   # Восстанавливаем данные
-  rollback_marzban_db
-  rollback_marzban_config
   rollback_ssl_certs
 
   # Запускаем сервисы

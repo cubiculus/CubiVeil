@@ -330,10 +330,9 @@ backup_system_info() {
     echo "Kernel: $(uname -r)"
     echo ""
     echo "Installed Packages:"
-    dpkg -l 2>/dev/null | grep -E "(marzban|sing-box|cubiveil|ufw|fail2ban)" || echo "N/A"
+    dpkg -l 2>/dev/null | grep -E "(sing-box|cubiveil|ufw|fail2ban)" || echo "N/A"
     echo ""
     echo "Services Status:"
-    echo "Marzban: $(svc_active "marzban" && echo "active" || echo "inactive")"
     echo "Sing-box: $(svc_active "sing-box" && echo "active" || echo "inactive")"
     echo "UFW: $(svc_active "ufw" && echo "active" || echo "inactive")"
     echo "Fail2ban: $(svc_active "fail2ban" && echo "active" || echo "inactive")"
@@ -361,10 +360,6 @@ backup_create_archive() {
 
   # Создаём архив
   tar -czf "$archive_file" -C "$BACKUP_DIR" \
-    marzban-db.sqlite3 \
-    marzban-db.sqlite3.sha256 \
-    marzban.env \
-    marzban.env.sha256 \
     sing-box-template.json \
     sing-box-template.json.sha256 \
     singbox-config.json \
@@ -396,12 +391,6 @@ backup_start_services() {
   if [[ -x "/usr/local/bin/sing-box" ]] && [[ -f "/etc/sing-box/config.json" ]]; then
     svc_start "sing-box"
     log_info "Sing-box started"
-  fi
-
-  # Запускаем Marzban
-  if [[ -d "$S_UI_DIR" ]]; then
-    svc_start "marzban"
-    log_info "Marzban started"
   fi
 
   # Ждём запуска

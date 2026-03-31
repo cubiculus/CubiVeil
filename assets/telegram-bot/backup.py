@@ -21,7 +21,7 @@ class BackupError(Exception):
 class BackupManager:
     """Manages database backups"""
 
-    def __init__(self, db_path: str = "/var/lib/marzban/db.sqlite3",
+    def __init__(self,
                  backup_dir: str = "/opt/cubiveil-bot/backups",
                  retention_days: int = 7):
         self.db_path = db_path
@@ -66,7 +66,6 @@ class BackupManager:
             raise BackupError(f"Invalid database path: {self.db_path}")
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-        dst = os.path.join(self.backup_dir, f"marzban_{timestamp}.sqlite3")
 
         try:
             # Create backup with metadata preservation

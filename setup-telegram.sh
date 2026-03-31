@@ -115,21 +115,17 @@ step_check_environment() {
     err "$(get_tg_str ERR_ROOT_TG_RU)"
   fi
 
-  # Проверка что Marzban установлен (Docker-контейнер или .env файл)
-  # .env находится в /var/lib/marzban/, а не в /opt/marzban/
-  local _marzban_ok=false
-  if [[ -f /var/lib/marzban/.env ]]; then
-    _marzban_ok=true
-  elif [[ -f /opt/marzban/.env ]]; then
-    _marzban_ok=true
+  # Проверка что Sing-box установлен (конфигурация или служба)
+  local _singbox_ok=false
+  if [[ -f /etc/sing-box/config.json ]]; then
+    _singbox_ok=true
   fi
-  # Дополнительная проверка Docker-контейнера
-  if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -qE '^marzban'; then
-    _marzban_ok=true
+  if systemctl is-active --quiet sing-box 2>/dev/null; then
+    _singbox_ok=true
   fi
 
-  if [[ "$_marzban_ok" != "true" ]]; then
-    err "$(get_tg_str ERR_MARZBAN_NOT_FOUND_TG_RU)"
+  if [[ "$_singbox_ok" != "true" ]]; then
+    err "$(get_tg_str ERR_INSTALLER_NOT_FOUND_TG_RU)"
   fi
 
   # Проверка Python3
@@ -308,7 +304,6 @@ EOF
   cat >/etc/systemd/system/cubiveil-bot.service <<EOF
 [Unit]
 Description=CubiVeil Telegram Bot
-After=network.target marzban.service
 
 [Service]
 Type=simple
@@ -322,7 +317,6 @@ StandardError=journal
 ProtectHome=true
 ProtectSystem=strict
 ReadWritePaths=/opt/cubiveil-bot/backups /opt/cubiveil-bot
-ReadOnlyPaths=/var/lib/marzban/db.sqlite3
 NoNewPrivileges=true
 LogRateLimitInterval=30s
 LogRateLimitBurst=1000
@@ -413,7 +407,7 @@ print_finish() {
     echo -e "  /backups — список бэкапов"
     echo -e "  /restore — восстановить бэкап"
     echo -e "  /users   — активные пользователи"
-    echo -e "  /restart — перезапустить Marzban"
+    echo -e "  /restart — перезапустить Sing-box"
     echo -e "  /logs    — логи сервисов"
     echo -e "  /health  — проверка здоровья"
     echo -e "  /profiles — управление профилями"
@@ -454,7 +448,7 @@ print_finish() {
     echo -e "  /backups — backups list"
     echo -e "  /restore — restore backup"
     echo -e "  /users   — active users"
-    echo -e "  /restart — restart Marzban"
+    echo -e "  /restart — restart Sing-box"
     echo -e "  /logs    — service logs"
     echo -e "  /health  — health check"
     echo -e "  /profiles — profiles management"

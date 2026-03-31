@@ -61,7 +61,7 @@ class LogsManager:
         """
         Get logs for a specific service
         Args:
-            service: Service name (marzban, sing-box, etc.)
+            service: Service name (sing-box, etc.)
             lines: Number of lines to retrieve
         Returns:
             tuple: (success: bool, logs: str)

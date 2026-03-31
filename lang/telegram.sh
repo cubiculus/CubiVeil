@@ -33,8 +33,8 @@ fi
 ERR_ROOT_TG="Scripts must be run as root (sudo)"
 ERR_ROOT_TG_RU="Запускай от root (sudo)"
 
-ERR_MARZBAN_NOT_FOUND_TG="Marzban not found. Run main installer first: bash install.sh"
-ERR_MARZBAN_NOT_FOUND_TG_RU="Marzban не найден. Сначала запусти основной установщик: bash install.sh"
+ERR_INSTALLER_NOT_FOUND_TG="Required service not found. Run main installer first: bash install.sh"
+ERR_INSTALLER_NOT_FOUND_TG_RU="Требуемый сервис не найден. Сначала запусти основной установщик: bash install.sh"
 
 ERR_PYTHON3_NOT_FOUND_TG="Python3 not found. Install: apt-get install python3"
 ERR_PYTHON3_NOT_FOUND_TG_RU="Python3 не установлен. Установи: apt-get install python3"

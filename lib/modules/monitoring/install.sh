@@ -29,7 +29,7 @@ MONITORING_LOG_DIR="/var/log/cubiveil/monitoring"
 MONITORING_DATA_DIR="/var/lib/cubiveil/monitoring"
 
 # Ключевые сервисы для мониторинга
-MONITORED_SERVICES=("marzban" "sing-box" "cubiveil-bot" "ufw" "fail2ban")
+MONITORED_SERVICES=("sing-box" "cubiveil-bot" "ufw" "fail2ban")
 
 # Пороги алертов
 ALERT_CPU_THRESHOLD=80    # CPU utilization %
@@ -267,22 +267,6 @@ monitor_check_ssl() {
 
 # ── Мониторинг логов / Log Monitoring ───────────────────────
 
-# Проверка ошибок в логах Marzban
-monitor_check_marzban_logs() {
-  log_step "monitor_check_marzban_logs" "Checking Marzban logs for errors"
-
-  local errors
-  errors=$(journalctl -u marzban --since "1 hour ago" --no-pager -p err 2>/dev/null | wc -l)
-
-  if [[ $errors -gt 0 ]]; then
-    log_warn "Found $errors errors in Marzban logs (last hour)"
-    return 1
-  else
-    log_success "No errors in Marzban logs (last hour)"
-    return 0
-  fi
-}
-
 # Проверка ошибок в логах Sing-box
 monitor_check_singbox_logs() {
   log_step "monitor_check_singbox_logs" "Checking Sing-box logs for errors"
@@ -323,7 +307,7 @@ monitor_health_check() {
   log_step "monitor_health_check" "Performing system health check"
 
   local health_score=0
-  local total_checks=6
+  local total_checks=5
 
   echo ""
   echo "System Health Check:"
@@ -361,15 +345,7 @@ monitor_health_check() {
     echo "  ✗ SSL: WARNING"
   fi
 
-  # 5. Проверка логов Marzban
-  if monitor_check_marzban_logs >/dev/null 2>&1; then
-    ((health_score++))
-    echo "  ✓ Marzban logs: OK"
-  else
-    echo "  ✗ Marzban logs: WARNING"
-  fi
-
-  # 6. Проверка логов Sing-box
+  # 5. Проверка логов Sing-box
   if monitor_check_singbox_logs >/dev/null 2>&1; then
     ((health_score++))
     echo "  ✓ Sing-box logs: OK"

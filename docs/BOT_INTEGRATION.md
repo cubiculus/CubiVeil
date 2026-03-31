@@ -38,7 +38,6 @@ bash setup-telegram.sh
 
 #### `/services`
 Статус всех сервисов:
-- 🟢 Марzban Panel
 - 🟢 Sing-box Core
 - 🟢 CubiVeil Bot
 - 🟢 Firewall (UFW)
@@ -49,11 +48,10 @@ bash setup-telegram.sh
 Получить последние логи сервиса.
 
 **Использование:**
-- `/logs marzban` — последние 20 строк логов Marzban
 - `/logs sing-box 50` — последние 50 строк логов Sing-box
 - `/logs cubiveil-bot 10` — последние 10 строк логов бота
 
-**Доступные сервисы:** `marzban`, `sing-box`, `cubiveil-bot`
+**Доступные сервисы:** `sing-box`, `cubiveil-bot`
 
 #### `/alerts`
 Статус алертов и текущие значения:
@@ -68,7 +66,6 @@ bash setup-telegram.sh
 
 #### `/backup`
 Создать полный бэкап системы через `utils/backup.sh`:
-- Marzban (конфигурация, база данных)
 - Sing-box (конфигурация)
 - SSL сертификаты
 - Ключи шифрования
@@ -120,7 +117,7 @@ QR-код отображается прямо в Telegram (Unicode версия)
 Перезапустить сервис.
 
 **Использование:**
-- `/restart marzban` — перезапустить Marzban
+
 - `/restart sing-box` — перезапустить Sing-box
 - `/restart cubiveil-bot` — перезапустить бота
 - `/restart all` — перезапустить все сервисы
@@ -141,7 +138,7 @@ bash /opt/cubiveil/utils/update.sh
 Экспорт конфигурации CubiVeil через `utils/export-config.sh`:
 
 Конфигурация включает:
-- Конфигурацию Marzban
+- Конфигурацию Sing-box
 - Конфигурацию Sing-box
 - SSL сертификаты
 - Настройки сети
@@ -224,7 +221,7 @@ Systemd сервис бота имеет следующие ограничени
 - `ProtectSystem=strict` — только чтение системных файлов
 - `NoNewPrivileges=true` — нет дополнительных привилегий
 - `ReadWritePaths` — запись только в `/opt/cubiveil-bot/`
-- `ReadOnlyPaths` — чтение базы данных Marzban
+- `ReadOnlyPaths` — чтение базы данных Sing-box
 
 ### Шифрование
 

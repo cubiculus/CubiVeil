@@ -24,7 +24,6 @@
 # ══════════════════════════════════════════════════════════════════════════════
 
 # File paths / Пути к файлам
-DEFAULT_DB_PATH = "/var/lib/marzban/db.sqlite3"
 BACKUP_DIR = "/opt/cubiveil-bot/backups"
 
 # Time intervals in seconds / Временные интервалы в секундах
@@ -48,7 +47,6 @@ THRESHOLD_MAX = 100
 ```python
 # Правильно:
 alert_cpu = 80
-db_path = "/var/lib/marzban/db.sqlite3"
 
 def get_cpu_usage():
     pass
@@ -442,7 +440,6 @@ class MetricsCollector:
         Initialize metrics collector
 
         Args:
-            db_path: Path to Marzban database
         """
         self.db_path = db_path
 

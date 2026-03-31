@@ -33,7 +33,6 @@ source "${PROJECT_DIR}/lib/utils.sh" || {
 }
 
 # ── Константы ─────────────────────────────────────────────────
-MARZBAN_DIR="/opt/marzban"
 SINGBOX_DIR="/etc/sing-box"
 DIAGNOSE_DIR="/root/cubiveil-diagnose"
 HEALTH_CHECK_PORT=""
@@ -171,14 +170,10 @@ step_check_ssl() {
   local days_until_expiry=0
   local is_valid=false
 
-  # Ищем домен в конфиге Marzban
-  if [[ -f "${MARZBAN_DIR}/.env" ]]; then
-    domain=$(grep -E "^XRAY_SUBSCRIPTION_URL_PREFIX=" "${MARZBAN_DIR}/.env" 2>/dev/null |
-      sed 's/.*https:\/\/\([^/]*\).*/\1/' | head -1 || echo "")
-
-    if [[ -z "$domain" ]]; then
-      domain=$(grep -E "^MARZBAN_HOST=" "${MARZBAN_DIR}/.env" 2>/dev/null | cut -d'=' -f2 || echo "")
-    fi
+  # Ищем домен в конфиге Sing-box (через systemd-юнит / конфигурацию)
+  if [[ -f "/etc/sing-box/config.json" ]]; then
+    domain=$(grep -oE '"serverName"\s*:\s*"[^"]+"' /etc/sing-box/config.json 2>/dev/null |
+      head -1 | sed -E 's/.*"serverName"\s*:\s*"([^"]+)".*/\1/' || echo "")
   fi
 
   # Ищем сертификат
@@ -186,8 +181,6 @@ step_check_ssl() {
     cert_path="/etc/letsencrypt/live/${domain}/fullchain.pem"
   elif [[ -f "${SINGBOX_DIR}/cert.pem" ]]; then
     cert_path="${SINGBOX_DIR}/cert.pem"
-  elif [[ -f "${MARZBAN_DIR}/cert.pem" ]]; then
-    cert_path="${MARZBAN_DIR}/cert.pem"
   fi
 
   if [[ -n "$cert_path" ]] && [[ -f "$cert_path" ]]; then
@@ -272,9 +265,8 @@ step_check_connections() {
   info "Проверка health check..."
 
   # Находим порт health check
-  if [[ -f "${MARZBAN_DIR}/.env" ]]; then
-    HEALTH_CHECK_PORT=$(grep -E "^HEALTH_CHECK_PORT=" "${MARZBAN_DIR}/.env" 2>/dev/null | cut -d'=' -f2 || echo "")
-  fi
+  # По умолчанию используем порт 8080, если нет явной настройки
+  HEALTH_CHECK_PORT="8080"
 
   if [[ -n "$HEALTH_CHECK_PORT" ]]; then
     if curl -sf --max-time 5 "http://localhost:${HEALTH_CHECK_PORT}/health" &>/dev/null; then
@@ -297,7 +289,7 @@ step_check_connections() {
 step_check_services() {
   step_title "5" "${MSG[TITLE_SERVICES]}" "Services check"
 
-  local services=("marzban" "sing-box" "cubiveil-bot" "ufw" "fail2ban")
+  local services=("sing-box" "cubiveil-bot" "ufw" "fail2ban")
   local issues=0
 
   for service in "${services[@]}"; do
@@ -314,7 +306,7 @@ step_check_services() {
 
   # Проверка логов на ошибки
   info "Проверка логов на ошибки..."
-  for service in "marzban" "sing-box"; do
+  for service in "sing-box"; do
     local error_count
     error_count=$(journalctl -u "$service" --since "1 hour ago" 2>/dev/null |
       grep -ciE "(error|fail|critical)" || echo "0")
@@ -341,10 +333,10 @@ step_check_ports() {
   # Ожидаемые порты
   local expected_ports=(443)
 
-  # Добавляем порты из конфига
-  if [[ -f "${MARZBAN_DIR}/.env" ]]; then
-    local config_ports
-    config_ports=$(grep -oE "PORT=[0-9]+" "${MARZBAN_DIR}/.env" 2>/dev/null | cut -d= -f2 || echo "")
+  # Добавляем порты из конфигурации Sing-box
+  local config_ports=""
+  if [[ -f "/etc/sing-box/config.json" ]]; then
+    config_ports=$(grep -oE '"port"\s*:\s*[0-9]+' /etc/sing-box/config.json 2>/dev/null | grep -oE '[0-9]+' | tr '\n' ' ' || echo "")
     for port in $config_ports; do
       expected_ports+=("$port")
     done
@@ -391,7 +383,7 @@ step_analyze_logs() {
     echo "Generated: $(date -Iseconds)"
     echo ""
 
-    for service in "marzban" "sing-box" "cubiveil-bot"; do
+    for service in "sing-box" "cubiveil-bot"; do
       echo "=== ${service} ==="
       journalctl -u "$service" --since "24 hours ago" --priority=err --no-pager 2>/dev/null | tail -20 || echo "No errors"
       echo ""

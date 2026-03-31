@@ -262,7 +262,6 @@ test_install_functions() {
     "_step_fail2ban"
     "_step_singbox"
     "_step_ssl"
-    "_step_marzban"
     "_step_decoy"
     "_step_traffic_shaping"
     "_step_telegram"

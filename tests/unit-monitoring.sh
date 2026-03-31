@@ -246,19 +246,19 @@ test_monitor_check_ssl() {
   ((TESTS_PASSED++)) || true
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: monitor_check_marzban_logs в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_monitor_check_marzban_logs() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ monitor_check_marzban_logs..."
+# в”Ђв”Ђ РўРµСЃС‚: monitor_check_singbox_logs в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+test_monitor_check_singbox_logs() {
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ monitor_check_singbox_logs..."
 
-  # Mock РґР»СЏ journalctl
-  journalctl() {
-    echo "" # РџСѓСЃС‚РѕР№ РІС‹РІРѕРґ
-    return 0
+  # Mock РґР»СЏ grep
+  grep() {
+    echo "0"
+    return 1 # РќРµС‚ РѕС€РёР±РѕРє
   }
 
-  monitor_check_marzban_logs || true
+  monitor_check_singbox_logs || true
 
-  pass "monitor_check_marzban_logs: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "monitor_check_singbox_logs: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
   ((TESTS_PASSED++)) || true
 }
 
@@ -304,8 +304,7 @@ test_monitor_health_check() {
   monitor_check_resources() { return 0; }
   monitor_network_check() { return 0; }
   monitor_check_ssl() { return 0; }
-  monitor_check_marzban_logs() { return 0; }
-  monitor_check_singbox_logs() { return 0; }
+    monitor_check_singbox_logs() { return 0; }
 
   monitor_health_check || true
 
@@ -454,7 +453,6 @@ test_all_functions_exist() {
     "monitor_network_check"
     "monitor_external_ip"
     "monitor_check_ssl"
-    "monitor_check_marzban_logs"
     "monitor_check_singbox_logs"
     "monitor_check_fail2ban_logs"
     "monitor_health_check"
@@ -617,7 +615,6 @@ main() {
   test_monitor_check_ssl
   echo ""
 
-  test_monitor_check_marzban_logs
   echo ""
 
   test_monitor_check_singbox_logs

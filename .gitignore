@@ -4,7 +4,6 @@
 *.credentials.age
 *.cubiveil-age-key.txt
 /root/cubiveil-credentials.*
-/opt/marzban/.env
 
 # --- Logs ---
 *.log

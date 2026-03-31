@@ -266,13 +266,19 @@ _step_telegram() {
 
 step_check_ip_neighborhood() { _step_system; }
 step_system_update() { _step_system; }
-step_auto_updates() { :; }
-step_bbr() { :; }
+step_auto_updates() {
+  log_info "Auto-updates step is deprecated and handled in system module"
+}
+step_bbr() {
+  log_info "BBR step is deprecated and handled in system module"
+}
 step_firewall() { _step_firewall; }
 step_fail2ban() { _step_fail2ban; }
 step_ssl() { _step_ssl; }
 step_install_sui() { _step_sui; }
-step_configure() { :; }
+step_configure() {
+  log_info "Legacy configuration step: no action required"
+}
 step_decoy_site() { _step_decoy; }
 step_traffic_shaping() { _step_traffic_shaping; }
 step_telegram() { _step_telegram; }

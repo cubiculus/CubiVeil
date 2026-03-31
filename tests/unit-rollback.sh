@@ -219,8 +219,8 @@ test_rollback_verify_integrity() {
   ROLLBACK_TEMP_DIR="$test_temp_dir"
 
   # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Рµ С„Р°Р№Р»С‹ СЃ hash
-  echo "test db" >"${test_temp_dir}/marzban-db.sqlite3"
-  echo "abc123" >"${test_temp_dir}/marzban-db.sqlite3.sha256"
+  echo "test db" >"${test_temp_dir}/singbox-db.sqlite3"
+  echo "abc123" >"${test_temp_dir}/singbox-db.sqlite3.sha256"
 
   rollback_verify_integrity
 
@@ -240,56 +240,56 @@ test_rollback_stop_services() {
   ((TESTS_PASSED++)) || true
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: rollback_marzban_db в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_rollback_marzban_db() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_marzban_db..."
+# в”Ђв”Ђ РўРµСЃС‚: rollback_singbox_db в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+test_rollback_singbox_db() {
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_singbox_db..."
 
   local test_backup_dir="/tmp/test-rollback-$$"
   local test_temp_dir="${test_backup_dir}/temp"
-  local test_marzban_dir="/tmp/test-marzban-$$"
-  mkdir -p "$test_temp_dir" "$test_marzban_dir"
+  local test_singbox_dir="/tmp/test-singbox-$$"
+  mkdir -p "$test_temp_dir" "$test_singbox_dir"
 
   ROLLBACK_TEMP_DIR="$test_temp_dir"
   # shellcheck disable=SC2034
-  MARZBAN_DIR="$test_marzban_dir"
+  SINGBOX_DIR="$test_singbox_dir"
 
   # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІСѓСЋ Р‘Р”
-  echo "test db" >"${test_temp_dir}/marzban-db.sqlite3"
-  echo "abc123" >"${test_temp_dir}/marzban-db.sqlite3.sha256"
+  echo "test db" >"${test_temp_dir}/singbox-db.sqlite3"
+  echo "abc123" >"${test_temp_dir}/singbox-db.sqlite3.sha256"
 
-  rollback_marzban_db || true
+  rollback_singbox_db || true
 
-  pass "rollback_marzban_db: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "rollback_singbox_db: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
   ((TESTS_PASSED++)) || true
 
-  rm -rf "$test_backup_dir" "$test_marzban_dir"
+  rm -rf "$test_backup_dir" "$test_singbox_dir"
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: rollback_marzban_config в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_rollback_marzban_config() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_marzban_config..."
+# в”Ђв”Ђ РўРµСЃС‚: rollback_singbox_config в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+test_rollback_singbox_config() {
+  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_singbox_config..."
 
   local test_backup_dir="/tmp/test-rollback-$$"
   local test_temp_dir="${test_backup_dir}/temp"
-  mkdir -p "$test_temp_dir" "/opt/marzban"
+  mkdir -p "$test_temp_dir" "/opt/singbox"
 
   ROLLBACK_TEMP_DIR="$test_temp_dir"
   # shellcheck disable=SC2034
-  MARZBAN_ENV="/opt/marzban/.env"
-  MARZBAN_TEMPLATE="${test_temp_dir}/sing-box-template.json"
+  SINGBOX_ENV="/opt/singbox/.env"
+  SINGBOX_TEMPLATE="${test_temp_dir}/sing-box-template.json"
 
   # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Рµ С„Р°Р№Р»С‹
-  echo "TEST=1" >"${test_temp_dir}/marzban.env"
-  echo "abc123" >"${test_temp_dir}/marzban.env.sha256"
-  echo "{}" >"$MARZBAN_TEMPLATE"
-  echo "abc123" >"${MARZBAN_TEMPLATE}.sha256"
+  echo "TEST=1" >"${test_temp_dir}/singbox.env"
+  echo "abc123" >"${test_temp_dir}/singbox.env.sha256"
+  echo "{}" >"$SINGBOX_TEMPLATE"
+  echo "abc123" >"${SINGBOX_TEMPLATE}.sha256"
 
-  rollback_marzban_config || true
+  rollback_singbox_config || true
 
-  pass "rollback_marzban_config: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "rollback_singbox_config: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
   ((TESTS_PASSED++)) || true
 
-  rm -rf "$test_backup_dir" "/opt/marzban"
+  rm -rf "$test_backup_dir" "/opt/singbox"
 }
 
 # в”Ђв”Ђ РўРµСЃС‚: rollback_singbox_config в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
@@ -345,14 +345,14 @@ test_rollback_keys() {
 
   local test_backup_dir="/tmp/test-rollback-$$"
   local test_temp_dir="${test_backup_dir}/temp"
-  local test_marzban_dir="/tmp/test-marzban-$$"
-  mkdir -p "$test_temp_dir" "$test_marzban_dir"
+  local test_singbox_dir="/tmp/test-singbox-$$"
+  mkdir -p "$test_temp_dir" "$test_singbox_dir"
 
   ROLLBACK_TEMP_DIR="$test_temp_dir"
   # shellcheck disable=SC2034
-  CREDENTIALS_FILE="${test_marzban_dir}/credentials.age"
+  CREDENTIALS_FILE="${test_singbox_dir}/credentials.age"
   # shellcheck disable=SC2034
-  CREDENTIALS_KEY="${test_marzban_dir}/credentials.key"
+  CREDENTIALS_KEY="${test_singbox_dir}/credentials.key"
 
   # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Рµ РєР»СЋС‡Рё
   echo "test credentials" >"${test_temp_dir}/credentials.age"
@@ -363,7 +363,7 @@ test_rollback_keys() {
   pass "rollback_keys: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
   ((TESTS_PASSED++)) || true
 
-  rm -rf "$test_backup_dir" "$test_marzban_dir"
+  rm -rf "$test_backup_dir" "$test_singbox_dir"
 }
 
 # в”Ђв”Ђ РўРµСЃС‚: rollback_start_services в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
@@ -400,8 +400,8 @@ test_rollback_full_mock() {
   rollback_extract_backup() { return 0; }
   rollback_verify_integrity() { return 0; }
   rollback_stop_services() { return 0; }
-  rollback_marzban_db() { return 0; }
-  rollback_marzban_config() { return 0; }
+  rollback_singbox_db() { return 0; }
+  rollback_singbox_config() { return 0; }
   rollback_singbox_config() { return 0; }
   rollback_ssl_certs() { return 0; }
   rollback_keys() { return 0; }
@@ -434,8 +434,8 @@ test_rollback_latest_mock() {
   rollback_extract_backup() { return 0; }
   rollback_verify_integrity() { return 0; }
   rollback_stop_services() { return 0; }
-  rollback_marzban_db() { return 0; }
-  rollback_marzban_config() { return 0; }
+  rollback_singbox_db() { return 0; }
+  rollback_singbox_config() { return 0; }
   rollback_ssl_certs() { return 0; }
   rollback_start_services() { return 0; }
 
@@ -510,8 +510,8 @@ test_all_functions_exist() {
     "rollback_extract_backup"
     "rollback_verify_integrity"
     "rollback_stop_services"
-    "rollback_marzban_db"
-    "rollback_marzban_config"
+    "rollback_singbox_db"
+    "rollback_singbox_config"
     "rollback_singbox_config"
     "rollback_ssl_certs"
     "rollback_keys"
@@ -613,10 +613,9 @@ main() {
   test_rollback_stop_services
   echo ""
 
-  test_rollback_marzban_db
+  test_rollback_singbox_db
   echo ""
 
-  test_rollback_marzban_config
   echo ""
 
   test_rollback_singbox_config

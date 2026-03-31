@@ -195,19 +195,6 @@ test_singbox_module() {
   fi
 }
 
-# РўРµСЃС‚: Marzban РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
-test_marzban_module() {
-  local test_name="Marzban module availability"
-
-  local module_file="${SCRIPT_DIR}/lib/modules/marzban/install.sh"
-
-  if [[ -f "$module_file" ]]; then
-    test_result "$test_name" "pass"
-  else
-    test_result "$test_name" "fail" "Marzban module not found"
-  fi
-}
-
 # РўРµСЃС‚: System РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
 test_system_module() {
   local test_name="System module availability"
@@ -339,7 +326,6 @@ test_run_all() {
   test_fail2ban_module
   test_ssl_module
   test_singbox_module
-  test_marzban_module
   test_system_module
   test_backup_module
   test_rollback_module
@@ -390,7 +376,6 @@ test_run_quick() {
   test_core_modules_available
   test_manifest_loads
   test_system_module
-  test_marzban_module
 }
 
 # в”Ђв”Ђ РњРѕРґСѓР»СЊРЅС‹Р№ РёРЅС‚РµСЂС„РµР№СЃ / Module Interface в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ

@@ -86,7 +86,7 @@ _usage() {
   cat <<EOF
 Usage: $0 [OPTIONS]
 
-CubiVeil Installer — Marzban + Sing-box
+CubiVeil Installer — S-UI + Sing-box
 
 Options:
   --dev                 Dev mode: self-signed SSL, no domain required

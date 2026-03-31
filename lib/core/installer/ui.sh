@@ -24,7 +24,6 @@ _dry_run_plan() {
     "fail2ban — SSH brute-force protection"
     "singbox  — generate keys/ports, install Sing-box"
     "ssl      — Let's Encrypt or self-signed"
-    "marzban  — panel installation and configuration"
   )
   [[ "$INSTALL_DECOY" == "true" ]] && _steps+=("decoy-site      — decoy website")
   [[ "$INSTALL_TRAFFIC_SHAPING" == "true" ]] && _steps+=("traffic-shaping — tc/netem fingerprint")
@@ -149,8 +148,8 @@ _print_finish() {
     echo "  $(get_str MSG_ADMIN_CREDENTIALS)"
     echo -e "${GREEN}╠══════════════════════════════════════════════════════════╣${PLAIN}"
     local _admin_user _admin_pass
-    _admin_user=$(grep "MARZBAN_USERNAME" /etc/cubiveil/admin.credentials 2>/dev/null | cut -d= -f2 || echo "N/A")
-    _admin_pass=$(grep "MARZBAN_PASSWORD" /etc/cubiveil/admin.credentials 2>/dev/null | cut -d= -f2 || echo "N/A")
+    _admin_user=$(grep "SUI_USERNAME\|ADMIN_USERNAME" /etc/cubiveil/admin.credentials 2>/dev/null | head -1 | cut -d= -f2 || echo "N/A")
+    _admin_pass=$(grep "SUI_PASSWORD\|ADMIN_PASSWORD" /etc/cubiveil/admin.credentials 2>/dev/null | head -1 | cut -d= -f2 || echo "N/A")
     echo -e "${GREEN}  Username: ${PLAIN}${_admin_user}"
     echo -e "${GREEN}  Password: ${YELLOW}${_admin_pass}${PLAIN}"
     echo -e "${GREEN}╚══════════════════════════════════════════════════════════╝${PLAIN}"
