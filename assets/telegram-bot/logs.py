@@ -11,6 +11,9 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
+# Local modules - constants
+from constants import SERVICE_NAMES
+
 # ══════════════════════════════════════════════════════════════════════════════
 # Constants / Константы
 # ══════════════════════════════════════════════════════════════════════════════
@@ -35,15 +38,6 @@ LOG_COMMAND_TIMEOUT = 10
 
 # Chunk size for long logs / Размер чанка для длинных логов
 LOG_CHUNK_SIZE = 4000
-
-# Service display names / Отображаемые имена сервисов
-SERVICE_NAMES = {
-    "s-ui": "🆂 S-UI",
-    "sing-box": "🆂 Sing-Box",
-    "cubiveil-bot": "🤖 Bot",
-    "nginx": "🌐 Nginx",
-    "systemd": "💻 Systemd"
-}
 
 
 class LogsError(Exception):
@@ -188,157 +182,3 @@ class LogsManager:
             return False, "❌ systemctl or journalctl command not found"
         except Exception as e:
             return False, f"❌ Error: {str(e)}"
-
-    def get_recent_logs(self, service: str, lines: int = 10) -> str:
-        """
-        Get recent logs for a service (simplified version for inline display)
-        Args:
-            service: Service name
-            lines: Number of lines
-        Returns:
-            str: Formatted logs
-        """
-        success, logs = self.get_service_logs(service, lines)
-
-        if not success:
-            return logs
-
-        return logs
-
-    def search_logs(self, service: str, pattern: str, lines: int = 100) -> Tuple[bool, str]:
-        """
-        Search logs for a specific pattern
-        Args:
-            service: Service name
-            pattern: Search pattern (grep)
-            lines: Number of lines to search
-        Returns:
-            tuple: (success: bool, logs: str)
-        """
-        if service not in self.services:
-            return False, f"Unknown service: {service}"
-
-        try:
-            # Get logs first
-            journal_result = subprocess.run(  # nosec B607, B603
-                ["journalctl", "-u", service, "--no-pager", "-n", str(lines)],
-                capture_output=True,
-                text=True,
-                timeout=LOG_COMMAND_TIMEOUT,
-                check=False
-            )
-
-            if journal_result.returncode != 0:
-                stderr = journal_result.stderr.strip()[:500] if journal_result.stderr else "Unknown error"
-                return False, f"❌ Error reading logs:\n<code>{stderr}</code>"
-
-            # Search with grep
-            grep_result = subprocess.run(  # nosec B607, B603
-                ["grep", "-i", pattern],
-                input=journal_result.stdout,
-                capture_output=True,
-                text=True,
-                timeout=LOG_COMMAND_TIMEOUT,
-                check=False
-            )
-
-            if grep_result.returncode == 0 and grep_result.stdout.strip():
-                matches = grep_result.stdout.strip()
-                if len(matches) > LOG_CHUNK_SIZE:
-                    matches = matches[:LOG_CHUNK_SIZE] + "\n... (truncated)"
-
-                return True, f"<b>🔍 Search results for '{pattern}':</b>\n\n<code>{matches}</code>"
-            elif grep_result.returncode == 1:
-                return True, f"📭 No matches found for '{pattern}'"
-            else:
-                stderr = grep_result.stderr.strip()[:500] if grep_result.stderr else "Unknown error"
-                return False, f"❌ Error searching logs:\n<code>{stderr}</code>"
-
-        except subprocess.TimeoutExpired:
-            return False, "⚠️ Timeout: Search took too long"
-        except Exception as e:
-            return False, f"❌ Error: {str(e)}"
-
-    def get_log_stats(self, service: str) -> dict:
-        """
-        Get statistics about logs for a service
-        Args:
-            service: Service name
-        Returns:
-            dict: Log statistics
-        """
-        stats = {
-            "service": service,
-            "total_lines": 0,
-            "errors": 0,
-            "warnings": 0,
-            "size_kb": 0
-        }
-
-        try:
-            # Count total lines (last 1000)
-            lines_result = subprocess.run(  # nosec B607, B603
-                ["journalctl", "-u", service, "--no-pager", "-n", "1000"],
-                capture_output=True,
-                text=True,
-                timeout=LOG_COMMAND_TIMEOUT,
-                check=False
-            )
-
-            if lines_result.returncode == 0:
-                all_lines = lines_result.stdout.strip().split("\n")
-                stats["total_lines"] = len(all_lines)
-
-                # Count errors and warnings
-                for line in all_lines:
-                    line_lower = line.lower()
-                    if "error" in line_lower or "failed" in line_lower:
-                        stats["errors"] += 1
-                    elif "warning" in line_lower or "warn" in line_lower:
-                        stats["warnings"] += 1
-
-            # Get disk usage for journal
-            size_result = subprocess.run(  # nosec B607, B603
-                ["journalctl", "--disk-usage"],
-                capture_output=True,
-                text=True,
-                timeout=LOG_COMMAND_TIMEOUT,
-                check=False
-            )
-
-            if size_result.returncode == 0:
-                # Parse "Archived and active journals take up 88.0M in total."
-                output = size_result.stdout.strip()
-                if "take up" in output:
-                    size_part = output.split("take up")[1].split("in total")[0].strip()
-                    stats["size_kb"] = size_part
-
-        except Exception as e:
-            logger.error(f"Error getting log stats: {e}")
-
-        return stats
-
-    def clear_service_logs(self, service: str) -> bool:
-        """
-        Clear logs for a specific service (rotate)
-        Args:
-            service: Service name
-        Returns:
-            bool: Success status
-        """
-        try:
-            subprocess.run(  # nosec B607, B603
-                ["journalctl", "-u", service, "--rotate"],
-                capture_output=True,
-                text=True,
-                timeout=LOG_COMMAND_TIMEOUT,
-                check=True
-            )
-            logger.info(f"Logs rotated for {service}")
-            return True
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to rotate logs for {service}: {e}")
-            return False
-        except Exception as e:
-            logger.error(f"Error rotating logs for {service}: {e}")
-            return False

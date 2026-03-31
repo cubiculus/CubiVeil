@@ -2,10 +2,13 @@
 """
 Alert State Management Module
 Manages alert state to avoid spamming alerts
+Uses file locking to prevent race conditions between cron and polling
 """
 
 import json
 import os
+import tempfile
+import fcntl
 import logging
 from typing import Dict, Any
 
@@ -18,7 +21,7 @@ class AlertStateError(Exception):
 
 
 class AlertStateManager:
-    """Manages alert state persistence"""
+    """Manages alert state persistence with file locking"""
 
     def __init__(self, state_file: str = "/opt/cubiveil-bot/alert_state.json"):
         self.state_file = state_file
@@ -35,11 +38,9 @@ class AlertStateManager:
 
     def load(self) -> Dict[str, Any]:
         """
-        Load alert state from file
+        Load alert state from file with shared lock
         Returns:
             dict: Alert state dictionary
-        Raises:
-            AlertStateError: If file cannot be read or parsed
         """
         try:
             if not os.path.exists(self.state_file):
@@ -47,11 +48,17 @@ class AlertStateManager:
                 return {}
 
             with open(self.state_file, 'r') as f:
-                state = json.load(f)
-                if not isinstance(state, dict):
-                    logger.warning(f"Invalid state format, expected dict, got {type(state)}")
-                    return {}
-                return state
+                # Acquire shared lock for reading
+                fcntl.flock(f.fileno(), fcntl.LOCK_SH)
+                try:
+                    state = json.load(f)
+                    if not isinstance(state, dict):
+                        logger.warning(f"Invalid state format, expected dict, got {type(state)}")
+                        return {}
+                    return state
+                finally:
+                    # Release lock
+                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse state file: {e}")
             return {}
@@ -64,13 +71,12 @@ class AlertStateManager:
 
     def save(self, state: Dict[str, Any]) -> bool:
         """
-        Save alert state to file
+        Save alert state to file using atomic write with exclusive lock
+        to prevent race conditions between concurrent processes.
         Args:
             state: State dictionary to save
         Returns:
             bool: True if saved successfully, False otherwise
-        Raises:
-            AlertStateError: If state cannot be saved
         """
         if not isinstance(state, dict):
             logger.error(f"Invalid state type: expected dict, got {type(state)}")
@@ -78,10 +84,30 @@ class AlertStateManager:
 
         try:
             self._ensure_directory_exists()
-            with open(self.state_file, 'w') as f:
-                json.dump(state, f, indent=2)
-            logger.debug(f"State saved to {self.state_file}")
-            return True
+
+            # Write to temporary file first
+            dir_name = os.path.dirname(self.state_file)
+            fd, temp_path = tempfile.mkstemp(suffix='.tmp', dir=dir_name)
+            try:
+                with os.fdopen(fd, 'w') as f:
+                    json.dump(state, f, indent=2)
+
+                # Acquire exclusive lock before replacing
+                with open(self.state_file, 'a') as lock_file:
+                    fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+                    try:
+                        # Atomic replace
+                        os.replace(temp_path, self.state_file)
+                        logger.debug(f"State saved atomically to {self.state_file}")
+                        return True
+                    finally:
+                        fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+            except Exception:
+                # Clean up temp file on error
+                if os.path.exists(temp_path):
+                    os.unlink(temp_path)
+                raise
+
         except IOError as e:
             logger.error(f"Failed to write state file: {e}")
             return False

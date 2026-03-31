@@ -179,9 +179,9 @@ class MetricsCollector:
             conn = sqlite3.connect(self.db_path, timeout=DB_TIMEOUT)
             cursor = conn.cursor()
 
-            # Count active users (status = 'active')
+            # Count active users (enable = 1 in s-ui clients table)
             cursor.execute(
-                "SELECT COUNT(*) FROM users WHERE status = 'active'"
+                "SELECT COUNT(*) FROM clients WHERE enable = 1"
             )
             result = cursor.fetchone()
             conn.close()

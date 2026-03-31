@@ -7,6 +7,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC2034
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Функция для получения случайного элемента массива
@@ -19,11 +20,13 @@ random_element() {
 }
 
 # Словари имён папок (EN)
+# shellcheck disable=SC2034
 FOLDER_CATEGORIES_EN=(
     "Documents" "Projects" "Media" "Archive" "Personal" "Work" "Shared"
     "Photos" "Videos" "Music" "Downloads" "Backups" "Reports" "Templates"
 )
 
+# shellcheck disable=SC2034
 FOLDER_NAMES_EN=(
     # Документы
     "Contracts" "Invoices" "Proposals" "Presentations" "Spreadsheets" "Notes"
@@ -43,11 +46,13 @@ FOLDER_NAMES_EN=(
 )
 
 # Словари имён папок (RU)
+# shellcheck disable=SC2034
 FOLDER_CATEGORIES_RU=(
     "Документы" "Проекты" "Медиа" "Архив" "Личное" "Работа" "Общее"
     "Фото" "Видео" "Музыка" "Загрузки" "Резервные копии" "Отчёты" "Шаблоны"
 )
 
+# shellcheck disable=SC2034
 FOLDER_NAMES_RU=(
     # Документы
     "Договоры" "Счета" "Предложения" "Презентации" "Таблицы" "Заметки"
@@ -66,7 +71,7 @@ FOLDER_NAMES_RU=(
     "Файлы клиентов" "Внутреннее" "Внешнее" "Черновики" "Финальные" "На проверке"
 )
 
-# Расширения файлов
+# shellcheck disable=SC2034
 FILE_EXTENSIONS=(
     "doc" "docx" "pdf" "xlsx" "xls" "ppt" "pptx" "txt" "rtf" "odt"
     "jpg" "jpeg" "png" "gif" "bmp" "svg" "webp" "tiff" "raw" "psd"
@@ -75,20 +80,21 @@ FILE_EXTENSIONS=(
     "csv" "json" "xml" "yaml" "yml" "md" "html" "css" "js" "py"
 )
 
-# Префиксы имён файлов
+# shellcheck disable=SC2034
 FILE_PREFIXES_EN=(
     "Final" "Draft" "Copy" "New" "Old" "Temp" "Backup" "Archive"
     "Report" "Summary" "Analysis" "Overview" "Details" "Notes" "Memo"
     "Version" "Updated" "Revised" "Approved" "Pending" "Review"
 )
 
+# shellcheck disable=SC2034
 FILE_PREFIXES_RU=(
     "Финальный" "Черновик" "Копия" "Новый" "Старый" "Временный" "Резервный" "Архивный"
     "Отчёт" "Сводка" "Анализ" "Обзор" "Детали" "Заметки" "Записка"
     "Версия" "Обновлённый" "Пересмотренный" "Утверждённый" "Ожидающий" "На проверке"
 )
 
-# Имена (EN)
+# shellcheck disable=SC2034
 FIRST_NAMES_EN=(
     "James" "John" "Robert" "Michael" "William" "David" "Richard" "Joseph"
     "Mary" "Patricia" "Jennifer" "Linda" "Elizabeth" "Barbara" "Susan" "Jessica"
@@ -98,6 +104,7 @@ FIRST_NAMES_EN=(
     "Dorothy" "Kimberly" "Emily" "Donna" "Michelle" "Carol" "Amanda" "Melissa"
 )
 
+# shellcheck disable=SC2034
 LAST_NAMES_EN=(
     "Smith" "Johnson" "Williams" "Brown" "Jones" "Garcia" "Miller" "Davis"
     "Rodriguez" "Martinez" "Hernandez" "Lopez" "Gonzalez" "Wilson" "Anderson" "Thomas"
@@ -107,7 +114,7 @@ LAST_NAMES_EN=(
     "Green" "Adams" "Nelson" "Baker" "Hall" "Rivera" "Campbell" "Mitchell"
 )
 
-# Имена (RU)
+# shellcheck disable=SC2034
 FIRST_NAMES_RU=(
     "Александр" "Дмитрий" "Максим" "Сергей" "Андрей" "Алексей" "Артём" "Илья"
     "Елена" "Ольга" "Наталья" "Ирина" "Анна" "Татьяна" "Екатерина" "Светлана"
@@ -117,6 +124,7 @@ FIRST_NAMES_RU=(
     "Полина" "Алина" "Кристина" "Людмила" "Галина" "Нина" "Зинаида" "Валентина"
 )
 
+# shellcheck disable=SC2034
 LAST_NAMES_RU=(
     "Иванов" "Смирнов" "Кузнецов" "Попов" "Васильев" "Петров" "Соколов" "Михайлов"
     "Новиков" "Фёдоров" "Морозов" "Волков" "Алексеев" "Лебедев" "Семёнов" "Егоров"
@@ -126,12 +134,13 @@ LAST_NAMES_RU=(
     "Гусев" "Титов" "Аксёнов" "Седов" "Григорьев" "Лазарев" "Рыбаков" "Филиппов"
 )
 
-# Должности
+# shellcheck disable=SC2034
 POSITIONS_EN=(
     "Administrator" "Manager" "User" "Editor" "Viewer" "Contributor"
     "Developer" "Designer" "Analyst" "Coordinator" "Specialist" "Director"
 )
 
+# shellcheck disable=SC2034
 POSITIONS_RU=(
     "Администратор" "Менеджер" "Пользователь" "Редактор" "Наблюдатель" "Автор"
     "Разработчик" "Дизайнер" "Аналитик" "Координатор" "Специалист" "Директор"
@@ -155,7 +164,7 @@ generate_folder_name() {
         ru|RU|русский|Russian)
             random_element FOLDER_NAMES_RU
             ;;
-        en|EN|english|English|*)
+        en|EN|english|English)
             random_element FOLDER_NAMES_EN
             ;;
         *)

@@ -24,6 +24,7 @@ from alert_state import AlertStateManager
 from commands import CommandHandler
 from health_check import HealthChecker
 from logs import LogsManager
+from keyboards import build_main_menu
 from constants import (
     DB_PATH,
     BACKUP_DIR,
@@ -50,13 +51,8 @@ from constants import (
 )
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Service display names / Отображаемые имена сервисов
+# File paths / Пути к файлам
 # ══════════════════════════════════════════════════════════════════════════════
-
-SERVICE_NAMES = {
-    "cubiveil-bot": "🤖 Bot",
-    "nginx": "🌐 Nginx",
-}
 
 
 class CubiVeilBot:
@@ -127,31 +123,8 @@ class CubiVeilBot:
             f"{STATUS_ICON_OK} <b>CubiVeil Bot started</b>\n"
             f"Alerts: CPU>{self.alert_cpu}% RAM>{self.alert_ram}% Disk>{self.alert_disk}%\n"
             "Send /help or use menu below",
-            reply_markup=self._build_main_menu_json()
+            reply_markup=json.dumps(build_main_menu())
         )
-
-    def _build_main_menu_json(self):
-        """Build main menu inline keyboard JSON"""
-        return {
-            "inline_keyboard": [
-                [
-                    {"text": "📊 Status", "callback_data": "main_status"},
-                    {"text": "📈 Monitor", "callback_data": "main_monitor"}
-                ],
-                [
-                    {"text": "💾 Backup", "callback_data": "main_backup"},
-                    {"text": "👥 Users", "callback_data": "main_users"}
-                ],
-                [
-                    {"text": "📋 Logs", "callback_data": "main_logs"},
-                    {"text": "🏥 Health", "callback_data": "main_health"}
-                ],
-                [
-                    {"text": "👤 Profiles", "callback_data": "main_profiles"},
-                    {"text": "⚙️ Settings", "callback_data": "main_settings"}
-                ]
-            ]
-        }
 
     def send_daily_report(self):
         """Send daily report with metrics and backup"""

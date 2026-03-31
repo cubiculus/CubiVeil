@@ -7,6 +7,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC2034
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Функция для получения случайного числа в диапазоне

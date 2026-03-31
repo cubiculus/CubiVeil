@@ -59,7 +59,7 @@ THRESHOLD_MAX = 100
 
 HEALTH_CHECK_INTERVAL = 300  # 5 minutes
 POLL_ERROR_DELAY = 5
-REQUEST_TIMEOUT = 30
+REQUEST_TIMEOUT = 35  # Long polling timeout + buffer (must be > getUpdates timeout)
 RESTART_COOLDOWN = 300  # 5 minutes between auto-restarts
 CONNECTION_TIMEOUT = 10  # Default connection timeout
 SERVICE_CHECK_TIMEOUT = 10  # Service status check timeout
@@ -108,6 +108,18 @@ ENV_ALERT_DISK = "ALERT_DISK"
 # ══════════════════════════════════════════════════════════════════════════════
 
 MONITORED_SERVICES = ["s-ui", "sing-box"]
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Service display names / Отображаемые имена сервисов
+# ══════════════════════════════════════════════════════════════════════════════
+
+SERVICE_NAMES = {
+    "s-ui": "🆂 S-UI",
+    "sing-box": "🆂 Sing-Box",
+    "cubiveil-bot": "🤖 Bot",
+    "nginx": "🌐 Nginx",
+    "systemd": "💻 Systemd"
+}
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Profile constants / Константы профилей

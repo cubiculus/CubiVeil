@@ -36,6 +36,7 @@ BACKUP_ARCHIVE_DIR="${BACKUP_DIR}/archives"
 
 # Пути к данным для бэкапа (S-UI)
 SUI_DB_DIR="/usr/local/s-ui/db"
+# shellcheck disable=SC2034
 SUI_CONFIG_FILE="${SUI_DB_DIR}/s-ui.db"
 SINGBOX_CONFIG_DIR="/usr/local/s-ui/bin/config"
 SSL_CERT_DIR="/usr/local/s-ui/cert"

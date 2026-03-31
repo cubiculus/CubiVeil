@@ -10,6 +10,7 @@ set -euo pipefail
 DEV_MODE="false"
 DRY_RUN="false"
 DEBUG_MODE="false"
+# shellcheck disable=SC2034
 DEV_DOMAIN="dev.cubiveil.local"
 DOMAIN=""
 INSTALL_DECOY="true"
@@ -23,16 +24,24 @@ INTERACTIVE_MODE="false"
 export INTERACTIVE_MODE
 
 # Переменные по умолчанию (заполняются в prompt_inputs())
+# shellcheck disable=SC2034
 LE_EMAIL=""
 LANG_NAME="${LANG_NAME:-Русский}"
+# shellcheck disable=SC2034
 SERVER_IP=""
 
 # Заглушки для совместимости (используются в модулях)
+# shellcheck disable=SC2034
 REPORT_TIME="${REPORT_TIME:-09:00}"
+# shellcheck disable=SC2034
 ALERT_CPU="${ALERT_CPU:-80}"
+# shellcheck disable=SC2034
 ALERT_RAM="${ALERT_RAM:-85}"
+# shellcheck disable=SC2034
 ALERT_DISK="${ALERT_DISK:-90}"
+# shellcheck disable=SC2034
 CUBIVEIL_DIR="${CUBIVEIL_DIR:-/opt/cubiveil}"
+# shellcheck disable=SC2034
 SSH_PORT="${SSH_PORT:-22}"
 
 # ── Функции ─────────────────────────────────────────────────

@@ -33,6 +33,9 @@ TELEGRAM_EDIT_MESSAGE_REPLY_MARKUP_ENDPOINT = "/editMessageReplyMarkup"
 # Timeouts in seconds / Таймауты в секундах
 DEFAULT_REQUEST_TIMEOUT = 10
 
+# Maximum file size for sending to Telegram (50 MB limit for documents)
+MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB
+
 # Multipart boundary / Граница multipart
 MULTIPART_BOUNDARY = "CubiVeilBoundary"
 
@@ -128,6 +131,15 @@ class TelegramClient:
         """Send file/document to chat"""
         if not os.path.exists(path):
             self.send("⚠️ Backup file not found")
+            return
+
+        # Check file size before loading into memory (prevent OOM)
+        file_size = os.path.getsize(path)
+        if file_size > MAX_FILE_SIZE:
+            self.send(
+                f"⚠️ File too large: {file_size / (1024*1024):.1f} MB\n"
+                f"Maximum size: {MAX_FILE_SIZE / (1024*1024):.0f} MB"
+            )
             return
 
         filename = os.path.basename(path)

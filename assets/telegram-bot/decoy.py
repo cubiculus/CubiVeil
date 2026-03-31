@@ -349,10 +349,9 @@ class DecoyManager:
         if not self.is_configured():
             return False, "Decoy site not configured", {}
 
-        # Source the rotate.sh and call the cleanup function
-        # We'll use the CLI utility for this
+        # Run cleanup via decoy rotate script
         success, output = self._run_command(
-            ["bash", "/opt/cubiveil/utils/decoy-rotate.sh", "cleanup"]
+            ["bash", self.rotate_script, "cleanup"]
         )
 
         stats = {"deleted": 0, "freed_mb": 0}
@@ -388,9 +387,9 @@ class DecoyManager:
         # Stop timer
         self._run_command(["systemctl", "stop", f"{self.timer_name}.timer"])
 
-        # Run regeneration via CLI utility
+        # Run regeneration via decoy rotate script
         success, output = self._run_command(
-            ["bash", "/opt/cubiveil/utils/decoy-rotate.sh", "regenerate"],
+            ["bash", self.rotate_script, "regenerate"],
             timeout=300  # 5 minutes for regeneration
         )
 

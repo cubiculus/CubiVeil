@@ -26,6 +26,7 @@ fi
 # Пути S-UI
 SUI_INSTALL_DIR="/usr/local/s-ui"
 SUI_DB_DIR="/usr/local/s-ui/db"
+# shellcheck disable=SC2034
 SUI_CONFIG_FILE="${SUI_DB_DIR}/s-ui.db"
 SUI_SERVICE="/etc/systemd/system/s-ui.service"
 SINGBOX_SERVICE="/etc/systemd/system/sing-box.service"

@@ -68,7 +68,7 @@ class BackupManager:
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M")
         db_filename = os.path.basename(self.db_path)
-        dst = os.path.join(self.backup_dir, f"marzban_{timestamp}.sqlite3")
+        dst = os.path.join(self.backup_dir, f"s-ui_{timestamp}.db")
 
         try:
             # Create backup with metadata preservation

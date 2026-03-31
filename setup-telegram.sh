@@ -115,16 +115,16 @@ step_check_environment() {
     err "$(get_tg_str ERR_ROOT_TG_RU)"
   fi
 
-  # Проверка что Sing-box установлен (конфигурация или служба)
-  local _singbox_ok=false
-  if [[ -f /etc/sing-box/config.json ]]; then
-    _singbox_ok=true
+  # Проверка что s-ui установлен (конфигурация или служба)
+  local _sui_ok=false
+  if [[ -f /usr/local/s-ui/db/s-ui.db ]]; then
+    _sui_ok=true
   fi
-  if systemctl is-active --quiet sing-box 2>/dev/null; then
-    _singbox_ok=true
+  if systemctl is-active --quiet s-ui 2>/dev/null; then
+    _sui_ok=true
   fi
 
-  if [[ "$_singbox_ok" != "true" ]]; then
+  if [[ "$_sui_ok" != "true" ]]; then
     err "$(get_tg_str ERR_INSTALLER_NOT_FOUND_TG_RU)"
   fi
 
@@ -265,7 +265,7 @@ step_install_bot() {
   chmod +x /opt/cubiveil-bot/bot.py
 
   # Копируем модули
-  for module in telegram_client.py metrics.py backup.py alert_state.py commands.py health_check.py logs.py keyboards.py profiles.py; do
+  for module in constants.py telegram_client.py metrics.py backup.py alert_state.py commands.py health_check.py logs.py keyboards.py decoy.py profiles.py; do
     if [[ -f "${BOT_MODULES_DIR}/${module}" ]]; then
       cp "${BOT_MODULES_DIR}/${module}" /opt/cubiveil-bot/${module}
       chmod +x /opt/cubiveil-bot/${module}
@@ -316,7 +316,7 @@ StandardOutput=journal
 StandardError=journal
 ProtectHome=true
 ProtectSystem=strict
-ReadWritePaths=/opt/cubiveil-bot/backups /opt/cubiveil-bot
+ReadWritePaths=/opt/cubiveil-bot/backups /opt/cubiveil-bot /var/www/decoy /etc/cubiveil
 NoNewPrivileges=true
 LogRateLimitInterval=30s
 LogRateLimitBurst=1000

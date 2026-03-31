@@ -22,8 +22,6 @@ CALLBACK_BACKUP_RESTORE = "backup_restore"
 CALLBACK_BACKUP_DELETE = "backup_delete"
 CALLBACK_BACKUP_DOWNLOAD = "backup_download"
 
-CALLBACK_LOGS_SUI = "logs_sui"
-CALLBACK_LOGS_SINGBOX = "logs_singbox"
 CALLBACK_LOGS_BOT = "logs_bot"
 CALLBACK_LOGS_NGINX = "logs_nginx"
 CALLBACK_LOGS_SYSTEM = "logs_system"
@@ -199,37 +197,6 @@ def build_confirm_keyboard(action: str, item: str):
     }
 
 
-def build_pagination_keyboard(current_page: int, total_pages: int, callback_prefix: str):
-    """
-    Build pagination keyboard
-    Args:
-        current_page: Current page number (0-based)
-        total_pages: Total pages count
-        callback_prefix: Prefix for callback data
-    Returns dict for JSON serialization
-    """
-    buttons = []
-    row = []
-
-    # Previous button
-    if current_page > 0:
-        row.append({"text": "◀️", "callback_data": f"{callback_prefix}_page:{current_page - 1}"})
-
-    # Page indicator
-    row.append({"text": f"{current_page + 1}/{total_pages}", "callback_data": "page_info"})
-
-    # Next button
-    if current_page < total_pages - 1:
-        row.append({"text": "▶️", "callback_data": f"{callback_prefix}_page:{current_page + 1}"})
-
-    buttons.append(row)
-
-    # Back button
-    buttons.append([{"text": "◀️ Back", "callback_data": CALLBACK_NAV_BACK}])
-
-    return {"inline_keyboard": buttons}
-
-
 def build_backup_actions_keyboard(filename: str):
     """
     Build backup actions keyboard
@@ -376,24 +343,6 @@ def build_decoy_weight_edit_keyboard(file_type: str, current_weight: int):
             ],
             [
                 {"text": "◀️ Back", "callback_data": CALLBACK_DECOY_WEIGHTS}
-            ]
-        ]
-    }
-
-
-def build_decoy_advanced_menu():
-    """
-    Build Decoy advanced actions menu (cleanup, regenerate)
-    Returns dict for JSON serialization
-    """
-    return {
-        "inline_keyboard": [
-            [
-                {"text": "🧹 Cleanup Old", "callback_data": CALLBACK_DECOY_CLEANUP},
-                {"text": "🔄 Regenerate All", "callback_data": CALLBACK_DECOY_REGENERATE}
-            ],
-            [
-                {"text": "◀️ Back", "callback_data": CALLBACK_DECOY_SETTINGS}
             ]
         ]
     }

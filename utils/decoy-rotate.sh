@@ -27,6 +27,9 @@ DECOY_WEBROOT="/var/www/decoy"
 DECOY_ROTATE_TIMER="cubiveil-decoy-rotate"
 DECOY_ROTATE_SCRIPT="/usr/local/lib/cubiveil/decoy-rotate.sh"
 
+# shellcheck disable=SC2034
+hours_limit=3
+
 # ── Проверка прав root ──────────────────────────────────────
 check_root() {
   if [[ $EUID -ne 0 ]]; then
@@ -142,7 +145,7 @@ cmd_files() {
   echo ""
 
   # Считаем по типам
-  local jpg_count pdf_count mp4_count mp3_count other_count
+  local jpg_count pdf_count mp4_count mp3_count
   jpg_count=$(find "${DECOY_WEBROOT}/files" -name "*.jpg" 2>/dev/null | wc -l)
   pdf_count=$(find "${DECOY_WEBROOT}/files" -name "*.pdf" 2>/dev/null | wc -l)
   mp4_count=$(find "${DECOY_WEBROOT}/files" -name "*.mp4" 2>/dev/null | wc -l)

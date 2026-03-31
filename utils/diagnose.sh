@@ -1,1 +1,576 @@
-#!/bin/bash`n# ╔═══════════════════════════════════════════════════════════╗`n# ║          CubiVeil — Diagnose Utility                      ║`n# ║          github.com/cubiculus/cubiveil                    ║`n# ║                                                           ║`n# ║  Диагностика проблем и сбор информации для поддержки      ║`n# ╚═══════════════════════════════════════════════════════════╝`n`nset -euo pipefail`n`n# ── Подключение локализации ───────────────────────────────────`nSCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"`nPROJECT_DIR="$(dirname "${SCRIPT_DIR}")"`n`n# Подключаем i18n модуль для единых функций локализации`nif [[ -f "${PROJECT_DIR}/lib/i18n.sh" ]]; then`n  source "${PROJECT_DIR}/lib/i18n.sh"`nelif [[ -f "${PROJECT_DIR}/lang/main.sh" ]]; then`n  source "${PROJECT_DIR}/lang/main.sh"`nelse`n  source "${PROJECT_DIR}/lib/fallback.sh"`nfi`n`n# ── Подключение унифицированных функций вывода ───────────────`nsource "${PROJECT_DIR}/lib/output.sh" || {`n  echo "❌ Не удалось загрузить lib/output.sh" >&2`n  exit 1`n}`n`n# ── Подключение общих утилит ───────────────────────────────────`nsource "${PROJECT_DIR}/lib/utils.sh" || {`n  err "Не удалось загрузить lib/utils.sh"`n}`n`n# ── Константы ─────────────────────────────────────────────────`nSINGBOX_DIR="/etc/sing-box"`nDIAGNOSE_DIR="/root/cubiveil-diagnose"`nHEALTH_CHECK_PORT=""`n`n# ── Локализация сообщений ─────────────────────────────────────`ndeclare -A MSG=(`n  [TITLE_DIAGNOSE]="CubiVeil — Diagnostics"`n  [TITLE_DNS]="Проверка DNS"`n  [TITLE_SSL]="Проверка SSL сертификата"`n  [TITLE_CONNECTION]="Проверка соединений"`n  [TITLE_SERVICES]="Проверка сервисов"`n  [TITLE_PORTS]="Проверка портов"`n  [TITLE_LOGS]="Анализ логов"`n  [TITLE_REPORT]="Сбор отчёта"`n  [TITLE_FIX]="Рекомендации"`n`n  [MSG_DIAGNOSING]="Диагностика..."`n  [MSG_CHECKING]="Проверка..."`n  [MSG_OK]="OK"`n  [MSG_FAIL]="FAIL"`n  [MSG_WARNING]="WARNING"`n  [MSG_SKIPPED]="SKIPPED"`n`n  [MSG_DNS_RESOLVE]="Разрешение имён"`n  [MSG_DNS_SERVER]="DNS сервер"`n  [MSG_SSL_VALID]="Сертификат валиден"`n  [MSG_SSL_EXPIRED]="Сертификат истёк"`n  [MSG_SSL_DAYS]="Дней до истечения"`n  [MSG_PORT_OPEN]="Порт открыт"`n  [MSG_PORT_CLOSED]="Порт закрыт"`n  [MSG_SERVICE_ACTIVE]="Сервис активен"`n  [MSG_SERVICE_INACTIVE]="Сервис неактивен"`n  [MSG_CONNECTION_OK]="Соединение установлено"`n  [MSG_CONNECTION_FAIL]="Соединение не установлено"`n`n  [ERR_NOT_ROOT]="Требуется запуск от root"`n  [ERR_DIAGNOSE_FAILED]="Диагностика завершена с ошибками"`n`n  [FIX_RESTART_SERVICE]="Перезапустить сервис"`n  [FIX_CHECK_FIREWALL]="Проверить файрвол"`n  [FIX_RENEW_SSL]="Обновить SSL сертификат"`n  [FIX_CHECK_DNS]="Проверить DNS настройки"`n  [FIX_CHECK_DISK]="Очистить место на диске"`n  [FIX_CHECK_RAM]="Освободить память"`n)`n`n# Функции msg и step_title импортируются из lib/i18n.sh`n`n# ══════════════════════════════════════════════════════════════`n# Переменные для сбора статистики`n# ══════════════════════════════════════════════════════════════`n`ndeclare -A DIAGNOSE_RESULTS`nDIAGNOSE_ISSUES=()`n`n# ══════════════════════════════════════════════════════════════`n# ШАГ 1: Проверка окружения`n# ══════════════════════════════════════════════════════════════`n`nstep_check_environment() {`n  step_title "1" "Проверка окружения" "Environment check"`n`n  if [[ $EUID -ne 0 ]]; then`n    err "${MSG[ERR_NOT_ROOT]}"`n  fi`n`n  mkdir -p "${DIAGNOSE_DIR}"`n`n  success "Окружение проверено"`n}`n`n# ══════════════════════════════════════════════════════════════`n# ШАГ 2: Проверка DNS`n# ══════════════════════════════════════════════════════════════`n`nstep_check_dns() {`n  step_title "2" "${MSG[TITLE_DNS]}" "DNS check"`n`n  local issues=0`n`n  # Проверка разрешения имён`n  info "${MSG[MSG_DNS_RESOLVE]}..."`n`n  local test_domains=("google.com" "github.com" "api4.ipify.org")`n  for domain in "${test_domains[@]}"; do`n    if dig +short "$domain" &>/dev/null || nslookup "$domain" &>/dev/null || host "$domain" &>/dev/null; then`n      success "  ✓ ${domain}"`n    else`n      # Пробуем альтернативу`n      if curl -sf --max-time 5 "https://${domain}" &>/dev/null; then`n        success "  ✓ ${domain} (через curl)"`n      else`n        warning "  ✗ ${domain}"`n        ((issues++))`n      fi`n    fi`n  done`n`n  # Проверка DNS серверов`n  info "${MSG[MSG_DNS_SERVER]}..."`n  local dns_servers`n  dns_servers=$(grep -E "^nameserver" /etc/resolv.conf 2>/dev/null | awk '{print $2}' | tr '\n' ' ' || echo "N/A")`n  info "  DNS: ${dns_servers}"`n`n  # Проверка на DNS leak (если есть утечка через IPv6)`n  local ipv6_enabled`n  if [[ -f /proc/sys/net/ipv6/conf/all/disable_ipv6 ]]; then`n    ipv6_enabled=$(cat /proc/sys/net/ipv6/conf/all/disable_ipv6)`n    if [[ "$ipv6_enabled" == "0" ]]; then`n      info "  IPv6: включён"`n    else`n      info "  IPv6: отключён"`n    fi`n  fi`n`n  DIAGNOSE_RESULTS[dns]=$([[ $issues -eq 0 ]] && echo "OK" || echo "ISSUES")`n`n  if [[ $issues -gt 0 ]]; then`n    DIAGNOSE_ISSUES+=("${MSG[FIX_CHECK_DNS]}")`n    warning "${MSG[TITLE_DNS]}: ${issues} проблем"`n  else`n    success "${MSG[TITLE_DNS]}: OK"`n  fi`n}`n`n# ══════════════════════════════════════════════════════════════`n# ШАГ 3: Проверка SSL сертификата`n# ══════════════════════════════════════════════════════════════`n`nstep_check_ssl() {`n  step_title "3" "${MSG[TITLE_SSL]}" "SSL certificate check"`n`n  local domain=""`n  local cert_path=""`n  local days_until_expiry=0`n  local is_valid=false`n`n  # Ищем домен в конфиге Sing-box (через systemd-юнит / конфигурацию)`n  if [[ -f "/etc/sing-box/config.json" ]]; then`n    domain=$(grep -oE '"serverName"\s*:\s*"[^"]+"' /etc/sing-box/config.json 2>/dev/null |`n      head -1 | sed -E 's/.*"serverName"\s*:\s*"([^"]+)".*/\1/' || echo "")`n  fi`n`n  # Ищем сертификат`n  if [[ -n "$domain" ]] && [[ -f "/etc/letsencrypt/live/${domain}/fullchain.pem" ]]; then`n    cert_path="/etc/letsencrypt/live/${domain}/fullchain.pem"`n  elif [[ -f "${SINGBOX_DIR}/cert.pem" ]]; then`n    cert_path="${SINGBOX_DIR}/cert.pem"`n  fi`n`n  if [[ -n "$cert_path" ]] && [[ -f "$cert_path" ]]; then`n    info "Сертификат: ${cert_path}"`n`n    # Проверяем срок действия`n    local expiry_date`n    expiry_date=$(openssl x509 -in "$cert_path" -noout -enddate 2>/dev/null | cut -d= -f2 || echo "")`n`n    if [[ -n "$expiry_date" ]]; then`n      local expiry_epoch current_epoch`n      expiry_epoch=$(date -d "$expiry_date" +%s 2>/dev/null || echo "0")`n      current_epoch=$(date +%s)`n      days_until_expiry=$(((expiry_epoch - current_epoch) / 86400))`n`n      info "${MSG[MSG_SSL_DAYS]}: ${days_until_expiry}"`n`n      if [[ $days_until_expiry -gt 30 ]]; then`n        success "${MSG[MSG_SSL_VALID]}"`n        is_valid=true`n      elif [[ $days_until_expiry -gt 0 ]]; then`n        warning "${MSG[MSG_SSL_VALID]} (истекает скоро)"`n        is_valid=true`n        DIAGNOSE_ISSUES+=("${MSG[FIX_RENEW_SSL]}")`n      else`n        warning "${MSG[MSG_SSL_EXPIRED]}"`n        DIAGNOSE_ISSUES+=("${MSG[FIX_RENEW_SSL]}")`n      fi`n    fi`n  else`n    info "SSL сертификат не найден (возможно используется Let's Encrypt)"`n`n    # Проверяем через curl с доменом`n    if [[ -n "$domain" ]]; then`n      if curl -sf --max-time 10 "https://${domain}" &>/dev/null; then`n        success "HTTPS соединение с ${domain} работает"`n        is_valid=true`n      else`n        warning "HTTPS соединение с ${domain} не установлено"`n      fi`n    fi`n  fi`n`n  DIAGNOSE_RESULTS[ssl]=$([[ "$is_valid" == "true" ]] && echo "OK" || echo "ISSUES")`n}`n`n# ══════════════════════════════════════════════════════════════`n# ШАГ 4: Проверка соединений`n# ══════════════════════════════════════════════════════════════`n`nstep_check_connections() {`n  step_title "4" "${MSG[TITLE_CONNECTION]}" "Connection check"`n`n  local issues=0`n`n  # Проверка внешнего соединения`n  info "Проверка интернет-соединения..."`n`n  if curl -sf --max-time 10 https://www.google.com &>/dev/null; then`n    success "  ✓ Интернет-соединение"`n  elif curl -sf --max-time 10 https://8.8.8.8 &>/dev/null; then`n    success "  ✓ Интернет-соединение (через IP)"`n  else`n    warning "  ✗ Интернет-соединение"`n    ((issues++))`n    DIAGNOSE_ISSUES+=("Проверить сетевое подключение")`n  fi`n`n  # Проверка доступности API Telegram (если установлен бот)`n  if systemctl is-active --quiet cubiveil-bot 2>/dev/null; then`n    info "Проверка соединения с Telegram..."`n    if curl -sf --max-time 10 https://api.telegram.org &>/dev/null; then`n      success "  ✓ Telegram API"`n    else`n      warning "  ✗ Telegram API"`n      ((issues++))`n      DIAGNOSE_ISSUES+=("Проверить доступность Telegram")`n    fi`n  fi`n`n  # Проверка health check endpoint`n  info "Проверка health check..."`n`n  # Находим порт health check`n  # По умолчанию используем порт 8080, если нет явной настройки`n  HEALTH_CHECK_PORT="8080"`n`n  if [[ -n "$HEALTH_CHECK_PORT" ]]; then`n    if curl -sf --max-time 5 "http://localhost:${HEALTH_CHECK_PORT}/health" &>/dev/null; then`n      success "  ✓ Health check (порт ${HEALTH_CHECK_PORT})"`n    else`n      warning "  ✗ Health check не отвечает"`n      ((issues++))`n    fi`n  else`n    info "  Health check порт не найден"`n  fi`n`n  DIAGNOSE_RESULTS[connections]=$([[ $issues -eq 0 ]] && echo "OK" || echo "ISSUES")`n}`n`n# ══════════════════════════════════════════════════════════════`n# ШАГ 5: Проверка сервисов`n# ══════════════════════════════════════════════════════════════`n`nstep_check_services() {`n  step_title "5" "${MSG[TITLE_SERVICES]}" "Services check"`n`n  local services=("sing-box" "cubiveil-bot" "ufw" "fail2ban")`n  local issues=0`n`n  for service in "${services[@]}"; do`n    if systemctl is-active --quiet "$service" 2>/dev/null; then`n      success "  ✓ ${service} — ${MSG[MSG_SERVICE_ACTIVE]}"`n    elif systemctl list-unit-files "$service" &>/dev/null; then`n      warning "  ✗ ${service} — ${MSG[MSG_SERVICE_INACTIVE]}"`n      ((issues++))`n      DIAGNOSE_ISSUES+=("${MSG[FIX_RESTART_SERVICE]}: ${service}")`n    else`n      info "  ○ ${service} — не установлен"`n    fi`n  done`n`n  # Проверка логов на ошибки`n  info "Проверка логов на ошибки..."`n  for service in "sing-box"; do`n    local error_count`n    error_count=$(journalctl -u "$service" --since "1 hour ago" 2>/dev/null |`n      grep -ciE "(error|fail|critical)" || echo "0")`n`n    if [[ "$error_count" -gt 10 ]]; then`n      warning "  ⚠️  ${service}: ${error_count} ошибок за последний час"`n    else`n      info "  ✓ ${service}: ${error_count} ошибок за последний час"`n    fi`n  done`n`n  DIAGNOSE_RESULTS[services]=$([[ $issues -eq 0 ]] && echo "OK" || echo "ISSUES")`n}`n`n# ══════════════════════════════════════════════════════════════`n# ШАГ 6: Проверка портов`n# ══════════════════════════════════════════════════════════════`n`nstep_check_ports() {`n  step_title "6" "${MSG[TITLE_PORTS]}" "Ports check"`n`n  local issues=0`n`n  # Ожидаемые порты`n  local expected_ports=(443)`n`n  # Добавляем порты из конфигурации Sing-box`n  local config_ports=""`n  if [[ -f "/etc/sing-box/config.json" ]]; then`n    config_ports=$(grep -oE '"port"\s*:\s*[0-9]+' /etc/sing-box/config.json 2>/dev/null | grep -oE '[0-9]+' | tr '\n' ' ' || echo "")`n    for port in $config_ports; do`n      expected_ports+=("$port")`n    done`n  fi`n`n  info "Проверка ожидаемых портов..."`n`n  for port in "${expected_ports[@]}"; do`n    if ss -tlnp 2>/dev/null | grep -q ":${port} "; then`n      success "  ✓ Порт ${port} открыт"`n    else`n      warning "  ✗ Порт ${port} закрыт"`n      ((issues++))`n    fi`n  done`n`n  # Проверка на неожиданные открытые порты`n  info "Сканирование открытых портов..."`n  local open_ports`n  open_ports=$(ss -tlnp 2>/dev/null | awk 'NR>1 {print $4}' | grep -oE ':[0-9]+' | cut -d: -f2 | sort -u | tr '\n' ' ' || echo "N/A")`n  info "  Открытые порты: ${open_ports}"`n`n  DIAGNOSE_RESULTS[ports]=$([[ $issues -eq 0 ]] && echo "OK" || echo "ISSUES")`n`n  if [[ $issues -gt 0 ]]; then`n    DIAGNOSE_ISSUES+=("${MSG[FIX_CHECK_FIREWALL]}")`n  fi`n}`n`n# ══════════════════════════════════════════════════════════════`n# ШАГ 7: Анализ логов`n# ══════════════════════════════════════════════════════════════`n`nstep_analyze_logs() {`n  step_title "7" "${MSG[TITLE_LOGS]}" "Log analysis"`n`n  # Собираем последние ошибки`n  info "Сбор последних ошибок..."`n`n  local log_file="${DIAGNOSE_DIR}/recent_errors.log"`n`n  {`n    echo "=== Recent Errors ==="`n    echo "Generated: $(date -Iseconds)"`n    echo ""`n`n    for service in "sing-box" "cubiveil-bot"; do`n      echo "=== ${service} ==="`n      journalctl -u "$service" --since "24 hours ago" --priority=err --no-pager 2>/dev/null | tail -20 || echo "No errors"`n      echo ""`n    done`n  } >"$log_file"`n`n  local error_count`n  error_count=$(wc -l <"$log_file" || echo "0")`n  info "Собрано строк логов: ${error_count}"`n`n  # Проверка места под логи`n  local journal_size`n  journal_size=$(journalctl --disk-usage 2>/dev/null | awk '{print $2, $3}' || echo "N/A")`n  info "Размер логов journalctl: ${journal_size}"`n`n  DIAGNOSE_RESULTS[logs]="OK"`n  success "Логи сохранены в: ${log_file}"`n}`n`n# ══════════════════════════════════════════════════════════════`n# ШАГ 8: Проверка ресурсов`n# ══════════════════════════════════════════════════════════════`n`nstep_check_resources() {`n  step_title "8" "Проверка ресурсов" "Resource check"`n`n  local issues=0`n`n  # Проверка диска`n  local disk_usage`n  disk_usage=$(df / 2>/dev/null | tail -1 | awk '{print $5}' | tr -d '%')`n`n  if [[ "$disk_usage" -gt 90 ]]; then`n    warning "  ✗ Диск заполнен на ${disk_usage}%"`n    ((issues++))`n    DIAGNOSE_ISSUES+=("${MSG[FIX_CHECK_DISK]}")`n  elif [[ "$disk_usage" -gt 80 ]]; then`n    warning "  ⚠️  Диск заполнен на ${disk_usage}%"`n  else`n    success "  ✓ Диск: ${disk_usage}%"`n  fi`n`n  # Проверка RAM`n  local ram_usage`n  ram_usage=$(free | awk '/^Mem:/ {printf "%.0f", $3/$2 * 100}')`n`n  if [[ "$ram_usage" -gt 90 ]]; then`n    warning "  ✗ RAM использовано ${ram_usage}%"`n    ((issues++))`n    DIAGNOSE_ISSUES+=("${MSG[FIX_CHECK_RAM]}")`n  elif [[ "$ram_usage" -gt 80 ]]; then`n    warning "  ⚠️  RAM использовано ${ram_usage}%"`n  else`n    success "  ✓ RAM: ${ram_usage}%"`n  fi`n`n  DIAGNOSE_RESULTS[resources]=$([[ $issues -eq 0 ]] && echo "OK" || echo "ISSUES")`n}`n`n# ══════════════════════════════════════════════════════════════`n# ШАГ 9: Генерация отчёта`n# ══════════════════════════════════════════════════════════════`n`nstep_generate_report() {`n  step_title "9" "${MSG[TITLE_REPORT]}" "Generate report"`n`n  local report_file`n  report_file="${DIAGNOSE_DIR}/diagnose_report_$(date +%Y%m%d_%H%M%S).txt"`n`n  {`n    echo "══════════════════════════════════════════════════════════"`n    echo "  CubiVeil — Diagnose Report"`n    echo "  Generated: $(date -Iseconds)"`n    echo "  Hostname: $(hostname)"`n    echo "══════════════════════════════════════════════════════════"`n    echo ""`n`n    echo "## Результаты проверки"`n    echo ""`n    for key in "${!DIAGNOSE_RESULTS[@]}"; do`n      printf "  %-15s %s\n" "${key}:" "${DIAGNOSE_RESULTS[$key]}"`n    done`n    echo ""`n`n    echo "## Проблемы"`n    echo ""`n    if [[ ${#DIAGNOSE_ISSUES[@]} -eq 0 ]]; then`n      echo "  Проблем не обнаружено"`n    else`n      for issue in "${DIAGNOSE_ISSUES[@]}"; do`n        echo "  ⚠️  ${issue}"`n      done`n    fi`n    echo ""`n`n    echo "## Системная информация"`n    echo ""`n    echo "  OS: $(cat /etc/os-release 2>/dev/null | grep PRETTY_NAME | cut -d'"' -f2 || echo 'N/A')"`n    echo "  Kernel: $(uname -r)"`n    echo "  CPU: $(nproc) cores"`n    echo "  RAM: $(free -h | awk '/^Mem:/ {print $2}')"`n    echo "  Disk: $(df -h / | tail -1 | awk '{print $2}')"`n    echo ""`n`n    echo "## Сетевая информация"`n    echo ""`n    echo "  External IP: $(curl -sf --max-time 5 https://api4.ipify.org || echo 'N/A')"`n    echo "  Internal IP: $(hostname -I 2>/dev/null | awk '{print $1}' || echo 'N/A')"`n    echo ""`n`n  } >"$report_file"`n`n  success "Отчёт сохранён: ${report_file}"`n`n  # Вывод краткого резюме`n  echo ""`n  info "══════════════════════════════════════════════════════════"`n  info "  Краткое резюме"`n  info "══════════════════════════════════════════════════════════"`n`n  local total_issues=${#DIAGNOSE_ISSUES[@]}`n  if [[ $total_issues -eq 0 ]]; then`n    success "  Проблем не обнаружено"`n  else`n    warning "  Обнаружено проблем: ${total_issues}"`n  fi`n}`n`n# ══════════════════════════════════════════════════════════════`n# ШАГ 10: Рекомендации`n# ══════════════════════════════════════════════════════════════`n`nstep_recommendations() {`n  step_title "10" "${MSG[TITLE_FIX]}" "Recommendations"`n`n  if [[ ${#DIAGNOSE_ISSUES[@]} -eq 0 ]]; then`n    success "  Все системы работают нормально"`n    return 0`n  fi`n`n  info "Рекомендации:"`n  echo ""`n`n  local i=1`n  declare -A shown_recommendations`n  for issue in "${DIAGNOSE_ISSUES[@]}"; do`n    # Убираем дубликаты`n    if [[ -z "${shown_recommendations[$issue]:-}" ]]; then`n      printf "  %d. %s\n" "$i" "$issue"`n      shown_recommendations[$issue]=1`n      ((i++))`n    fi`n  done`n`n  echo ""`n  info "Для сбора полного лога выполните:"`n  echo "  tar -czf /root/cubiveil-diagnose.tar.gz -C /root cubiveil-diagnose"`n  echo "  и отправьте файл в поддержку"`n}`n`n# ══════════════════════════════════════════════════════════════`n# Точка входа / Entry point`n# ══════════════════════════════════════════════════════════════`n`nmain() {`n  select_language`n`n  step_check_environment`n  step_check_dns`n  step_check_ssl`n  step_check_connections`n  step_check_services`n  step_check_ports`n  step_analyze_logs`n  step_check_resources`n  step_generate_report`n  step_recommendations`n`n  # Итоговый статус`n  echo ""`n  if [[ ${#DIAGNOSE_ISSUES[@]} -gt 0 ]]; then`n    warning "${MSG[ERR_DIAGNOSE_FAILED]}"`n    exit 1`n  else`n    success "Диагностика завершена успешно"`n    exit 0`n  fi`n}`n`nmain "$@"`n
+#!/bin/bash
+# ╔═══════════════════════════════════════════════════════════╗
+# ║          CubiVeil — Diagnose Utility                      ║
+# ║          github.com/cubiculus/cubiveil                    ║
+# ║                                                           ║
+# ║  Диагностика проблем и сбор информации для поддержки      ║
+# ╚═══════════════════════════════════════════════════════════╝
+
+set -euo pipefail
+
+# ── Подключение локализации ───────────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "${SCRIPT_DIR}")"
+
+# Подключаем i18n модуль для единых функций локализации
+if [[ -f "${PROJECT_DIR}/lib/i18n.sh" ]]; then
+  source "${PROJECT_DIR}/lib/i18n.sh"
+elif [[ -f "${PROJECT_DIR}/lang/main.sh" ]]; then
+  source "${PROJECT_DIR}/lang/main.sh"
+else
+  source "${PROJECT_DIR}/lib/fallback.sh"
+fi
+
+# ── Подключение унифицированных функций вывода ───────────────
+source "${PROJECT_DIR}/lib/output.sh" || {
+  echo "❌ Не удалось загрузить lib/output.sh" >&2
+  exit 1
+}
+
+# ── Подключение общих утилит ───────────────────────────────────
+source "${PROJECT_DIR}/lib/utils.sh" || {
+  err "Не удалось загрузить lib/utils.sh"
+}
+
+# ── Константы ─────────────────────────────────────────────────
+SINGBOX_DIR="/etc/sing-box"
+DIAGNOSE_DIR="/root/cubiveil-diagnose"
+HEALTH_CHECK_PORT=""
+
+# ── Локализация сообщений ─────────────────────────────────────
+declare -A MSG=(
+  [TITLE_DIAGNOSE]="CubiVeil — Diagnostics"
+  [TITLE_DNS]="Проверка DNS"
+  [TITLE_SSL]="Проверка SSL сертификата"
+  [TITLE_CONNECTION]="Проверка соединений"
+  [TITLE_SERVICES]="Проверка сервисов"
+  [TITLE_PORTS]="Проверка портов"
+  [TITLE_LOGS]="Анализ логов"
+  [TITLE_REPORT]="Сбор отчёта"
+  [TITLE_FIX]="Рекомендации"
+
+  [MSG_DIAGNOSING]="Диагностика..."
+  [MSG_CHECKING]="Проверка..."
+  [MSG_OK]="OK"
+  [MSG_FAIL]="FAIL"
+  [MSG_WARNING]="WARNING"
+  [MSG_SKIPPED]="SKIPPED"
+
+  [MSG_DNS_RESOLVE]="Разрешение имён"
+  [MSG_DNS_SERVER]="DNS сервер"
+  [MSG_SSL_VALID]="Сертификат валиден"
+  [MSG_SSL_EXPIRED]="Сертификат истёк"
+  [MSG_SSL_DAYS]="Дней до истечения"
+  [MSG_PORT_OPEN]="Порт открыт"
+  [MSG_PORT_CLOSED]="Порт закрыт"
+  [MSG_SERVICE_ACTIVE]="Сервис активен"
+  [MSG_SERVICE_INACTIVE]="Сервис неактивен"
+  [MSG_CONNECTION_OK]="Соединение установлено"
+  [MSG_CONNECTION_FAIL]="Соединение не установлено"
+
+  [ERR_NOT_ROOT]="Требуется запуск от root"
+  [ERR_DIAGNOSE_FAILED]="Диагностика завершена с ошибками"
+
+  [FIX_RESTART_SERVICE]="Перезапустить сервис"
+  [FIX_CHECK_FIREWALL]="Проверить файрвол"
+  [FIX_RENEW_SSL]="Обновить SSL сертификат"
+  [FIX_CHECK_DNS]="Проверить DNS настройки"
+  [FIX_CHECK_DISK]="Очистить место на диске"
+  [FIX_CHECK_RAM]="Освободить память"
+)
+
+# Функции msg и step_title импортируются из lib/i18n.sh
+
+# ══════════════════════════════════════════════════════════════
+# Переменные для сбора статистики
+# ══════════════════════════════════════════════════════════════
+
+declare -A DIAGNOSE_RESULTS
+DIAGNOSE_ISSUES=()
+
+# ══════════════════════════════════════════════════════════════
+# ШАГ 1: Проверка окружения
+# ══════════════════════════════════════════════════════════════
+
+step_check_environment() {
+  step_title "1" "Проверка окружения" "Environment check"
+
+  if [[ $EUID -ne 0 ]]; then
+    err "${MSG[ERR_NOT_ROOT]}"
+  fi
+
+  mkdir -p "${DIAGNOSE_DIR}"
+
+  success "Окружение проверено"
+}
+
+# ══════════════════════════════════════════════════════════════
+# ШАГ 2: Проверка DNS
+# ══════════════════════════════════════════════════════════════
+
+step_check_dns() {
+  step_title "2" "${MSG[TITLE_DNS]}" "DNS check"
+
+  local issues=0
+
+  # Проверка разрешения имён
+  info "${MSG[MSG_DNS_RESOLVE]}..."
+
+  local test_domains=("google.com" "github.com" "api4.ipify.org")
+  for domain in "${test_domains[@]}"; do
+    if dig +short "$domain" &>/dev/null || nslookup "$domain" &>/dev/null || host "$domain" &>/dev/null; then
+      success "  ✓ ${domain}"
+    else
+      # Пробуем альтернативу
+      if curl -sf --max-time 5 "https://${domain}" &>/dev/null; then
+        success "  ✓ ${domain} (через curl)"
+      else
+        warning "  ✗ ${domain}"
+        ((issues++))
+      fi
+    fi
+  done
+
+  # Проверка DNS серверов
+  info "${MSG[MSG_DNS_SERVER]}..."
+  local dns_servers
+  dns_servers=$(grep -E "^nameserver" /etc/resolv.conf 2>/dev/null | awk '{print $2}' | tr '\n' ' ' || echo "N/A")
+  info "  DNS: ${dns_servers}"
+
+  # Проверка на DNS leak (если есть утечка через IPv6)
+  local ipv6_enabled
+  if [[ -f /proc/sys/net/ipv6/conf/all/disable_ipv6 ]]; then
+    ipv6_enabled=$(cat /proc/sys/net/ipv6/conf/all/disable_ipv6)
+    if [[ "$ipv6_enabled" == "0" ]]; then
+      info "  IPv6: включён"
+    else
+      info "  IPv6: отключён"
+    fi
+  fi
+
+  DIAGNOSE_RESULTS[dns]=$([[ $issues -eq 0 ]] && echo "OK" || echo "ISSUES")
+
+  if [[ $issues -gt 0 ]]; then
+    DIAGNOSE_ISSUES+=("${MSG[FIX_CHECK_DNS]}")
+    warning "${MSG[TITLE_DNS]}: ${issues} проблем"
+  else
+    success "${MSG[TITLE_DNS]}: OK"
+  fi
+}
+
+# ══════════════════════════════════════════════════════════════
+# ШАГ 3: Проверка SSL сертификата
+# ══════════════════════════════════════════════════════════════
+
+step_check_ssl() {
+  step_title "3" "${MSG[TITLE_SSL]}" "SSL certificate check"
+
+  local domain=""
+  local cert_path=""
+  local days_until_expiry=0
+  local is_valid=false
+
+  # Ищем домен в конфиге Sing-box (через systemd-юнит / конфигурацию)
+  if [[ -f "/etc/sing-box/config.json" ]]; then
+    domain=$(grep -oE '"serverName"\s*:\s*"[^"]+"' /etc/sing-box/config.json 2>/dev/null | \
+      head -1 | sed -E 's/.*"serverName"\s*:\s*"([^"]+)".*/\1/' || echo "")
+  fi
+
+  # Ищем сертификат
+  if [[ -n "$domain" ]] && [[ -f "/etc/letsencrypt/live/${domain}/fullchain.pem" ]]; then
+    cert_path="/etc/letsencrypt/live/${domain}/fullchain.pem"
+  elif [[ -f "${SINGBOX_DIR}/cert.pem" ]]; then
+    cert_path="${SINGBOX_DIR}/cert.pem"
+  fi
+
+  if [[ -n "$cert_path" ]] && [[ -f "$cert_path" ]]; then
+    info "Сертификат: ${cert_path}"
+
+    # Проверяем срок действия
+    local expiry_date
+    expiry_date=$(openssl x509 -in "$cert_path" -noout -enddate 2>/dev/null | cut -d= -f2 || echo "")
+
+    if [[ -n "$expiry_date" ]]; then
+      local expiry_epoch current_epoch
+      expiry_epoch=$(date -d "$expiry_date" +%s 2>/dev/null || echo "0")
+      current_epoch=$(date +%s)
+      days_until_expiry=$(((expiry_epoch - current_epoch) / 86400))
+
+      info "${MSG[MSG_SSL_DAYS]}: ${days_until_expiry}"
+
+      if [[ $days_until_expiry -gt 30 ]]; then
+        success "${MSG[MSG_SSL_VALID]}"
+        is_valid=true
+      elif [[ $days_until_expiry -gt 0 ]]; then
+        warning "${MSG[MSG_SSL_VALID]} (истекает скоро)"
+        is_valid=true
+        DIAGNOSE_ISSUES+=("${MSG[FIX_RENEW_SSL]}")
+      else
+        warning "${MSG[MSG_SSL_EXPIRED]}"
+        DIAGNOSE_ISSUES+=("${MSG[FIX_RENEW_SSL]}")
+      fi
+    fi
+  else
+    info "SSL сертификат не найден (возможно используется Let's Encrypt)"
+
+    # Проверяем через curl с доменом
+    if [[ -n "$domain" ]]; then
+      if curl -sf --max-time 10 "https://${domain}" &>/dev/null; then
+        success "HTTPS соединение с ${domain} работает"
+        is_valid=true
+      else
+        warning "HTTPS соединение с ${domain} не установлено"
+      fi
+    fi
+  fi
+
+  DIAGNOSE_RESULTS[ssl]=$([[ "$is_valid" == "true" ]] && echo "OK" || echo "ISSUES")
+}
+
+# ══════════════════════════════════════════════════════════════
+# ШАГ 4: Проверка соединений
+# ══════════════════════════════════════════════════════════════
+
+step_check_connections() {
+  step_title "4" "${MSG[TITLE_CONNECTION]}" "Connection check"
+
+  local issues=0
+
+  # Проверка внешнего соединения
+  info "Проверка интернет-соединения..."
+
+  if curl -sf --max-time 10 https://www.google.com &>/dev/null; then
+    success "  ✓ Интернет-соединение"
+  elif curl -sf --max-time 10 https://8.8.8.8 &>/dev/null; then
+    success "  ✓ Интернет-соединение (через IP)"
+  else
+    warning "  ✗ Интернет-соединение"
+    ((issues++))
+    DIAGNOSE_ISSUES+=("Проверить сетевое подключение")
+  fi
+
+  # Проверка доступности API Telegram (если установлен бот)
+  if systemctl is-active --quiet cubiveil-bot 2>/dev/null; then
+    info "Проверка соединения с Telegram..."
+    if curl -sf --max-time 10 https://api.telegram.org &>/dev/null; then
+      success "  ✓ Telegram API"
+    else
+      warning "  ✗ Telegram API"
+      ((issues++))
+      DIAGNOSE_ISSUES+=("Проверить доступность Telegram")
+    fi
+  fi
+
+  # Проверка health check endpoint
+  info "Проверка health check..."
+
+  # Находим порт health check
+  # По умолчанию используем порт 8080, если нет явной настройки
+  HEALTH_CHECK_PORT="8080"
+
+  if [[ -n "$HEALTH_CHECK_PORT" ]]; then
+    if curl -sf --max-time 5 "http://localhost:${HEALTH_CHECK_PORT}/health" &>/dev/null; then
+      success "  ✓ Health check (порт ${HEALTH_CHECK_PORT})"
+    else
+      warning "  ✗ Health check не отвечает"
+      ((issues++))
+    fi
+  else
+    info "  Health check порт не найден"
+  fi
+
+  DIAGNOSE_RESULTS[connections]=$([[ $issues -eq 0 ]] && echo "OK" || echo "ISSUES")
+}
+
+# ══════════════════════════════════════════════════════════════
+# ШАГ 5: Проверка сервисов
+# ══════════════════════════════════════════════════════════════
+
+step_check_services() {
+  step_title "5" "${MSG[TITLE_SERVICES]}" "Services check"
+
+  local services=("sing-box" "cubiveil-bot" "ufw" "fail2ban")
+  local issues=0
+
+  for service in "${services[@]}"; do
+    if systemctl is-active --quiet "$service" 2>/dev/null; then
+      success "  ✓ ${service} — ${MSG[MSG_SERVICE_ACTIVE]}"
+    elif systemctl list-unit-files "$service" &>/dev/null; then
+      warning "  ✗ ${service} — ${MSG[MSG_SERVICE_INACTIVE]}"
+      ((issues++))
+      DIAGNOSE_ISSUES+=("${MSG[FIX_RESTART_SERVICE]}: ${service}")
+    else
+      info "  ○ ${service} — не установлен"
+    fi
+  done
+
+  # Проверка логов на ошибки
+  info "Проверка логов на ошибки..."
+  for service in "sing-box"; do
+    local error_count
+    error_count=$(journalctl -u "$service" --since "1 hour ago" 2>/dev/null | \
+      grep -ciE "(error|fail|critical)" || echo "0")
+
+    if [[ "$error_count" -gt 10 ]]; then
+      warning "  ⚠️  ${service}: ${error_count} ошибок за последний час"
+    else
+      info "  ✓ ${service}: ${error_count} ошибок за последний час"
+    fi
+  done
+
+  DIAGNOSE_RESULTS[services]=$([[ $issues -eq 0 ]] && echo "OK" || echo "ISSUES")
+}
+
+# ══════════════════════════════════════════════════════════════
+# ШАГ 6: Проверка портов
+# ══════════════════════════════════════════════════════════════
+
+step_check_ports() {
+  step_title "6" "${MSG[TITLE_PORTS]}" "Ports check"
+
+  local issues=0
+
+  # Ожидаемые порты
+  local expected_ports=(443)
+
+  # Добавляем порты из конфигурации Sing-box
+  local config_ports=""
+  if [[ -f "/etc/sing-box/config.json" ]]; then
+    config_ports=$(grep -oE '"port"\s*:\s*[0-9]+' /etc/sing-box/config.json 2>/dev/null | grep -oE '[0-9]+' | tr '\n' ' ' || echo "")
+    for port in $config_ports; do
+      expected_ports+=("$port")
+    done
+  fi
+
+  info "Проверка ожидаемых портов..."
+
+  for port in "${expected_ports[@]}"; do
+    if ss -tlnp 2>/dev/null | grep -q ":${port} "; then
+      success "  ✓ Порт ${port} открыт"
+    else
+      warning "  ✗ Порт ${port} закрыт"
+      ((issues++))
+    fi
+  done
+
+  # Проверка на неожиданные открытые порты
+  info "Сканирование открытых портов..."
+  local open_ports
+  open_ports=$(ss -tlnp 2>/dev/null | awk 'NR>1 {print $4}' | grep -oE ':[0-9]+' | cut -d: -f2 | sort -u | tr '\n' ' ' || echo "N/A")
+  info "  Открытые порты: ${open_ports}"
+
+  DIAGNOSE_RESULTS[ports]=$([[ $issues -eq 0 ]] && echo "OK" || echo "ISSUES")
+
+  if [[ $issues -gt 0 ]]; then
+    DIAGNOSE_ISSUES+=("${MSG[FIX_CHECK_FIREWALL]}")
+  fi
+}
+
+# ══════════════════════════════════════════════════════════════
+# ШАГ 7: Анализ логов
+# ══════════════════════════════════════════════════════════════
+
+step_analyze_logs() {
+  step_title "7" "${MSG[TITLE_LOGS]}" "Log analysis"
+
+  # Собираем последние ошибки
+  info "Сбор последних ошибок..."
+
+  local log_file="${DIAGNOSE_DIR}/recent_errors.log"
+
+  {
+    echo "=== Recent Errors ==="
+    echo "Generated: $(date -Iseconds)"
+    echo ""
+
+    for service in "sing-box" "cubiveil-bot"; do
+      echo "=== ${service} ==="
+      journalctl -u "$service" --since "24 hours ago" --priority=err --no-pager 2>/dev/null | tail -20 || echo "No errors"
+      echo ""
+    done
+  } >"$log_file"
+
+  local error_count
+  error_count=$(wc -l <"$log_file" || echo "0")
+  info "Собрано строк логов: ${error_count}"
+
+  # Проверка места под логи
+  local journal_size
+  journal_size=$(journalctl --disk-usage 2>/dev/null | awk '{print $2, $3}' || echo "N/A")
+  info "Размер логов journalctl: ${journal_size}"
+
+  DIAGNOSE_RESULTS[logs]="OK"
+  success "Логи сохранены в: ${log_file}"
+}
+
+# ══════════════════════════════════════════════════════════════
+# ШАГ 8: Проверка ресурсов
+# ══════════════════════════════════════════════════════════════
+
+step_check_resources() {
+  step_title "8" "Проверка ресурсов" "Resource check"
+
+  local issues=0
+
+  # Проверка диска
+  local disk_usage
+  disk_usage=$(df / 2>/dev/null | tail -1 | awk '{print $5}' | tr -d '%')
+
+  if [[ "$disk_usage" -gt 90 ]]; then
+    warning "  ✗ Диск заполнен на ${disk_usage}%"
+    ((issues++))
+    DIAGNOSE_ISSUES+=("${MSG[FIX_CHECK_DISK]}")
+  elif [[ "$disk_usage" -gt 80 ]]; then
+    warning "  ⚠️  Диск заполнен на ${disk_usage}%"
+  else
+    success "  ✓ Диск: ${disk_usage}%"
+  fi
+
+  # Проверка RAM
+  local ram_usage
+  ram_usage=$(free | awk '/^Mem:/ {printf "%.0f", $3/$2 * 100}')
+
+  if [[ "$ram_usage" -gt 90 ]]; then
+    warning "  ✗ RAM использовано ${ram_usage}%"
+    ((issues++))
+    DIAGNOSE_ISSUES+=("${MSG[FIX_CHECK_RAM]}")
+  elif [[ "$ram_usage" -gt 80 ]]; then
+    warning "  ⚠️  RAM использовано ${ram_usage}%"
+  else
+    success "  ✓ RAM: ${ram_usage}%"
+  fi
+
+  DIAGNOSE_RESULTS[resources]=$([[ $issues -eq 0 ]] && echo "OK" || echo "ISSUES")
+}
+
+# ══════════════════════════════════════════════════════════════
+# ШАГ 9: Генерация отчёта
+# ══════════════════════════════════════════════════════════════
+
+step_generate_report() {
+  step_title "9" "${MSG[TITLE_REPORT]}" "Generate report"
+
+  local report_file
+  report_file="${DIAGNOSE_DIR}/diagnose_report_$(date +%Y%m%d_%H%M%S).txt"
+
+  {
+    echo "══════════════════════════════════════════════════════════"
+    echo "  CubiVeil — Diagnose Report"
+    echo "  Generated: $(date -Iseconds)"
+    echo "  Hostname: $(hostname)"
+    echo "══════════════════════════════════════════════════════════"
+    echo ""
+
+    echo "## Результаты проверки"
+    echo ""
+    for key in "${!DIAGNOSE_RESULTS[@]}"; do
+      printf "  %-15s %s\n" "${key}:" "${DIAGNOSE_RESULTS[$key]}"
+    done
+    echo ""
+
+    echo "## Проблемы"
+    echo ""
+    if [[ ${#DIAGNOSE_ISSUES[@]} -eq 0 ]]; then
+      echo "  Проблем не обнаружено"
+    else
+      for issue in "${DIAGNOSE_ISSUES[@]}"; do
+        echo "  ⚠️  ${issue}"
+      done
+    fi
+    echo ""
+
+    echo "## Системная информация"
+    echo ""
+    echo "  OS: $(cat /etc/os-release 2>/dev/null | grep PRETTY_NAME | cut -d'"' -f2 || echo 'N/A')"
+    echo "  Kernel: $(uname -r)"
+    echo "  CPU: $(nproc) cores"
+    echo "  RAM: $(free -h | awk '/^Mem:/ {print $2}')"
+    echo "  Disk: $(df -h / | tail -1 | awk '{print $2}')"
+    echo ""
+
+    echo "## Сетевая информация"
+    echo ""
+    echo "  External IP: $(curl -sf --max-time 5 https://api4.ipify.org || echo 'N/A')"
+    echo "  Internal IP: $(hostname -I 2>/dev/null | awk '{print $1}' || echo 'N/A')"
+    echo ""
+
+  } >"$report_file"
+
+  success "Отчёт сохранён: ${report_file}"
+
+  # Вывод краткого резюме
+  echo ""
+  info "══════════════════════════════════════════════════════════"
+  info "  Краткое резюме"
+  info "══════════════════════════════════════════════════════════"
+
+  local total_issues=${#DIAGNOSE_ISSUES[@]}
+  if [[ $total_issues -eq 0 ]]; then
+    success "  Проблем не обнаружено"
+  else
+    warning "  Обнаружено проблем: ${total_issues}"
+  fi
+}
+
+# ══════════════════════════════════════════════════════════════
+# ШАГ 10: Рекомендации
+# ══════════════════════════════════════════════════════════════
+
+step_recommendations() {
+  step_title "10" "${MSG[TITLE_FIX]}" "Recommendations"
+
+  if [[ ${#DIAGNOSE_ISSUES[@]} -eq 0 ]]; then
+    success "  Все системы работают нормально"
+    return 0
+  fi
+
+  info "Рекомендации:"
+  echo ""
+
+  local i=1
+  declare -A shown_recommendations
+  for issue in "${DIAGNOSE_ISSUES[@]}"; do
+    # Убираем дубликаты
+    if [[ -z "${shown_recommendations[$issue]:-}" ]]; then
+      printf "  %d. %s\n" "$i" "$issue"
+      shown_recommendations[$issue]=1
+      ((i++))
+    fi
+  done
+
+  echo ""
+  info "Для сбора полного лога выполните:"
+  echo "  tar -czf /root/cubiveil-diagnose.tar.gz -C /root cubiveil-diagnose"
+  echo "  и отправьте файл в поддержку"
+}
+
+# ══════════════════════════════════════════════════════════════
+# Точка входа / Entry point
+# ══════════════════════════════════════════════════════════════
+
+main() {
+  select_language
+
+  step_check_environment
+  step_check_dns
+  step_check_ssl
+  step_check_connections
+  step_check_services
+  step_check_ports
+  step_analyze_logs
+  step_check_resources
+  step_generate_report
+  step_recommendations
+
+  # Итоговый статус
+  echo ""
+  if [[ ${#DIAGNOSE_ISSUES[@]} -gt 0 ]]; then
+    warning "${MSG[ERR_DIAGNOSE_FAILED]}"
+    exit 1
+  else
+    success "Диагностика завершена успешно"
+    exit 0
+  fi
+}
+
+main "$@"

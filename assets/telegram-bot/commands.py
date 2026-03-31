@@ -15,7 +15,15 @@ from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
-# Local modules
+# Local modules - constants
+from constants import (
+    PROGRESS_BAR_WIDTH,
+    PROGRESS_BAR_FILLED,
+    PROGRESS_BAR_EMPTY,
+    DEFAULT_CONNECTION_TARGETS,
+)
+
+# Local modules - keyboards
 from keyboards import (
     build_main_menu,
     build_backup_menu,
@@ -24,14 +32,12 @@ from keyboards import (
     build_alerts_submenu,
     build_back_button,
     build_confirm_keyboard,
-    build_pagination_keyboard,
     build_backup_actions_keyboard,
     build_logs_lines_keyboard,
     build_decoy_menu,
     build_decoy_settings_menu,
     build_decoy_weights_menu,
     build_decoy_weight_edit_keyboard,
-    build_decoy_advanced_menu,
     # Callback constants
     CALLBACK_MAIN_STATUS,
     CALLBACK_MAIN_MONITOR,
@@ -107,11 +113,6 @@ COMMAND_RESET = "/reset"
 COMMAND_SUBSCRIPTION = "/subscription"
 COMMAND_CREATE = "/create"
 
-# Progress bar settings / Настройки прогресс-бара
-PROGRESS_BAR_WIDTH = 10
-PROGRESS_BAR_FILLED = "█"
-PROGRESS_BAR_EMPTY = "░"
-
 # Rate limiting / Ограничение частоты команд
 RATE_LIMIT_SECONDS = 3  # Минимальный интервал между командами
 MAX_COMMANDS_PER_MINUTE = 10  # Максимум команд в минуту
@@ -119,20 +120,6 @@ MAX_COMMANDS_PER_MINUTE = 10  # Максимум команд в минуту
 # Timeouts in seconds / Таймауты в секундах
 SERVICE_RESTART_TIMEOUT = 30
 ERROR_MESSAGE_MAX_LENGTH = 500
-
-# Default connection test targets / Цели для проверки соединения по умолчанию
-SPEEDTEST_TARGETS = [
-    ("Google", "https://www.google.com"),
-    ("Cloudflare", "https://www.cloudflare.com"),
-    ("GitHub", "https://www.github.com"),
-    ("Telegram", "https://api.telegram.org"),
-]
-
-# Service display names / Отображаемые имена сервисов
-SERVICE_NAMES = {
-    "cubiveil-bot": "🤖 Bot",
-    "nginx": "🌐 Nginx",
-}
 
 # Service log mapping / Маппинг логов сервисов
 SERVICE_LOG_MAP = {
@@ -145,45 +132,7 @@ SERVICE_LOG_MAP = {
 
 # Local modules - decoy
 from decoy import DecoyManager
-
-
-class SuiClient:
-    """
-    Stub class for S-UI API client
-    Tests mock this class, so it just provides the interface
-    """
-
-    def __init__(self, base_url=None, api_key=None):
-        self.base_url = base_url or "http://localhost:2095"
-        self.api_key = api_key
-
-    def enable_user(self, username: str) -> bool:
-        """Enable a user"""
-        return True
-
-    def disable_user(self, username: str) -> bool:
-        """Disable a user"""
-        return True
-
-    def extend_user(self, username: str, days: int) -> dict:
-        """Extend user expiration"""
-        return {"username": username, "expire": 1700000000}
-
-    def reset_user_traffic(self, username: str) -> bool:
-        """Reset user traffic"""
-        return True
-
-    def get_user_traffic(self, username: str) -> dict:
-        """Get user traffic usage"""
-        return {"used_gb": 0, "limit_gb": 0, "remaining_gb": 0, "percentage": 0}
-
-    def get_subscription_link(self, username: str) -> str:
-        """Get user subscription link"""
-        return f"https://example.com/sub/{username}"
-
-    def create_user(self, username: str, days: int, data_limit: int) -> dict:
-        """Create a new user"""
-        return {"username": username}
+from sui_client import SuiClient
 
 
 class CommandHandler:
@@ -304,8 +253,21 @@ class CommandHandler:
 
         args = ["bash", script]
         params = command.strip().split()[1:]
+
+        # Path traversal protection: validate arguments
         if params:
-            args += params
+            validated_params = []
+            for param in params:
+                # Only allow alphanumeric, slashes, underscores, dots, hyphens
+                if not re.match(r'^[a-zA-Z0-9/_.-]+$', param):
+                    self.telegram.send(f"❌ Invalid argument: {param}")
+                    return
+                # Must start with /var/backups/cubiveil/ for security
+                if param.startswith('/') and not param.startswith('/var/backups/cubiveil/'):
+                    self.telegram.send("❌ Path must be within /var/backups/cubiveil/")
+                    return
+                validated_params.append(param)
+            args += validated_params
 
         self._run_shell_utility(args, "Rollback")
 
@@ -332,7 +294,20 @@ class CommandHandler:
             self.telegram.send("⚠️ Usage: /import <path_to_exported_config>")
             return
 
-        args = ["bash", script] + params
+        # Path traversal protection: validate arguments
+        validated_params = []
+        for param in params:
+            # Only allow alphanumeric, slashes, underscores, dots, hyphens
+            if not re.match(r'^[a-zA-Z0-9/_.-]+$', param):
+                self.telegram.send(f"❌ Invalid argument: {param}")
+                return
+            # Must start with /var/backups/cubiveil/ for security
+            if param.startswith('/') and not param.startswith('/var/backups/cubiveil/'):
+                self.telegram.send("❌ Path must be within /var/backups/cubiveil/")
+                return
+            validated_params.append(param)
+
+        args = ["bash", script] + validated_params
         self._run_shell_utility(args, "Import config")
 
     def _install_aliases(self):
@@ -462,6 +437,10 @@ class CommandHandler:
             self._handle_settings_menu(chat_id, message_id, data)
         elif data.startswith("nav_"):
             self._handle_navigation(chat_id, message_id, data)
+        elif data.startswith("decoy_"):
+            self._handle_decoy_menu(chat_id, message_id, data)
+        elif data.startswith("profiles_"):
+            self._handle_profiles_list(chat_id, message_id, data)
 
     # ═══════════════════════════════════════════════════════════════════════════
     # Navigation Handlers / Навигация
@@ -535,7 +514,7 @@ class CommandHandler:
             filename = data.split(":", 1)[1].replace("_", "/")
             self._restore_backup(filename)
         elif data.startswith("backup_cancel:"):
-            self.telegram.send(chat_id, "✅ Cancelled")
+            self.telegram.send("✅ Cancelled")
 
     # ═══════════════════════════════════════════════════════════════════════════
     # Logs Menu Handlers / Меню логов
@@ -553,6 +532,25 @@ class CommandHandler:
         elif data in SERVICE_LOG_MAP:
             service = SERVICE_LOG_MAP[data]
             self._show_logs(service, 50)
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # Decoy Handlers / Обработка Decoy
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    def _handle_decoy_menu(self, chat_id, message_id, data: str):
+        """Handle decoy menu callbacks"""
+        if data == CALLBACK_DECOY_MAIN:
+            self._decoy_menu(chat_id, message_id)
+        elif data == CALLBACK_DECOY_STATUS:
+            self._decoy_status(chat_id, message_id)
+        elif data == CALLBACK_DECOY_ROTATE:
+            self._decoy_rotate(chat_id, message_id)
+        elif data == CALLBACK_DECOY_FILES:
+            self._decoy_files(chat_id, message_id)
+        elif data == CALLBACK_DECOY_CONFIG:
+            self._decoy_config(chat_id, message_id)
+        elif data == CALLBACK_DECOY_SETTINGS:
+            self._decoy_settings_menu(chat_id, message_id)
 
     # ═══════════════════════════════════════════════════════════════════════════
     # Profiles Handlers / Профили
@@ -603,6 +601,37 @@ class CommandHandler:
             self.telegram.send("⚠️ Change RAM threshold: Use /set_ram <percent> command")
         elif data == CALLBACK_SETTINGS_DISK:
             self.telegram.send("⚠️ Change Disk threshold: Use /set_disk <percent> command")
+
+    # ═══════════════════════════════════════════════════════════════════════════
+    # Decoy Menu Handlers / Обработка меню Decoy
+    # ═══════════════════════════════════════════════════════════════════════════
+
+    def _handle_decoy_menu(self, chat_id, message_id, data: str):
+        """Handle decoy menu callbacks"""
+        if data == CALLBACK_DECOY_STATUS:
+            self._decoy_status(chat_id, message_id)
+        elif data == CALLBACK_DECOY_ROTATE:
+            self._decoy_rotate(chat_id, message_id)
+        elif data == CALLBACK_DECOY_FILES:
+            self._decoy_files(chat_id, message_id)
+        elif data == CALLBACK_DECOY_CONFIG:
+            self._decoy_config(chat_id, message_id)
+        elif data == CALLBACK_DECOY_SETTINGS:
+            self._decoy_settings_menu(chat_id, message_id)
+        elif data == CALLBACK_DECOY_INTERVAL:
+            self.telegram.send("⚠️ Change interval: Use /decoy_interval <hours> command")
+        elif data == CALLBACK_DECOY_LIMIT:
+            self.telegram.send("⚠️ Change size limit: Use /decoy_limit <MB> command")
+        elif data == CALLBACK_DECOY_WEIGHTS:
+            self.telegram.send("⚠️ Configure weights via /decoy_weights command")
+        elif data == CALLBACK_DECOY_ENABLE:
+            self.telegram.send("⚠️ Enable rotation: Use /decoy_enable command")
+        elif data == CALLBACK_DECOY_DISABLE:
+            self.telegram.send("⚠️ Disable rotation: Use /decoy_disable command")
+        elif data == CALLBACK_DECOY_CLEANUP:
+            self.telegram.send("⚠️ Cleanup old files: Use /decoy_cleanup command")
+        elif data == CALLBACK_DECOY_REGENERATE:
+            self.telegram.send("⚠️ Regenerate files: Use /decoy_regenerate command")
 
     # ═══════════════════════════════════════════════════════════════════════════
     # Command Implementations / Реализация команд
@@ -686,18 +715,6 @@ class CommandHandler:
         result = self.sui.create_user(username, days, data_limit)
         if result:
             self.telegram.send(f"✅ User <b>{username}</b> created successfully!")
-
-    def _enable_command(self, command: str):
-        """Handle /enable command"""
-        parts = command.strip().split()
-        if len(parts) < 2:
-            self.telegram.send("⚠️ Usage: /enable <username>")
-            return
-
-        username = parts[1]
-        success = self.sui.enable_user(username)
-        if success:
-            self.telegram.send(f"✅ User <b>{username}</b> enabled")
 
     def _disable_command(self, command: str):
         """Handle /disable command"""
@@ -829,19 +846,6 @@ class CommandHandler:
             reply_markup=json.dumps(build_confirm_keyboard("backup_restore", filename))
         )
 
-    def _restore_backup(self, filename: str):
-        """Restore backup"""
-        backups = self.backup.list_backups()
-        for bak in backups:
-            if bak["filename"] == filename:
-                success = self.backup.restore(bak["path"])
-                if success:
-                    self.telegram.send("✅ Backup restored successfully!")
-                else:
-                    self.telegram.send("❌ Restore failed")
-                return
-        self.telegram.send(f"❌ Backup not found: {filename}")
-
     def _confirm_delete_backup(self, filename: str):
         """Confirm backup deletion"""
         self.telegram.send(
@@ -927,7 +931,7 @@ class CommandHandler:
         self.telegram.send("⏳ Running speed test...")
 
         results = []
-        for name, url in SPEEDTEST_TARGETS:
+        for name, url in DEFAULT_CONNECTION_TARGETS:
             result = self.health.check_connection_speed(url)
             if result["success"]:
                 results.append(f"🟢 {name}: {result['latency_ms']}ms")
@@ -1124,15 +1128,22 @@ class CommandHandler:
 
         self.telegram.send(f"❌ Backup not found: <code>{filename}</code>")
 
-    def _set_cpu(self, command: str):
+    def _set_threshold(self, command: str, attr_name: str, display_name: str):
         """
-        Handle /set_cpu command
-        Usage: /set_cpu <percent>
+        Universal method for setting alert thresholds
+        Args:
+            command: Command string
+            attr_name: Attribute name ('cpu', 'ram', 'disk')
+            display_name: Display name for messages
         """
         args = command.split()[1:]
+        current_value = getattr(self, f"alert_{attr_name}")
 
         if len(args) < 1:
-            self.telegram.send(f"⚠️ Current CPU threshold: {self.alert_cpu}%\nUsage: <code>/set_cpu &lt;percent&gt;</code>")
+            self.telegram.send(
+                f"⚠️ Current {display_name} threshold: {current_value}%\n"
+                f"Usage: <code>/set_{attr_name} &lt;percent&gt;</code>"
+            )
             return
 
         try:
@@ -1141,54 +1152,22 @@ class CommandHandler:
                 self.telegram.send("⚠️ Value must be between 0 and 100")
                 return
 
-            self.alert_cpu = new_value
-            self.telegram.send(f"✅ CPU threshold set to {new_value}%")
+            setattr(self, f"alert_{attr_name}", new_value)
+            self.telegram.send(f"✅ {display_name} threshold set to {new_value}%")
         except ValueError:
             self.telegram.send("⚠️ Invalid value. Use a number between 0 and 100")
+
+    def _set_cpu(self, command: str):
+        """Handle /set_cpu command"""
+        self._set_threshold(command, "cpu", "CPU")
 
     def _set_ram(self, command: str):
-        """
-        Handle /set_ram command
-        Usage: /set_ram <percent>
-        """
-        args = command.split()[1:]
-
-        if len(args) < 1:
-            self.telegram.send(f"⚠️ Current RAM threshold: {self.alert_ram}%\nUsage: <code>/set_ram &lt;percent&gt;</code>")
-            return
-
-        try:
-            new_value = int(args[0])
-            if new_value < 0 or new_value > 100:
-                self.telegram.send("⚠️ Value must be between 0 and 100")
-                return
-
-            self.alert_ram = new_value
-            self.telegram.send(f"✅ RAM threshold set to {new_value}%")
-        except ValueError:
-            self.telegram.send("⚠️ Invalid value. Use a number between 0 and 100")
+        """Handle /set_ram command"""
+        self._set_threshold(command, "ram", "RAM")
 
     def _set_disk(self, command: str):
-        """
-        Handle /set_disk command
-        Usage: /set_disk <percent>
-        """
-        args = command.split()[1:]
-
-        if len(args) < 1:
-            self.telegram.send(f"⚠️ Current Disk threshold: {self.alert_disk}%\nUsage: <code>/set_disk &lt;percent&gt;</code>")
-            return
-
-        try:
-            new_value = int(args[0])
-            if new_value < 0 or new_value > 100:
-                self.telegram.send("⚠️ Value must be between 0 and 100")
-                return
-
-            self.alert_disk = new_value
-            self.telegram.send(f"✅ Disk threshold set to {new_value}%")
-        except ValueError:
-            self.telegram.send("⚠️ Invalid value. Use a number between 0 and 100")
+        """Handle /set_disk command"""
+        self._set_threshold(command, "disk", "Disk")
 
     # ═══════════════════════════════════════════════════════════════════════════
     # Profile Commands / Команды профилей
@@ -1213,6 +1192,76 @@ class CommandHandler:
         else:
             self.telegram.send(f"❌ Failed to enable profile <code>{username}</code>\nCheck username and try again")
 
+    def _qr_command(self, command: str):
+        """
+        Handle /qr command
+        Usage: /qr <username>
+        """
+        args = command.split()[1:]
+
+        if len(args) < 1:
+            self.telegram.send("⚠️ Usage: <code>/qr &lt;username&gt;</code>")
+            return
+
+        username = args[0]
+        self._show_qr(username)
+
+    def _show_all_profiles(self):
+        """Show all profiles"""
+        self._show_profiles_by_status("all")
+
+    def _show_profiles_by_status(self, status: str):
+        """
+        Show profiles filtered by status
+        Args:
+            status: Profile status (all, active, disabled, expired)
+        """
+        # Stub implementation - will be fully implemented with SuiClient
+        self.telegram.send(f"📋 Profiles ({status}):\\nFeature requires S-UI API integration")
+
+    def _show_profile_info(self, username: str):
+        """
+        Show detailed profile information
+        Args:
+            username: Profile username
+        """
+        # Stub implementation - will be fully implemented with SuiClient
+        self.telegram.send(f"👤 Profile: <code>{username}</code>\\nFeature requires S-UI API integration")
+
+    def _enable_profile(self, username: str):
+        """
+        Enable a profile
+        Args:
+            username: Profile username
+        """
+        success = self.sui.enable_user(username)
+        if success:
+            self.telegram.send(f"✅ Profile <code>{username}</code> enabled")
+        else:
+            self.telegram.send(f"❌ Failed to enable profile <code>{username}</code>")
+
+    def _confirm_disable_profile(self, username: str):
+        """
+        Show confirmation for disabling a profile
+        Args:
+            username: Profile username
+        """
+        self.telegram.send(
+            f"⚠️ <b>Confirm Disable</b>\\n\\n"
+            f"Disable profile: <code>{username}</code>\\n"
+            f"This will stop all traffic for this user.",
+            reply_markup=json.dumps(build_confirm_keyboard("profile_disable", username))
+        )
+
+    def _show_qr(self, username: str):
+        """
+        Show QR code for profile
+        Args:
+            username: Profile username
+        """
+        # Stub implementation - QR generation requires subscription link
+        self.telegram.send(f"📱 QR code for <code>{username}</code>\\nFeature requires S-UI API integration")
+
     # ═══════════════════════════════════════════════════════════════════════════
     # Decoy Site Handlers / Обработка Decoy Site
     # ═══════════════════════════════════════════════════════════════════════════
@@ -1221,7 +1270,6 @@ class CommandHandler:
         """Show Decoy Site main menu"""
         if not self.decoy.is_configured():
             self.telegram.send(
-                chat_id,
                 "❌ Decoy Site not configured\n"
                 "Run: install.sh --decoy",
                 reply_markup=build_back_button()
@@ -1229,7 +1277,6 @@ class CommandHandler:
             return
 
         self.telegram.send(
-            chat_id,
             "🎭 <b>Decoy Site Management</b>\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
             "Manage rotation and files",
@@ -1242,7 +1289,6 @@ class CommandHandler:
 
         if not status["configured"]:
             self.telegram.send(
-                chat_id,
                 "❌ Decoy Site not configured\n"
                 "Run: install.sh --decoy"
             )
@@ -1264,18 +1310,18 @@ class CommandHandler:
             for ftype, count in status["files_by_type"].items():
                 message += f"  {ftype.upper()}: {count}\n"
 
-        self.telegram.send(chat_id, message, reply_markup=build_decoy_menu())
+        self.telegram.send(message, reply_markup=build_decoy_menu())
 
     def _decoy_rotate(self, chat_id, message_id=None):
         """Trigger immediate rotation"""
-        self.telegram.answer_callback(chat_id, "🔄 Starting rotation...")
+        self.telegram.answer_callback(callback_query_id=chat_id, text="🔄 Starting rotation...")
 
         success, message = self.decoy.rotate_now()
 
         if success:
-            self.telegram.send(chat_id, f"✅ {message}\n\nUse /decoy_status to see results")
+            self.telegram.send(f"✅ {message}\n\nUse /decoy_status to see results")
         else:
-            self.telegram.send(chat_id, f"❌ {message}")
+            self.telegram.send(f"❌ {message}")
 
     def _decoy_files(self, chat_id, message_id=None):
         """Show list of decoy files"""
@@ -1283,7 +1329,6 @@ class CommandHandler:
 
         if not files:
             self.telegram.send(
-                chat_id,
                 "📁 No files found\n"
                 "Run rotation or regenerate files",
                 reply_markup=build_decoy_menu()
@@ -1300,14 +1345,14 @@ class CommandHandler:
         if len(files) > 15:
             message += f"\n... and {len(files) - 15} more files"
 
-        self.telegram.send(chat_id, message, reply_markup=build_decoy_menu())
+        self.telegram.send(message, reply_markup=build_decoy_menu())
 
     def _decoy_config(self, chat_id, message_id=None):
         """Show decoy configuration"""
         config = self.decoy._load_config()
 
         if not config:
-            self.telegram.send(chat_id, "❌ Failed to load configuration")
+            self.telegram.send("❌ Failed to load configuration")
             return
 
         # Format config as code block
@@ -1320,12 +1365,11 @@ class CommandHandler:
         message = f"⚙️ <b>Decoy Configuration</b>\n\n"
         message += f"<pre>{config_text}</pre>"
 
-        self.telegram.send(chat_id, message, reply_markup=build_decoy_menu())
+        self.telegram.send(message, reply_markup=build_decoy_menu())
 
     def _decoy_settings_menu(self, chat_id, message_id=None):
         """Show Decoy Settings menu"""
         self.telegram.send(
-            chat_id,
             "⚙️ <b>Decoy Settings</b>\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
             "Configure rotation parameters",

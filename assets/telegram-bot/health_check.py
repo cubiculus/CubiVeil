@@ -126,20 +126,22 @@ class HealthChecker:
             conn = sqlite3.connect(SUI_DB_FILE, timeout=DB_TIMEOUT)
             cur = conn.cursor()
 
+            # s-ui schema: clients(email, enable, up, down, total, expiry_time)
             cur.execute("""
-                SELECT status, used_traffic, data_limit, expire
-                FROM users
-                WHERE username = ?
+                SELECT enable, up, down, total, expiry_time
+                FROM clients
+                WHERE email = ?
             """, (username,))
 
             row = cur.fetchone()
             conn.close()
 
             if row:
-                result["status"] = row[0] or "unknown"
-                result["used_traffic"] = row[1] or 0
-                result["data_limit"] = row[2] or 0
-                result["expiry"] = row[3]
+                enable, up, down, total, expiry_time = row
+                result["status"] = "active" if enable == 1 else "disabled"
+                result["used_traffic"] = (up or 0) + (down or 0)
+                result["data_limit"] = total or 0
+                result["expiry"] = expiry_time
             else:
                 logger.info(f"User not found: {username}")
                 result["error"] = "User not found"
@@ -169,19 +171,21 @@ class HealthChecker:
             conn = sqlite3.connect(SUI_DB_FILE, timeout=DB_TIMEOUT)
             cur = conn.cursor()
 
+            # s-ui schema: clients(email, enable, up, down, total, expiry_time)
             cur.execute("""
-                SELECT username, status, used_traffic, data_limit, expire
-                FROM users
-                ORDER BY username
+                SELECT email, enable, up, down, total, expiry_time
+                FROM clients
+                ORDER BY email
             """)
 
             for row in cur.fetchall():
+                email, enable, up, down, total, expiry_time = row
                 profiles.append({
-                    "username": row[0],
-                    "status": row[1] or "unknown",
-                    "used_traffic": row[2] or 0,
-                    "data_limit": row[3] or 0,
-                    "expiry": row[4]
+                    "username": email,
+                    "status": "active" if enable == 1 else "disabled",
+                    "used_traffic": (up or 0) + (down or 0),
+                    "data_limit": total or 0,
+                    "expiry": expiry_time
                 })
 
             conn.close()
@@ -238,7 +242,7 @@ class HealthChecker:
 
     def check_health_endpoint(self) -> dict:
         """
-        Check the health check endpoint
+        Check the S-UI API status endpoint
         Returns dict with status, services
         """
         result = {
@@ -251,7 +255,7 @@ class HealthChecker:
         try:
             response = subprocess.run(  # nosec B607, B603
                 ["curl", "-sf", "--max-time", "10",
-                 f"http://localhost:{self.health_check_port}/health"],
+                 f"http://localhost:{self.health_check_port}/api/server/status"],
                 capture_output=True,
                 text=True,
                 timeout=HEALTH_ENDPOINT_TIMEOUT,
@@ -261,24 +265,27 @@ class HealthChecker:
             if response.returncode == 0:
                 try:
                     data = json.loads(response.stdout)
-                    result["status"] = data.get("status", "unknown")
-                    result["s-ui"] = data.get("s-ui", "unknown")
-                    result["singbox"] = data.get("singbox", "unknown")
+                    # S-UI API v2 response format
+                    if data.get("success"):
+                        result["status"] = "healthy"
+                        result["s-ui"] = "running"
+                    else:
+                        result["status"] = "unhealthy"
                 except json.JSONDecodeError as e:
-                    logger.error(f"Invalid JSON from health endpoint: {e}")
+                    logger.error(f"Invalid JSON from status endpoint: {e}")
                     result["status"] = "invalid_response"
-                    result["error"] = "Invalid JSON from health endpoint"
+                    result["error"] = "Invalid JSON from status endpoint"
             else:
                 result["status"] = "unreachable"
-                result["error"] = "Health endpoint not responding"
+                result["error"] = "Status endpoint not responding"
 
         except subprocess.TimeoutExpired as e:
-            logger.warning(f"Timeout connecting to health endpoint: {e}")
-            result["error"] = "Timeout connecting to health endpoint"
+            logger.warning(f"Timeout connecting to status endpoint: {e}")
+            result["error"] = "Timeout connecting to status endpoint"
         except subprocess.CalledProcessError as e:
-            logger.info(f"Health endpoint not responding: {e}")
+            logger.info(f"Status endpoint not responding: {e}")
             result["status"] = "unreachable"
-            result["error"] = "Health endpoint not responding"
+            result["error"] = "Status endpoint not responding"
         except FileNotFoundError:
             logger.error("curl command not found")
             result["error"] = "curl not installed"
