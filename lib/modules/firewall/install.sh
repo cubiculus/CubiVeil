@@ -114,44 +114,6 @@ firewall_disable() {
 
 # ── Управление портами / Port Management ───────────────────
 
-# Открытие порта с валидацией
-firewall_open_port() {
-  local port="$1"
-  local proto="${2:-tcp}"
-  local comment="${3:-cubiveil}"
-
-  log_step "firewall_open_port" "Opening port ${port}/${proto}"
-
-  # Валидация порта через модуль validation.sh
-  if ! validate_port "$port"; then
-    local msg
-    if declare -f get_str >/dev/null; then
-      msg=$(get_str "MSG_ERR_INVALID_PORT" | sed "s/{PORT}/${port}/")
-    else
-      msg="Invalid port: ${port}"
-    fi
-    log_error "$msg"
-    return 1
-  fi
-
-  # Пробуем открыть порт с комментарием
-  if ! ufw allow "${port}/${proto}" comment "${comment}" >/dev/null 2>&1; then
-    # Пробуем без comment (некоторые версии ufw не поддерживают)
-    if ! ufw allow "${port}/${proto}" >/dev/null 2>&1; then
-      local msg
-      if declare -f get_str >/dev/null; then
-        msg=$(get_str "MSG_ERR_OPEN_PORT" | sed "s/{PORT}/${port}/" | sed "s/{PROTO}/${proto}/")
-      else
-        msg="Failed to open port ${port}/${proto} in firewall"
-      fi
-      log_error "$msg"
-      return 1
-    fi
-  fi
-
-  log_success "Port ${port}/${proto} opened: ${comment}"
-}
-
 # Закрытие порта
 firewall_close_port() {
   local port="$1"

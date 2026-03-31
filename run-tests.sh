@@ -69,6 +69,7 @@ run_unit_tests() {
     "unit-decoy-install.sh:Decoy-site Install"
     "unit-decoy-site.sh:Decoy-site module"
     "unit-decoy-rotate.sh:Decoy-site Rotate"
+    "unit-decoy-generators.sh:Decoy Generators"
     "unit-decoy-inner-pages.sh:Decoy Inner Pages"
     "unit-traffic-shaping.sh:Traffic Shaping module"
     "unit-traffic-shaping-persist.sh:TS Persist"

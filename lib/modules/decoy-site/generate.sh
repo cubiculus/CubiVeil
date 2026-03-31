@@ -580,8 +580,21 @@ decoy_generate_profile() {
     local temp_dir
     temp_dir=$(mktemp -d)
 
-    # Запускаем генератор
-    bash "$SCRIPT_DIR/generate.sh" --output "$temp_dir" "$@"
+    # Сохраняем текущие параметры
+    local original_output="$OUTPUT_DIR"
+    local original_output_set="$OUTPUT_DIR_SET"
+
+    # Устанавливаем параметры для generate()
+    OUTPUT_DIR="$temp_dir"
+    OUTPUT_DIR_SET=1
+
+    # Вызываем функцию generate напрямую (не рекурсивно!)
+    parse_args "$@"
+    generate
+
+    # Восстанавливаем параметры
+    OUTPUT_DIR="$original_output"
+    OUTPUT_DIR_SET="$original_output_set"
 
     # Копируем конфиг
     if [[ -f "$temp_dir/.generation_meta.json" ]]; then
@@ -613,8 +626,21 @@ EOF
 
 # decoy_build_webroot - сборка webroot из шаблонов
 decoy_build_webroot() {
-    # Просто запускаем генератор в DECOY_WEBROOT
-    bash "$SCRIPT_DIR/generate.sh" --output "$DECOY_WEBROOT" "$@"
+    # Сохраняем текущие параметры
+    local original_output="$OUTPUT_DIR"
+    local original_output_set="$OUTPUT_DIR_SET"
+
+    # Устанавливаем параметры для generate()
+    OUTPUT_DIR="$DECOY_WEBROOT"
+    OUTPUT_DIR_SET=1
+
+    # Вызываем функцию generate напрямую
+    parse_args "$@"
+    generate
+
+    # Восстанавливаем параметры
+    OUTPUT_DIR="$original_output"
+    OUTPUT_DIR_SET="$original_output_set"
 }
 
 # decoy_write_nginx_conf - запись конфигурации nginx
