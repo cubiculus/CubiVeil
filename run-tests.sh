@@ -58,6 +58,7 @@ run_unit_tests() {
     "unit-install.sh:install.sh"
     "unit-installer-modules.sh:Installer modules"
     "unit-orchestrator.sh:Orchestrator"
+    "unit-s-ui.sh:S-UI module"
     "unit-telegram.sh:setup-telegram.sh"
     "unit-system.sh:System module"
     "unit-ssl.sh:SSL module"
