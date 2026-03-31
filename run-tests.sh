@@ -59,6 +59,7 @@ run_unit_tests() {
     "unit-installer-modules.sh:Installer modules"
     "unit-orchestrator.sh:Orchestrator"
     "unit-ui.sh:UI module"
+    "unit-prompt.sh:Prompt module"
     "unit-s-ui.sh:S-UI module"
     "unit-firewall.sh:Firewall module"
     "unit-fail2ban.sh:Fail2ban module"
