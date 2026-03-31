@@ -99,6 +99,9 @@ build/
 *.egg-info/
 .eggs/
 
+# --- Decoy-site generated files ---
+lib/modules/decoy-site/webroot/
+
 # --- Rust ---
 target/
 Cargo.lock

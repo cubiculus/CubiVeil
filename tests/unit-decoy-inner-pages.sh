@@ -262,11 +262,11 @@ test_decoy_build_webroot_calls_inner_pages() {
 }
 EOF
 
-  # Создаём шаблон
+  # Создаём шаблон (минимум файлов для теста)
   local templates_dir="${PROJECT_ROOT}/lib/modules/decoy-site/templates"
   mkdir -p "$templates_dir"
-  if [[ ! -f "${templates_dir}/portal.html" ]]; then
-    echo '<html><body><h1>{{SITE_NAME}}</h1></body></html>' >"${templates_dir}/portal.html"
+  if [[ ! -f "${templates_dir}/_shared/index.html" ]]; then
+    echo '<html><body><h1>{{SITE_NAME}}</h1></body></html>' >"${templates_dir}/_shared/index.html"
   fi
 
   # Вызываем decoy_build_webroot

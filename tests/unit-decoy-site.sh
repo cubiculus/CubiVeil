@@ -36,6 +36,12 @@ is_command_available() {
   return 1
 }
 
+# Устанавливаем переменные по умолчанию для загрузки модулей
+export TEST_MODE="false"  # Не включать test mode при загрузке
+export TEST_DECOY_DIR=""  # Явно устанавливаем в пустую строку
+export DECOY_WEBROOT="/tmp/test-decoy-webroot-$$"
+mkdir -p "$DECOY_WEBROOT"
+
 # Создаём тестовую директорию /etc/cubiveil в temp
 TEST_ETC_CUBIVEIL="/tmp/test-cubiveil-etc-$$"
 mkdir -p "$TEST_ETC_CUBIVEIL"
@@ -195,6 +201,9 @@ gen_range() {
 # ════════════════════════════════════════════════════════════
 test_module_load() {
   info "Тестирование загрузки модуля decoy-site..."
+
+  # Debug
+  echo "[DEBUG] TEST_MODE=[$TEST_MODE], TEST_DECOY_DIR=[$TEST_DECOY_DIR], DECOY_WEBROOT=[$DECOY_WEBROOT]" >&2
 
   # Источник install.sh
   # shellcheck disable=SC1090

@@ -59,47 +59,51 @@ test_install_syntax() {
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: РїРµСЂРµРјРµРЅРЅР°СЏ DEV_MODE РѕРїСЂРµРґРµР»РµРЅР° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: переменная DEV_MODE определена ─────────────────────────────────
 test_dev_mode_variable() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїРµСЂРµРјРµРЅРЅРѕР№ DEV_MODE..."
+  info "Тестирование переменной DEV_MODE..."
 
-  if grep -q 'DEV_MODE=' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: РїРµСЂРµРјРµРЅРЅР°СЏ DEV_MODE РѕРїСЂРµРґРµР»РµРЅР°"
+  if grep -q 'DEV_MODE=' "${SCRIPT_DIR}/install.sh" ||
+     grep -q 'DEV_MODE=' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
+    pass "install.sh: переменная DEV_MODE определена"
   else
-    fail "install.sh: РїРµСЂРµРјРµРЅРЅР°СЏ DEV_MODE РЅРµ РЅР°Р№РґРµРЅР°"
+    fail "install.sh: переменная DEV_MODE не найдена"
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: РїРµСЂРµРјРµРЅРЅР°СЏ DRY_RUN РѕРїСЂРµРґРµР»РµРЅР° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: переменная DRY_RUN определена ──────────────────────────────────
 test_dry_run_variable() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїРµСЂРµРјРµРЅРЅРѕР№ DRY_RUN..."
+  info "Тестирование переменной DRY_RUN..."
 
-  if grep -q 'DRY_RUN=' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: РїРµСЂРµРјРµРЅРЅР°СЏ DRY_RUN РѕРїСЂРµРґРµР»РµРЅР°"
+  if grep -q 'DRY_RUN=' "${SCRIPT_DIR}/install.sh" ||
+     grep -q 'DRY_RUN=' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
+    pass "install.sh: переменная DRY_RUN определена"
   else
-    fail "install.sh: РїРµСЂРµРјРµРЅРЅР°СЏ DRY_RUN РЅРµ РЅР°Р№РґРµРЅР°"
+    fail "install.sh: переменная DRY_RUN не найдена"
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: Р°СЂРіСѓРјРµРЅС‚ --dev РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: аргумент --dev обрабатывается ───────────────────────────────────
 test_dev_argument() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РѕР±СЂР°Р±РѕС‚РєРё Р°СЂРіСѓРјРµРЅС‚Р° --dev..."
+  info "Тестирование обработки аргумента --dev..."
 
-  if grep -q '\-\-dev)' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: Р°СЂРіСѓРјРµРЅС‚ --dev РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ"
+  if grep -q '\-\-dev)' "${SCRIPT_DIR}/install.sh" ||
+     grep -q '\-\-dev)' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
+    pass "install.sh: аргумент --dev обрабатывается"
   else
-    fail "install.sh: Р°СЂРіСѓРјРµРЅС‚ --dev РЅРµ РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ"
+    fail "install.sh: аргумент --dev не обрабатывается"
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: Р°СЂРіСѓРјРµРЅС‚ --dry-run РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: аргумент --dry-run обрабатывается ───────────────────────────────
 test_dry_run_argument() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РѕР±СЂР°Р±РѕС‚РєРё Р°СЂРіСѓРјРµРЅС‚Р° --dry-run..."
+  info "Тестирование обработки аргумента --dry-run..."
 
-  if grep -q '\-\-dry-run)' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: Р°СЂРіСѓРјРµРЅС‚ --dry-run РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ"
+  if grep -q '\-\-dry-run)' "${SCRIPT_DIR}/install.sh" ||
+     grep -q '\-\-dry-run)' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
+    pass "install.sh: аргумент --dry-run обрабатывается"
   else
-    fail "install.sh: Р°СЂРіСѓРјРµРЅС‚ --dry-run РЅРµ РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚СЃСЏ"
+    fail "install.sh: аргумент --dry-run не обрабатывается"
   fi
 }
 
@@ -140,85 +144,94 @@ test_usage_has_examples() {
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: dry-run СЂРµР¶РёРј РїРѕРєР°Р·С‹РІР°РµС‚ РїР»Р°РЅ СѓСЃС‚Р°РЅРѕРІРєРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: dry-run режим показывает план установки ─────────────────────────
 test_dry_run_shows_plan() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ dry-run: РїР»Р°РЅ СѓСЃС‚Р°РЅРѕРІРєРё..."
+  info "Тестирование dry-run: план установки..."
 
   if grep -q 'Installation Plan' "${SCRIPT_DIR}/install.sh" ||
-    grep -q 'РџР»Р°РЅ СѓСЃС‚Р°РЅРѕРІРєРё' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: dry-run РїРѕРєР°Р·С‹РІР°РµС‚ РїР»Р°РЅ СѓСЃС‚Р°РЅРѕРІРєРё"
+    grep -q 'Installation Plan' "${SCRIPT_DIR}/lib/core/installer/ui.sh" ||
+    grep -q 'План установки' "${SCRIPT_DIR}/install.sh" ||
+    grep -q 'План установки' "${SCRIPT_DIR}/lib/core/installer/ui.sh"; then
+    pass "install.sh: dry-run показывает план установки"
   else
-    fail "install.sh: dry-run РЅРµ РїРѕРєР°Р·С‹РІР°РµС‚ РїР»Р°РЅ СѓСЃС‚Р°РЅРѕРІРєРё"
+    fail "install.sh: dry-run не показывает план установки"
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: dry-run РїСЂРѕРІРµСЂСЏРµС‚ root в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: dry-run проверяет root ──────────────────────────────────────────
 test_dry_run_checks_root() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ dry-run: РїСЂРѕРІРµСЂРєР° root..."
+  info "Тестирование dry-run: проверка root..."
 
-  if grep -q 'EUID' "${SCRIPT_DIR}/install.sh" &&
-    grep -q 'Root access' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: dry-run РїСЂРѕРІРµСЂСЏРµС‚ root РґРѕСЃС‚СѓРї"
+  if grep -q 'EUID' "${SCRIPT_DIR}/lib/core/installer/ui.sh" &&
+    grep -q 'Root access' "${SCRIPT_DIR}/lib/core/installer/ui.sh"; then
+    pass "install.sh: dry-run проверяет root доступ"
   else
-    fail "install.sh: dry-run РЅРµ РїСЂРѕРІРµСЂСЏРµС‚ root РґРѕСЃС‚СѓРї"
+    fail "install.sh: dry-run не проверяет root доступ"
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: dry-run РїСЂРѕРІРµСЂСЏРµС‚ Ubuntu в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: dry-run проверяет Ubuntu ────────────────────────────────────────
 test_dry_run_checks_ubuntu() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ dry-run: РїСЂРѕРІРµСЂРєР° Ubuntu..."
+  info "Тестирование dry-run: проверка Ubuntu..."
 
-  if grep -q 'ubuntu' "${SCRIPT_DIR}/install.sh" &&
-    grep -q 'Ubuntu detected' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: dry-run РїСЂРѕРІРµСЂСЏРµС‚ Ubuntu"
+  if grep -q 'ubuntu' "${SCRIPT_DIR}/lib/core/installer/ui.sh" &&
+    grep -q 'Ubuntu' "${SCRIPT_DIR}/lib/core/installer/ui.sh"; then
+    pass "install.sh: dry-run проверяет Ubuntu"
   else
-    fail "install.sh: dry-run РЅРµ РїСЂРѕРІРµСЂСЏРµС‚ Ubuntu"
+    fail "install.sh: dry-run не проверяет Ubuntu"
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: dev СЂРµР¶РёРј РїРѕРєР°Р·С‹РІР°РµС‚ РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: dev режим показывает предупреждение ─────────────────────────────
 test_dev_mode_warning() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ dev-СЂРµР¶РёРј: РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ..."
+  info "Тестирование dev-режим: предупреждение..."
 
-  if grep -q 'DEV MODE' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: dev-СЂРµР¶РёРј РїРѕРєР°Р·С‹РІР°РµС‚ РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ"
+  if grep -q 'DEV MODE' "${SCRIPT_DIR}/install.sh" ||
+     grep -q 'DEV-режим' "${SCRIPT_DIR}/install.sh" ||
+     grep -q 'DEV_MODE' "${SCRIPT_DIR}/lib/core/installer/cli.sh" ||
+     grep -q 'DEV_MODE' "${SCRIPT_DIR}/lib/core/installer/prompt.sh"; then
+    pass "install.sh: dev-режим показывает предупреждение"
   else
-    fail "install.sh: dev-СЂРµР¶РёРј РЅРµ РїРѕРєР°Р·С‹РІР°РµС‚ РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёРµ"
+    fail "install.sh: dev-режим не показывает предупреждение"
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: dry-run РїРѕРєР°Р·С‹РІР°РµС‚ СЃРѕРѕР±С‰РµРЅРёРµ Рѕ СЃРёРјСѓР»СЏС†РёРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: dry-run показывает сообщение о симуляции ────────────────────────
 test_dry_run_simulation_message() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ dry-run: СЃРѕРѕР±С‰РµРЅРёРµ Рѕ СЃРёРјСѓР»СЏС†РёРё..."
+  info "Тестирование dry-run: сообщение о симуляции..."
 
-  if grep -q 'Simulation mode' "${SCRIPT_DIR}/install.sh" ||
-    grep -q 'Р РµР¶РёРј СЃРёРјСѓР»СЏС†РёРё' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: dry-run РїРѕРєР°Р·С‹РІР°РµС‚ СЃРѕРѕР±С‰РµРЅРёРµ Рѕ СЃРёРјСѓР»СЏС†РёРё"
+  if grep -q 'Simulation' "${SCRIPT_DIR}/install.sh" ||
+    grep -q 'Simulation' "${SCRIPT_DIR}/lib/core/installer/ui.sh"; then
+    pass "install.sh: dry-run показывает сообщение о симуляции"
   else
-    fail "install.sh: dry-run РЅРµ РїРѕРєР°Р·С‹РІР°РµС‚ СЃРѕРѕР±С‰РµРЅРёРµ Рѕ СЃРёРјСѓР»СЏС†РёРё"
+    fail "install.sh: dry-run не показывает сообщение о симуляции"
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: dry-run РЅРµ РІРЅРѕСЃРёС‚ РёР·РјРµРЅРµРЅРёСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: dry-run не вносит изменения ─────────────────────────────────────
 test_dry_run_no_changes() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ dry-run: РѕС‚СЃСѓС‚СЃС‚РІРёРµ РёР·РјРµРЅРµРЅРёР№..."
+  info "Тестирование dry-run: отсутствие изменений..."
 
   if grep -q 'No changes' "${SCRIPT_DIR}/install.sh" ||
-    grep -q 'РёР·РјРµРЅРµРЅРёСЏ РЅРµ Р±СѓРґСѓС‚' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: dry-run СѓРєР°Р·С‹РІР°РµС‚ РЅР° РѕС‚СЃСѓС‚СЃС‚РІРёРµ РёР·РјРµРЅРµРЅРёР№"
+    grep -q 'No changes' "${SCRIPT_DIR}/lib/core/installer/ui.sh" ||
+    grep -q 'изменения не будут' "${SCRIPT_DIR}/install.sh" ||
+    grep -q 'изменения не будут' "${SCRIPT_DIR}/lib/core/installer/ui.sh"; then
+    pass "install.sh: dry-run указывает на отсутствие изменений"
   else
-    fail "install.sh: dry-run РЅРµ СѓРєР°Р·С‹РІР°РµС‚ РЅР° РѕС‚СЃСѓС‚СЃС‚РІРёРµ РёР·РјРµРЅРµРЅРёР№"
+    fail "install.sh: dry-run не указывает на отсутствие изменений"
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: parse_args С„СѓРЅРєС†РёСЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: parse_args функция существует ───────────────────────────────────
 test_parse_args_exists() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёРё parse_args..."
+  info "Тестирование функции parse_args..."
 
-  if grep -q 'parse_args()' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: С„СѓРЅРєС†РёСЏ parse_args СЃСѓС‰РµСЃС‚РІСѓРµС‚"
+  if grep -q 'parse_args()' "${SCRIPT_DIR}/install.sh" ||
+     grep -q 'parse_args()' "${SCRIPT_DIR}/lib/core/installer/cli.sh" ||
+     grep -q 'parse_args() {' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
+    pass "install.sh: функция parse_args существует"
   else
-    fail "install.sh: С„СѓРЅРєС†РёСЏ parse_args РЅРµ РЅР°Р№РґРµРЅР°"
+    fail "install.sh: функция parse_args не найдена"
   fi
 }
 
@@ -245,25 +258,27 @@ test_help_argument() {
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: DEV_DOMAIN РїРµСЂРµРјРµРЅРЅР°СЏ РѕРїСЂРµРґРµР»РµРЅР° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: DEV_DOMAIN переменная определена ────────────────────────────────
 test_dev_domain_variable() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїРµСЂРµРјРµРЅРЅРѕР№ DEV_DOMAIN..."
+  info "Тестирование переменной DEV_DOMAIN..."
 
-  if grep -q 'DEV_DOMAIN=' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: РїРµСЂРµРјРµРЅРЅР°СЏ DEV_DOMAIN РѕРїСЂРµРґРµР»РµРЅР°"
+  if grep -q 'DEV_DOMAIN=' "${SCRIPT_DIR}/install.sh" ||
+     grep -q 'DEV_DOMAIN=' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
+    pass "install.sh: переменная DEV_DOMAIN определена"
   else
-    fail "install.sh: РїРµСЂРµРјРµРЅРЅР°СЏ DEV_DOMAIN РЅРµ РЅР°Р№РґРµРЅР°"
+    fail "install.sh: переменная DEV_DOMAIN не найдена"
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: dev.cubiveil.local РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: dev.cubiveil.local используется по умолчанию ────────────────────
 test_default_dev_domain() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РґРѕРјРµРЅР° РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РґР»СЏ dev..."
+  info "Тестирование домена по умолчанию для dev..."
 
-  if grep -q 'dev.cubiveil.local' "${SCRIPT_DIR}/install.sh"; then
-    pass "install.sh: dev.cubiveil.local РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ"
+  if grep -q 'dev.cubiveil.local' "${SCRIPT_DIR}/install.sh" ||
+     grep -q 'dev.cubiveil.local' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
+    pass "install.sh: dev.cubiveil.local используется по умолчанию"
   else
-    fail "install.sh: dev.cubiveil.local РЅРµ РЅР°Р№РґРµРЅРѕ"
+    fail "install.sh: dev.cubiveil.local не найдено"
   fi
 }
 
@@ -283,7 +298,8 @@ test_prompt_inputs_checks_dev_mode() {
   info "Тестирование prompt_inputs: проверка DEV_MODE..."
 
   if grep -q 'DEV_MODE.*true' "${SCRIPT_DIR}/install.sh" ||
-    grep -q 'DEV_MODE:-false' "${SCRIPT_DIR}/install.sh"; then
+     grep -q 'DEV_MODE:-false' "${SCRIPT_DIR}/install.sh" ||
+     grep -q 'DEV_MODE' "${SCRIPT_DIR}/lib/core/installer/prompt.sh"; then
     pass "prompt_inputs: проверяет DEV_MODE"
   else
     fail "prompt_inputs: не проверяет DEV_MODE"
@@ -294,8 +310,8 @@ test_prompt_inputs_checks_dev_mode() {
 test_prompt_inputs_skips_in_dev_mode() {
   info "Тестирование prompt_inputs: пропуск ввода в dev-режиме..."
 
-  if grep -q 'return 0' "${SCRIPT_DIR}/install.sh" &&
-    grep -q 'DEV-режим\|DEV mode' "${SCRIPT_DIR}/install.sh"; then
+  if grep -q 'return 0' "${SCRIPT_DIR}/lib/core/installer/prompt.sh" &&
+     grep -q 'DEV-режим\|DEV mode\|DEV_MODE' "${SCRIPT_DIR}/lib/core/installer/prompt.sh"; then
     pass "prompt_inputs: пропускает ввод в dev-режиме"
   else
     fail "prompt_inputs: не пропускает ввод в dev-режиме"

@@ -147,7 +147,6 @@ test_module_functions_usage() {
     "step_fail2ban"
     "step_ssl"
     "step_install_sui"
-    "step_configure"
     "step_decoy_site"
     "step_traffic_shaping"
     "step_finish"
@@ -216,69 +215,59 @@ test_installation_steps_order() {
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: step_traffic_shaping РїРѕСЃР»Рµ step_configure в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: step_traffic_shaping после step_install_sui ─────────────────────
 test_traffic_shaping_after_configure() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚Рё step_configure в†’ step_traffic_shaping..."
+  info "Тестирование последовательности step_install_sui → step_traffic_shaping..."
 
-  # РќР°С…РѕРґРёРј РЅРѕРјРµСЂР° СЃС‚СЂРѕРє РІС‹Р·РѕРІР° step_configure Рё step_traffic_shaping
-  local configure_line traffic_line
-  configure_line=$(grep -n '^  step_configure$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
+  # Находим номера строк вызова step_install_sui и step_traffic_shaping
+  local sui_line traffic_line
+  sui_line=$(grep -n '^  step_install_sui$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
   traffic_line=$(grep -n '^  step_traffic_shaping$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
 
-  if [[ "$configure_line" -eq 0 ]]; then
-    fail "install.sh: step_configure РЅРµ РЅР°Р№РґРµРЅ"
+  if [[ "$sui_line" -eq 0 ]]; then
+    fail "install.sh: step_install_sui не найден"
     return
   fi
 
   if [[ "$traffic_line" -eq 0 ]]; then
-    fail "install.sh: step_traffic_shaping РЅРµ РЅР°Р№РґРµРЅ"
+    fail "install.sh: step_traffic_shaping не найден"
     return
   fi
 
-  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ step_traffic_shaping РІС‹Р·С‹РІР°РµС‚СЃСЏ СЃСЂР°Р·Сѓ РїРѕСЃР»Рµ step_configure
-  local expected_traffic_line=$((configure_line + 2))
-
-  if [[ "$traffic_line" -eq "$expected_traffic_line" ]]; then
-    pass "install.sh: step_traffic_shaping РІС‹Р·С‹РІР°РµС‚СЃСЏ РїРѕСЃР»Рµ step_configure (СЃС‚СЂРѕРєРё $configure_line в†’ $traffic_line)"
-    ((TESTS_PASSED++)) || true
-  elif [[ "$traffic_line" -gt "$configure_line" ]]; then
-    pass "install.sh: step_traffic_shaping РІС‹Р·С‹РІР°РµС‚СЃСЏ РїРѕСЃР»Рµ step_configure (СЃС‚СЂРѕРєРё $configure_line в†’ $traffic_line)"
+  # Проверяем что step_traffic_shaping вызывается после step_install_sui
+  if [[ "$traffic_line" -gt "$sui_line" ]]; then
+    pass "install.sh: step_traffic_shaping вызывается после step_install_sui (строки $sui_line → $traffic_line)"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: step_traffic_shaping РґРѕР»Р¶РµРЅ РІС‹Р·С‹РІР°С‚СЊСЃСЏ РїРѕСЃР»Рµ step_configure"
+    fail "install.sh: step_traffic_shaping должен вызываться после step_install_sui"
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: step_decoy_site РїРѕСЃР»Рµ step_configure в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: step_decoy_site после step_install_sui ──────────────────────────
 test_decoy_site_after_configure() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚Рё step_configure в†’ step_decoy_site..."
+  info "Тестирование последовательности step_install_sui → step_decoy_site..."
 
-  # РќР°С…РѕРґРёРј РЅРѕРјРµСЂР° СЃС‚СЂРѕРє РІС‹Р·РѕРІР° step_configure Рё step_decoy_site
-  local configure_line decoy_line
-  configure_line=$(grep -n '^  step_configure$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
+  # Находим номера строк вызова step_install_sui и step_decoy_site
+  local sui_line decoy_line
+  sui_line=$(grep -n '^  step_install_sui$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
   decoy_line=$(grep -n '^  step_decoy_site$' "${SCRIPT_DIR}/install.sh" 2>/dev/null | head -1 | cut -d: -f1 || echo "0")
 
-  if [[ "$configure_line" -eq 0 ]]; then
-    fail "install.sh: step_configure РЅРµ РЅР°Р№РґРµРЅ"
+  if [[ "$sui_line" -eq 0 ]]; then
+    fail "install.sh: step_install_sui не найден"
     return
   fi
 
   if [[ "$decoy_line" -eq 0 ]]; then
-    fail "install.sh: step_decoy_site РЅРµ РЅР°Р№РґРµРЅ"
+    fail "install.sh: step_decoy_site не найден"
     return
   fi
 
-  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ step_decoy_site РІС‹Р·С‹РІР°РµС‚СЃСЏ СЃСЂР°Р·Сѓ РїРѕСЃР»Рµ step_configure
-  local expected_decoy_line=$((configure_line + 2))
-
-  if [[ "$decoy_line" -eq "$expected_decoy_line" ]]; then
-    pass "install.sh: step_decoy_site РІС‹Р·С‹РІР°РµС‚СЃСЏ РїРѕСЃР»Рµ step_configure (СЃС‚СЂРѕРєРё $configure_line в†’ $decoy_line)"
-    ((TESTS_PASSED++)) || true
-  elif [[ "$decoy_line" -gt "$configure_line" ]]; then
-    pass "install.sh: step_decoy_site РІС‹Р·С‹РІР°РµС‚СЃСЏ РїРѕСЃР»Рµ step_configure (СЃС‚СЂРѕРєРё $configure_line в†’ $decoy_line)"
+  # Проверяем что step_decoy_site вызывается после step_install_sui
+  if [[ "$decoy_line" -gt "$sui_line" ]]; then
+    pass "install.sh: step_decoy_site вызывается после step_install_sui (строки $sui_line → $decoy_line)"
     ((TESTS_PASSED++)) || true
   else
-    fail "install.sh: step_decoy_site РґРѕР»Р¶РµРЅ РІС‹Р·С‹РІР°С‚СЊСЃСЏ РїРѕСЃР»Рµ step_configure"
+    fail "install.sh: step_decoy_site должен вызываться после step_install_sui"
   fi
 }
 

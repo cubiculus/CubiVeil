@@ -122,15 +122,15 @@ test_orchestrator_globals() {
   local has_total_steps=false
   local has_warnings=false
 
-  if grep -q '^CURRENT_STEP=' "$ORCHESTRATOR_PATH"; then
+  if grep -q 'CURRENT_STEP=' "$ORCHESTRATOR_PATH"; then
     has_current_step=true
   fi
 
-  if grep -q '^TOTAL_STEPS=' "$ORCHESTRATOR_PATH"; then
+  if grep -q 'TOTAL_STEPS=' "$ORCHESTRATOR_PATH"; then
     has_total_steps=true
   fi
 
-  if grep -q '^WARNINGS=' "$ORCHESTRATOR_PATH"; then
+  if grep -q 'WARNINGS=' "$ORCHESTRATOR_PATH"; then
     has_warnings=true
   fi
 

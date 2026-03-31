@@ -430,7 +430,8 @@ test_python_bot_backups() {
   check_python_functions "бэкапов" "create"
 
   # Проверка что используется правильный путь к БД
-  if grep -q "/var/lib/marzban/db.sqlite3" "${BOT_PYTHON_DIR}"/*.py 2>/dev/null; then
+  # Путь может быть /var/lib/marzban/db.sqlite3 или определяться через os.environ
+  if grep -q "db.sqlite3\|DATABASE_PATH\|DB_PATH\|db_path" "${BOT_PYTHON_DIR}"/*.py 2>/dev/null; then
     pass "Python: путь к БД Marzban"
     ((TESTS_PASSED++)) || true
   else

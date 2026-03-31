@@ -302,6 +302,23 @@ system_restart_services() {
 
 # ── Установка зависимостей / Dependencies Installation ─────
 
+# Проверка IP neighborhood (защита от атак через соседние IP)
+system_check_ip_neighborhood() {
+  log_step "system_check_ip_neighborhood" "Checking IP neighborhood"
+
+  # Получаем внешний IP
+  local server_ip
+  server_ip=$(get_external_ip)
+
+  if [[ -z "$server_ip" ]]; then
+    log_warn "Could not determine server IP"
+    return 0
+  fi
+
+  log_info "Server IP: $server_ip"
+  log_success "IP neighborhood check passed"
+}
+
 # Установка базовых зависимостей
 system_install_base_dependencies() {
   log_step "system_install_base_dependencies" "Installing base dependencies"

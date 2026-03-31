@@ -114,6 +114,24 @@ firewall_disable() {
 
 # ── Управление портами / Port Management ───────────────────
 
+# Открытие порта
+firewall_open_port() {
+  local port="$1"
+  local proto="${2:-tcp}"
+
+  # Validate port number using validate_port from validation.sh
+  if ! validate_port "$port"; then
+    log_error "Invalid port number: $port"
+    return 1
+  fi
+
+  log_step "firewall_open_port" "Opening port ${port}/${proto}"
+
+  ufw allow "${port}/${proto}" >/dev/null 2>&1
+
+  log_success "Port ${port}/${proto} opened"
+}
+
 # Закрытие порта
 firewall_close_port() {
   local port="$1"

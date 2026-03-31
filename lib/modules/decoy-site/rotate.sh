@@ -21,9 +21,16 @@ DECOY_WEBROOT="${DECOY_WEBROOT:-/var/www/decoy}"
 DECOY_CONFIG="${DECOY_CONFIG:-/etc/cubiveil/decoy.json}"
 DECOY_ROTATE_TIMER="cubiveil-decoy-rotate"
 
+# Отладка
+echo "[ROTATE DEBUG] TEST_MODE=[$TEST_MODE], TEST_DECOY_DIR=[$TEST_DECOY_DIR]" >&2
+
 # В тестовом режиме используем временные директории
 if [[ "${TEST_MODE:-false}" == "true" ]]; then
-  TEST_DECOY_DIR="${TEST_DECOY_DIR:-/tmp/test-decoy-$$}"
+  echo "[ROTATE] Enabling test mode" >&2
+  if [[ -z "$TEST_DECOY_DIR" ]]; then
+    TEST_DECOY_DIR="/tmp/test-decoy-$$"
+    echo "[ROTATE] TEST_DECOY_DIR was empty, set to $TEST_DECOY_DIR" >&2
+  fi
   mkdir -p "$TEST_DECOY_DIR"
   DECOY_WEBROOT="${TEST_DECOY_DIR}/webroot"
   DECOY_CONFIG="${TEST_DECOY_DIR}/decoy.json"

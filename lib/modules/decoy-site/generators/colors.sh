@@ -10,6 +10,19 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
+# Логирование
+log_info() {
+    echo "[INFO] $*" >&2
+}
+
+log_success() {
+    echo "[SUCCESS] $*" >&2
+}
+
+log_error() {
+    echo "[ERROR] $*" >&2
+}
+
 # Функция для конвертации HSL в HEX
 hsl_to_hex() {
     local h=$1
@@ -167,10 +180,57 @@ generate_colors() {
 EOF
 }
 
+# ── Генерация CSS файла ────────────────────────────────────────────────────────
+
+# Генерация style.css из base.css с подстановкой цветов
+generate_css_file() {
+    local output_dir="$1"
+    local colors_json="$2"
+    
+    # Путь к base.css (в _shared)
+    local templates_dir="$ROOT_DIR/templates"
+    local base_css="$templates_dir/_shared/base.css"
+    local output_css="$output_dir/style.css"
+    
+    if [[ ! -f "$base_css" ]]; then
+        log_error "base.css not found at $base_css"
+        return 1
+    fi
+    
+    # Извлекаем цвета из JSON
+    local primary secondary accent background text border
+    primary=$(echo "$colors_json" | jq -r '.primary')
+    secondary=$(echo "$colors_json" | jq -r '.secondary')
+    accent=$(echo "$colors_json" | jq -r '.accent')
+    background=$(echo "$colors_json" | jq -r '.background')
+    text=$(echo "$colors_json" | jq -r '.text')
+    border=$(echo "$colors_json" | jq -r '.border')
+    
+    # Копируем base.css в output как style.css и заменяем плейсхолдеры
+    cp "$base_css" "$output_css"
+    
+    # Заменяем плейсхолдеры на реальные цвета
+    # Используем | как разделитель в sed чтобы избежать проблем с /
+    sed -i "s|{{PRIMARY_COLOR}}|$primary|g" "$output_css"
+    sed -i "s|{{SECONDARY_COLOR}}|$secondary|g" "$output_css"
+    sed -i "s|{{ACCENT_COLOR}}|$accent|g" "$output_css"
+    sed -i "s|{{BACKGROUND_COLOR}}|$background|g" "$output_css"
+    sed -i "s|{{TEXT_COLOR}}|$text|g" "$output_css"
+    sed -i "s|{{BORDER_COLOR}}|$border|g" "$output_css"
+    
+    log_info "Generated style.css with colors: primary=$primary, background=$background"
+    
+    # Возвращаем путь к сгенерированному файлу
+    echo "$output_css"
+}
+
 # Основная функция
 main() {
     local base_hue=""
     local theme="auto"
+    local output_dir=""
+    local generate_css_flag=false
+    local input_colors=""
 
     # Парсинг аргументов
     while [[ $# -gt 0 ]]; do
@@ -183,23 +243,50 @@ main() {
                 theme="$2"
                 shift 2
                 ;;
+            --output|-o)
+                output_dir="$2"
+                shift 2
+                ;;
+            --css)
+                generate_css_flag=true
+                shift
+                ;;
             --help)
                 echo "Usage: $0 [--hue <0-360>] [--theme <ocean|forest|sunset|corporate|dark|light|purple|warm>]"
                 echo ""
                 echo "Options:"
                 echo "  --hue, -h     Base hue (0-360)"
                 echo "  --theme, -t   Predefined theme"
+                echo "  --output, -o  Output directory for CSS file"
+                echo "  --css         Generate CSS file instead of JSON"
                 echo "  --help        Show this help"
                 exit 0
                 ;;
             *)
-                echo "Unknown option: $1" >&2
-                exit 1
+                # Если это не флаг, считаем что это input colors JSON
+                if [[ "$1" != -* ]]; then
+                    input_colors="$1"
+                fi
+                shift
                 ;;
         esac
     done
 
-    generate_colors "$base_hue" "$theme"
+    # Генерируем цвета или используем input
+    local colors_json
+    if [[ -n "$input_colors" ]]; then
+        colors_json="$input_colors"
+    else
+        colors_json=$(generate_colors "$base_hue" "$theme")
+    fi
+    
+    # Если флаг --css и указана output_dir, генерируем CSS
+    if [[ "$generate_css_flag" == "true" && -n "$output_dir" ]]; then
+        generate_css_file "$output_dir" "$colors_json"
+    else
+        # Вывод JSON
+        echo "$colors_json"
+    fi
 }
 
 # Запуск только если скрипт вызван напрямую

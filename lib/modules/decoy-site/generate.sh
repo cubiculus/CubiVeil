@@ -14,9 +14,14 @@ TEMPLATES_DIR="$ROOT_DIR/templates"
 LOGS_DIR="$ROOT_DIR/logs"
 WEBROOT_DIR="$ROOT_DIR/webroot"
 
+# Отладка
+echo "[GENERATE DEBUG] SCRIPT_DIR=[$SCRIPT_DIR], ROOT_DIR=[$ROOT_DIR], LOGS_DIR=[$LOGS_DIR]" >&2
+
 # Файлы логов
 LOG_FILE="$LOGS_DIR/generate.log"
+echo "[GENERATE] About to mkdir LOGS_DIR=[$LOGS_DIR]" >&2
 mkdir -p "$LOGS_DIR"
+echo "[GENERATE] LOGS_DIR created" >&2
 
 # Логирование
 log() {
@@ -34,6 +39,7 @@ log() {
 log_info() { log "INFO" "$@"; }
 log_error() { log "ERROR" "$@"; }
 log_debug() { log "DEBUG" "$@"; }
+log_success() { log "SUCCESS" "$@"; }
 
 # Обработка ошибок
 error_exit() {
@@ -256,10 +262,13 @@ copy_template() {
     mkdir -p "$output_dir"
     rm -rf "$output_dir"/*
 
-    # Копируем общие файлы из _shared
+    # Копируем общие файлы из _shared (кроме base.css)
     if [[ -d "$TEMPLATES_DIR/_shared" ]]; then
         log_info "Copying shared files from _shared"
-        cp -r "$TEMPLATES_DIR/_shared"/* "$output_dir/"
+        # Копируем всё кроме base.css (он будет сгенерирован как style.css)
+        find "$TEMPLATES_DIR/_shared" -type f ! -name "base.css" -exec cp {} "$output_dir/" \;
+        # Копируем поддиректории если есть
+        find "$TEMPLATES_DIR/_shared" -mindepth 1 -type d -exec cp -r {} "$output_dir/" \; 2>/dev/null || true
     fi
 
     # Копируем уникальные файлы шаблона (если есть)
@@ -270,6 +279,20 @@ copy_template() {
             cp -r "$TEMPLATES_DIR/$template_name"/* "$output_dir/"
         fi
     fi
+}
+
+# Генерация style.css с цветами
+generate_style_css() {
+    local output_dir="$1"
+    local colors_json="$2"
+    
+    log_info "Generating style.css with color scheme"
+    
+    # Вызываем colors.sh с флагом --css для генерации файла
+    # Передаем colors_json как аргумент, а не через stdin
+    bash "$GENERATORS_DIR/colors.sh" --css --output "$output_dir" "$colors_json"
+    
+    log_success "style.css generated"
 }
 
 # Замена переменных в файлах
@@ -714,7 +737,10 @@ generate() {
     mkdir -p "$OUTPUT_DIR"
     copy_template "$selected_template" "$OUTPUT_DIR"
 
-    # 8. Замена переменных
+    # 8. Генерация style.css с цветами
+    generate_style_css "$OUTPUT_DIR" "$colors_json"
+
+    # 9. Замена переменных
     replace_variables "$OUTPUT_DIR" "$site_name" "$colors_json" "$stats_json" "$content_json" "$LANG"
 
     # 9. Генерация nginx.conf
