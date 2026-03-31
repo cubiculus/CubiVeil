@@ -102,7 +102,8 @@ generate_colors() {
     local primary_light=45
 
     # Secondary - вторичный цвет (смещение на 30-60 градусов)
-    local secondary_offset=$((30 + $(od -An -tu2 -N2 /dev/urandom | tr -d ' ') % 31))
+    local secondary_offset
+    secondary_offset=$((30 + $(od -An -tu2 -N2 /dev/urandom | tr -d ' ') % 31))
     local secondary_hue=$(( (base_hue + secondary_offset) % 360 ))
     local secondary_sat=65
     local secondary_light=50
@@ -125,7 +126,8 @@ generate_colors() {
     elif [[ "$theme" == "light" ]]; then
         bg_light=98
     else
-        local bg_mode=$(od -An -tu1 -N1 /dev/urandom | tr -d ' ' | awk '{print $1 % 3}')
+        local bg_mode
+        bg_mode=$(od -An -tu1 -N1 /dev/urandom | tr -d ' ' | awk '{print $1 % 3}')
         case $bg_mode in
             0) bg_light=98 ;;   # Светлый
             1) bg_light=95 ;;   # Очень светлый
@@ -186,17 +188,17 @@ EOF
 generate_css_file() {
     local output_dir="$1"
     local colors_json="$2"
-    
+
     # Путь к base.css (в _shared)
     local templates_dir="$ROOT_DIR/templates"
     local base_css="$templates_dir/_shared/base.css"
     local output_css="$output_dir/style.css"
-    
+
     if [[ ! -f "$base_css" ]]; then
         log_error "base.css not found at $base_css"
         return 1
     fi
-    
+
     # Извлекаем цвета из JSON
     local primary secondary accent background text border
     primary=$(echo "$colors_json" | jq -r '.primary')
@@ -205,10 +207,10 @@ generate_css_file() {
     background=$(echo "$colors_json" | jq -r '.background')
     text=$(echo "$colors_json" | jq -r '.text')
     border=$(echo "$colors_json" | jq -r '.border')
-    
+
     # Копируем base.css в output как style.css и заменяем плейсхолдеры
     cp "$base_css" "$output_css"
-    
+
     # Заменяем плейсхолдеры на реальные цвета
     # Используем | как разделитель в sed чтобы избежать проблем с /
     sed -i "s|{{PRIMARY_COLOR}}|$primary|g" "$output_css"
@@ -217,9 +219,9 @@ generate_css_file() {
     sed -i "s|{{BACKGROUND_COLOR}}|$background|g" "$output_css"
     sed -i "s|{{TEXT_COLOR}}|$text|g" "$output_css"
     sed -i "s|{{BORDER_COLOR}}|$border|g" "$output_css"
-    
+
     log_info "Generated style.css with colors: primary=$primary, background=$background"
-    
+
     # Возвращаем путь к сгенерированному файлу
     echo "$output_css"
 }
@@ -279,7 +281,7 @@ main() {
     else
         colors_json=$(generate_colors "$base_hue" "$theme")
     fi
-    
+
     # Если флаг --css и указана output_dir, генерируем CSS
     if [[ "$generate_css_flag" == "true" && -n "$output_dir" ]]; then
         generate_css_file "$output_dir" "$colors_json"

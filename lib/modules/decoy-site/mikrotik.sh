@@ -7,6 +7,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck disable=SC2034
 MODULE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
@@ -14,6 +15,7 @@ if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
 fi
 
 # ── Константы / Constants ────────────────────────────────────────
+# shellcheck disable=SC2034
 DECOY_WEBROOT="/var/www/decoy"
 DECOY_CONFIG="/etc/cubiveil/decoy.json"
 

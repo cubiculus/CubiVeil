@@ -26,6 +26,7 @@ source "${MODULE_DIR}/rotate.sh"
 source "${MODULE_DIR}/mikrotik.sh"
 
 # ── Константы / Constants ────────────────────────────────────────
+# shellcheck disable=SC2034
 DECOY_WEBROOT="/var/www/decoy"
 DECOY_CONFIG="/etc/cubiveil/decoy.json"
 NGINX_CONF="/etc/nginx/sites-available/cubiveil-decoy"

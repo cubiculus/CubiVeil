@@ -18,10 +18,12 @@ _select_language() {
     read -rp "  Enter choice [1-2]: " _lc
     case "$_lc" in
     1)
+      # shellcheck disable=SC2034
       LANG_NAME="Русский"
       return
       ;;
     2)
+      # shellcheck disable=SC2034
       LANG_NAME="English"
       return
       ;;

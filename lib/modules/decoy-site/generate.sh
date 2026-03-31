@@ -255,8 +255,8 @@ copy_template() {
     log_info "Copying template '$template_name' to '$output_dir'"
 
     # Создаём и очищаем output
-    mkdir -p "$output_dir"
-    rm -rf "$output_dir"/*
+    mkdir -p "${output_dir:?}"
+    rm -rf "${output_dir:?}"/*
 
     # Копируем общие файлы из _shared (кроме base.css)
     if [[ -d "$TEMPLATES_DIR/_shared" ]]; then

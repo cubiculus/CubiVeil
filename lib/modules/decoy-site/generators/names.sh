@@ -8,9 +8,11 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC2034
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Словари прилагательных (EN)
+# shellcheck disable=SC2034
 ADJECTIVES_EN=(
     # Технологии
     "Digital" "Smart" "Cyber" "Tech" "Quantum" "Neural" "Virtual" "Cloud"
@@ -29,6 +31,7 @@ ADJECTIVES_EN=(
     "Ancient" "Mystic" "Secret" "Hidden" "Silent" "Swift" "Rapid" "Fast"
 )
 
+# shellcheck disable=SC2034
 # Словари существительных (EN)
 NOUNS_EN=(
     # Технологии
@@ -48,6 +51,7 @@ NOUNS_EN=(
     "Temple" "Fortress" "Citadel" "Dome" "Bridge" "Gate" "Portal" "Nexus"
 )
 
+# shellcheck disable=SC2034
 # Типы продуктов (EN)
 TYPES_EN=(
     "Drive" "Vault" "Cloud" "Hub" "Space" "Box" "Store" "Archive"
@@ -55,6 +59,7 @@ TYPES_EN=(
     "Share" "Sync" "Link" "Connect" "Network" "System" "Platform" "Service"
 )
 
+# shellcheck disable=SC2034
 # Словари прилагательных (RU)
 ADJECTIVES_RU=(
     # Технологии
@@ -74,6 +79,7 @@ ADJECTIVES_RU=(
     "Древний" "Мистический" "Тайный" "Скрытый" "Тихий" "Быстрый" "Стремительный" "Скоростной"
 )
 
+# shellcheck disable=SC2034
 # Словари существительных (RU)
 NOUNS_RU=(
     # Технологии
@@ -93,6 +99,7 @@ NOUNS_RU=(
     "Храм" "Крепость" "Цитадель" "Купол" "Мост" "Ворота" "Портал" "Нексус"
 )
 
+# shellcheck disable=SC2034
 # Типы продуктов (RU)
 TYPES_RU=(
     "Диск" "Хранилище" "Облако" "Центр" "Пространство" "Бокс" "Магазин" "Архив"
@@ -120,7 +127,7 @@ generate_name() {
             noun=$(random_element NOUNS_RU)
             type=$(random_element TYPES_RU)
             ;;
-        en|EN|english|English|*)
+        en|EN|english|English)
             adjective=$(random_element ADJECTIVES_EN)
             noun=$(random_element NOUNS_EN)
             type=$(random_element TYPES_EN)
