@@ -105,38 +105,20 @@ _print_finish() {
 
   # Выделение финального блока (URL + credentials)
   echo -e "${GREEN}╔══════════════════════════════════════════════════════════════════════════╗${PLAIN}"
-  if [[ "$LANG_NAME" == "Русский" ]]; then
-    echo "  $(get_str SUCCESS_PANEL_URL)     ${_panel_url}"
-    echo "  $(get_str SUCCESS_SUBSCRIPTION_URL)   ${_sub_url}"
-    echo ""
-    echo "  $(get_str SUCCESS_PROFILES) Trojan · Shadowsocks · VLESS · VMess · Hysteria2"
-    echo ""
-    [[ "$DEV_MODE" == "true" ]] &&
-      warn "$(get_str MSG_BROWSERS_SECURITY_WARNING)"
-    echo ""
-    echo "  $(get_str NEXT_STEPS)"
-    echo "    $(get_str MSG_NEXT_STEP_CREATE_USERS)"
-    echo "    $(get_str MSG_NEXT_STEP_SUBSCRIPTION)"
-    echo "    $(get_str MSG_NEXT_STEP_SSH)"
-    if [[ "$INSTALL_TELEGRAM" != "true" ]]; then
-      echo "    $(get_str MSG_NEXT_STEP_TELEGRAM)"
-    fi
-  else
-    echo "  $(get_str SUCCESS_PANEL_URL)        ${_panel_url}"
-    echo "  $(get_str SUCCESS_SUBSCRIPTION_URL) ${_sub_url}"
-    echo ""
-    echo "  $(get_str SUCCESS_PROFILES) Trojan · Shadowsocks · VLESS · VMess · Hysteria2"
-    echo ""
-    [[ "$DEV_MODE" == "true" ]] &&
-      warn "$(get_str MSG_BROWSERS_SECURITY_WARNING)"
-    echo ""
-    echo "  $(get_str NEXT_STEPS)"
-    echo "    $(get_str MSG_NEXT_STEP_CREATE_USERS)"
-    echo "    $(get_str MSG_NEXT_STEP_SUBSCRIPTION)"
-    echo "    $(get_str MSG_NEXT_STEP_SSH)"
-    if [[ "$INSTALL_TELEGRAM" != "true" ]]; then
-      echo "    $(get_str MSG_NEXT_STEP_TELEGRAM)"
-    fi
+  echo "  $(get_str SUCCESS_PANEL_URL)     ${_panel_url}"
+  echo "  $(get_str SUCCESS_SUBSCRIPTION_URL)   ${_sub_url}"
+  echo ""
+  echo "  $(get_str SUCCESS_PROFILES) Trojan · Shadowsocks · VLESS · VMess · Hysteria2"
+  echo ""
+  [[ "$DEV_MODE" == "true" ]] &&
+    warn "$(get_str MSG_BROWSERS_SECURITY_WARNING)"
+  echo ""
+  echo "  $(get_str NEXT_STEPS)"
+  echo "    $(get_str MSG_NEXT_STEP_CREATE_USERS)"
+  echo "    $(get_str MSG_NEXT_STEP_SUBSCRIPTION)"
+  echo "    $(get_str MSG_NEXT_STEP_SSH)"
+  if [[ "$INSTALL_TELEGRAM" != "true" ]]; then
+    echo "    $(get_str MSG_NEXT_STEP_TELEGRAM)"
   fi
 
   echo -e "${GREEN}╚══════════════════════════════════════════════════════════════════════════╝${PLAIN}"

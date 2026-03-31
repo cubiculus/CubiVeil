@@ -74,6 +74,7 @@ run_unit_tests() {
     "unit-traffic-shaping.sh:Traffic Shaping module"
     "unit-traffic-shaping-persist.sh:TS Persist"
     "unit-traffic-shaping-uninstall.sh:TS Uninstall"
+    "unit-core-libs.sh:Core Libraries"
     "unit-backup.sh:Backup module"
     "unit-monitoring.sh:Monitoring module"
     "unit-rollback.sh:Rollback module"

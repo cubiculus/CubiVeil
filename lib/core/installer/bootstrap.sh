@@ -66,7 +66,7 @@ setup_remote_install() {
     "setup-telegram.sh"
     "lib/fallback.sh" "lib/common.sh" "lib/utils.sh"
     "lib/output.sh" "lib/security.sh" "lib/i18n.sh"
-    "lib/validation.sh" "lib/manifest.sh"
+    "lib/validation.sh"
     "lib/core/log.sh" "lib/core/system.sh"
     "lib/modules/system/install.sh"
     "lib/modules/firewall/install.sh"

@@ -8,8 +8,11 @@ set -euo pipefail
 
 # ── Глобальные переменные ───────────────────────────────────
 CURRENT_STEP=0
-TOTAL_STEPS=8
-# WARNINGS=() объявлен в lib/core/log.sh, не сбрасываем здесь
+# Динамический подсчёт шагов: base (5) + опциональные
+TOTAL_STEPS=5
+[[ "${INSTALL_DECOY:-true}" == "true" ]] && ((TOTAL_STEPS++))
+[[ "${INSTALL_TRAFFIC_SHAPING:-true}" == "true" ]] && ((TOTAL_STEPS++))
+[[ "${INSTALL_TELEGRAM:-}" == "true" ]] && ((TOTAL_STEPS++))
 
 # ── Функции ─────────────────────────────────────────────────
 
@@ -290,12 +293,6 @@ _step_telegram() {
 
 step_check_ip_neighborhood() { _step_system; }
 step_system_update() { _step_system; }
-step_auto_updates() {
-  log_info "Auto-updates: handled in system module"
-}
-step_bbr() {
-  log_info "BBR: handled in system module"
-}
 step_firewall() { _step_firewall; }
 step_fail2ban() { _step_fail2ban; }
 step_ssl() { _step_ssl; }

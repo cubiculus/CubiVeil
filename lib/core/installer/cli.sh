@@ -27,24 +27,13 @@ LE_EMAIL=""
 LANG_NAME="${LANG_NAME:-Русский}"
 SERVER_IP=""
 
-# Заглушки для совместимости
+# Заглушки для совместимости (используются в модулях)
 REPORT_TIME="${REPORT_TIME:-09:00}"
 ALERT_CPU="${ALERT_CPU:-80}"
 ALERT_RAM="${ALERT_RAM:-85}"
 ALERT_DISK="${ALERT_DISK:-90}"
-SB_TAG="${SB_TAG:-}"
-REALITY_SNI="${REALITY_SNI:-}"
-TROJAN_PORT="${TROJAN_PORT:-}"
-SS_PORT="${SS_PORT:-}"
-PANEL_PORT="${PANEL_PORT:-}"
-SUB_PORT="${SUB_PORT:-}"
 CUBIVEIL_DIR="${CUBIVEIL_DIR:-/opt/cubiveil}"
-BACKUP_DIR="${BACKUP_DIR:-}"
 SSH_PORT="${SSH_PORT:-22}"
-CHECKED="${CHECKED:-0}"
-VPN_COUNT="${VPN_COUNT:-0}"
-CURRENT="${CURRENT:-}"
-cmd="${cmd:-}"
 
 # ── Функции ─────────────────────────────────────────────────
 

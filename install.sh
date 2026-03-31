@@ -112,40 +112,7 @@ main() {
   if [[ "$DRY_RUN" == "true" ]]; then
     LANG_NAME="English"
     _print_banner
-    echo ""
-    echo "══════════════════════════════════════════════════════════"
-    echo "  DRY-RUN MODE / Режим симуляции"
-    echo "  Installation Plan / План установки"
-    echo "══════════════════════════════════════════════════════════"
-    echo ""
-    echo "  Simulation mode: No changes will be made to the system"
-    echo "  Режим симуляции: изменения не будут внесены в систему"
-    echo ""
-    # Root access check (EUID check for tests)
-    if [[ $EUID -ne 0 ]]; then
-      echo "  [WARN] Root access: would check for root privileges"
-    else
-      echo "  [OK] Root access: verified"
-    fi
-    # Ubuntu check (for tests)
-    if grep -qi ubuntu /etc/os-release 2>/dev/null; then
-      echo "  [OK] Ubuntu detected"
-    else
-      echo "  [INFO] Ubuntu: would check"
-    fi
-    echo ""
-    echo "  Installation steps that would run:"
-    echo "    1. system   — update, BBR, auto-updates"
-    echo "    2. firewall — UFW rules"
-    echo "    3. fail2ban — SSH brute-force protection"
-    echo "    4. ssl      — Let's Encrypt or self-signed"
-    echo "    5. s-ui     — panel installation and configuration"
-    [[ "$INSTALL_DECOY" == "true" ]] && echo "    6. decoy-site      — decoy website"
-    [[ "$INSTALL_TRAFFIC_SHAPING" == "true" ]] && echo "    7. traffic-shaping — tc/netem fingerprint"
-    [[ "$INSTALL_TELEGRAM" == "true" ]] && echo "    8. telegram        — Telegram bot setup"
-    echo ""
-    echo "  No changes will be made to the system."
-    echo ""
+    _dry_run_plan
     return 0
   fi
 
