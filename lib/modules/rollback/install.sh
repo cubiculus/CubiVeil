@@ -30,6 +30,9 @@ BACKUP_ARCHIVE_DIR="${BACKUP_DIR}/archives"
 ROLLBACK_TEMP_DIR="${BACKUP_DIR}/temp"
 
 # Пути для восстановления
+SSL_CERT_DIR="/etc/ssl/certs"
+CREDENTIALS_FILE="/etc/cubiveil/credentials.age"
+CREDENTIALS_KEY="/etc/cubiveil/credentials.key"
 
 # ── Инициализация / Initialization ─────────────────────────────
 
@@ -172,20 +175,6 @@ rollback_verify_integrity() {
 
   local issues=0
 
-    local expected_hash
-
-      ((issues++))
-    else
-    fi
-  fi
-
-    local expected_hash
-
-      ((issues++))
-    else
-    fi
-  fi
-
   # Проверяем SHA256 конфигурации Sing-box
   if [[ -f "${ROLLBACK_TEMP_DIR}/singbox-config.json" ]] &&
     [[ -f "${ROLLBACK_TEMP_DIR}/singbox-config.json.sha256" ]]; then
@@ -214,8 +203,6 @@ rollback_verify_integrity() {
 rollback_stop_services() {
   log_step "rollback_stop_services" "Stopping services for rollback"
 
-  fi
-
   # Останавливаем Sing-box
   if svc_active "sing-box"; then
     svc_stop "sing-box"
@@ -224,62 +211,6 @@ rollback_stop_services() {
 
   # Ждём завершения
   sleep 2
-}
-
-
-
-
-  if [[ ! -f "$backup_db" ]]; then
-    return 1
-  fi
-
-  # Проверяем целостность перед восстановлением
-  if [[ -f "${backup_db}.sha256" ]]; then
-    local expected_hash
-    expected_hash=$(cat "${backup_db}.sha256")
-
-    if ! verify_sha256 "$backup_db" "$expected_hash"; then
-      return 1
-    fi
-  fi
-
-  fi
-
-  # Копируем базу данных
-
-  # Устанавливаем права
-
-}
-
-
-  # Проверяем целостность .env
-    local expected_hash
-
-      return 1
-    fi
-  fi
-
-  # Восстанавливаем .env
-  else
-  fi
-
-  # Проверяем целостность шаблона Sing-box
-  if [[ -f "${ROLLBACK_TEMP_DIR}/sing-box-template.json.sha256" ]]; then
-    local expected_hash
-    expected_hash=$(cat "${ROLLBACK_TEMP_DIR}/sing-box-template.json.sha256")
-
-    if ! verify_sha256 "${ROLLBACK_TEMP_DIR}/sing-box-template.json" "$expected_hash"; then
-      log_error "Sing-box template integrity check failed, skipping restore"
-      return 1
-    fi
-  fi
-
-  # Восстанавливаем шаблон Sing-box
-  if [[ -f "${ROLLBACK_TEMP_DIR}/sing-box-template.json" ]]; then
-    log_success "Sing-box template restored"
-  else
-    log_warn "Sing-box template backup not found"
-  fi
 }
 
 # ── Восстановление Sing-box / Restore Sing-box ───────────────
@@ -393,8 +324,6 @@ rollback_start_services() {
   if [[ -x "/usr/local/bin/sing-box" ]] && [[ -f "/etc/sing-box/config.json" ]]; then
     svc_start "sing-box"
     log_info "Sing-box started"
-  fi
-
   fi
 
   # Ждём запуска

@@ -181,13 +181,11 @@ main() {
   _export_globals
 
   # Оркестрация модулей (legacy API wrappers)
-  step_check_ip_neighborhood
-  step_system_update
+  _step_system
   step_firewall
   step_fail2ban
   step_ssl
   step_install_sui
-  step_configure
   step_decoy_site
   step_traffic_shaping
   step_telegram
