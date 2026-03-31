@@ -14,12 +14,6 @@
 
 set -euo pipefail
 
-# ── Глобальные переменные ───────────────────────────────────
-DEV_MODE="false"
-DRY_RUN="false"
-DEV_DOMAIN="dev.cubiveil.local"
-DOMAIN=""
-
 # ── Определение корневой директории ─────────────────────────
 # При запуске через curl/pipe BASH_SOURCE[0] == "-s"
 if [[ "${BASH_SOURCE[0]}" == "-s" || ! -f "${BASH_SOURCE[0]}" ]]; then
@@ -42,6 +36,8 @@ Options:
   --domain=NAME         Set domain (default in dev mode: ${DEV_DOMAIN})
   --no-decoy            Skip decoy-site installation
   --no-traffic-shaping  Skip traffic-shaping module
+  --no-sui              Skip s-ui panel installation
+  --no-ssl              Skip SSL certificate installation
   --telegram            Install Telegram bot (will prompt for config)
   --help, -h            Show this help
 
@@ -53,35 +49,6 @@ Examples:
   sudo bash install.sh --telegram
   sudo bash install.sh --debug 2>&1 | tee install_debug.log
 EOF
-}
-
-# ── Функция parse_args ──────────────────────────────────────
-parse_args() {
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-    --dev) DEV_MODE="true" ;;
-    --dry-run) DRY_RUN="true" ;;
-    --debug | -v)
-      set -x
-      export CUBIVEIL_LOG_LEVEL="DEBUG"
-      ;;
-    --domain=*) DOMAIN="${1#*=}" ;;
-    --no-decoy) INSTALL_DECOY="false" ;;
-    --no-traffic-shaping) INSTALL_TRAFFIC_SHAPING="false" ;;
-    --telegram) INSTALL_TELEGRAM="true" ;;
-    --help | -h)
-      usage
-      exit 0
-      ;;
-    *) ;;
-    esac
-    shift
-  done
-
-  # В dev-режиме устанавливаем английский язык по умолчанию
-  if [[ "$DEV_MODE" == "true" ]]; then
-    LANG_NAME="English"
-  fi
 }
 
 # ── Загрузка модулей установщика ────────────────────────────
@@ -124,7 +91,17 @@ source "${INSTALL_SCRIPT_DIR}/lib/i18n.sh" || { err "Cannot load lib/i18n.sh"; }
 # ── Применение аргументов ───────────────────────────────────
 parse_args "$@"
 
+# В dev-режиме устанавливаем домен по умолчанию
 [[ "$DEV_MODE" == "true" && -z "$DOMAIN" ]] && DOMAIN="$DEV_DOMAIN"
+
+# В не-dev режиме DOMAIN обязателен
+if [[ "$DEV_MODE" != "true" && -z "$DOMAIN" && "$DRY_RUN" != "true" ]]; then
+  echo "Error: DOMAIN is required for production installation"
+  echo "Use --domain=example.com or --dev for self-signed SSL"
+  echo ""
+  usage
+  exit 1
+fi
 
 # ══════════════════════════════════════════════════════════════
 # MAIN

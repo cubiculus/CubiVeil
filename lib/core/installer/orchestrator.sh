@@ -132,6 +132,7 @@ _step_fail2ban() {
 }
 
 _step_ssl() {
+  [[ "$INSTALL_SSL" != "true" ]] && return 0
   local _label
   _label="$(get_str MSG_STEP_4_8_SSL)"
   step_module "$_label"
@@ -139,6 +140,7 @@ _step_ssl() {
 }
 
 _step_sui() {
+  [[ "$INSTALL_SUI" != "true" ]] && return 0
   local _label
   _label="$(get_str MSG_STEP_5_8_SUI)"
   step_module "$_label"
@@ -184,24 +186,37 @@ _install_sui_panel() {
   bash "$_sui_script" >"$_sui_log" 2>&1 &
   local _sui_bg_pid=$!
 
-  # Ждём, пока сервис станет активным (до 180 секунд)
+  # Ждём завершения фонового процесса или пока сервис станет активным
   local _max_wait=180
-  local _started=false
   local _start_time
   _start_time=$(date +%s)
+  local _exit_code=0
 
   while true; do
     local _now
     _now=$(date +%s)
     local _elapsed=$((_now - _start_time))
 
+    # Проверяем таймаут
     if [[ $_elapsed -ge $_max_wait ]]; then
+      log_warn "Timeout waiting for s-ui installation (${_max_wait}s)"
       break
     fi
 
-    if systemctl is-active --quiet s-ui 2>/dev/null; then
-      _started=true
+    # Проверяем, завершился ли фоновый процесс
+    if ! kill -0 "$_sui_bg_pid" 2>/dev/null; then
+      # Процесс завершился, получаем код выхода
+      wait "$_sui_bg_pid" 2>/dev/null || _exit_code=$?
       break
+    fi
+
+    # Проверяем, запустился ли сервис
+    if systemctl is-active --quiet s-ui 2>/dev/null; then
+      # Сервис активен, ждём ещё немного для завершения установки
+      sleep 5
+      if systemctl is-active --quiet s-ui 2>/dev/null; then
+        break
+      fi
     fi
 
     echo -ne "\rWaiting for s-ui... ${_elapsed}s"
@@ -209,12 +224,21 @@ _install_sui_panel() {
   done
   echo -ne "\r"
 
-  # Убиваем фоновый процесс
-  kill "$_sui_bg_pid" 2>/dev/null || true
-  wait "$_sui_bg_pid" 2>/dev/null || true
+  # Если процесс ещё работает, ждём его завершения
+  if kill -0 "$_sui_bg_pid" 2>/dev/null; then
+    wait "$_sui_bg_pid" 2>/dev/null || _exit_code=$?
+  fi
 
-  if [[ "$_started" != "true" ]]; then
-    log_error "s-ui did not start within ${_max_wait}s"
+  # Проверяем результат установки
+  if [[ $_exit_code -ne 0 ]]; then
+    log_error "s-ui installation failed with exit code ${_exit_code}"
+    log_warn "Check install log: $_sui_log"
+    rm -f "$_sui_script"
+    return 1
+  fi
+
+  if ! systemctl is-active --quiet s-ui 2>/dev/null; then
+    log_error "s-ui service is not active after installation"
     log_warn "Check: systemctl status s-ui"
     log_warn "Full install log: $_sui_log"
     rm -f "$_sui_script"
@@ -262,23 +286,20 @@ _step_telegram() {
   fi
 }
 
-# ── Legacy API wrappers (для тестов, совместимости) ─────────
+# ── Legacy API wrappers (для совместимости) ─────────────────
 
 step_check_ip_neighborhood() { _step_system; }
 step_system_update() { _step_system; }
 step_auto_updates() {
-  log_info "Auto-updates step is deprecated and handled in system module"
+  log_info "Auto-updates: handled in system module"
 }
 step_bbr() {
-  log_info "BBR step is deprecated and handled in system module"
+  log_info "BBR: handled in system module"
 }
 step_firewall() { _step_firewall; }
 step_fail2ban() { _step_fail2ban; }
 step_ssl() { _step_ssl; }
 step_install_sui() { _step_sui; }
-step_configure() {
-  log_info "Legacy configuration step: no action required"
-}
 step_decoy_site() { _step_decoy; }
 step_traffic_shaping() { _step_traffic_shaping; }
 step_telegram() { _step_telegram; }
