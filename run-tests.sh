@@ -66,6 +66,7 @@ run_unit_tests() {
     "unit-ssl.sh:SSL module"
     "unit-system.sh:System module"
     "unit-telegram.sh:setup-telegram.sh"
+    "unit-decoy-install.sh:Decoy-site Install"
     "unit-decoy-site.sh:Decoy-site module"
     "unit-decoy-inner-pages.sh:Decoy Inner Pages"
     "unit-traffic-shaping.sh:Traffic Shaping module"
