@@ -455,9 +455,9 @@ test_export_globals() {
   _export_globals
 
   # Проверяем что переменные экспортированы
-  if [[ "${LANG_NAME:-}" == "TestLang" ]] && \
-     [[ "${DEV_MODE:-}" == "true" ]] && \
-     [[ "${DOMAIN:-}" == "test.example.com" ]]; then
+  if [[ "${LANG_NAME:-}" == "TestLang" ]] &&
+    [[ "${DEV_MODE:-}" == "true" ]] &&
+    [[ "${DOMAIN:-}" == "test.example.com" ]]; then
     pass "_export_globals: переменные установлены"
     ((TESTS_PASSED++)) || true
   else
@@ -539,8 +539,8 @@ test_warnings_array_initialized() {
   source "$ORCHESTRATOR_PATH"
 
   # Проверяем что WARNINGS это массив
-  if [[ "$(declare -p WARNINGS 2>/dev/null)" == *"declare -a"* ]] || \
-     [[ "$(declare -p WARNINGS 2>/dev/null)" == *"declare -A"* ]]; then
+  if [[ "$(declare -p WARNINGS 2>/dev/null)" == *"declare -a"* ]] ||
+    [[ "$(declare -p WARNINGS 2>/dev/null)" == *"declare -A"* ]]; then
     pass "WARNINGS: инициализирован как массив"
     ((TESTS_PASSED++)) || true
   else
@@ -589,7 +589,7 @@ EOF
   # Проверяем что функции удалены
   local remaining=0
   for func in module_install module_configure module_enable module_disable \
-              module_update module_remove module_status module_health_check; do
+    module_update module_remove module_status module_health_check; do
     if declare -f "$func" >/dev/null 2>&1; then
       ((remaining++)) || true
     fi

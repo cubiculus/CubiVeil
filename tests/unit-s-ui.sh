@@ -117,8 +117,8 @@ test_sui_module_globals() {
     has_db_dir=true
   fi
 
-  if grep -q 'SUI_PANEL_PORT=' "$SUI_MODULE_PATH" && \
-     grep -q 'SUI_SUB_PORT=' "$SUI_MODULE_PATH"; then
+  if grep -q 'SUI_PANEL_PORT=' "$SUI_MODULE_PATH" &&
+    grep -q 'SUI_SUB_PORT=' "$SUI_MODULE_PATH"; then
     has_ports=true
   fi
 
@@ -780,8 +780,8 @@ test_module_enable_waits_for_services() {
   info "Проверка ожидания сервисов в module_enable..."
 
   # Проверяем наличие цикла ожидания
-  if grep -q 'while true' "$SUI_MODULE_PATH" && \
-     grep -q 'sui_check_services' "$SUI_MODULE_PATH"; then
+  if grep -q 'while true' "$SUI_MODULE_PATH" &&
+    grep -q 'sui_check_services' "$SUI_MODULE_PATH"; then
     pass "module_enable: ждёт запуска сервисов"
     ((TESTS_PASSED++)) || true
   else
@@ -797,8 +797,8 @@ test_module_remove_preserves_db() {
   info "Проверка сохранения БД в module_remove..."
 
   # Проверяем что БД не удаляется
-  if grep -q 'Database directory preserved' "$SUI_MODULE_PATH" || \
-     ! grep -q 'rm -rf.*SUI_DB_DIR' "$SUI_MODULE_PATH"; then
+  if grep -q 'Database directory preserved' "$SUI_MODULE_PATH" ||
+    ! grep -q 'rm -rf.*SUI_DB_DIR' "$SUI_MODULE_PATH"; then
     pass "module_remove: сохраняет директорию БД"
     ((TESTS_PASSED++)) || true
   else

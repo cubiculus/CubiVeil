@@ -24,12 +24,12 @@ command() {
   local cmd="$1"
   shift
   case "$cmd" in
-    -v)
-      if [[ "$*" == *"age"* ]] || [[ "$*" == *"openssl"* ]]; then
-        return 0
-      fi
-      return 1
-      ;;
+  -v)
+    if [[ "$*" == *"age"* ]] || [[ "$*" == *"openssl"* ]]; then
+      return 0
+    fi
+    return 1
+    ;;
   esac
   return 0
 }

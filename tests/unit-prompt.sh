@@ -21,28 +21,28 @@ PROMPT_MODULE_PATH="${PROJECT_ROOT}/lib/core/installer/prompt.sh"
 get_str() {
   local key="$1"
   case "$key" in
-    MSG_SELECT_LANGUAGE) echo "Select language:" ;;
-    MSG_OPTION_RU) echo "Русский" ;;
-    MSG_OPTION_EN) echo "English" ;;
-    MSG_INVALID_CHOICE) echo "Invalid choice" ;;
-    MSG_PRE_INSTALL_SETUP) echo "Pre-install setup" ;;
-    INFO_DEV_MODE) echo "Dev mode enabled" ;;
-    MSG_BROWSERS_SECURITY_WARNING) echo "Browser security warning" ;;
-    MSG_DO_NOT_USE_PRODUCTION) echo "Do not use in production" ;;
-    MSG_DNS_A_RECORD_HINT) echo "DNS A record hint" ;;
-    MSG_LE_DNS_CHECK) echo "Let's Encrypt DNS check" ;;
-    MSG_PROMPT_DOMAIN) echo "Enter domain:" ;;
-    WARN_DOMAIN_EMPTY) echo "Domain cannot be empty" ;;
-    WARN_DOMAIN_FORMAT) echo "Invalid domain format" ;;
-    MSG_CANNOT_RESOLVE_DOMAIN) echo "Cannot resolve domain: {DOMAIN}" ;;
-    MSG_CONTINUE_DESPITE_ERROR) echo "Continue despite error? [y/N]:" ;;
-    MSG_A_RECORD_MISMATCH) echo "A record mismatch for {DOMAIN}" ;;
-    MSG_CONTINUE_DESPITE_MISMATCH) echo "Continue despite mismatch? [y/N]:" ;;
-    MSG_PROMPT_EMAIL) echo "Enter email for {DOMAIN}:" ;;
-    MSG_INVALID_EMAIL) echo "Invalid email format" ;;
-    MSG_PROMPT_TELEGRAM) echo "Install Telegram bot? [y/N]:" ;;
-    MSG_TELEGRAM_WILL_BE_INSTALLED) echo "Telegram bot will be installed" ;;
-    *) echo "$key" ;;
+  MSG_SELECT_LANGUAGE) echo "Select language:" ;;
+  MSG_OPTION_RU) echo "Русский" ;;
+  MSG_OPTION_EN) echo "English" ;;
+  MSG_INVALID_CHOICE) echo "Invalid choice" ;;
+  MSG_PRE_INSTALL_SETUP) echo "Pre-install setup" ;;
+  INFO_DEV_MODE) echo "Dev mode enabled" ;;
+  MSG_BROWSERS_SECURITY_WARNING) echo "Browser security warning" ;;
+  MSG_DO_NOT_USE_PRODUCTION) echo "Do not use in production" ;;
+  MSG_DNS_A_RECORD_HINT) echo "DNS A record hint" ;;
+  MSG_LE_DNS_CHECK) echo "Let's Encrypt DNS check" ;;
+  MSG_PROMPT_DOMAIN) echo "Enter domain:" ;;
+  WARN_DOMAIN_EMPTY) echo "Domain cannot be empty" ;;
+  WARN_DOMAIN_FORMAT) echo "Invalid domain format" ;;
+  MSG_CANNOT_RESOLVE_DOMAIN) echo "Cannot resolve domain: {DOMAIN}" ;;
+  MSG_CONTINUE_DESPITE_ERROR) echo "Continue despite error? [y/N]:" ;;
+  MSG_A_RECORD_MISMATCH) echo "A record mismatch for {DOMAIN}" ;;
+  MSG_CONTINUE_DESPITE_MISMATCH) echo "Continue despite mismatch? [y/N]:" ;;
+  MSG_PROMPT_EMAIL) echo "Enter email for {DOMAIN}:" ;;
+  MSG_INVALID_EMAIL) echo "Invalid email format" ;;
+  MSG_PROMPT_TELEGRAM) echo "Install Telegram bot? [y/N]:" ;;
+  MSG_TELEGRAM_WILL_BE_INSTALLED) echo "Telegram bot will be installed" ;;
+  *) echo "$key" ;;
   esac
 }
 info() { echo "[INFO] $1"; }

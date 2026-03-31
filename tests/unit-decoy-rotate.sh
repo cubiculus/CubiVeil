@@ -34,12 +34,12 @@ command() {
   local cmd="$1"
   shift
   case "$cmd" in
-    -v)
-      if [[ "$*" == *"convert"* ]]; then
-        return 0
-      fi
-      return 1
-      ;;
+  -v)
+    if [[ "$*" == *"convert"* ]]; then
+      return 0
+    fi
+    return 1
+    ;;
   esac
   return 1
 }
@@ -49,35 +49,35 @@ jq() {
   local arg="$1"
   shift
   case "$arg" in
-    -r)
-      local field="$2"
-      shift 2
-      case "$field" in
-        '.rotation.enabled') echo "true" ;;
-        '.rotation.files_per_cycle') echo "1" ;;
-        '.rotation.interval_hours') echo "3" ;;
-        '.rotation.types // {}') echo '{"jpg":{"enabled":true,"weight":1},"pdf":{"enabled":true,"weight":1}}' ;;
-        '.rotation.types.jpg.enabled // false') echo "true" ;;
-        '.rotation.types.jpg.weight // 1') echo "1" ;;
-        '.rotation.types.pdf.enabled // false') echo "true" ;;
-        '.rotation.types.pdf.weight // 1') echo "1" ;;
-        '.rotation.types.mp4.enabled // false') echo "false" ;;
-        '.rotation.types.mp3.enabled // false') echo "false" ;;
-        '.rotation.types.pdf.size_min_mb // 50') echo "50" ;;
-        '.rotation.types.mp4.size_min_mb // 100') echo "100" ;;
-        '.rotation.types.mp3.size_min_mb // 10') echo "10" ;;
-        '.max_total_files_mb // 5000') echo "5000" ;;
-        '.accent_color') echo "#4a90d9" ;;
-        *) echo "unknown" ;;
-      esac
-      ;;
-    *)
-      if [[ "$*" == *".rotation.last_rotated_at"* ]]; then
-        echo "{\"rotation\":{\"last_rotated_at\":\"2026-03-31T12:00:00Z\"}}"
-      else
-        echo "{}"
-      fi
-      ;;
+  -r)
+    local field="$2"
+    shift 2
+    case "$field" in
+    '.rotation.enabled') echo "true" ;;
+    '.rotation.files_per_cycle') echo "1" ;;
+    '.rotation.interval_hours') echo "3" ;;
+    '.rotation.types // {}') echo '{"jpg":{"enabled":true,"weight":1},"pdf":{"enabled":true,"weight":1}}' ;;
+    '.rotation.types.jpg.enabled // false') echo "true" ;;
+    '.rotation.types.jpg.weight // 1') echo "1" ;;
+    '.rotation.types.pdf.enabled // false') echo "true" ;;
+    '.rotation.types.pdf.weight // 1') echo "1" ;;
+    '.rotation.types.mp4.enabled // false') echo "false" ;;
+    '.rotation.types.mp3.enabled // false') echo "false" ;;
+    '.rotation.types.pdf.size_min_mb // 50') echo "50" ;;
+    '.rotation.types.mp4.size_min_mb // 100') echo "100" ;;
+    '.rotation.types.mp3.size_min_mb // 10') echo "10" ;;
+    '.max_total_files_mb // 5000') echo "5000" ;;
+    '.accent_color') echo "#4a90d9" ;;
+    *) echo "unknown" ;;
+    esac
+    ;;
+  *)
+    if [[ "$*" == *".rotation.last_rotated_at"* ]]; then
+      echo "{\"rotation\":{\"last_rotated_at\":\"2026-03-31T12:00:00Z\"}}"
+    else
+      echo "{}"
+    fi
+    ;;
   esac
   return 0
 }
@@ -107,8 +107,8 @@ head() {
   local arg="$1"
   shift
   case "$arg" in
-    -n1) echo "2026-03-30+12:00:00 /var/www/decoy/files/old_file.jpg" ;;
-    *) cat ;;
+  -n1) echo "2026-03-30+12:00:00 /var/www/decoy/files/old_file.jpg" ;;
+  *) cat ;;
   esac
 }
 
@@ -117,11 +117,11 @@ cut() {
   local arg="$1"
   shift
   case "$arg" in
-    -d.) echo "1" ;;
-    -d' ') echo "/var/www/decoy/files/old_file.jpg" ;;
-    -f1) echo "1" ;;
-    -f2-) echo "/var/www/decoy/files/old_file.jpg" ;;
-    *) cat ;;
+  -d.) echo "1" ;;
+  -d' ') echo "/var/www/decoy/files/old_file.jpg" ;;
+  -f1) echo "1" ;;
+  -f2-) echo "/var/www/decoy/files/old_file.jpg" ;;
+  *) cat ;;
   esac
 }
 
@@ -147,9 +147,9 @@ du() {
   local arg="$1"
   shift
   case "$arg" in
-    -sk) echo "1024 /var/www/decoy/files" ;;
-    -m) echo "1 /var/www/decoy/files/test.jpg" ;;
-    *) echo "1024 /var/www/decoy/files" ;;
+  -sk) echo "1024 /var/www/decoy/files" ;;
+  -m) echo "1 /var/www/decoy/files/test.jpg" ;;
+  *) echo "1024 /var/www/decoy/files" ;;
   esac
 }
 
@@ -170,9 +170,9 @@ systemctl() {
   local cmd="$1"
   shift
   case "$cmd" in
-    daemon-reload) return 0 ;;
-    enable|start|stop) return 0 ;;
-    is-active) return 0 ;;
+  daemon-reload) return 0 ;;
+  enable | start | stop) return 0 ;;
+  is-active) return 0 ;;
   esac
   return 0
 }
@@ -204,8 +204,8 @@ cat() {
 mkdir() { :; }
 
 # Mock для gen_hex и gen_range (будут определены в файле)
-gen_hex() { echo "abcdef12" ; }
-gen_range() { echo "10" ; }
+gen_hex() { echo "abcdef12"; }
+gen_range() { echo "10"; }
 
 # Mock для /proc/loadavg
 proc_loadavg() {

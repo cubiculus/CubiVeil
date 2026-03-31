@@ -892,8 +892,8 @@ test_system_euid_check() {
   info "Проверка EUID проверки..."
 
   # Проверяем наличие проверки EUID
-  if grep -q 'EUID -ne 0' "$SYSTEM_MODULE_PATH" || \
-     grep -q 'EUID -eq 0' "$SYSTEM_MODULE_PATH"; then
+  if grep -q 'EUID -ne 0' "$SYSTEM_MODULE_PATH" ||
+    grep -q 'EUID -eq 0' "$SYSTEM_MODULE_PATH"; then
     pass "system/install.sh: проверяет EUID (root права)"
     ((TESTS_PASSED++)) || true
   else

@@ -34,12 +34,12 @@ command() {
   local cmd="$1"
   shift
   case "$cmd" in
-    -v)
-      if [[ "$*" == *"tc"* ]]; then
-        return 0
-      fi
-      return 1
-      ;;
+  -v)
+    if [[ "$*" == *"tc"* ]]; then
+      return 0
+    fi
+    return 1
+    ;;
   esac
   return 1
 }
@@ -49,12 +49,12 @@ ip() {
   local arg="$1"
   shift
   case "$arg" in
-    route)
-      if [[ "$*" == *"default"* ]]; then
-        echo "default via 192.168.1.1 dev eth0"
-        return 0
-      fi
-      ;;
+  route)
+    if [[ "$*" == *"default"* ]]; then
+      echo "default via 192.168.1.1 dev eth0"
+      return 0
+    fi
+    ;;
   esac
   return 1
 }
@@ -64,18 +64,18 @@ tc() {
   local arg1="$1"
   shift
   case "$arg1" in
-    qdisc)
-      if [[ "$*" == *"show"* ]]; then
-        echo "qdisc fq_codel 0: root"
-        return 0
-      fi
-      if [[ "$*" == *"del"* ]]; then
-        return 0
-      fi
-      if [[ "$*" == *"add"* ]]; then
-        return 0
-      fi
-      ;;
+  qdisc)
+    if [[ "$*" == *"show"* ]]; then
+      echo "qdisc fq_codel 0: root"
+      return 0
+    fi
+    if [[ "$*" == *"del"* ]]; then
+      return 0
+    fi
+    if [[ "$*" == *"add"* ]]; then
+      return 0
+    fi
+    ;;
   esac
   return 0
 }
@@ -85,9 +85,9 @@ grep() {
   local pattern="$1"
   shift
   case "$pattern" in
-    "qdisc") echo "1" ;;
-    "default") echo "default via 192.168.1.1 dev eth0" ;;
-    *) return 1 ;;
+  "qdisc") echo "1" ;;
+  "default") echo "default via 192.168.1.1 dev eth0" ;;
+  *) return 1 ;;
   esac
 }
 
@@ -101,8 +101,8 @@ head() {
   local arg="$1"
   shift
   case "$arg" in
-    -1) cat ;;
-    *) cat ;;
+  -1) cat ;;
+  *) cat ;;
   esac
 }
 
@@ -145,18 +145,18 @@ jq() {
   local arg="$1"
   shift
   case "$arg" in
-    -r)
-      local field="$2"
-      shift 2
-      case "$field" in
-        .interface) echo "eth0" ;;
-        .delay_ms) echo "5" ;;
-        .jitter_ms) echo "10" ;;
-        .reorder_percent) echo "0.3" ;;
-        *) echo "unknown" ;;
-      esac
-      ;;
-    *) echo "{}" ;;
+  -r)
+    local field="$2"
+    shift 2
+    case "$field" in
+    .interface) echo "eth0" ;;
+    .delay_ms) echo "5" ;;
+    .jitter_ms) echo "10" ;;
+    .reorder_percent) echo "0.3" ;;
+    *) echo "unknown" ;;
+    esac
+    ;;
+  *) echo "{}" ;;
   esac
 }
 
@@ -167,8 +167,8 @@ read() { :; }
 date() {
   local arg="$1"
   case "$arg" in
-    -u) echo "2026-03-31T12:00:00Z" ;;
-    *) echo "Tue Mar 31 12:00:00 UTC 2026" ;;
+  -u) echo "2026-03-31T12:00:00Z" ;;
+  *) echo "Tue Mar 31 12:00:00 UTC 2026" ;;
   esac
 }
 

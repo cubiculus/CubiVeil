@@ -38,16 +38,16 @@ systemctl() {
   local cmd="$1"
   shift
   case "$cmd" in
-    enable|start|stop|reload) return 0 ;;
-    is-active)
-      if [[ "$*" == *"nginx"* ]]; then
-        return 0
-      fi
-      if [[ "$*" == *"cubiveil-decoy-rotate"* ]]; then
-        return 0
-      fi
-      return 1
-      ;;
+  enable | start | stop | reload) return 0 ;;
+  is-active)
+    if [[ "$*" == *"nginx"* ]]; then
+      return 0
+    fi
+    if [[ "$*" == *"cubiveil-decoy-rotate"* ]]; then
+      return 0
+    fi
+    return 1
+    ;;
   esac
   return 0
 }
@@ -57,12 +57,12 @@ command() {
   local cmd="$1"
   shift
   case "$cmd" in
-    -v)
-      if [[ "$*" == *"nginx"* ]]; then
-        return 0
-      fi
-      return 1
-      ;;
+  -v)
+    if [[ "$*" == *"nginx"* ]]; then
+      return 0
+    fi
+    return 1
+    ;;
   esac
   return 1
 }
@@ -71,7 +71,7 @@ command() {
 nginx() {
   local arg="$1"
   case "$arg" in
-    -t) return 0 ;;
+  -t) return 0 ;;
   esac
   return 0
 }
@@ -85,17 +85,17 @@ jq() {
   local arg="$1"
   shift
   case "$arg" in
-    -r)
-      local field="$2"
-      shift 2
-      case "$field" in
-        '.rotation.enabled') echo "true" ;;
-        '.template // "unknown"') echo "default" ;;
-        '.site_name // "unknown"') echo "Test Site" ;;
-        *) echo "unknown" ;;
-      esac
-      ;;
-    *) echo "{}" ;;
+  -r)
+    local field="$2"
+    shift 2
+    case "$field" in
+    '.rotation.enabled') echo "true" ;;
+    '.template // "unknown"') echo "default" ;;
+    '.site_name // "unknown"') echo "Test Site" ;;
+    *) echo "unknown" ;;
+    esac
+    ;;
+  *) echo "{}" ;;
   esac
 }
 
@@ -449,8 +449,8 @@ test_module_enable_checks_config() {
   info "Тестирование module_enable (проверка конфига)..."
 
   # Проверяем наличие проверки конфига
-  if grep -q 'NGINX_CONF' "$DECOY_INSTALL_PATH" 2>/dev/null && \
-     grep -q '\-f.*NGINX_CONF' "$DECOY_INSTALL_PATH" 2>/dev/null; then
+  if grep -q 'NGINX_CONF' "$DECOY_INSTALL_PATH" 2>/dev/null &&
+    grep -q '\-f.*NGINX_CONF' "$DECOY_INSTALL_PATH" 2>/dev/null; then
     pass "module_enable: проверяет наличие конфига"
     ((TESTS_PASSED++)) || true
   else

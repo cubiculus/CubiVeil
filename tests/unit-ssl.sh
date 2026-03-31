@@ -37,28 +37,34 @@ openssl() {
   local cmd="$1"
   shift
   case "$cmd" in
-    req)
-      # Создаём фиктивные файлы сертификатов
-      local keyout=""
-      local out=""
-      while [[ $# -gt 0 ]]; do
-        case "$1" in
-          -keyout) keyout="$2"; shift 2 ;;
-          -out) out="$2"; shift 2 ;;
-          *) shift ;;
-        esac
-      done
-      # Создаём директории и файлы если указаны пути
-      if [[ -n "$keyout" ]]; then
-        mkdir -p "$(dirname "$keyout")" 2>/dev/null || true
-        echo "MOCK_KEY" > "$keyout" 2>/dev/null || true
-      fi
-      if [[ -n "$out" ]]; then
-        mkdir -p "$(dirname "$out")" 2>/dev/null || true
-        echo "MOCK_CERT" > "$out" 2>/dev/null || true
-      fi
-      return 0
-      ;;
+  req)
+    # Создаём фиктивные файлы сертификатов
+    local keyout=""
+    local out=""
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+      -keyout)
+        keyout="$2"
+        shift 2
+        ;;
+      -out)
+        out="$2"
+        shift 2
+        ;;
+      *) shift ;;
+      esac
+    done
+    # Создаём директории и файлы если указаны пути
+    if [[ -n "$keyout" ]]; then
+      mkdir -p "$(dirname "$keyout")" 2>/dev/null || true
+      echo "MOCK_KEY" >"$keyout" 2>/dev/null || true
+    fi
+    if [[ -n "$out" ]]; then
+      mkdir -p "$(dirname "$out")" 2>/dev/null || true
+      echo "MOCK_CERT" >"$out" 2>/dev/null || true
+    fi
+    return 0
+    ;;
   esac
   return 0
 }
@@ -455,8 +461,8 @@ test_ssl_generate_creates_directory() {
   source "$SSL_MODULE_PATH"
 
   # Проверяем наличие mkdir -p в функции
-  if grep -q 'mkdir -p.*SSL_SELFIGNED_DIR' "$SSL_MODULE_PATH" || \
-     grep -q 'mkdir -p "\$SSL_SELFIGNED_DIR"' "$SSL_MODULE_PATH"; then
+  if grep -q 'mkdir -p.*SSL_SELFIGNED_DIR' "$SSL_MODULE_PATH" ||
+    grep -q 'mkdir -p "\$SSL_SELFIGNED_DIR"' "$SSL_MODULE_PATH"; then
     pass "ssl_generate_self_signed: создаёт директорию"
     ((TESTS_PASSED++)) || true
   else
@@ -504,8 +510,8 @@ test_ssl_generate_sets_permissions() {
   info "Тестирование ssl_generate_self_signed (права доступа)..."
 
   # Проверяем установку прав
-  if grep -q 'chmod 600.*key.pem' "$SSL_MODULE_PATH" && \
-     grep -q 'chmod 644.*cert.pem' "$SSL_MODULE_PATH"; then
+  if grep -q 'chmod 600.*key.pem' "$SSL_MODULE_PATH" &&
+    grep -q 'chmod 644.*cert.pem' "$SSL_MODULE_PATH"; then
     pass "ssl_generate_self_signed: устанавливает права доступа"
     ((TESTS_PASSED++)) || true
   else
@@ -649,8 +655,8 @@ test_ssl_dev_mode_check() {
   info "Проверка проверки DEV_MODE..."
 
   # Проверяем наличие проверки DEV_MODE
-  if grep -q 'DEV_MODE.*true' "$SSL_MODULE_PATH" || \
-     grep -q '"${DEV_MODE:-false}" == "true"' "$SSL_MODULE_PATH"; then
+  if grep -q 'DEV_MODE.*true' "$SSL_MODULE_PATH" ||
+    grep -q '"${DEV_MODE:-false}" == "true"' "$SSL_MODULE_PATH"; then
     pass "ssl/install.sh: проверяет DEV_MODE"
     ((TESTS_PASSED++)) || true
   else
@@ -666,8 +672,8 @@ test_ssl_dry_run_check() {
   info "Проверка проверки DRY_RUN..."
 
   # Проверяем наличие проверки DRY_RUN
-  if grep -q 'DRY_RUN.*true' "$SSL_MODULE_PATH" || \
-     grep -q '"${DRY_RUN:-false}" == "true"' "$SSL_MODULE_PATH"; then
+  if grep -q 'DRY_RUN.*true' "$SSL_MODULE_PATH" ||
+    grep -q '"${DRY_RUN:-false}" == "true"' "$SSL_MODULE_PATH"; then
     pass "ssl/install.sh: проверяет DRY_RUN"
     ((TESTS_PASSED++)) || true
   else
@@ -706,8 +712,8 @@ test_ssl_certificates_preserved() {
   info "Проверка сохранения сертификатов..."
 
   # module_remove не должен удалять сертификаты
-  if ! grep -q 'rm.*cert.pem' "$SSL_MODULE_PATH" && \
-     ! grep -q 'rm.*key.pem' "$SSL_MODULE_PATH"; then
+  if ! grep -q 'rm.*cert.pem' "$SSL_MODULE_PATH" &&
+    ! grep -q 'rm.*key.pem' "$SSL_MODULE_PATH"; then
     pass "module_remove: сохраняет сертификаты"
     ((TESTS_PASSED++)) || true
   else

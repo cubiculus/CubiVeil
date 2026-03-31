@@ -37,8 +37,8 @@ is_command_available() {
 }
 
 # Устанавливаем переменные по умолчанию для загрузки модулей
-export TEST_MODE="false"  # Не включать test mode при загрузке
-export TEST_DECOY_DIR=""  # Явно устанавливаем в пустую строку
+export TEST_MODE="false" # Не включать test mode при загрузке
+export TEST_DECOY_DIR="" # Явно устанавливаем в пустую строку
 export DECOY_WEBROOT="/tmp/test-decoy-webroot-$$"
 mkdir -p "$DECOY_WEBROOT"
 

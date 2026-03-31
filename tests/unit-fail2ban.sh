@@ -47,26 +47,26 @@ fail2ban-client() {
   local cmd="$1"
   shift
   case "$cmd" in
-    status)
-      if [[ "$*" == "sshd" ]]; then
-        echo "Status for the jail: sshd"
-        echo "|- Filter"
-        echo "|  |- Currently failed: 0"
-        echo "|  |- Currently banned: 0"
-        echo "|  |- Total failed: 0"
-        echo "|- Action"
-        echo "   |- Currently banned: 0"
-      else
-        echo "Status"
-        echo "|- Number of jail: 1"
-        echo "|- Jail list: sshd"
-      fi
-      return 0
-      ;;
-    set)
-      # unbanip command
-      return 0
-      ;;
+  status)
+    if [[ "$*" == "sshd" ]]; then
+      echo "Status for the jail: sshd"
+      echo "|- Filter"
+      echo "|  |- Currently failed: 0"
+      echo "|  |- Currently banned: 0"
+      echo "|  |- Total failed: 0"
+      echo "|- Action"
+      echo "   |- Currently banned: 0"
+    else
+      echo "Status"
+      echo "|- Number of jail: 1"
+      echo "|- Jail list: sshd"
+    fi
+    return 0
+    ;;
+  set)
+    # unbanip command
+    return 0
+    ;;
   esac
   return 0
 }
@@ -169,9 +169,9 @@ test_fail2ban_constants() {
     has_conf_file=true
   fi
 
-  if grep -q 'FAIL2BAN_DEFAULT_BANTIME=' "$FAIL2BAN_MODULE_PATH" && \
-     grep -q 'FAIL2BAN_DEFAULT_FINDTIME=' "$FAIL2BAN_MODULE_PATH" && \
-     grep -q 'FAIL2BAN_DEFAULT_MAXRETRY=' "$FAIL2BAN_MODULE_PATH"; then
+  if grep -q 'FAIL2BAN_DEFAULT_BANTIME=' "$FAIL2BAN_MODULE_PATH" &&
+    grep -q 'FAIL2BAN_DEFAULT_FINDTIME=' "$FAIL2BAN_MODULE_PATH" &&
+    grep -q 'FAIL2BAN_DEFAULT_MAXRETRY=' "$FAIL2BAN_MODULE_PATH"; then
     has_defaults=true
   fi
 
@@ -338,8 +338,8 @@ test_fail2ban_configure_creates_file() {
   source "$FAIL2BAN_MODULE_PATH"
 
   # Проверяем наличие команды cat > в функции
-  if grep -q 'cat >.*FAIL2BAN_CONF_FILE' "$FAIL2BAN_MODULE_PATH" || \
-     grep -q 'cat >"${FAIL2BAN_CONF_FILE}"' "$FAIL2BAN_MODULE_PATH"; then
+  if grep -q 'cat >.*FAIL2BAN_CONF_FILE' "$FAIL2BAN_MODULE_PATH" ||
+    grep -q 'cat >"${FAIL2BAN_CONF_FILE}"' "$FAIL2BAN_MODULE_PATH"; then
     pass "fail2ban_configure: создаёт файл конфигурации"
     ((TESTS_PASSED++)) || true
   else

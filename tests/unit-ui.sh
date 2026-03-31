@@ -21,38 +21,38 @@ UI_MODULE_PATH="${PROJECT_ROOT}/lib/core/installer/ui.sh"
 get_str() {
   local key="$1"
   case "$key" in
-    MSG_DRY_RUN_TITLE) echo "Dry-Run Mode" ;;
-    MSG_DRY_RUN_SIMULATION_MODE) echo "Simulation Mode" ;;
-    MSG_DRY_RUN_MODE_DEV) echo "Dev Mode" ;;
-    MSG_DRY_RUN_MODE_PROD) echo "Production Mode" ;;
-    MSG_DRY_RUN_DOMAIN) echo "Domain:" ;;
-    MSG_DRY_RUN_EMAIL) echo "Email:" ;;
-    MSG_DRY_RUN_WILL_BE_PROMPTED) echo "will be prompted" ;;
-    MSG_DRY_RUN_CHECKING_ENV) echo "Checking environment" ;;
-    MSG_DRY_RUN_ROOT_ACCESS_WOULD_CHECK) echo "Root access would be checked" ;;
-    MSG_DRY_RUN_ROOT_ACCESS_OK) echo "Root access OK" ;;
-    MSG_DRY_RUN_UBUNTU_DETECTED_OK) echo "Ubuntu detected OK" ;;
-    MSG_DRY_RUN_UBUNTU_WOULD_CHECK) echo "Ubuntu would be checked" ;;
-    MSG_DRY_RUN_ENV_CHECKS_OK) echo "Environment checks OK" ;;
-    MSG_DRY_RUN_NO_CHANGES) echo "No changes will be made" ;;
-    MSG_INSTALLED_SUCCESSFULLY) echo "installed successfully" ;;
-    MSG_WARNINGS_DURING_INSTALL) echo "Warnings during installation:" ;;
-    SUCCESS_PANEL_URL) echo "Panel URL:" ;;
-    SUCCESS_SUBSCRIPTION_URL) echo "Subscription URL:" ;;
-    SUCCESS_PROFILES) echo "Profiles:" ;;
-    MSG_BROWSERS_SECURITY_WARNING) echo "Browser security warning" ;;
-    NEXT_STEPS) echo "Next steps:" ;;
-    MSG_NEXT_STEP_CREATE_USERS) echo "Create users" ;;
-    MSG_NEXT_STEP_SUBSCRIPTION) echo "Get subscription" ;;
-    MSG_NEXT_STEP_SSH) echo "Configure SSH" ;;
-    MSG_NEXT_STEP_TELEGRAM) echo "Setup Telegram bot" ;;
-    MSG_ADMIN_CREDENTIALS) echo "Admin Credentials" ;;
-    MSG_MIKROTIK_SCRIPT) echo "MikroTik Script" ;;
-    MSG_MIKROTIK_SCRIPT_SAVED) echo "Script saved to {PATH}" ;;
-    MSG_MIKROTIK_IMPORT_INSTRUCTIONS_1) echo "Import: {PATH}" ;;
-    MSG_MIKROTIK_IMPORT_INSTRUCTIONS_2) echo "Terminal > Import" ;;
-    MSG_MIKROTIK_IMPORT_INSTRUCTIONS_3) echo "Apply script" ;;
-    *) echo "$key" ;;
+  MSG_DRY_RUN_TITLE) echo "Dry-Run Mode" ;;
+  MSG_DRY_RUN_SIMULATION_MODE) echo "Simulation Mode" ;;
+  MSG_DRY_RUN_MODE_DEV) echo "Dev Mode" ;;
+  MSG_DRY_RUN_MODE_PROD) echo "Production Mode" ;;
+  MSG_DRY_RUN_DOMAIN) echo "Domain:" ;;
+  MSG_DRY_RUN_EMAIL) echo "Email:" ;;
+  MSG_DRY_RUN_WILL_BE_PROMPTED) echo "will be prompted" ;;
+  MSG_DRY_RUN_CHECKING_ENV) echo "Checking environment" ;;
+  MSG_DRY_RUN_ROOT_ACCESS_WOULD_CHECK) echo "Root access would be checked" ;;
+  MSG_DRY_RUN_ROOT_ACCESS_OK) echo "Root access OK" ;;
+  MSG_DRY_RUN_UBUNTU_DETECTED_OK) echo "Ubuntu detected OK" ;;
+  MSG_DRY_RUN_UBUNTU_WOULD_CHECK) echo "Ubuntu would be checked" ;;
+  MSG_DRY_RUN_ENV_CHECKS_OK) echo "Environment checks OK" ;;
+  MSG_DRY_RUN_NO_CHANGES) echo "No changes will be made" ;;
+  MSG_INSTALLED_SUCCESSFULLY) echo "installed successfully" ;;
+  MSG_WARNINGS_DURING_INSTALL) echo "Warnings during installation:" ;;
+  SUCCESS_PANEL_URL) echo "Panel URL:" ;;
+  SUCCESS_SUBSCRIPTION_URL) echo "Subscription URL:" ;;
+  SUCCESS_PROFILES) echo "Profiles:" ;;
+  MSG_BROWSERS_SECURITY_WARNING) echo "Browser security warning" ;;
+  NEXT_STEPS) echo "Next steps:" ;;
+  MSG_NEXT_STEP_CREATE_USERS) echo "Create users" ;;
+  MSG_NEXT_STEP_SUBSCRIPTION) echo "Get subscription" ;;
+  MSG_NEXT_STEP_SSH) echo "Configure SSH" ;;
+  MSG_NEXT_STEP_TELEGRAM) echo "Setup Telegram bot" ;;
+  MSG_ADMIN_CREDENTIALS) echo "Admin Credentials" ;;
+  MSG_MIKROTIK_SCRIPT) echo "MikroTik Script" ;;
+  MSG_MIKROTIK_SCRIPT_SAVED) echo "Script saved to {PATH}" ;;
+  MSG_MIKROTIK_IMPORT_INSTRUCTIONS_1) echo "Import: {PATH}" ;;
+  MSG_MIKROTIK_IMPORT_INSTRUCTIONS_2) echo "Terminal > Import" ;;
+  MSG_MIKROTIK_IMPORT_INSTRUCTIONS_3) echo "Apply script" ;;
+  *) echo "$key" ;;
   esac
 }
 warning() { echo "[WARN] $1"; }
@@ -65,18 +65,18 @@ jq() {
   local arg="$1"
   shift
   case "$arg" in
-    -r)
-      local field="$2"
-      shift 2
-      local file="$1"
-      case "$field" in
-        .domain) echo "test.example.com" ;;
-        .panel) echo "8080" ;;
-        .subscription) echo "8081" ;;
-        *) echo "unknown" ;;
-      esac
-      ;;
-    *) echo "{}" ;;
+  -r)
+    local field="$2"
+    shift 2
+    local file="$1"
+    case "$field" in
+    .domain) echo "test.example.com" ;;
+    .panel) echo "8080" ;;
+    .subscription) echo "8081" ;;
+    *) echo "unknown" ;;
+    esac
+    ;;
+  *) echo "{}" ;;
   esac
 }
 
@@ -85,10 +85,10 @@ grep() {
   local pattern="$1"
   shift
   case "$pattern" in
-    "SUI_USERNAME\|ADMIN_USERNAME") echo "SUI_USERNAME=admin" ;;
-    "SUI_PASSWORD\|ADMIN_PASSWORD") echo "SUI_PASSWORD=secret123" ;;
-    "ubuntu") return 0 ;;
-    *) return 1 ;;
+  "SUI_USERNAME\|ADMIN_USERNAME") echo "SUI_USERNAME=admin" ;;
+  "SUI_PASSWORD\|ADMIN_PASSWORD") echo "SUI_PASSWORD=secret123" ;;
+  "ubuntu") return 0 ;;
+  *) return 1 ;;
   esac
 }
 
@@ -100,9 +100,9 @@ cut() {
   local delim="$1"
   shift
   case "$delim" in
-    -d=) echo "admin" ;;
-    -f2) echo "admin" ;;
-    *) echo "unknown" ;;
+  -d=) echo "admin" ;;
+  -f2) echo "admin" ;;
+  *) echo "unknown" ;;
   esac
 }
 
@@ -524,9 +524,9 @@ test_print_finish_profiles() {
   local output
   output=$(_print_finish 2>&1) || true
 
-  if [[ "$output" == *"Trojan"* ]] || [[ "$output" == *"Shadowsocks"* ]] || \
-     [[ "$output" == *"VLESS"* ]] || [[ "$output" == *"VMess"* ]] || \
-     [[ "$output" == *"Hysteria"* ]]; then
+  if [[ "$output" == *"Trojan"* ]] || [[ "$output" == *"Shadowsocks"* ]] ||
+    [[ "$output" == *"VLESS"* ]] || [[ "$output" == *"VMess"* ]] ||
+    [[ "$output" == *"Hysteria"* ]]; then
     pass "_print_finish: выводит профили"
     ((TESTS_PASSED++)) || true
   else

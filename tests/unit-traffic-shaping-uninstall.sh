@@ -34,9 +34,9 @@ systemctl() {
   local cmd="$1"
   shift
   case "$cmd" in
-    stop|disable) return 0 ;;
-    daemon-reload) return 0 ;;
-    is-active) return 1 ;;
+  stop | disable) return 0 ;;
+  daemon-reload) return 0 ;;
+  is-active) return 1 ;;
   esac
   return 0
 }
@@ -49,15 +49,15 @@ jq() {
   local arg="$1"
   shift
   case "$arg" in
-    -r)
-      local field="$2"
-      shift 2
-      case "$field" in
-        .interface) echo "eth0" ;;
-        *) echo "unknown" ;;
-      esac
-      ;;
-    *) echo "{}" ;;
+  -r)
+    local field="$2"
+    shift 2
+    case "$field" in
+    .interface) echo "eth0" ;;
+    *) echo "unknown" ;;
+    esac
+    ;;
+  *) echo "{}" ;;
   esac
   return 0
 }
@@ -67,12 +67,12 @@ ip() {
   local arg="$1"
   shift
   case "$arg" in
-    route)
-      if [[ "$*" == *"default"* ]]; then
-        echo "default via 192.168.1.1 dev eth0"
-        return 0
-      fi
-      ;;
+  route)
+    if [[ "$*" == *"default"* ]]; then
+      echo "default via 192.168.1.1 dev eth0"
+      return 0
+    fi
+    ;;
   esac
   return 1
 }
@@ -87,8 +87,8 @@ head() {
   local arg="$1"
   shift
   case "$arg" in
-    -1) echo "eth0" ;;
-    *) cat ;;
+  -1) echo "eth0" ;;
+  *) cat ;;
   esac
 }
 
@@ -97,11 +97,11 @@ tc() {
   local arg1="$1"
   shift
   case "$arg1" in
-    qdisc)
-      if [[ "$*" == *"del"* ]]; then
-        return 0
-      fi
-      ;;
+  qdisc)
+    if [[ "$*" == *"del"* ]]; then
+      return 0
+    fi
+    ;;
   esac
   return 0
 }

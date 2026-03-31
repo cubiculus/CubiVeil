@@ -46,27 +46,27 @@ ufw() {
   local cmd="$1"
   shift
   case "$cmd" in
-    --force)
-      local subcmd="$1"
-      case "$subcmd" in
-        reset|enable|disable) return 0 ;;
-      esac
-      ;;
-    default) return 0 ;;
-    allow) return 0 ;;
-    delete) return 0 ;;
-    status)
-      if [[ "$*" == *"numbered"* ]]; then
-        echo "Status: active"
-        echo "To                         Action      From"
-        echo "--                         ------      ----"
-        echo "22/tcp                     ALLOW       Anywhere"
-        echo "443/tcp                    ALLOW       Anywhere"
-      else
-        echo "Status: active"
-      fi
-      return 0
-      ;;
+  --force)
+    local subcmd="$1"
+    case "$subcmd" in
+    reset | enable | disable) return 0 ;;
+    esac
+    ;;
+  default) return 0 ;;
+  allow) return 0 ;;
+  delete) return 0 ;;
+  status)
+    if [[ "$*" == *"numbered"* ]]; then
+      echo "Status: active"
+      echo "To                         Action      From"
+      echo "--                         ------      ----"
+      echo "22/tcp                     ALLOW       Anywhere"
+      echo "443/tcp                    ALLOW       Anywhere"
+    else
+      echo "Status: active"
+    fi
+    return 0
+    ;;
   esac
   return 0
 }
