@@ -60,6 +60,7 @@ run_unit_tests() {
     "unit-orchestrator.sh:Orchestrator"
     "unit-s-ui.sh:S-UI module"
     "unit-firewall.sh:Firewall module"
+    "unit-fail2ban.sh:Fail2ban module"
     "unit-telegram.sh:setup-telegram.sh"
     "unit-system.sh:System module"
     "unit-ssl.sh:SSL module"
