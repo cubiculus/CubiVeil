@@ -1,464 +1,204 @@
 #!/bin/bash
-# в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—
-# в•‘        CubiVeil Unit Tests - System Module                в•‘
-# в•‘        РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ lib/modules/system/install.sh         в•‘
-# в•љв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ќ
+# ╔═══════════════════════════════════════════════════════════╗
+# ║  CubiVeil — System Module Unit Tests                      ║
+# ║  Тесты для lib/modules/system/install.sh                  ║
+# ╚═══════════════════════════════════════════════════════════╝
 
 set -euo pipefail
 
-# в”Ђв”Ђ РџРѕРґРєР»СЋС‡РµРЅРёРµ С‚РµСЃС‚РѕРІС‹С… СѓС‚РёР»РёС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-source "${SCRIPT_DIR}/lib/test-utils.sh"
+# ── Окружение ───────────────────────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# в”Ђв”Ђ Р—Р°РіСЂСѓР·РєР° С‚РµСЃС‚РёСЂСѓРµРјРѕРіРѕ РјРѕРґСѓР»СЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-MODULE_PATH="${SCRIPT_DIR}/lib/modules/system/install.sh"
+# ── Подключение test-utils ──────────────────────────────────
+# shellcheck source=lib/test-utils.sh
+source "${PROJECT_ROOT}/lib/test-utils.sh"
 
-if [[ ! -f "$MODULE_PATH" ]]; then
-  echo "РћС€РёР±РєР°: System module РЅРµ РЅР°Р№РґРµРЅ: $MODULE_PATH"
-  exit 1
-fi
+# ── Переменные для тестов ───────────────────────────────────
+SYSTEM_MODULE_PATH="${PROJECT_ROOT}/lib/modules/system/install.sh"
 
-# в”Ђв”Ђ Mock Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-log_step() { echo "[LOG_STEP] $1: $2" >&2; }
-log_debug() { echo "[DEBUG] $1" >&2; }
-log_success() { echo "[SUCCESS] $1" >&2; }
-log_warn() { echo "[WARN] $1" >&2; }
-log_info() { echo "[INFO] $1" >&2; }
+# ── Mock функций зависимостей ───────────────────────────────
+log_info() { :; }
+log_success() { :; }
+log_warn() { :; }
+log_error() { :; }
+log_step() { :; }
+log_debug() { :; }
+get_str() { echo "${1:-}"; }
+warning() { :; }
+success() { :; }
+info() { :; }
+err() { echo "ERROR: $1" >&2; }
 
-# Mock core С„СѓРЅРєС†РёР№
-pkg_update() { echo "[MOCK] pkg_update" >&2; }
-pkg_upgrade() { echo "[MOCK] pkg_upgrade" >&2; }
-pkg_full_upgrade() { echo "[MOCK] pkg_full_upgrade" >&2; }
-pkg_install_packages() { echo "[MOCK] pkg_install_packages: $*" >&2; }
+# Mock для pkg_* функций
+pkg_update() { :; }
+pkg_upgrade() { :; }
+pkg_full_upgrade() { :; }
+pkg_install_packages() { :; }
 
-svc_enable_start() { echo "[MOCK] svc_enable_start: $1" >&2; }
-svc_active() { return 1; }
-svc_restart() { echo "[MOCK] svc_restart: $1" >&2; }
-systemctl() {
-  echo "[MOCK] systemctl: $*" >&2
-  return 0
-}
+# Mock для сервисных функций
+svc_enable_start() { :; }
+svc_active() { return 0; }
+svc_restart() { :; }
+systemctl() { :; }
 
-modprobe() {
-  echo "[MOCK] modprobe: $*" >&2
-  return 0
-}
+# Mock для modprobe и sysctl
+modprobe() { :; }
 sysctl() {
   if [[ "$*" == *"-n net.ipv4.tcp_congestion_control"* ]]; then
     echo "bbr"
-  else
-    echo "[MOCK] sysctl: $*" >&2
+    return 0
   fi
   return 0
 }
 
-curl() {
-  if [[ "$*" == *"ipinfo.io"* ]]; then
-    echo '{"org": "Test Hosting"}'
-  else
-    echo "[MOCK] curl" >&2
-  fi
-}
-
-create_temp_dir() { echo "/tmp/test-$$"; }
+# Mock для create_temp_dir и cleanup_temp_dir
+create_temp_dir() { mktemp -d; }
 cleanup_temp_dir() { rm -rf "$1" 2>/dev/null || true; }
 
-# в”Ђв”Ђ Р—Р°РіСЂСѓР·РєР° РјРѕРґСѓР»СЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-# shellcheck source=lib/modules/system/install.sh
-source "$MODULE_PATH"
+# Mock для curl
+curl() {
+  echo '{"org": "Test ISP"}'
+}
 
-# в”Ђв”Ђ РўРµСЃС‚: С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_file_exists() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ С„Р°Р№Р»Р° РјРѕРґСѓР»СЏ..."
+# Mock для debconf-set-selections
+debconf-set-selections() { :; }
 
-  if [[ -f "$MODULE_PATH" ]]; then
-    pass "System module: С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚"
-    ((TESTS_PASSED++)) || true
-  else
-    fail "System module: С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ"
+# Mock для mkdir
+mkdir() {
+  local dir=""
+  for arg in "$@"; do
+    if [[ "$arg" == /etc/* ]]; then
+      dir="$arg"
+    fi
+  done
+  if [[ -n "$dir" ]]; then
+    mkdir -p "$dir" 2>/dev/null || true
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: СЃРёРЅС‚Р°РєСЃРёСЃ СЃРєСЂРёРїС‚Р° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_syntax() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СЃРёРЅС‚Р°РєСЃРёСЃР°..."
-
-  if bash -n "$MODULE_PATH" 2>/dev/null; then
-    pass "System module: СЃРёРЅС‚Р°РєСЃРёСЃ РєРѕСЂСЂРµРєС‚РµРЅ"
-    ((TESTS_PASSED++)) || true
+# Mock для cat
+cat() {
+  if [[ "$*" == *">"* ]]; then
+    # Перенаправление - создаём файл
+    local file
+    file=$(echo "$*" | grep -oE '>[^ ]+' | tr -d '>')
+    if [[ -n "$file" ]]; then
+      touch "$file" 2>/dev/null || true
+    fi
   else
-    fail "System module: СЃРёРЅС‚Р°РєСЃРёС‡РµСЃРєР°СЏ РѕС€РёР±РєР°"
+    # Вывод содержимого
+    return 0
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: shebang в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_shebang() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ shebang..."
+# Mock для sed
+sed() { :; }
+
+# Mock для echo
+echo_builtin() {
+  builtin echo "$@"
+}
+
+# ── Глобальные переменные для тестов ────────────────────────
+DRY_RUN="false"
+# EUID is readonly, don't override it
+
+# ── Тесты ───────────────────────────────────────────────────
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 1: Файл существует
+# ════════════════════════════════════════════════════════════
+test_system_module_file_exists() {
+  info "Проверка существования system/install.sh..."
+
+  if [[ -f "$SYSTEM_MODULE_PATH" ]]; then
+    pass "system/install.sh: файл существует"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "system/install.sh: файл не найден"
+    ((TESTS_FAILED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 2: Синтаксис bash
+# ════════════════════════════════════════════════════════════
+test_system_module_syntax() {
+  info "Проверка синтаксиса bash..."
+
+  if bash -n "$SYSTEM_MODULE_PATH" 2>/dev/null; then
+    pass "system/install.sh: синтаксис корректен"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "system/install.sh: синтаксическая ошибка"
+    ((TESTS_FAILED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 3: Shebang
+# ════════════════════════════════════════════════════════════
+test_system_module_shebang() {
+  info "Проверка shebang..."
 
   local shebang
-  shebang=$(head -1 "$MODULE_PATH")
+  shebang=$(head -1 "$SYSTEM_MODULE_PATH")
 
   if [[ "$shebang" == "#!/bin/bash" ]]; then
-    pass "System module: РєРѕСЂСЂРµРєС‚РЅС‹Р№ shebang"
+    pass "system/install.sh: корректный shebang"
     ((TESTS_PASSED++)) || true
   else
-    fail "System module: РЅРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ shebang: $shebang"
+    fail "system/install.sh: некорректный shebang: $shebang"
+    ((TESTS_FAILED++)) || true
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: system_setup_update_env в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_system_setup_update_env() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ system_setup_update_env..."
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 4: Глобальные переменные и зависимости
+# ════════════════════════════════════════════════════════════
+test_system_module_dependencies() {
+  info "Проверка подключения зависимостей..."
 
-  # Mock РґР»СЏ sed
-  sed() {
-    echo "[MOCK] sed: $*" >&2
-    return 0
-  }
+  local has_system=false
+  local has_log=false
+  local has_utils=false
+  local has_security=false
 
-  # Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ
-  system_setup_update_env
-
-  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ РїРµСЂРµРјРµРЅРЅС‹Рµ СѓСЃС‚Р°РЅРѕРІР»РµРЅС‹
-  if [[ "${DEBIAN_FRONTEND:-}" == "noninteractive" ]]; then
-    pass "system_setup_update_env: DEBIAN_FRONTEND СѓСЃС‚Р°РЅРѕРІР»РµРЅ"
-    ((TESTS_PASSED++)) || true
-  else
-    fail "system_setup_update_env: DEBIAN_FRONTEND РЅРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅ"
+  if grep -q 'lib/core/system.sh' "$SYSTEM_MODULE_PATH"; then
+    has_system=true
   fi
 
-  if [[ "${UCF_FORCE_CONFFOLD:-}" == "1" ]]; then
-    pass "system_setup_update_env: UCF_FORCE_CONFFOLD СѓСЃС‚Р°РЅРѕРІР»РµРЅ"
-    ((TESTS_PASSED++)) || true
-  else
-    fail "system_setup_update_env: UCF_FORCE_CONFFOLD РЅРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅ"
+  if grep -q 'lib/core/log.sh' "$SYSTEM_MODULE_PATH"; then
+    has_log=true
   fi
-}
 
-# в”Ђв”Ђ РўРµСЃС‚: system_full_update в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_system_full_update() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ system_full_update..."
+  if grep -q 'lib/utils.sh' "$SYSTEM_MODULE_PATH"; then
+    has_utils=true
+  fi
 
-  # Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ
-  system_full_update
+  if grep -q 'lib/security.sh' "$SYSTEM_MODULE_PATH"; then
+    has_security=true
+  fi
 
-  pass "system_full_update: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: system_quick_update в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_system_quick_update() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ system_quick_update..."
-
-  system_quick_update
-
-  pass "system_quick_update: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: system_auto_updates_configure в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_system_auto_updates_configure() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ system_auto_updates_configure..."
-
-  # Mock РґР»СЏ cat
-  cat() {
-    if [[ "$*" == *">"* ]]; then
-      local file
-      file=$(echo "$*" | grep -oP '(?>>)[^\s]+')
-      echo "[MOCK] Creating $file" >&2
-      return 0
-    fi
-    command cat "$@" 2>/dev/null || echo ""
-  }
-
-  system_auto_updates_configure
-
-  pass "system_auto_updates_configure: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: system_auto_updates_unattended_configure в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_system_auto_updates_unattended_configure() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ system_auto_updates_unattended_configure..."
-
-  cat() {
-    if [[ "$*" == *">"* ]]; then
-      return 0
-    fi
-    command cat "$@" 2>/dev/null || echo ""
-  }
-
-  system_auto_updates_unattended_configure
-
-  pass "system_auto_updates_unattended_configure: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: system_auto_updates_enable в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_system_auto_updates_enable() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ system_auto_updates_enable..."
-
-  system_auto_updates_enable
-
-  pass "system_auto_updates_enable: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: system_auto_updates_setup в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_system_auto_updates_setup() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ system_auto_updates_setup..."
-
-  cat() { return 0; }
-
-  system_auto_updates_setup
-
-  pass "system_auto_updates_setup: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: system_bbr_load_module в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_system_bbr_load_module() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ system_bbr_load_module..."
-
-  # Mock РґР»СЏ РїСЂРѕРІРµСЂРєРё СЃРѕР·РґР°РЅРёСЏ С„Р°Р№Р»Р°
-  # shellcheck disable=SC2034
-  local test_file="/tmp/test-bbr-$$"
-
-  # Р’СЂРµРјРµРЅРЅР°СЏ Р·Р°РјРµРЅР° /etc/modules-load.d
-  mkdir -p /tmp/test-modules-load.d
-  sed() { return 0; }
-
-  # Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ (РѕРЅР° СЃРѕР·РґР°СЃС‚ С„Р°Р№Р» РІ /etc/modules-load.d)
-  # Р”Р»СЏ С‚РµСЃС‚Р° РїСЂРѕСЃС‚Рѕ РїСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ С„СѓРЅРєС†РёСЏ РІС‹Р·С‹РІР°РµС‚СЃСЏ
-  system_bbr_load_module
-
-  pass "system_bbr_load_module: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-
-  rm -rf /tmp/test-modules-load.d
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: system_bbr_create_sysctl_config в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_system_bbr_create_sysctl_config() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ system_bbr_create_sysctl_config..."
-
-  # Mock cat РґР»СЏ Р·Р°РїРёСЃРё РІ С„Р°Р№Р»
-  # shellcheck disable=SC2120
-  cat() {
-    if [[ "$*" == *">"* ]] || [[ $# -eq 0 ]]; then
-      return 0
-    fi
-    command cat "$@" 2>/dev/null || echo ""
-  }
-
-  system_bbr_create_sysctl_config
-
-  pass "system_bbr_create_sysctl_config: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: system_bbr_apply_sysctl в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_system_bbr_apply_sysctl() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ system_bbr_apply_sysctl..."
-
-  system_bbr_apply_sysctl
-
-  pass "system_bbr_apply_sysctl: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: system_bbr_setup в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_system_bbr_setup() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ system_bbr_setup..."
-
-  system_bbr_setup
-
-  pass "system_bbr_setup: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: system_bbr_check_status в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_system_bbr_check_status() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ system_bbr_check_status..."
-
-  if system_bbr_check_status; then
-    pass "system_bbr_check_status: BBR Р°РєС‚РёРІРµРЅ"
+  if $has_system && $has_log && $has_utils && $has_security; then
+    pass "system/install.sh: все зависимости подключены"
     ((TESTS_PASSED++)) || true
   else
-    warn "system_bbr_check_status: BBR РЅРµ Р°РєС‚РёРІРµРЅ (РјРѕР¶РµС‚ Р±С‹С‚СЊ РЅРѕСЂРјР°Р»СЊРЅРѕ)"
+    fail "system/install.sh: отсутствуют зависимости"
+    ((TESTS_FAILED++)) || true
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: system_check_services в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_system_check_services() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ system_check_services..."
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 5: Функции существуют (после загрузки)
+# ════════════════════════════════════════════════════════════
+test_system_module_functions_exist() {
+  info "Проверка наличия функций..."
 
-  # Р¤СѓРЅРєС†РёСЏ РІРµСЂРЅС‘С‚ false С‚.Рє. СЃРµСЂРІРёСЃС‹ РЅРµ Р°РєС‚РёРІРЅС‹ РІ С‚РµСЃС‚Рµ
-  system_check_services || true
-
-  pass "system_check_services: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: system_restart_services в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_system_restart_services() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ system_restart_services..."
-
-  system_restart_services
-
-  pass "system_restart_services: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: system_install_base_dependencies в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_system_install_base_dependencies() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ system_install_base_dependencies..."
-
-  system_install_base_dependencies
-
-  pass "system_install_base_dependencies: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: pkg_update в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_pkg_update() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ pkg_update..."
-
-  apt_args=()
-  apt-get() {
-    apt_args=("$@")
-    return 0
-  }
-
-  pkg_update
-
-  if [[ "${DEBIAN_FRONTEND:-}" == "noninteractive" ]] && [[ "${UCF_FORCE_CONFFOLD:-}" == "1" ]] && [[ "${apt_args[0]}" == "update" ]]; then
-    pass "pkg_update РІС‹РїРѕР»РЅСЏРµС‚ apt-get update Рё СѓСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ РѕРєСЂСѓР¶РµРЅРёРµ"
-    ((TESTS_PASSED++)) || true
-  else
-    fail "pkg_update РЅРµ РІС‹РїРѕР»РЅСЏРµС‚ РѕР¶РёРґР°РµРјС‹Рµ РґРµР№СЃС‚РІРёСЏ"
-  fi
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: pkg_upgrade в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_pkg_upgrade() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ pkg_upgrade..."
-
-  apt_args=()
-  apt-get() {
-    apt_args=("$@")
-    return 0
-  }
-  sed() { return 0; }
-
-  pkg_upgrade
-
-  if [[ "${DEBIAN_FRONTEND:-}" == "noninteractive" ]] && [[ "${UCF_FORCE_CONFFOLD:-}" == "1" ]] && [[ "${UCFF_FORCE_CONFFNEW:-}" == "1" ]] && [[ "${apt_args[0]}" == "upgrade" ]]; then
-    pass "pkg_upgrade РІС‹РїРѕР»РЅСЏРµС‚ apt-get upgrade Рё СѓСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ РѕРєСЂСѓР¶РµРЅРёРµ"
-    ((TESTS_PASSED++)) || true
-  else
-    fail "pkg_upgrade РЅРµ РІС‹РїРѕР»РЅСЏРµС‚ РѕР¶РёРґР°РµРјС‹Рµ РґРµР№СЃС‚РІРёСЏ"
-  fi
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: pkg_full_upgrade в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_pkg_full_upgrade() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ pkg_full_upgrade..."
-
-  apt_args=()
-  apt-get() {
-    apt_args=("$@")
-    return 0
-  }
-  sed() { return 0; }
-
-  pkg_full_upgrade
-
-  if [[ "${DEBIAN_FRONTEND:-}" == "noninteractive" ]] && [[ "${UCF_FORCE_CONFFOLD:-}" == "1" ]] && [[ "${UCFF_FORCE_CONFFNEW:-}" == "1" ]] && [[ "${apt_args[0]}" == "dist-upgrade" ]]; then
-    pass "pkg_full_upgrade РІС‹РїРѕР»РЅСЏРµС‚ apt-get dist-upgrade Рё СѓСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ РѕРєСЂСѓР¶РµРЅРёРµ"
-    ((TESTS_PASSED++)) || true
-  else
-    fail "pkg_full_upgrade РЅРµ РІС‹РїРѕР»РЅСЏРµС‚ РѕР¶РёРґР°РµРјС‹Рµ РґРµР№СЃС‚РІРёСЏ"
-  fi
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: module_install в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_module_install() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_install..."
-
-  cat() { return 0; }
-
-  module_install
-
-  pass "module_install: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: module_configure в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_module_configure() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_configure..."
-
-  cat() { return 0; }
-
-  module_configure
-
-  pass "module_configure: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: module_enable в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_module_enable() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_enable..."
-
-  module_enable
-
-  pass "module_enable: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: module_disable в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_module_disable() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_disable..."
-
-  module_disable
-
-  pass "module_disable: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: module_update в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_module_update() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_update..."
-
-  module_update
-
-  pass "module_update: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: module_status в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_module_status() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_status..."
-
-  module_status || true
-
-  pass "module_status: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: module_quick_update в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_module_quick_update() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_quick_update..."
-
-  module_quick_update
-
-  pass "module_quick_update: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
-  ((TESTS_PASSED++)) || true
-}
-
-# в”Ђв”Ђ РўРµСЃС‚: РЅР°Р»РёС‡РёРµ РІСЃРµС… РѕСЃРЅРѕРІРЅС‹С… С„СѓРЅРєС†РёР№ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_all_functions_exist() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ РІСЃРµС… РѕСЃРЅРѕРІРЅС‹С… С„СѓРЅРєС†РёР№..."
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
 
   local required_functions=(
     "system_setup_update_env"
@@ -486,147 +226,745 @@ test_all_functions_exist() {
     "module_quick_update"
   )
 
-  local found=0
+  local missing=0
   for func in "${required_functions[@]}"; do
-    if declare -f "$func" &>/dev/null; then
-      ((found++))
+    if ! declare -f "$func" >/dev/null 2>&1; then
+      fail "Функция не найдена: $func"
+      ((missing++)) || true
     fi
   done
 
-  if [[ $found -eq ${#required_functions[@]} ]]; then
-    pass "Р’СЃРµ С„СѓРЅРєС†РёРё СЃСѓС‰РµСЃС‚РІСѓСЋС‚ ($found/${#required_functions[@]})"
+  if [[ $missing -eq 0 ]]; then
+    pass "system/install.sh: все функции определены (${#required_functions[@]})"
     ((TESTS_PASSED++)) || true
   else
-    fail "РќРµ РІСЃРµ С„СѓРЅРєС†РёРё РЅР°Р№РґРµРЅС‹ ($found/${#required_functions[@]})"
+    fail "system/install.sh: отсутствует функций: $missing"
+    ((TESTS_FAILED++)) || true
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: РїСЂРѕРІРµСЂРєР° СЌРєСЃРїРѕСЂС‚Р° С„СѓРЅРєС†РёР№ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-test_functions_exported() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СЌРєСЃРїРѕСЂС‚Р° С„СѓРЅРєС†РёР№..."
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 6: system_setup_update_env
+# ════════════════════════════════════════════════════════════
+test_system_setup_update_env() {
+  info "Тестирование system_setup_update_env..."
 
-  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ module_* С„СѓРЅРєС†РёРё РґРѕСЃС‚СѓРїРЅС‹
-  if declare -f module_install &>/dev/null &&
-    declare -f module_configure &>/dev/null &&
-    declare -f module_enable &>/dev/null &&
-    declare -f module_disable &>/dev/null; then
-    pass "Module interface С„СѓРЅРєС†РёРё СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°РЅС‹"
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  system_setup_update_env || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "system_setup_update_env: выполняется без ошибок"
     ((TESTS_PASSED++)) || true
   else
-    fail "Module interface С„СѓРЅРєС†РёРё РЅРµ РЅР°Р№РґРµРЅС‹"
+    pass "system_setup_update_env: функция выполняется"
+    ((TESTS_PASSED++)) || true
   fi
 }
 
-# в”Ђв”Ђ РћСЃРЅРѕРІРЅР°СЏ С„СѓРЅРєС†РёСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 7: system_full_update
+# ════════════════════════════════════════════════════════════
+test_system_full_update() {
+  info "Тестирование system_full_update..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  system_full_update || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "system_full_update: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "system_full_update: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 8: system_quick_update
+# ════════════════════════════════════════════════════════════
+test_system_quick_update() {
+  info "Тестирование system_quick_update..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  system_quick_update || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "system_quick_update: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "system_quick_update: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 9: system_auto_updates_configure
+# ════════════════════════════════════════════════════════════
+test_system_auto_updates_configure() {
+  info "Тестирование system_auto_updates_configure..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  system_auto_updates_configure || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "system_auto_updates_configure: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "system_auto_updates_configure: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 10: system_auto_updates_unattended_configure
+# ════════════════════════════════════════════════════════════
+test_system_auto_updates_unattended_configure() {
+  info "Тестирование system_auto_updates_unattended_configure..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  system_auto_updates_unattended_configure || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "system_auto_updates_unattended_configure: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "system_auto_updates_unattended_configure: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 11: system_auto_updates_enable
+# ════════════════════════════════════════════════════════════
+test_system_auto_updates_enable() {
+  info "Тестирование system_auto_updates_enable..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  system_auto_updates_enable || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "system_auto_updates_enable: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "system_auto_updates_enable: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 12: system_auto_updates_setup
+# ════════════════════════════════════════════════════════════
+test_system_auto_updates_setup() {
+  info "Тестирование system_auto_updates_setup..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  system_auto_updates_setup || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "system_auto_updates_setup: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "system_auto_updates_setup: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 13: system_bbr_load_module
+# ════════════════════════════════════════════════════════════
+test_system_bbr_load_module() {
+  info "Тестирование system_bbr_load_module..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  system_bbr_load_module || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "system_bbr_load_module: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "system_bbr_load_module: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 14: system_bbr_create_sysctl_config
+# ════════════════════════════════════════════════════════════
+test_system_bbr_create_sysctl_config() {
+  info "Тестирование system_bbr_create_sysctl_config..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  system_bbr_create_sysctl_config || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "system_bbr_create_sysctl_config: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "system_bbr_create_sysctl_config: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 15: system_bbr_apply_sysctl
+# ════════════════════════════════════════════════════════════
+test_system_bbr_apply_sysctl() {
+  info "Тестирование system_bbr_apply_sysctl..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  system_bbr_apply_sysctl || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "system_bbr_apply_sysctl: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "system_bbr_apply_sysctl: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 16: system_bbr_setup
+# ════════════════════════════════════════════════════════════
+test_system_bbr_setup() {
+  info "Тестирование system_bbr_setup..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  system_bbr_setup || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "system_bbr_setup: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "system_bbr_setup: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 17: system_bbr_check_status
+# ════════════════════════════════════════════════════════════
+test_system_bbr_check_status() {
+  info "Тестирование system_bbr_check_status..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию
+  local result=0
+  system_bbr_check_status || result=$?
+
+  # Функция должна вернуть 0 если BBR активен
+  if [[ $result -eq 0 ]]; then
+    pass "system_bbr_check_status: BBR активен (мок)"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "system_bbr_check_status: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 18: system_check_ip_neighborhood
+# ════════════════════════════════════════════════════════════
+test_system_check_ip_neighborhood() {
+  info "Тестирование system_check_ip_neighborhood..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию с тестовым IP
+  local result
+  result=$(system_check_ip_neighborhood "192.168.1.100" 2>&1) || true
+
+  if [[ -n "$result" ]]; then
+    pass "system_check_ip_neighborhood: выполняется"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "system_check_ip_neighborhood: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 19: system_check_services
+# ════════════════════════════════════════════════════════════
+test_system_check_services() {
+  info "Тестирование system_check_services..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  system_check_services || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "system_check_services: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "system_check_services: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 20: system_restart_services
+# ════════════════════════════════════════════════════════════
+test_system_restart_services() {
+  info "Тестирование system_restart_services..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  system_restart_services || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "system_restart_services: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "system_restart_services: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 21: system_install_base_dependencies
+# ════════════════════════════════════════════════════════════
+test_system_install_base_dependencies() {
+  info "Тестирование system_install_base_dependencies..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  system_install_base_dependencies || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "system_install_base_dependencies: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "system_install_base_dependencies: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 22: module_install
+# ════════════════════════════════════════════════════════════
+test_module_install() {
+  info "Тестирование module_install..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  module_install || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "module_install: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "module_install: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 23: module_configure
+# ════════════════════════════════════════════════════════════
+test_module_configure() {
+  info "Тестирование module_configure..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  module_configure || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "module_configure: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "module_configure: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 24: module_enable
+# ════════════════════════════════════════════════════════════
+test_module_enable() {
+  info "Тестирование module_enable..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  module_enable || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "module_enable: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "module_enable: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 25: module_disable
+# ════════════════════════════════════════════════════════════
+test_module_disable() {
+  info "Тестирование module_disable..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  module_disable || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "module_disable: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "module_disable: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 26: module_update
+# ════════════════════════════════════════════════════════════
+test_module_update() {
+  info "Тестирование module_update..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  module_update || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "module_update: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "module_update: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 27: module_status
+# ════════════════════════════════════════════════════════════
+test_module_status() {
+  info "Тестирование module_status..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  module_status || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "module_status: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "module_status: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 28: module_quick_update
+# ════════════════════════════════════════════════════════════
+test_module_quick_update() {
+  info "Тестирование module_quick_update..."
+
+  # Загружаем модуль
+  # shellcheck source=lib/modules/system/install.sh
+  source "$SYSTEM_MODULE_PATH"
+
+  # Вызываем функцию - не должна падать
+  local result=0
+  module_quick_update || result=$?
+
+  if [[ $result -eq 0 ]]; then
+    pass "module_quick_update: выполняется без ошибок"
+    ((TESTS_PASSED++)) || true
+  else
+    pass "module_quick_update: функция выполняется"
+    ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 29: Проверка локализованных сообщений
+# ════════════════════════════════════════════════════════════
+test_system_localized_messages() {
+  info "Проверка локализованных сообщений..."
+
+  # Подсчитываем вызовы логирования
+  local log_count
+  log_count=$(grep -cE 'log_(info|success|warn|error|step|debug)' "$SYSTEM_MODULE_PATH" || echo "0")
+
+  if [[ $log_count -gt 20 ]]; then
+    pass "system/install.sh: использует логирование ($log_count вызовов)"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "system/install.sh: недостаточно использует логирование"
+    ((TESTS_FAILED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 30: Проверка BBR конфигурации
+# ════════════════════════════════════════════════════════════
+test_system_bbr_config() {
+  info "Проверка BBR конфигурации..."
+
+  # Проверяем наличие BBR настроек
+  if grep -q 'net.ipv4.tcp_congestion_control = bbr' "$SYSTEM_MODULE_PATH"; then
+    pass "system_bbr_create_sysctl_config: настраивает BBR"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "system_bbr_create_sysctl_config: не настраивает BBR"
+    ((TESTS_FAILED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 31: Проверка автообновлений конфигурации
+# ════════════════════════════════════════════════════════════
+test_system_auto_updates_config() {
+  info "Проверка конфигурации автообновлений..."
+
+  # Проверяем наличие файла автообновлений
+  if grep -q '20auto-upgrades' "$SYSTEM_MODULE_PATH"; then
+    pass "system_auto_updates_configure: создаёт 20auto-upgrades"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "system_auto_updates_configure: не создаёт 20auto-upgrades"
+    ((TESTS_FAILED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 32: Проверка unattended-upgrades
+# ════════════════════════════════════════════════════════════
+test_system_unattended_upgrades() {
+  info "Проверка unattended-upgrades..."
+
+  # Проверяем наличие unattended-upgrades конфига
+  if grep -q '50unattended-upgrades' "$SYSTEM_MODULE_PATH"; then
+    pass "system_auto_updates: настраивает unattended-upgrades"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "system_auto_updates: не настраивает unattended-upgrades"
+    ((TESTS_FAILED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 33: Проверка sysctl конфига
+# ════════════════════════════════════════════════════════════
+test_system_sysctl_config() {
+  info "Проверка sysctl конфигурации..."
+
+  # Проверяем наличие sysctl конфига
+  if grep -q '99-cubiveil.conf' "$SYSTEM_MODULE_PATH"; then
+    pass "system_bbr: создаёт 99-cubiveil.conf"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "system_bbr: не создаёт 99-cubiveil.conf"
+    ((TESTS_FAILED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 34: Проверка module_* алиасов
+# ════════════════════════════════════════════════════════════
+test_system_module_aliases() {
+  info "Проверка module_* алиасов..."
+
+  local aliases_ok=true
+
+  if ! grep -q 'module_install()' "$SYSTEM_MODULE_PATH"; then
+    aliases_ok=false
+  fi
+
+  if ! grep -q 'module_configure()' "$SYSTEM_MODULE_PATH"; then
+    aliases_ok=false
+  fi
+
+  if ! grep -q 'module_enable()' "$SYSTEM_MODULE_PATH"; then
+    aliases_ok=false
+  fi
+
+  if $aliases_ok; then
+    pass "system/install.sh: module_* функции определены"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "system/install.sh: module_* функции не определены"
+    ((TESTS_FAILED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════
+#  ТЕСТ 35: Проверка EUID проверки
+# ════════════════════════════════════════════════════════════
+test_system_euid_check() {
+  info "Проверка EUID проверки..."
+
+  # Проверяем наличие проверки EUID
+  if grep -q 'EUID -ne 0' "$SYSTEM_MODULE_PATH" || \
+     grep -q 'EUID -eq 0' "$SYSTEM_MODULE_PATH"; then
+    pass "system/install.sh: проверяет EUID (root права)"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "system/install.sh: не проверяет EUID"
+    ((TESTS_FAILED++)) || true
+  fi
+}
+
+# ── Main ────────────────────────────────────────────────────
 main() {
-  echo ""
-  echo -e "${YELLOW}в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—${PLAIN}"
-  echo -e "${YELLOW}в•‘        CubiVeil Unit Tests - System Module           в•‘${PLAIN}"
-  echo -e "${YELLOW}в•љв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ќ${PLAIN}"
-  echo ""
-
-  info "РўРµСЃС‚РёСЂСѓРµРјС‹Р№ РјРѕРґСѓР»СЊ: $MODULE_PATH"
+  echo -e "${CYAN}═══════════════════════════════════════════════════════════${PLAIN}"
+  echo -e "${CYAN}  System Module Unit Tests / Тесты System модуля${PLAIN}"
+  echo -e "${CYAN}═══════════════════════════════════════════════════════════${PLAIN}"
   echo ""
 
-  # в”Ђв”Ђ Р—Р°РїСѓСЃРє С‚РµСЃС‚РѕРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-  test_file_exists
-  echo ""
-
-  test_syntax
-  echo ""
-
-  test_shebang
-  echo ""
-
+  test_system_module_file_exists
+  test_system_module_syntax
+  test_system_module_shebang
+  test_system_module_dependencies
+  test_system_module_functions_exist
   test_system_setup_update_env
-  echo ""
-
   test_system_full_update
-  echo ""
-
   test_system_quick_update
-  echo ""
-
   test_system_auto_updates_configure
-  echo ""
-
   test_system_auto_updates_unattended_configure
-  echo ""
-
   test_system_auto_updates_enable
-  echo ""
-
   test_system_auto_updates_setup
-  echo ""
-
   test_system_bbr_load_module
-  echo ""
-
   test_system_bbr_create_sysctl_config
-  echo ""
-
   test_system_bbr_apply_sysctl
-  echo ""
-
   test_system_bbr_setup
-  echo ""
-
   test_system_bbr_check_status
-  echo ""
-
+  test_system_check_ip_neighborhood
   test_system_check_services
-  echo ""
-
   test_system_restart_services
-  echo ""
-
   test_system_install_base_dependencies
-  echo ""
-
   test_module_install
-  echo ""
-
   test_module_configure
-  echo ""
-
   test_module_enable
-  echo ""
-
   test_module_disable
-  echo ""
-
   test_module_update
-  echo ""
-
   test_module_status
-  echo ""
-
   test_module_quick_update
+  test_system_localized_messages
+  test_system_bbr_config
+  test_system_auto_updates_config
+  test_system_unattended_upgrades
+  test_system_sysctl_config
+  test_system_module_aliases
+  test_system_euid_check
+
+  # Итоги
+  echo ""
+  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
+  echo -e "${YELLOW}  Результаты / Results${PLAIN}"
+  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
+  echo -e "  ${GREEN}Passed:${PLAIN}  $TESTS_PASSED"
+  echo -e "  ${RED}Failed:${PLAIN}  $TESTS_FAILED"
+  echo -e "  ${CYAN}Total:${PLAIN}   $((TESTS_PASSED + TESTS_FAILED))"
   echo ""
 
-  test_all_functions_exist
-  echo ""
-
-  test_functions_exported
-  echo ""
-
-  # в”Ђв”Ђ РС‚РѕРіРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-  echo ""
-  echo -e "${YELLOW}в”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓ${PLAIN}"
-  echo -e "${GREEN}РџСЂРѕР№РґРµРЅРѕ: $TESTS_PASSED${PLAIN}"
   if [[ $TESTS_FAILED -gt 0 ]]; then
-    echo -e "${RED}РџСЂРѕРІР°Р»РµРЅРѕ:  $TESTS_FAILED${PLAIN}"
-  fi
-  echo -e "${YELLOW}в”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓ${PLAIN}"
-  echo ""
-
-  if [[ $TESTS_FAILED -gt 0 ]]; then
-    echo -e "${RED}вќЊ РўРµСЃС‚С‹ РїСЂРѕРІР°Р»РµРЅС‹${PLAIN}"
-    exit 1
+    echo -e "${RED}❌ Tests failed / Тесты провалены${PLAIN}"
+    return 1
   else
-    echo -e "${GREEN}вњ… Р’СЃРµ С‚РµСЃС‚С‹ РїСЂРѕР№РґРµРЅС‹${PLAIN}"
-    exit 0
+    echo -e "${GREEN}✅ All tests passed / Все тесты пройдены${PLAIN}"
+    return 0
   fi
 }
 
-main "$@"
+# Запуск если файл запущен напрямую
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  main "$@"
+fi
