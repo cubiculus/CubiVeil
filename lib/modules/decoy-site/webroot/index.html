@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Стремительный Космос Бокс - Корпоративное хранилище</title>
+    <title>{{SITE_NAME}} - {{SITE_TITLE}}</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,44 +11,44 @@
         <header class="header">
             <div class="logo">
                 <span class="logo-icon">📁</span>
-                <span class="logo-text">Стремительный Космос Бокс</span>
+                <span class="logo-text">{{SITE_NAME}}</span>
             </div>
             <nav class="nav">
-                <a href="index.html" class="nav-link active">Добро пожаловать</a>
-                <a href="files.html" class="nav-link">Файлы</a>
-                <a href="stats.html" class="nav-link">Статистика</a>
-                <a href="users.html" class="nav-link">Пользователи</a>
-                <a href="login.html" class="nav-link btn-login">Войти</a>
+                <a href="index.html" class="nav-link active">{{WELCOME_TEXT}}</a>
+                <a href="files.html" class="nav-link">{{FILES_TITLE}}</a>
+                <a href="stats.html" class="nav-link">{{STATS_TITLE}}</a>
+                <a href="users.html" class="nav-link">{{USERS_TITLE}}</a>
+                <a href="login.html" class="nav-link btn-login">{{LOGIN_BUTTON}}</a>
             </nav>
         </header>
 
         <main class="main">
             <section class="hero">
-                <h1>Добро пожаловать, Стремительный Космос Бокс</h1>
-                <p class="hero-subtitle">Корпоративное хранилище</p>
+                <h1>{{WELCOME_TEXT}}, {{SITE_NAME}}</h1>
+                <p class="hero-subtitle">{{SITE_TITLE}}</p>
 
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <span class="stat-value" id="storage-value">19.24 TB</span>
-                        <span class="stat-label">Хранилище</span>
+                        <span class="stat-value" id="storage-value">{{TOTAL_STORAGE}}</span>
+                        <span class="stat-label">{{STORAGE_LABEL}}</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-value" id="users-value">290</span>
-                        <span class="stat-label">Пользователи</span>
+                        <span class="stat-value" id="users-value">{{TOTAL_USERS}}</span>
+                        <span class="stat-label">{{USERS_LABEL}}</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-value" id="files-value">215513</span>
-                        <span class="stat-label">Файлы</span>
+                        <span class="stat-value" id="files-value">{{TOTAL_FILES}}</span>
+                        <span class="stat-label">{{FILES_LABEL}}</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-value" id="traffic-value">1.37 GB</span>
-                        <span class="stat-label">Трафик/день</span>
+                        <span class="stat-value" id="traffic-value">{{DAILY_TRAFFIC}}</span>
+                        <span class="stat-label">{{TRAFFIC_LABEL}}/день</span>
                     </div>
                 </div>
 
                 <div class="cta-buttons">
-                    <a href="files.html" class="btn btn-primary">Файлы</a>
-                    <a href="login.html" class="btn btn-secondary">Войти</a>
+                    <a href="files.html" class="btn btn-primary">{{FILES_TITLE}}</a>
+                    <a href="login.html" class="btn btn-secondary">{{LOGIN_BUTTON}}</a>
                 </div>
             </section>
 
@@ -72,7 +72,7 @@
         </main>
 
         <footer class="footer">
-            <p>&copy; 2024 Стремительный Космос Бокс. Все права защищены.</p>
+            <p>&copy; 2024 {{SITE_NAME}}. Все права защищены.</p>
         </footer>
     </div>
 

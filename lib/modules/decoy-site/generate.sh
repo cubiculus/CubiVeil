@@ -256,8 +256,20 @@ copy_template() {
     mkdir -p "$output_dir"
     rm -rf "$output_dir"/*
 
-    # Копируем файлы шаблона
-    cp -r "$TEMPLATES_DIR/$template_name"/* "$output_dir/"
+    # Копируем общие файлы из _shared
+    if [[ -d "$TEMPLATES_DIR/_shared" ]]; then
+        log_info "Copying shared files from _shared"
+        cp -r "$TEMPLATES_DIR/_shared"/* "$output_dir/"
+    fi
+
+    # Копируем уникальные файлы шаблона (если есть)
+    if [[ -d "$TEMPLATES_DIR/$template_name" ]]; then
+        local template_files
+        template_files=$(find "$TEMPLATES_DIR/$template_name" -type f 2>/dev/null || true)
+        if [[ -n "$template_files" ]]; then
+            cp -r "$TEMPLATES_DIR/$template_name"/* "$output_dir/"
+        fi
+    fi
 }
 
 # Замена переменных в файлах
@@ -433,6 +445,180 @@ window.SITE_CONFIG = {
     colors: $colors_json
 };
 EOF
+}
+
+# Генерация внутренних страниц (files, audit, 404)
+_generate_inner_pages() {
+    local template="$1"
+    local site_name="$2"
+    local accent_color="$3"
+    local copyright_year="$4"
+    local output_dir="${DECOY_WEBROOT:-$OUTPUT_DIR}"
+
+    log_debug "_generate_inner_pages: Generating inner pages"
+
+    # Создаём директорию для файлов
+    local files_dir="${output_dir}/files"
+    mkdir -p "${files_dir}/upload"
+
+    # Создаём директорию для audit логов
+    local audit_dir="${output_dir}/audit"
+    mkdir -p "${audit_dir}/logs"
+
+    # Генерация /files/index.html
+    cat > "${files_dir}/index.html" <<EOF
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Storage - ${site_name}</title>
+    <style>
+        :root {
+            --accent-color: ${accent_color};
+        }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .logo { font-size: 24px; font-weight: bold; color: var(--accent-color); }
+        .nav a { margin-left: 20px; text-decoration: none; color: #333; }
+        .nav a.active { color: var(--accent-color); font-weight: bold; }
+        .file-list { list-style: none; padding: 0; }
+        .file-item { padding: 15px; border: 1px solid #ddd; margin-bottom: 10px; border-radius: 4px; display: flex; align-items: center; }
+        .file-icon { margin-right: 15px; font-size: 24px; }
+        .file-info { flex: 1; }
+        .file-name { font-weight: bold; }
+        .file-meta { font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">📁 ${site_name}</div>
+            <nav class="nav">
+                <a href="../index.html" class="active">Files</a>
+                <a href="../stats.html">Statistics</a>
+                <a href="../login.html">Login</a>
+            </nav>
+        </div>
+        <h1>File Storage</h1>
+        <p>Browse and manage your files</p>
+        <ul class="file-list">
+            <li class="file-item">
+                <span class="file-icon">📄</span>
+                <div class="file-info">
+                    <div class="file-name">document.pdf</div>
+                    <div class="file-meta">2.5 MB • ${copyright_year}</div>
+                </div>
+            </li>
+            <li class="file-item">
+                <span class="file-icon">🖼️</span>
+                <div class="file-info">
+                    <div class="file-name">image.jpg</div>
+                    <div class="file-meta">1.2 MB • ${copyright_year}</div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
+EOF
+
+    # Генерация /files/upload/index.html
+    cat > "${files_dir}/upload/index.html" <<EOF
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload File - ${site_name}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; }
+        .upload-area { border: 2px dashed #ccc; padding: 40px; text-align: center; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload File</h1>
+        <div class="upload-area">
+            <p>Drag and drop files here or click to browse</p>
+        </div>
+    </div>
+</body>
+</html>
+EOF
+
+    # Генерация /audit/logs/index.html
+    cat > "${audit_dir}/logs/index.html" <<EOF
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Log - ${site_name}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Audit Log</h1>
+        <p>System activity log</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Event</th>
+                    <th>User</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>${copyright_year}-01-01 10:00:00</td>
+                    <td>Login successful</td>
+                    <td>admin</td>
+                    <td>✓</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+EOF
+
+    # Генерация /404.html
+    cat > "${output_dir}/404.html" <<EOF
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found - ${site_name}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .error-container { text-align: center; background: white; padding: 40px; border-radius: 8px; max-width: 400px; }
+        h1 { font-size: 72px; margin: 0; color: ${accent_color}; }
+        p { color: #666; }
+        a { color: ${accent_color}; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <h1>404</h1>
+        <p>Page not found</p>
+        <p><a href="index.html">Return to home</a></p>
+    </div>
+</body>
+</html>
+EOF
+
+    log_success "_generate_inner_pages: Inner pages generated"
 }
 
 # Генерация nginx.conf
@@ -637,6 +823,15 @@ decoy_build_webroot() {
     # Вызываем функцию generate напрямую
     parse_args "$@"
     generate
+
+    # После генерации создаём внутренние страницы
+    local template site_name accent_color copyright_year
+    template=$(jq -r '.template // "portal"' "$DECOY_CONFIG" 2>/dev/null || echo "portal")
+    site_name=$(jq -r '.site_name // "Decoy Site"' "$DECOY_CONFIG" 2>/dev/null || echo "Decoy Site")
+    accent_color=$(jq -r '.accent_color // "#4a90d9"' "$DECOY_CONFIG" 2>/dev/null || echo "#4a90d9")
+    copyright_year=$(jq -r '.copyright_year // "2025"' "$DECOY_CONFIG" 2>/dev/null || echo "2025")
+
+    _generate_inner_pages "$template" "$site_name" "$accent_color" "$copyright_year"
 
     # Восстанавливаем параметры
     OUTPUT_DIR="$original_output"

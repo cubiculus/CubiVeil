@@ -1,9 +1,9 @@
 {
-    "seed": "8145ad778cc2abd4b988191754762b65",
-    "template": "minimal",
+    "seed": "49ad434bd55abad7afe6a0cfe8aa698d",
+    "template": "corporate",
     "language": "ru",
     "color_theme": "auto",
-    "site_name": "Стремительный Космос Бокс",
-    "generated_at": "2026-03-30T22:02:36+03:00",
+    "site_name": "",
+    "generated_at": "2025-01-01T12:00:00+00:00",
     "version": "1.0.0"
 }

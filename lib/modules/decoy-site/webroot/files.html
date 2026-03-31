@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Стремительный Космос Бокс - Файлы</title>
+    <title>{{SITE_NAME}} - {{FILES_TITLE}}</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,20 +11,20 @@
         <header class="header">
             <div class="logo">
                 <span class="logo-icon">📁</span>
-                <span class="logo-text">Стремительный Космос Бокс</span>
+                <span class="logo-text">{{SITE_NAME}}</span>
             </div>
             <nav class="nav">
-                <a href="index.html" class="nav-link">Добро пожаловать</a>
-                <a href="files.html" class="nav-link active">Файлы</a>
-                <a href="stats.html" class="nav-link">Статистика</a>
-                <a href="users.html" class="nav-link">Пользователи</a>
-                <a href="login.html" class="nav-link btn-login">Войти</a>
+                <a href="index.html" class="nav-link">{{WELCOME_TEXT}}</a>
+                <a href="files.html" class="nav-link active">{{FILES_TITLE}}</a>
+                <a href="stats.html" class="nav-link">{{STATS_TITLE}}</a>
+                <a href="users.html" class="nav-link">{{USERS_TITLE}}</a>
+                <a href="login.html" class="nav-link btn-login">{{LOGIN_BUTTON}}</a>
             </nav>
         </header>
 
         <main class="main">
             <div class="files-header">
-                <h1>Файлы</h1>
+                <h1>{{FILES_TITLE}}</h1>
                 <div class="files-actions">
                     <button class="btn btn-primary" id="upload-btn">📤 Загрузить</button>
                     <button class="btn btn-secondary" id="new-folder-btn">📁 Новая папка</button>
@@ -82,13 +82,13 @@
             </div>
 
             <div class="files-footer">
-                <p>Всего: <span id="total-files">215513</span> файлов в <span id="total-folders">17241</span> папках</p>
-                <p>Занято: 15.39 TB из 19.24 TB</p>
+                <p>Всего: <span id="total-files">{{TOTAL_FILES}}</span> файлов в <span id="total-folders">{{TOTAL_FOLDERS}}</span> папках</p>
+                <p>Занято: {{USED_STORAGE}} из {{TOTAL_STORAGE}}</p>
             </div>
         </main>
 
         <footer class="footer">
-            <p>&copy; 2024 Стремительный Космос Бокс. Все права защищены.</p>
+            <p>&copy; 2024 {{SITE_NAME}}. Все права защищены.</p>
         </footer>
     </div>
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Стремительный Космос Бокс - Вход в систему</title>
+    <title>{{SITE_NAME}} - {{LOGIN_TITLE}}</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="login-page">
@@ -11,13 +11,13 @@
         <div class="login-box">
             <div class="login-header">
                 <span class="logo-icon">📁</span>
-                <h1>Стремительный Космос Бокс</h1>
-                <p>Корпоративное хранилище</p>
+                <h1>{{SITE_NAME}}</h1>
+                <p>{{SITE_TITLE}}</p>
             </div>
 
             <form id="login-form" class="login-form">
                 <div class="form-group">
-                    <label for="username">Пользователи</label>
+                    <label for="username">{{USERS_LABEL}}</label>
                     <input type="text" id="username" name="username" required autocomplete="username">
                 </div>
 
@@ -31,10 +31,10 @@
                         <input type="checkbox" name="remember">
                         <span>Запомнить меня</span>
                     </label>
-                    <a href="forgot-password.html" class="forgot-link">Забыли пароль?</a>
+                    <a href="forgot-password.html" class="forgot-link">{{FORGOT_PASSWORD}}</a>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-block">Войти</button>
+                <button type="submit" class="btn btn-primary btn-block">{{LOGIN_BUTTON}}</button>
 
                 <div id="error-message" class="error-message" style="display: none;"></div>
             </form>
