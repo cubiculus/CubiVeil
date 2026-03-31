@@ -4,7 +4,7 @@
 # ║        Тестирование lib/modules/decoy-site/          ║
 # ╚══════════════════════════════════════════════════════╝
 
-set -euo pipefail
+set -uo pipefail
 
 # ── Подключение тестовых утилит ──────────────────────────────
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -202,9 +202,6 @@ gen_range() {
 test_module_load() {
   info "Тестирование загрузки модуля decoy-site..."
 
-  # Debug
-  echo "[DEBUG] TEST_MODE=[$TEST_MODE], TEST_DECOY_DIR=[$TEST_DECOY_DIR], DECOY_WEBROOT=[$DECOY_WEBROOT]" >&2
-
   # Источник install.sh
   # shellcheck disable=SC1090
   source "$MODULE_PATH"
@@ -233,6 +230,8 @@ test_decoy_generate_profile() {
   export TEST_DECOY_DIR
   export DECOY_CONFIG="${TEST_DECOY_DIR}/decoy.json"
   export DECOY_WEBROOT="${TEST_DECOY_DIR}/webroot"
+  export OUTPUT_DIR="${DECOY_WEBROOT}"
+  export OUTPUT_DIR_SET="1"
 
   # Источник generate.sh
   # shellcheck disable=SC1090
@@ -716,7 +715,19 @@ main() {
   echo "  Результаты / Results"
   echo "════════════════════════════════════════════"
   echo ""
-  print_summary
+  echo -e "  Пройдено ${GREEN}(${TESTS_PASSED})${PLAIN}"
+  if [[ $TESTS_FAILED -gt 0 ]]; then
+    echo -e "  Провалено ${RED}(${TESTS_FAILED})${PLAIN}"
+  fi
+  echo ""
+
+  if [[ $TESTS_FAILED -gt 0 ]]; then
+    echo -e "${RED}Тесты провалены${PLAIN}"
+    exit 1
+  else
+    echo -e "${GREEN}Все тесты пройдены${PLAIN}"
+    exit 0
+  fi
 }
 
 main "$@"

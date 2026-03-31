@@ -14,14 +14,9 @@ TEMPLATES_DIR="$ROOT_DIR/templates"
 LOGS_DIR="$ROOT_DIR/logs"
 WEBROOT_DIR="$ROOT_DIR/webroot"
 
-# Отладка
-echo "[GENERATE DEBUG] SCRIPT_DIR=[$SCRIPT_DIR], ROOT_DIR=[$ROOT_DIR], LOGS_DIR=[$LOGS_DIR]" >&2
-
 # Файлы логов
 LOG_FILE="$LOGS_DIR/generate.log"
-echo "[GENERATE] About to mkdir LOGS_DIR=[$LOGS_DIR]" >&2
 mkdir -p "$LOGS_DIR"
-echo "[GENERATE] LOGS_DIR created" >&2
 
 # Логирование
 log() {
@@ -88,16 +83,17 @@ generate_seed() {
 
 # Парсинг аргументов командной строки
 parse_args() {
-    TEMPLATE="auto"
-    LANG="ru"
-    COLOR_THEME="auto"
-    BASE_HUE=""
-    SEED=""
-    USERS_COUNT=""
-    FILES_COUNT=""
-    STORAGE_SIZE=""
-    OUTPUT_DIR=""
-    OUTPUT_DIR_SET=0
+    TEMPLATE="${TEMPLATE:-auto}"
+    LANG="${LANG:-ru}"
+    COLOR_THEME="${COLOR_THEME:-auto}"
+    BASE_HUE="${BASE_HUE:-}"
+    SEED="${SEED:-}"
+    USERS_COUNT="${USERS_COUNT:-}"
+    FILES_COUNT="${FILES_COUNT:-}"
+    STORAGE_SIZE="${STORAGE_SIZE:-}"
+    # OUTPUT_DIR и OUTPUT_DIR_SET сохраняем если уже установлены
+    OUTPUT_DIR="${OUTPUT_DIR:-}"
+    OUTPUT_DIR_SET="${OUTPUT_DIR_SET:-0}"
     CONFIG_FILE="$ROOT_DIR/config.json"
 
     while [[ $# -gt 0 ]]; do
@@ -285,13 +281,13 @@ copy_template() {
 generate_style_css() {
     local output_dir="$1"
     local colors_json="$2"
-    
+
     log_info "Generating style.css with color scheme"
-    
+
     # Вызываем colors.sh с флагом --css для генерации файла
     # Передаем colors_json как аргумент, а не через stdin
     bash "$GENERATORS_DIR/colors.sh" --css --output "$output_dir" "$colors_json"
-    
+
     log_success "style.css generated"
 }
 
@@ -924,4 +920,7 @@ main() {
     generate
 }
 
-main "$@"
+# Вызываем main только если скрипт запущен напрямую а не source-ится
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
