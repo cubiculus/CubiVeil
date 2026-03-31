@@ -70,6 +70,7 @@ run_unit_tests() {
     "unit-decoy-site.sh:Decoy-site module"
     "unit-decoy-inner-pages.sh:Decoy Inner Pages"
     "unit-traffic-shaping.sh:Traffic Shaping module"
+    "unit-traffic-shaping-persist.sh:TS Persist"
     "unit-backup.sh:Backup module"
     "unit-monitoring.sh:Monitoring module"
     "unit-rollback.sh:Rollback module"
