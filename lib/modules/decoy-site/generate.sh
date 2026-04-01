@@ -472,7 +472,7 @@ _generate_inner_pages() {
     local site_name="$2"
     local accent_color="$3"
     local copyright_year="$4"
-    local output_dir="${DECOY_WEBROOT:-$OUTPUT_DIR}"
+    local output_dir="${DECOY_WEBROOT:-${OUTPUT_DIR:-/tmp/decoy-webroot}}"
 
     log_debug "_generate_inner_pages: Generating inner pages"
 
@@ -834,9 +834,9 @@ EOF
 
 # decoy_build_webroot - сборка webroot из шаблонов
 decoy_build_webroot() {
-    # Сохраняем текущие параметры
-    local original_output="$OUTPUT_DIR"
-    local original_output_set="$OUTPUT_DIR_SET"
+    # Сохраняем текущие параметры (с защитой от unbound variable)
+    local original_output="${OUTPUT_DIR:-}"
+    local original_output_set="${OUTPUT_DIR_SET:-0}"
 
     # Устанавливаем параметры для generate()
     OUTPUT_DIR="$DECOY_WEBROOT"

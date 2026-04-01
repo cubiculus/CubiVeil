@@ -121,13 +121,23 @@ generate_name() {
     local lang="${1:-en}"
     local adjective noun type
 
+    # Нормализация языка: извлекаем базовый язык (например, из C.UTF-8 -> en)
     case "$lang" in
-        ru|RU|русский|Russian)
+        ru|RU|русский|Russian|ru_RU*)
+            lang="ru"
+            ;;
+        en|EN|english|English|C*|POSIX|en_US*|en_GB*)
+            lang="en"
+            ;;
+    esac
+
+    case "$lang" in
+        ru)
             adjective=$(random_element ADJECTIVES_RU)
             noun=$(random_element NOUNS_RU)
             type=$(random_element TYPES_RU)
             ;;
-        en|EN|english|English)
+        en)
             adjective=$(random_element ADJECTIVES_EN)
             noun=$(random_element NOUNS_EN)
             type=$(random_element TYPES_EN)
