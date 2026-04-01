@@ -232,10 +232,10 @@ test_backup_sui_db() {
 
   # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ Р±СЌРєР°Рї СЃРѕР·РґР°РЅ
   if [[ -f "${test_backup_dir}/s-ui-db.sqlite3" ]]; then
-    pass "backup_sui_db: Р±СЌРєР°Рї Р'Р" СЃРѕР·РґР°РЅ"
+    pass "backup_sui_db: бэкап создан"
     ((TESTS_PASSED++)) || true
   else
-    pass "backup_sui_db: Р±СЌРєР°Рї РјРѕР¶РµС‚ РЅРµ СЃРѕР·РґР°С‚СЊСЃСЏ РІ С‚РµСЃС‚Рµ"
+    pass "backup_sui_db: бэкап может не создаться в тесте"
     ((TESTS_PASSED++)) || true
   fi
 
@@ -691,7 +691,7 @@ main() {
   echo -e "${YELLOW}в"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓ${PLAIN}"
   echo -e "${GREEN}РџСЂРѕР№РґРµРЅРѕ: $TESTS_PASSED${PLAIN}"
   if [[ $TESTS_FAILED -gt 0 ]]; then
-    echo -e "${RED}РџСЂРѕРІР°Р»РµРЅРѕ:  $TESTS_FAILED${PLAIN}"
+    echo -e "${RED}РџСЂРѕРІР°Р»РµРЅРѕ: $TESTS_FAILED${PLAIN}"
   fi
   echo -e "${YELLOW}в"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓ${PLAIN}"
   echo ""

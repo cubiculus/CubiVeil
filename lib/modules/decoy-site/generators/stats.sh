@@ -6,16 +6,16 @@ SEED=$(date +%s)
 # Парсим параметры
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --seed)
-      SEED="$2"
-      shift 2
-      ;;
-    --users|--files|--storage|--json)
-      shift $([[ "$1" == --* ]] && echo 2 || echo 1)
-      ;;
-    *)
-      shift
-      ;;
+  --seed)
+    SEED="$2"
+    shift 2
+    ;;
+  --users | --files | --storage | --json)
+    shift $([[ "$1" == --* ]] && echo 2 || echo 1)
+    ;;
+  *)
+    shift
+    ;;
   esac
 done
 

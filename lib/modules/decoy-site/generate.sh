@@ -22,10 +22,13 @@ LOGS_DIR="${SCRIPT_DIR}/logs"
 mkdir -p "$LOGS_DIR"
 LOG_FILE="${LOGS_DIR}/generate.log"
 
-log()         { echo "[$(date '+%H:%M:%S')] [$1] $2" >> "$LOG_FILE"; }
-log_info()    { log "INFO" "$*"; }
-log_success() { log "OK"   "$*"; }
-log_error()   { log "ERR"  "$*"; echo "[ERR] $*" >&2; }
+log() { echo "[$(date '+%H:%M:%S')] [$1] $2" >>"$LOG_FILE"; }
+log_info() { log "INFO" "$*"; }
+log_success() { log "OK" "$*"; }
+log_error() {
+  log "ERR" "$*"
+  echo "[ERR] $*" >&2
+}
 
 # Источники
 source "${GENERATORS_DIR}/variants.sh"
@@ -50,19 +53,52 @@ DECOY_ROTATE_TIMER="${DECOY_ROTATE_TIMER:-cubiveil-decoy-rotate}"
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --variant|-V) VARIANT="$2"; shift 2 ;;
-      --lang|-l)    LANG="$2";    shift 2 ;;
-      --theme)      COLOR_THEME="$2"; shift 2 ;;
-      --seed|-s)    SEED="$2";    shift 2 ;;
-      --output|-o)  OUTPUT_DIR="$2"; shift 2 ;;
-      --users|-u)   USERS_COUNT="$2"; shift 2 ;;
-      --files|-f)   FILES_COUNT="$2"; shift 2 ;;
-      --storage)    STORAGE_SIZE="$2"; shift 2 ;;
-      --list)       list_variants; exit 0 ;;
-      --help|-h)    show_help; exit 0 ;;
-      # Обратная совместимость с --template
-      --template|-t) VARIANT="$2"; shift 2 ;;
-      *) shift ;;
+    --variant | -V)
+      VARIANT="$2"
+      shift 2
+      ;;
+    --lang | -l)
+      LANG="$2"
+      shift 2
+      ;;
+    --theme)
+      COLOR_THEME="$2"
+      shift 2
+      ;;
+    --seed | -s)
+      SEED="$2"
+      shift 2
+      ;;
+    --output | -o)
+      OUTPUT_DIR="$2"
+      shift 2
+      ;;
+    --users | -u)
+      USERS_COUNT="$2"
+      shift 2
+      ;;
+    --files | -f)
+      FILES_COUNT="$2"
+      shift 2
+      ;;
+    --storage)
+      STORAGE_SIZE="$2"
+      shift 2
+      ;;
+    --list)
+      list_variants
+      exit 0
+      ;;
+    --help | -h)
+      show_help
+      exit 0
+      ;;
+    # Обратная совместимость с --template
+    --template | -t)
+      VARIANT="$2"
+      shift 2
+      ;;
+    *) shift ;;
     esac
   done
 }
@@ -116,52 +152,58 @@ _build_content_preview() {
   local files_json="$3"
 
   case "$content_type" in
-    files|mixed)
-      # Файловая сетка
-      local html='<div class="file-grid" id="file-grid">'
-      # Несколько статичных папок
-      local folders_en=("Documents" "Projects" "Archives" "Backups" "Shared" "Personal")
-      local folders_ru=("Документы" "Проекты" "Архивы" "Бэкапы" "Общие" "Личное")
-      local count="${#folders_en[@]}"
-      for ((i=0; i<count; i++)); do
-        local fname
-        if [[ "$lang" == "ru" ]]; then
-          fname="${folders_ru[$i]}"
-        else
-          fname="${folders_en[$i]}"
-        fi
-        html+="<div class=\"file-card folder\" data-type=\"folder\">
+  files | mixed)
+    # Файловая сетка
+    local html='<div class="file-grid" id="file-grid">'
+    # Несколько статичных папок
+    local folders_en=("Documents" "Projects" "Archives" "Backups" "Shared" "Personal")
+    local folders_ru=("Документы" "Проекты" "Архивы" "Бэкапы" "Общие" "Личное")
+    local count="${#folders_en[@]}"
+    for ((i = 0; i < count; i++)); do
+      local fname
+      if [[ "$lang" == "ru" ]]; then
+        fname="${folders_ru[$i]}"
+      else
+        fname="${folders_en[$i]}"
+      fi
+      html+="<div class=\"file-card folder\" data-type=\"folder\">
           <span class=\"file-card-icon\">📁</span>
           <span class=\"file-card-name\">${fname}</span>
         </div>"
-      done
-      html+='</div>
+    done
+    html+='</div>
       <div class="files-footer" id="files-footer"></div>'
-      echo "$html"
-      ;;
+    echo "$html"
+    ;;
 
-    media|gallery)
-      # Медиа-сетка с цветными плейсхолдерами
-      local html='<div class="media-grid">'
-      local icons=("🖼️" "🎬" "🎵" "🖼️" "🎬" "🖼️" "📸" "🎬" "🖼️")
-      for icon in "${icons[@]}"; do
-        html+="<div class=\"media-card\">
+  media | gallery)
+    # Медиа-сетка с цветными плейсхолдерами
+    local html='<div class="media-grid">'
+    local icons=("🖼️" "🎬" "🎵" "🖼️" "🎬" "🖼️" "📸" "🎬" "🖼️")
+    for icon in "${icons[@]}"; do
+      html+="<div class=\"media-card\">
           <div class=\"media-thumb\">${icon}</div>
         </div>"
-      done
-      html+='</div>'
-      echo "$html"
-      ;;
+    done
+    html+='</div>'
+    echo "$html"
+    ;;
 
-    stats|dashboard)
-      # Мини-дашборд
-      local used_lbl upload_lbl download_lbl activity_lbl
-      if [[ "$lang" == "ru" ]]; then
-        used_lbl="Использовано"; upload_lbl="Загружено"; download_lbl="Скачано"; activity_lbl="Активность"
-      else
-        used_lbl="Used"; upload_lbl="Uploaded"; download_lbl="Downloaded"; activity_lbl="Activity"
-      fi
-      cat <<DASHHTML
+  stats | dashboard)
+    # Мини-дашборд
+    local used_lbl upload_lbl download_lbl activity_lbl
+    if [[ "$lang" == "ru" ]]; then
+      used_lbl="Использовано"
+      upload_lbl="Загружено"
+      download_lbl="Скачано"
+      activity_lbl="Активность"
+    else
+      used_lbl="Used"
+      upload_lbl="Uploaded"
+      download_lbl="Downloaded"
+      activity_lbl="Activity"
+    fi
+    cat <<DASHHTML
 <div class="dashboard-grid">
   <div class="dash-card">
     <div class="dash-card-label">${used_lbl}</div>
@@ -184,7 +226,7 @@ _build_content_preview() {
   </div>
 </div>
 DASHHTML
-      ;;
+    ;;
   esac
 }
 
@@ -224,7 +266,7 @@ _render_template() {
     -e "s|{{RIGHTS_TEXT}}|${_RIGHTS_TEXT}|g" \
     -e "s|{{PRIVACY_TEXT}}|${_PRIVACY_TEXT}|g" \
     -e "s|{{TERMS_TEXT}}|${_TERMS_TEXT}|g" \
-    "$tpl_file" > "${output_file}.tmp"
+    "$tpl_file" >"${output_file}.tmp"
 
   # Блоки с HTML вставляем через python3 (sed плохо справляется с многострочным HTML)
   python3 - "${output_file}.tmp" "$output_file" \
@@ -263,17 +305,17 @@ _generate_css() {
   # Добавляем layout-специфичные стили к style.css
   local layout_css=""
   case "$layout" in
-    gallery)
-      layout_css='
+  gallery)
+    layout_css='
 .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
 .media-card { aspect-ratio: 1; border-radius: 8px; background: var(--color-border); display: flex; align-items: center; justify-content: center; font-size: 2rem; cursor: pointer; transition: transform .15s; }
 .media-card:hover { transform: scale(1.05); }
 .media-thumb { font-size: 2.5rem; }
 .file-grid { display: none; }
 .dashboard-grid { display: none; }'
-      ;;
-    dashboard)
-      layout_css='
+    ;;
+  dashboard)
+    layout_css='
 .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
 .dash-card { background: white; padding: 16px; border-radius: 12px; border: 1px solid var(--color-border); }
 .dash-card--wide { grid-column: 1 / -1; }
@@ -285,9 +327,9 @@ _generate_css() {
 .activity-bars { display: flex; align-items: flex-end; gap: 4px; height: 48px; }
 .file-grid { display: none; }
 .media-grid { display: none; }'
-      ;;
-    list)
-      layout_css='
+    ;;
+  list)
+    layout_css='
 .file-grid { display: flex; flex-direction: column; gap: 2px; }
 .file-card { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 8px; background: white; border: 1px solid var(--color-border); cursor: pointer; transition: background .1s; }
 .file-card:hover { background: rgba(0,0,0,.03); }
@@ -295,9 +337,9 @@ _generate_css() {
 .file-card-name { font-size: .875rem; }
 .media-grid { display: none; }
 .dashboard-grid { display: none; }'
-      ;;
-    grid|*)
-      layout_css='
+    ;;
+  grid | *)
+    layout_css='
 .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
 .file-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 8px; border-radius: 12px; background: white; border: 1px solid var(--color-border); cursor: pointer; text-align: center; transition: box-shadow .15s, transform .15s; }
 .file-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.08); transform: translateY(-2px); }
@@ -305,13 +347,13 @@ _generate_css() {
 .file-card-name { font-size: .75rem; word-break: break-word; color: var(--color-text); }
 .media-grid { display: none; }
 .dashboard-grid { display: none; }'
-      ;;
+    ;;
   esac
 
-  echo "$layout_css" >> "${output_dir}/style.css"
+  echo "$layout_css" >>"${output_dir}/style.css"
 
   # Стили для страницы входа
-  cat >> "${output_dir}/style.css" << 'LOGIN_CSS'
+  cat >>"${output_dir}/style.css" <<'LOGIN_CSS'
 .login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--color-bg); }
 .login-container { width: 100%; max-width: 400px; padding: 20px; }
 .login-box { background: white; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.1); overflow: hidden; }
@@ -485,10 +527,10 @@ print(f'  siteName: {json.dumps(site)},')
 print(f'  language: {json.dumps(lang)},')
 print(f'  stats: {json.dumps(d)},')
 print(f'}};')
-" > "${OUTPUT_DIR}/config.js"
+" >"${OUTPUT_DIR}/config.js"
 
   # 16. nginx.conf (один, больше не дублируется по шаблонам)
-  cat > "${OUTPUT_DIR}/nginx.conf" <<NGINX
+  cat >"${OUTPUT_DIR}/nginx.conf" <<NGINX
 server {
     listen 80;
     server_name localhost;
@@ -515,7 +557,7 @@ print(json.dumps({
   'generated_at': '$(date -Iseconds)',
   'version': '2.0'
 }, indent=2))
-" > "${OUTPUT_DIR}/.generation_meta.json"
+" >"${OUTPUT_DIR}/.generation_meta.json"
 
   local end_time duration
   end_time=$(date +%s)
@@ -527,7 +569,7 @@ print(json.dumps({
 # Простая страница логина если нет шаблона
 _build_simple_login_page() {
   local out="$1"
-  cat > "$out" <<HTML
+  cat >"$out" <<HTML
 <!DOCTYPE html>
 <html lang="${_LANG}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${_SITE_NAME} — ${_LOGIN_BUTTON}</title><link rel="stylesheet" href="style.css"></head>
@@ -573,7 +615,7 @@ config = {
   'max_total_files_mb': 5000
 }
 print(json.dumps(config, indent=2))
-" > "$DECOY_CONFIG"
+" >"$DECOY_CONFIG"
     chmod 600 "$DECOY_CONFIG"
   fi
 
@@ -598,10 +640,10 @@ decoy_write_nginx_conf() {
   variant_id=$(python3 -c "import json; print(json.load(open('$DECOY_CONFIG')).get('template','unknown'))" 2>/dev/null || echo "unknown")
   mkdir -p "$(dirname "$NGINX_CONF")"
   sed -e "s|{{DECOY_WEBROOT}}|$DECOY_WEBROOT|g" \
-      -e "s|{{SITE_NAME}}|$site_name|g" \
-      -e "s|{{GENERATED_AT}}|$generated_at|g" \
-      -e "s|{{TEMPLATE}}|$variant_id|g" \
-      "$tpl" > "$NGINX_CONF"
+    -e "s|{{SITE_NAME}}|$site_name|g" \
+    -e "s|{{GENERATED_AT}}|$generated_at|g" \
+    -e "s|{{TEMPLATE}}|$variant_id|g" \
+    "$tpl" >"$NGINX_CONF"
 }
 
 # Этот файл уже определён в rotate.sh, оставляем совместимость

@@ -3,31 +3,31 @@
 set -euo pipefail
 
 THEME="auto"
-OUTPUT_MODE="json"  # json или css
+OUTPUT_MODE="json" # json или css
 OUTPUT_DIR="."
 
 # Парсим параметры
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --theme)
-      THEME="$2"
-      shift 2
-      ;;
-    --output)
-      OUTPUT_DIR="$2"
-      shift 2
-      ;;
-    --css)
-      OUTPUT_MODE="css"
-      shift
-      ;;
-    --json)
-      OUTPUT_MODE="json"
-      shift
-      ;;
-    *)
-      shift
-      ;;
+  --theme)
+    THEME="$2"
+    shift 2
+    ;;
+  --output)
+    OUTPUT_DIR="$2"
+    shift 2
+    ;;
+  --css)
+    OUTPUT_MODE="css"
+    shift
+    ;;
+  --json)
+    OUTPUT_MODE="json"
+    shift
+    ;;
+  *)
+    shift
+    ;;
   esac
 done
 
@@ -53,23 +53,23 @@ fi
 PALETTE="${THEMES[$THEME]:-${THEMES[blue]}}"
 
 case "$OUTPUT_MODE" in
-  json)
-    # Парсим палитру
-    IFS=',' read -r primary secondary accent <<< "$PALETTE"
-    # Выделяем значения цветов
-    primary="${primary##*=}"
-    secondary="${secondary##*=}"
-    accent="${accent##*=}"
-    echo "{"
-    echo "  \"theme\": \"$THEME\","
-    echo "  \"primary\": \"#$primary\","
-    echo "  \"secondary\": \"#$secondary\","
-    echo "  \"accent\": \"#$accent\""
-    echo "}"
-    ;;
-  css)
-    # Генерируем простой CSS
-    cat > "${OUTPUT_DIR}/colors.css" <<'EOF'
+json)
+  # Парсим палитру
+  IFS=',' read -r primary secondary accent <<<"$PALETTE"
+  # Выделяем значения цветов
+  primary="${primary##*=}"
+  secondary="${secondary##*=}"
+  accent="${accent##*=}"
+  echo "{"
+  echo "  \"theme\": \"$THEME\","
+  echo "  \"primary\": \"#$primary\","
+  echo "  \"secondary\": \"#$secondary\","
+  echo "  \"accent\": \"#$accent\""
+  echo "}"
+  ;;
+css)
+  # Генерируем простой CSS
+  cat >"${OUTPUT_DIR}/colors.css" <<'EOF'
 :root {
   --color-primary: #0052cc;
   --color-secondary: #0079bf;
@@ -85,5 +85,5 @@ body.dark-theme {
   --color-border: #333333;
 }
 EOF
-    ;;
+  ;;
 esac
