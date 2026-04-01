@@ -25,6 +25,13 @@ backups/
 *.txt
 *.ps1
 
+# --- Test outputs ---
+test_output/
+tests/test_output/
+lib/modules/*/test_output/
+tmp/
+temp/
+
 # --- Archives ---
 *.tar.gz
 *.zip

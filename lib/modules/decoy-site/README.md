@@ -1,42 +1,33 @@
-# Decoy Gen — Генератор Сайтов-Прикрытий
+# Decoy Gen V2 — Генератор Сайтов-Прикрытий
 
-**Decoy Site Generator** — инструмент для генерации статических сайтов-прикрытий, имитирующих реальные файловые хранилища (Nextcloud, OneDrive, NAS и т.п.).
+**Decoy Site Generator V2** — инструмент для генерации статических сайтов-прикрытий, имитирующих реальные файловые хранилища (Nextcloud, OneDrive, NAS и т.п.).
 
 ## 🚀 Возможности
 
-- **12 уникальных шаблонов** — от минимализма до корпоративных панелей
+- **15 уникальных вариантов** — от облачных хранилищ до корпоративных порталов
 - **10 000+ комбинаций названий** — каждый сайт уникален
 - **Генерация цветовых схем** — 8 предустановленных тем + случайные
 - **Фейковая статистика** — правдоподобные числа пользователей, файлов, трафика
 - **Фейковая авторизация** — 8 типов ошибок, блокировка после 3 попыток
 - **Локализация** — поддержка русского и английского языков
 - **Адаптивный дизайн** — mobile-friendly интерфейсы
+- **Централизованная архитектура** — один шаблон, 15 вариантов конфигурации
 
 ## 📁 Структура Проекта
 
 ```
-lib/modules/decoy_gen/
-├── generate.sh          # Главный скрипт генерации
+lib/modules/decoy-site/
+├── generate.sh          # Главный скрипт генерации (V2)
 ├── rotate.sh            # Смена активного сайта
 ├── config.json          # Конфигурация по умолчанию
 ├── generators/
+│   ├── variants.sh      # Централизованные определения вариантов
 │   ├── colors.sh        # Генератор цветовых схем
 │   ├── names.sh         # Генератор названий
 │   ├── stats.sh         # Генератор статистики
 │   └── content.sh       # Генератор контента
-├── templates/           # 12 HTML-шаблонов
-│   ├── minimal/         # Минималистичный
-│   ├── single_page/     # Одностраничный лендинг
-│   ├── corporate/       # Корпоративный
-│   ├── personal/        # Персональный
-│   ├── multi_page/      # Классический
-│   ├── cloud_service/   # Современный SaaS
-│   ├── media_library/   # Медиа-галерея
-│   ├── backup_center/   # Технический
-│   ├── dashboard/       # Панель управления
-│   ├── admin_panel/     # Админ-панель
-│   ├── secure_vault/    # Защищённое хранилище
-│   └── team_workspace/  # Командная работа
+├── template/
+│   └── index.html.tpl   # Адаптивный HTML-шаблон
 ├── webroot/             # Сгенерированный сайт (НЕ в git!)
 └── logs/                # Логи генерации
 ```
@@ -85,11 +76,10 @@ bash generate.sh
 bash generate.sh [OPTIONS]
 
 Options:
-  --template, -t <name>   Шаблон (или 'auto' для случайного)
-                          Доступны: minimal, single_page, corporate,
-                          personal, multi_page, cloud_service,
-                          media_library, backup_center, dashboard,
-                          admin_panel, secure_vault, team_workspace
+  --variant, -v <name>   Вариант сайта (или 'auto' для случайного)
+                          Доступны: cloud_storage, backup_center, company_portal,
+                          corporate_site, data_center, ecommerce, educational,
+                          financial, government, healthcare, news_portal
   --lang, -l <lang>       Язык (ru или en, по умолчанию: ru)
   --theme <name>          Цветовая тема (или 'auto')
                           Доступны: ocean, forest, sunset, corporate,
@@ -107,8 +97,8 @@ Options:
 ### Примеры
 
 ```bash
-# Сгенерировать с конкретным шаблоном
-bash generate.sh --template cloud_service
+# Сгенерировать с конкретным вариантом
+bash generate.sh --variant cloud_storage
 
 # Английский язык с темой ocean
 bash generate.sh --lang en --theme ocean
@@ -145,7 +135,7 @@ bash rotate.sh status
 
 ```json
 {
-  "template": "auto",
+  "variant": "auto",
   "lang": "ru",
   "color_theme": "auto",
   "base_hue": null,
@@ -157,22 +147,25 @@ bash rotate.sh status
 }
 ```
 
-## 🎨 Шаблоны
+## 🎨 Варианты сайтов
 
-| Шаблон | Описание | Стиль |
-|--------|----------|-------|
-| minimal | Минималистичный интерфейс | Чистый, простой |
-| single_page | Одностраничный лендинг | Современный градиент |
-| corporate | Корпоративный портал | Бизнес-стиль |
-| personal | Персональное хранилище | Дружелюбный |
-| multi_page | Классическая навигация | Традиционный |
-| cloud_service | SaaS-платформа | Тёмная тема, неон |
-| media_library | Медиа-галерея | Кино-стиль |
-| backup_center | Центр резервных копий | Терминальный |
-| dashboard | Панель управления | Admin dashboard |
-| admin_panel | Админ-панель | Контрольный центр |
-| secure_vault | Защищённое хранилище | Security style |
-| team_workspace | Командная работа | Collaboration |
+| Вариант | Описание | Стиль | Иконка |
+|---------|----------|-------|--------|
+| cloud_storage | Облачное хранилище | Файлы в сетке | ☁️ |
+| media_library | Медиатека | Галерея медиа | 🎬 |
+| backup_center | Центр резервного копирования | Панель управления | 💾 |
+| corporate_portal | Корпоративный портал | Корпоративный | 🏢 |
+| personal_vault | Личное хранилище | Приватные файлы | 🔐 |
+| team_workspace | Командное пространство | Совместная работа | 👥 |
+| secure_archive | Защищённый архив | Долгосрочное хранение | 🗄️ |
+| file_sharing | Файлообменник | Обмен файлами | 🔗 |
+| nas_interface | Сетевое хранилище | NAS интерфейс | 🖥️ |
+| dev_repository | Репозиторий | Артефакты и пакеты | 📦 |
+| photo_gallery | Фотогалерея | Фото в альбомах | 🖼️ |
+| document_hub | Документооборот | Управление документами | 📄 |
+| data_room | Комната данных | Due diligence | 🏛️ |
+| sync_service | Сервис синхронизации | Синхронизация устройств | 🔄 |
+| asset_manager | Менеджер активов | Цифровые активы | 🎨 |
 
 ## 🔐 Фейковая Авторизация
 

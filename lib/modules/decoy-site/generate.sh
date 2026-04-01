@@ -309,6 +309,27 @@ _generate_css() {
   esac
 
   echo "$layout_css" >> "${output_dir}/style.css"
+
+  # Стили для страницы входа
+  cat >> "${output_dir}/style.css" << 'LOGIN_CSS'
+.login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--color-bg); }
+.login-container { width: 100%; max-width: 400px; padding: 20px; }
+.login-box { background: white; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.1); overflow: hidden; }
+.login-header { text-align: center; padding: 32px 32px 24px; border-bottom: 1px solid var(--color-border); }
+.login-header .logo-icon { font-size: 3rem; display: block; margin-bottom: 16px; }
+.login-header h1 { margin: 0 0 8px; font-size: 1.5rem; color: var(--color-text); }
+.login-header p { margin: 0; color: var(--color-secondary); }
+.login-form { padding: 32px; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 6px; font-size: .875rem; color: var(--color-text); }
+.form-group input { width: 100%; padding: 12px 16px; border: 1px solid var(--color-border); border-radius: 8px; font-size: 1rem; }
+.form-group input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), .1); }
+.btn { display: inline-block; padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; text-decoration: none; cursor: pointer; transition: all .15s; }
+.btn-primary { background: var(--color-primary); color: white; }
+.btn-primary:hover { background: var(--color-primary-dark); }
+.btn-block { width: 100%; }
+.error-message { margin-top: 16px; padding: 12px; background: #fee; color: #c33; border: 1px solid #fcc; border-radius: 6px; font-size: .875rem; }
+LOGIN_CSS
 }
 
 # ── Локализация строк ────────────────────────────────────────
@@ -444,8 +465,11 @@ print(f\"STAT_DAILY_DOWNLOAD='{download_mb} MB'\"     )
   _render_template "${TEMPLATE_DIR}/index.html.tpl" "${OUTPUT_DIR}/index.html"
 
   # 13. Рендерим login.html (статичная страница)
-  _render_template "${TEMPLATE_DIR}/login.html.tpl"  "${OUTPUT_DIR}/login.html" 2>/dev/null || \
+  if [[ -f "${TEMPLATE_DIR}/login.html.tpl" ]]; then
+    _render_template "${TEMPLATE_DIR}/login.html.tpl" "${OUTPUT_DIR}/login.html"
+  else
     _build_simple_login_page "${OUTPUT_DIR}/login.html"
+  fi
 
   # 14. CSS с layout-вариантом
   _generate_css "$OUTPUT_DIR" "$colors_json" "${V_LAYOUT}"
