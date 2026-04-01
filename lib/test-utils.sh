@@ -14,7 +14,10 @@ if [[ -f "${TEST_UTILS_DIR}/output.sh" ]]; then
 fi
 
 # ── Функции вывода ────────────────────────────────────────────
-pass() { echo -e "${GREEN}[PASS]${PLAIN} $1"; }
+pass() {
+  echo -e "${GREEN}[PASS]${PLAIN} $1"
+  ((TESTS_PASSED++)) || true
+}
 fail() {
   echo -e "${RED}[FAIL]${PLAIN} $1"
   ((TESTS_FAILED++)) || true
