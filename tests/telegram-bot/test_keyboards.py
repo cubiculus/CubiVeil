@@ -19,7 +19,6 @@ from keyboards import (
     build_alerts_submenu,
     build_back_button,
     build_confirm_keyboard,
-    build_pagination_keyboard,
     build_backup_actions_keyboard,
     build_logs_lines_keyboard,
     build_decoy_menu,
@@ -120,30 +119,6 @@ class TestKeyboards(unittest.TestCase):
         self.assertEqual(keyboard[0][0]["callback_data"], "test_action_confirm:test_item")
         self.assertEqual(keyboard[0][1]["text"], "❌ Cancel")
         self.assertEqual(keyboard[0][1]["callback_data"], "test_action_cancel:test_item")
-
-    def test_build_pagination_keyboard(self):
-        """Test pagination keyboard has correct structure"""
-        # Test middle page
-        menu = build_pagination_keyboard(1, 5, "test_prefix")
-        keyboard = menu["inline_keyboard"]
-        self.assertEqual(len(keyboard), 2)  # Page row + back button
-
-        # First row should have prev, page info, next
-        self.assertEqual(keyboard[0][0]["text"], "◀️")
-        self.assertEqual(keyboard[0][1]["text"], "2/5")
-        self.assertEqual(keyboard[0][2]["text"], "▶️")
-
-        # Test first page (no prev button)
-        menu = build_pagination_keyboard(0, 5, "test_prefix")
-        keyboard = menu["inline_keyboard"]
-        self.assertEqual(keyboard[0][0]["text"], "1/5")
-        self.assertEqual(keyboard[0][1]["text"], "▶️")
-
-        # Test last page (no next button)
-        menu = build_pagination_keyboard(4, 5, "test_prefix")
-        keyboard = menu["inline_keyboard"]
-        self.assertEqual(keyboard[0][0]["text"], "◀️")
-        self.assertEqual(keyboard[0][1]["text"], "5/5")
 
     def test_build_backup_actions_keyboard(self):
         """Test backup actions keyboard has correct structure"""

@@ -59,7 +59,7 @@ class TestBackupManager(unittest.TestCase):
 
         self.assertIsNotNone(backup_path)
         self.assertTrue(os.path.exists(backup_path))
-        self.assertIn("marzban_", backup_path)
+        self.assertIn("s-ui_", backup_path)
 
     def test_create_backup_invalid_path(self):
         """Test backup creation with invalid path"""
