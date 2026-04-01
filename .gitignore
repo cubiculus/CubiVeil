@@ -133,3 +133,8 @@ docs/build/
 # --- Exports and diagnostics ---
 /root/cubiveil-export/
 /root/cubiveil-diagnose/
+
+# --- Markdown files (except root README and docs/README_EN) ---
+*.md
+!README.md
+!docs/README_EN.md
