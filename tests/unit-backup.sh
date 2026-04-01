@@ -1,4 +1,4 @@
-#!/bin/bash
+﻿#!/bin/bash
 # в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—
 # в•‘        CubiVeil Unit Tests - Backup Module                в•‘
 # в•‘        РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ lib/modules/backup/install.sh         в•‘
@@ -567,17 +567,20 @@ test_all_functions_exist() {
   )
 
   local found=0
+  local missing_funcs=()
   for func in "${required_functions[@]}"; do
     if declare -f "$func" &>/dev/null; then
       ((found++))
+    else
+      missing_funcs+=("$func")
     fi
   done
 
   if [[ $found -eq ${#required_functions[@]} ]]; then
-    pass "Р’СЃРµ С„СѓРЅРєС†РёРё СЃСѓС‰РµСЃС‚РІСѓСЋС‚ ($found/${#required_functions[@]})"
+    pass "Все функции существуют ($found/${#required_functions[@]})"
     ((TESTS_PASSED++)) || true
   else
-    fail "РќРµ РІСЃРµ С„СѓРЅРєС†РёРё РЅР°Р№РґРµРЅС‹ ($found/${#required_functions[@]})"
+    fail "Не все функции найдены ($found/${#required_functions[@]}). Отсутствуют: ${missing_funcs[*]}"
   fi
 }
 

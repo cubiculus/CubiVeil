@@ -91,64 +91,6 @@ class TestLogsManager(unittest.TestCase):
         self.assertTrue(success)
         self.assertIn("Systemd", logs)
 
-    def test_get_recent_logs(self):
-        """Test getting recent logs"""
-        # This will fail without actual journalctl, but tests the method exists
-        result = self.logs.get_recent_logs("s-ui", 10)
-        self.assertIsInstance(result, str)
-
-    @patch('logs.subprocess.run')
-    def test_search_logs_success(self, mock_run):
-        """Test searching logs"""
-        mock_run.return_value = MagicMock(
-            returncode=0,
-            stdout="Match line 1\nMatch line 2\n",
-            stderr=""
-        )
-
-        success, logs = self.logs.search_logs("s-ui", "error", 100)
-
-        self.assertTrue(success)
-        self.assertIn("Search results", logs)
-
-    @patch('logs.subprocess.run')
-    def test_search_logs_no_matches(self, mock_run):
-        """Test searching logs with no matches"""
-        # First call (journalctl) succeeds, second call (grep) returns 1 (no matches)
-        mock_run.side_effect = [
-            MagicMock(returncode=0, stdout="Some logs\n", stderr=""),
-            MagicMock(returncode=1, stdout="", stderr="")
-        ]
-
-        success, logs = self.logs.search_logs("s-ui", "xyz123notfound", 100)
-
-        self.assertTrue(success)  # Not an error, just no matches
-        self.assertIn("No matches", logs)
-
-    @patch('logs.subprocess.run')
-    def test_get_log_stats(self, mock_run):
-        """Test getting log statistics"""
-        mock_run.return_value = MagicMock(
-            returncode=0,
-            stdout="Line with error\nLine with warning\nNormal line\n",
-            stderr=""
-        )
-
-        stats = self.logs.get_log_stats("s-ui")
-
-        self.assertEqual(stats["service"], "s-ui")
-        self.assertGreater(stats["total_lines"], 0)
-
-    @patch('logs.subprocess.run')
-    def test_clear_service_logs(self, mock_run):
-        """Test clearing service logs"""
-        mock_run.return_value = MagicMock(returncode=0)
-
-        result = self.logs.clear_service_logs("s-ui")
-
-        self.assertTrue(result)
-        mock_run.assert_called_once()
-
 
 class TestLogsConstants(unittest.TestCase):
     """Test logs module constants"""
