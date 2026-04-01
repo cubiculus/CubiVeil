@@ -64,7 +64,7 @@ test_dev_mode_variable() {
   info "Тестирование переменной DEV_MODE..."
 
   if grep -q 'DEV_MODE=' "${SCRIPT_DIR}/install.sh" ||
-     grep -q 'DEV_MODE=' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
+    grep -q 'DEV_MODE=' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
     pass "install.sh: переменная DEV_MODE определена"
   else
     fail "install.sh: переменная DEV_MODE не найдена"
@@ -76,7 +76,7 @@ test_dry_run_variable() {
   info "Тестирование переменной DRY_RUN..."
 
   if grep -q 'DRY_RUN=' "${SCRIPT_DIR}/install.sh" ||
-     grep -q 'DRY_RUN=' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
+    grep -q 'DRY_RUN=' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
     pass "install.sh: переменная DRY_RUN определена"
   else
     fail "install.sh: переменная DRY_RUN не найдена"
@@ -88,7 +88,7 @@ test_dev_argument() {
   info "Тестирование обработки аргумента --dev..."
 
   if grep -q '\-\-dev)' "${SCRIPT_DIR}/install.sh" ||
-     grep -q '\-\-dev)' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
+    grep -q '\-\-dev)' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
     pass "install.sh: аргумент --dev обрабатывается"
   else
     fail "install.sh: аргумент --dev не обрабатывается"
@@ -100,7 +100,7 @@ test_dry_run_argument() {
   info "Тестирование обработки аргумента --dry-run..."
 
   if grep -q '\-\-dry-run)' "${SCRIPT_DIR}/install.sh" ||
-     grep -q '\-\-dry-run)' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
+    grep -q '\-\-dry-run)' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
     pass "install.sh: аргумент --dry-run обрабатывается"
   else
     fail "install.sh: аргумент --dry-run не обрабатывается"
@@ -187,9 +187,9 @@ test_dev_mode_warning() {
   info "Тестирование dev-режим: предупреждение..."
 
   if grep -q 'DEV MODE' "${SCRIPT_DIR}/install.sh" ||
-     grep -q 'DEV-режим' "${SCRIPT_DIR}/install.sh" ||
-     grep -q 'DEV_MODE' "${SCRIPT_DIR}/lib/core/installer/cli.sh" ||
-     grep -q 'DEV_MODE' "${SCRIPT_DIR}/lib/core/installer/prompt.sh"; then
+    grep -q 'DEV-режим' "${SCRIPT_DIR}/install.sh" ||
+    grep -q 'DEV_MODE' "${SCRIPT_DIR}/lib/core/installer/cli.sh" ||
+    grep -q 'DEV_MODE' "${SCRIPT_DIR}/lib/core/installer/prompt.sh"; then
     pass "install.sh: dev-режим показывает предупреждение"
   else
     fail "install.sh: dev-режим не показывает предупреждение"
@@ -227,8 +227,8 @@ test_parse_args_exists() {
   info "Тестирование функции parse_args..."
 
   if grep -q 'parse_args()' "${SCRIPT_DIR}/install.sh" ||
-     grep -q 'parse_args()' "${SCRIPT_DIR}/lib/core/installer/cli.sh" ||
-     grep -q 'parse_args() {' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
+    grep -q 'parse_args()' "${SCRIPT_DIR}/lib/core/installer/cli.sh" ||
+    grep -q 'parse_args() {' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
     pass "install.sh: функция parse_args существует"
   else
     fail "install.sh: функция parse_args не найдена"
@@ -263,7 +263,7 @@ test_dev_domain_variable() {
   info "Тестирование переменной DEV_DOMAIN..."
 
   if grep -q 'DEV_DOMAIN=' "${SCRIPT_DIR}/install.sh" ||
-     grep -q 'DEV_DOMAIN=' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
+    grep -q 'DEV_DOMAIN=' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
     pass "install.sh: переменная DEV_DOMAIN определена"
   else
     fail "install.sh: переменная DEV_DOMAIN не найдена"
@@ -275,7 +275,7 @@ test_default_dev_domain() {
   info "Тестирование домена по умолчанию для dev..."
 
   if grep -q 'dev.cubiveil.local' "${SCRIPT_DIR}/install.sh" ||
-     grep -q 'dev.cubiveil.local' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
+    grep -q 'dev.cubiveil.local' "${SCRIPT_DIR}/lib/core/installer/cli.sh"; then
     pass "install.sh: dev.cubiveil.local используется по умолчанию"
   else
     fail "install.sh: dev.cubiveil.local не найдено"
@@ -298,8 +298,8 @@ test_prompt_inputs_checks_dev_mode() {
   info "Тестирование prompt_inputs: проверка DEV_MODE..."
 
   if grep -q 'DEV_MODE.*true' "${SCRIPT_DIR}/install.sh" ||
-     grep -q 'DEV_MODE:-false' "${SCRIPT_DIR}/install.sh" ||
-     grep -q 'DEV_MODE' "${SCRIPT_DIR}/lib/core/installer/prompt.sh"; then
+    grep -q 'DEV_MODE:-false' "${SCRIPT_DIR}/install.sh" ||
+    grep -q 'DEV_MODE' "${SCRIPT_DIR}/lib/core/installer/prompt.sh"; then
     pass "prompt_inputs: проверяет DEV_MODE"
   else
     fail "prompt_inputs: не проверяет DEV_MODE"
@@ -311,7 +311,7 @@ test_prompt_inputs_skips_in_dev_mode() {
   info "Тестирование prompt_inputs: пропуск ввода в dev-режиме..."
 
   if grep -q 'return 0' "${SCRIPT_DIR}/lib/core/installer/prompt.sh" &&
-     grep -q 'DEV-режим\|DEV mode\|DEV_MODE' "${SCRIPT_DIR}/lib/core/installer/prompt.sh"; then
+    grep -q 'DEV-режим\|DEV mode\|DEV_MODE' "${SCRIPT_DIR}/lib/core/installer/prompt.sh"; then
     pass "prompt_inputs: пропускает ввод в dev-режиме"
   else
     fail "prompt_inputs: не пропускает ввод в dev-режиме"

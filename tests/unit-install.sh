@@ -160,7 +160,7 @@ test_module_functions_usage() {
     fi
   done
 
-    # Также проверяем _step_system как обобщающую функцию
+  # Также проверяем _step_system как обобщающую функцию
   if grep -q "_step_system" "${SCRIPT_DIR}/install.sh"; then
     found=$((found + 3))
   fi

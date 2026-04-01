@@ -116,7 +116,7 @@ decoy_save_mikrotik_script() {
   mkdir -p "$(dirname "$output_file")"
 
   # Генерируем скрипт
-  if decoy_print_mikrotik_script "$config_file" > "$output_file"; then
+  if decoy_print_mikrotik_script "$config_file" >"$output_file"; then
     chmod 644 "$output_file"
     log_success "MikroTik скрипт сохранён: $output_file"
     return 0
@@ -129,15 +129,15 @@ decoy_save_mikrotik_script() {
 # Если скрипт вызван напрямую
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   case "${1:-print}" in
-    print)
-      decoy_print_mikrotik_script "${2:-}"
-      ;;
-    save)
-      decoy_save_mikrotik_script "${2:-}" "${3:-}"
-      ;;
-    *)
-      echo "Usage: $0 [print|save] [config_file] [output_file]"
-      exit 1
-      ;;
+  print)
+    decoy_print_mikrotik_script "${2:-}"
+    ;;
+  save)
+    decoy_save_mikrotik_script "${2:-}" "${3:-}"
+    ;;
+  *)
+    echo "Usage: $0 [print|save] [config_file] [output_file]"
+    exit 1
+    ;;
   esac
 fi

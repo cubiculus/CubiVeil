@@ -172,7 +172,7 @@ step_check_ssl() {
 
   # Ищем домен в конфиге Sing-box (через systemd-юнит / конфигурацию)
   if [[ -f "/etc/sing-box/config.json" ]]; then
-    domain=$(grep -oE '"serverName"\s*:\s*"[^"]+"' /etc/sing-box/config.json 2>/dev/null | \
+    domain=$(grep -oE '"serverName"\s*:\s*"[^"]+"' /etc/sing-box/config.json 2>/dev/null |
       head -1 | sed -E 's/.*"serverName"\s*:\s*"([^"]+)".*/\1/' || echo "")
   fi
 
@@ -308,7 +308,7 @@ step_check_services() {
   info "Проверка логов на ошибки..."
   for service in "sing-box"; do
     local error_count
-    error_count=$(journalctl -u "$service" --since "1 hour ago" 2>/dev/null | \
+    error_count=$(journalctl -u "$service" --since "1 hour ago" 2>/dev/null |
       grep -ciE "(error|fail|critical)" || echo "0")
 
     if [[ "$error_count" -gt 10 ]]; then
