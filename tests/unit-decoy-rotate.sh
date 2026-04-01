@@ -188,6 +188,7 @@ printf() {
 }
 
 # Mock для cat
+# shellcheck disable=SC2120
 cat() {
   if [[ "$*" == *">"* ]]; then
     local file
