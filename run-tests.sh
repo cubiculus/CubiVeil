@@ -7,31 +7,32 @@
 
 set -euo pipefail
 
-# ── Подключение библиотек через централизованный загрузчик ──
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# ── Сохраняем путь к проекту до загрузки модулей ────────────
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# ── Подключение библиотек через централизованный загрузчик ──
 # Используем init.sh для правильного порядка загрузки
-if [[ -f "${SCRIPT_DIR}/lib/init.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/init.sh" || {
+if [[ -f "${PROJECT_DIR}/lib/init.sh" ]]; then
+  source "${PROJECT_DIR}/lib/init.sh" || {
     echo "❌ Не удалось загрузить lib/init.sh" >&2
     exit 1
   }
 else
   # Fallback для обратной совместимости
-  source "${SCRIPT_DIR}/lib/output.sh" || {
+  source "${PROJECT_DIR}/lib/output.sh" || {
     echo "❌ Не удалось загрузить lib/output.sh" >&2
     exit 1
   }
 fi
 
 # ── Переменные ───────────────────────────────────────────────────
-TESTS_DIR="$SCRIPT_DIR/tests"
+TESTS_DIR="${PROJECT_DIR}/tests"
 
 TOTAL_PASSED=0
 TOTAL_FAILED=0
 
 # ── Подключение тестовых утилит ───────────────────────────────
-source "${SCRIPT_DIR}/lib/test-utils.sh"
+source "${PROJECT_DIR}/lib/test-utils.sh"
 
 # ── Функции ─────────────────────────────────────────────────────
 print_header() {
@@ -246,7 +247,7 @@ run_coverage_tests() {
     ((TOTAL_FAILED++)) || true
   fi
 
-  cd "$SCRIPT_DIR"
+  cd "${PROJECT_DIR}"
 }
 
 # ── Основная функция ─────────────────────────────────────────────
