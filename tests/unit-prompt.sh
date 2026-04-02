@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1071,SC1111,SC2140
+# shellcheck disable=SC1071,SC1111,SC2140,SC2034
 # ╔═══════════════════════════════════════════════════════════╗
 # ║  CubiVeil — Prompt Module Unit Tests                      ║
 # ║  Тесты для lib/core/installer/prompt.sh                   ║
@@ -229,6 +229,7 @@ test_prompt_inputs_noninteractive() {
   info "Тестирование prompt_inputs non-interactive..."
 
   # Обнуляем окружение
+  # shellcheck source=lib/core/installer/prompt.sh
   source "$PROMPT_MODULE_PATH"
   INTERACTIVE_MODE="false"
   DEV_MODE="false"
@@ -237,7 +238,7 @@ test_prompt_inputs_noninteractive() {
   INSTALL_TELEGRAM=""
 
   # Вызываем функцию
-  prompt_inputs 2>&1 >/dev/null
+  prompt_inputs >/dev/null 2>&1
 
   if [[ "$DOMAIN" == "example.org" ]] && [[ "$LE_EMAIL" == "admin@example.org" ]] && [[ "$INSTALL_TELEGRAM" == "false" ]]; then
     pass "prompt_inputs: non-interactive работает"

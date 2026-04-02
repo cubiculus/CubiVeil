@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1071,SC1111,SC2140,SC2178
+# shellcheck disable=SC1071,SC1111,SC2140,SC2178,SC2034
 # ╔═══════════════════════════════════════════════════════════╗
 # ║  CubiVeil — System Module Unit Tests                      ║
 # ║  Тесты для lib/modules/system/install.sh                  ║

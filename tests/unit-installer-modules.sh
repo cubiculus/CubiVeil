@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1071,SC1111,SC2140
+# shellcheck disable=SC1071,SC1111,SC2140,SC1090
 # ╔══════════════════════════════════════════════════════╗
 # ║        CubiVeil Unit Tests - Installer Modules       ║
 # ║        Тестирование lib/core/installer/*.sh          ║
@@ -84,6 +84,7 @@ test_bootstrap_load() {
   info "Тестирование загрузки bootstrap.sh..."
 
   if [[ -f "$BOOTSTRAP_PATH" ]]; then
+    # shellcheck source=lib/core/installer/bootstrap.sh
     source "$BOOTSTRAP_PATH"
 
     # Проверка что функции существуют
@@ -138,6 +139,7 @@ test_cli_load() {
   info "Тестирование загрузки cli.sh..."
 
   if [[ -f "$CLI_PATH" ]]; then
+    # shellcheck source=lib/core/installer/cli.sh
     source "$CLI_PATH"
 
     # Проверка что функции существуют
@@ -239,6 +241,7 @@ test_orchestrator_load() {
     # Mock для run_module
     run_module() { return 0; }
 
+    # shellcheck source=lib/core/installer/orchestrator.sh
     source "$ORCHESTRATOR_PATH"
 
     # Проверка что функции существуют (обновлено для s-ui)
@@ -310,6 +313,7 @@ test_ui_load() {
   info "Тестирование загрузки ui.sh..."
 
   if [[ -f "$UI_PATH" ]]; then
+    # shellcheck source=lib/core/installer/ui.sh
     source "$UI_PATH"
 
     # Проверка что функции существуют
@@ -368,6 +372,7 @@ test_prompt_load() {
   info "Тестирование загрузки prompt.sh..."
 
   if [[ -f "$PROMPT_PATH" ]]; then
+    # shellcheck source=lib/core/installer/prompt.sh
     source "$PROMPT_PATH"
 
     # Проверка что функции существуют
@@ -443,10 +448,15 @@ test_integration_all_modules() {
   info "Тестирование интеграции всех модулей..."
 
   # Загружаем все модули по порядку
+  # shellcheck source=lib/core/installer/bootstrap.sh
   source "$BOOTSTRAP_PATH"
+  # shellcheck source=lib/core/installer/cli.sh
   source "$CLI_PATH"
+  # shellcheck source=lib/core/installer/prompt.sh
   source "$PROMPT_PATH"
+  # shellcheck source=lib/core/installer/orchestrator.sh
   source "$ORCHESTRATOR_PATH"
+  # shellcheck source=lib/core/installer/ui.sh
   source "$UI_PATH"
 
   # Проверка что все функции доступны

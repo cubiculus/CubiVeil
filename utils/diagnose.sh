@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1071,SC1111,SC2140
+# shellcheck disable=SC1071,SC1111,SC2140,SC2034,SC2043
 # ╔═══════════════════════════════════════════════════════════╗
 # ║          CubiVeil — Diagnose Utility                      ║
 # ║          github.com/cubiculus/cubiveil                    ║
@@ -307,6 +307,7 @@ step_check_services() {
 
   # Проверка логов на ошибки
   info "Проверка логов на ошибки..."
+  # shellcheck disable=SC2043
   for service in "sing-box"; do
     local error_count
     error_count=$(journalctl -u "$service" --since "1 hour ago" 2>/dev/null |

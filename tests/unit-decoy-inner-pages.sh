@@ -100,188 +100,117 @@ export DECOY_WEBROOT=""
 # shellcheck source=lib/modules/decoy-site/generate.sh
 source "$GENERATE_PATH"
 
-# ── Тест: _generate_inner_pages функция существует ──────────────────────
-test_generate_inner_pages_exists() {
-  info "Тестирование существования _generate_inner_pages..."
+# ── Тест: decoy_build_webroot функция существует ──────────────
+test_decoy_build_webroot_function_exists() {
+  info "Тестирование существования decoy_build_webroot..."
 
-  if declare -f _generate_inner_pages &>/dev/null; then
-    pass "_generate_inner_pages: функция существует"
+  if declare -f decoy_build_webroot &>/dev/null; then
+    pass "decoy_build_webroot: функция существует"
     ((TESTS_PASSED++)) || true
   else
-    fail "_generate_inner_pages: функция не найдена"
+    fail "decoy_build_webroot: функция не найдена"
   fi
 }
 
-# ── Тест: _generate_inner_pages генерирует страницы ─────────────────────
-test_generate_inner_pages_creates_files() {
-  info "Тестирование генерации внутренних страниц..."
+# ── Тест: decoy_build_webroot генерирует файлы ───────────────────
+test_decoy_build_webroot_generates_files() {
+  info "Тестирование генерации сайта через decoy_build_webroot..."
 
   local test_id="inner-$$-$RANDOM"
   local test_webroot="/tmp/test-decoy-${test_id}"
-  mkdir -p "$test_webroot/files"
-  DECOY_WEBROOT="$test_webroot"
+  mkdir -p "$test_webroot"
 
-  # Создаём тестовые файлы
-  touch "${test_webroot}/files/file1.jpg"
-  touch "${test_webroot}/files/file2.pdf"
+  export DECOY_WEBROOT="$test_webroot"
+  export OUTPUT_DIR="$test_webroot"
+  export DECOY_CONFIG="${test_webroot}/decoy.json"
 
-  # Вызываем функцию
-  _generate_inner_pages "portal" "Test Site" "#4a90d9" "2025" || true
-
-  # Проверяем создание страниц
-  if [[ -f "${test_webroot}/files/index.html" ]]; then
-    pass "_generate_inner_pages: создан /files/index.html"
+  # Запускаем генерацию сайта через новый API
+  if decoy_build_webroot --variant cloud_storage --lang ru; then
+    pass "decoy_build_webroot: выполнен"
     ((TESTS_PASSED++)) || true
   else
-    fail "_generate_inner_pages: не создан /files/index.html"
+    fail "decoy_build_webroot: вызов завершился ошибкой"
+    ((TESTS_FAILED++)) || true
   fi
 
-  if [[ -f "${test_webroot}/files/upload/index.html" ]]; then
-    pass "_generate_inner_pages: создан /files/upload/index.html"
-    ((TESTS_PASSED++)) || true
-  else
-    fail "_generate_inner_pages: не создан /files/upload/index.html"
-  fi
-
-  if [[ -f "${test_webroot}/audit/logs/index.html" ]]; then
-    pass "_generate_inner_pages: создан /audit/logs/index.html"
-    ((TESTS_PASSED++)) || true
-  else
-    fail "_generate_inner_pages: не создан /audit/logs/index.html"
-  fi
-
-  if [[ -f "${test_webroot}/404.html" ]]; then
-    pass "_generate_inner_pages: создан /404.html"
-    ((TESTS_PASSED++)) || true
-  else
-    fail "_generate_inner_pages: не создан /404.html"
-  fi
+  # Проверка обязательных файлов
+  for file in "index.html" "style.css" "config.js" "nginx.conf" ".generation_meta.json"; do
+    if [[ -f "${test_webroot}/${file}" ]]; then
+      pass "decoy_build_webroot: создан ${file}"
+      ((TESTS_PASSED++)) || true
+    else
+      fail "decoy_build_webroot: не создан ${file}"
+      ((TESTS_FAILED++)) || true
+    fi
+  done
 
   rm -rf "$test_webroot"
 }
 
-# ── Тест: _generate_inner_pages содержит правильный HTML ────────────────
-test_generate_inner_pages_html_content() {
-  info "Тестирование содержимого внутренних страниц..."
+# ── Тест: decoy_build_webroot содержит правильный HTML ──────────────
+test_decoy_build_webroot_html_content() {
+  info "Тестирование содержимого сгенерированного index.html..."
 
   local test_id="inner-html-$$-$RANDOM"
   local test_webroot="/tmp/test-decoy-${test_id}"
-  mkdir -p "$test_webroot/files"
-  DECOY_WEBROOT="$test_webroot"
+  mkdir -p "$test_webroot"
 
-  # Создаём тестовые файлы
-  touch "${test_webroot}/files/test.jpg"
+  export DECOY_WEBROOT="$test_webroot"
+  export OUTPUT_DIR="$test_webroot"
+  export DECOY_CONFIG="${test_webroot}/decoy.json"
 
-  # Вызываем функцию
-  _generate_inner_pages "portal" "Test Site" "#4a90d9" "2025" || true
+  # Вызываем генерацию
+  decoy_build_webroot --variant cloud_storage --lang ru || true
 
-  # Проверяем содержимое /files/index.html
-  if [[ -f "${test_webroot}/files/index.html" ]]; then
+  # Проверяем содержимое /index.html
+  if [[ -f "${test_webroot}/index.html" ]]; then
     local content
-    content=$(cat "${test_webroot}/files/index.html")
+    content=$(cat "${test_webroot}/index.html")
 
-    if echo "$content" | grep -q "File Storage"; then
-      pass "_generate_inner_pages: /files/index.html содержит заголовок"
+    if echo "$content" | grep -q "Облачное хранилище"; then
+      pass "decoy_build_webroot: index.html содержит заголовок Облачное хранилище"
       ((TESTS_PASSED++)) || true
     else
-      fail "_generate_inner_pages: /files/index.html не содержит заголовок"
+      fail "decoy_build_webroot: index.html не содержит заголовок Облачное хранилище"
+      ((TESTS_FAILED++)) || true
     fi
 
-    if echo "$content" | grep -q "Test Site"; then
-      pass "_generate_inner_pages: /files/index.html содержит site_name"
+    if echo "$content" | grep -q "Войти"; then
+      pass "decoy_build_webroot: index.html содержит кнопку входа"
       ((TESTS_PASSED++)) || true
     else
-      fail "_generate_inner_pages: /files/index.html не содержит site_name"
+      fail "decoy_build_webroot: index.html не содержит кнопку входа"
+      ((TESTS_FAILED++)) || true
     fi
-  fi
-
-  # Проверяем содержимое /audit/logs/index.html
-  if [[ -f "${test_webroot}/audit/logs/index.html" ]]; then
-    local audit_content
-    audit_content=$(cat "${test_webroot}/audit/logs/index.html")
-
-    if echo "$audit_content" | grep -q "Audit Log"; then
-      pass "_generate_inner_pages: /audit/logs/index.html содержит заголовок"
-      ((TESTS_PASSED++)) || true
-    else
-      fail "_generate_inner_pages: /audit/logs/index.html не содержит заголовок"
-    fi
-  fi
-
-  # Проверяем содержимое /404.html
-  if [[ -f "${test_webroot}/404.html" ]]; then
-    local err404_content
-    err404_content=$(cat "${test_webroot}/404.html")
-
-    if echo "$err404_content" | grep -q "404"; then
-      pass "_generate_inner_pages: /404.html содержит код ошибки"
-      ((TESTS_PASSED++)) || true
-    else
-      fail "_generate_inner_pages: /404.html не содержит код ошибки"
-    fi
+  else
+    fail "decoy_build_webroot: index.html не создан"
+    ((TESTS_FAILED++)) || true
   fi
 
   rm -rf "$test_webroot"
 }
 
-# ── Тест: decoy_build_webroot вызывает _generate_inner_pages ────────────
-test_decoy_build_webroot_calls_inner_pages() {
-  info "Тестирование вызова _generate_inner_pages из decoy_build_webroot..."
+# ── Тест: decoy_build_webroot создаёт сайт ─────────────────────
+test_decoy_build_webroot_has_output() {
+  info "Тестирование результата decoy_build_webroot..."
 
   local test_id="build-$$-$RANDOM"
   local test_webroot="/tmp/test-decoy-${test_id}"
   mkdir -p "$test_webroot"
-  DECOY_WEBROOT="$test_webroot"
+  export DECOY_WEBROOT="$test_webroot"
+  export OUTPUT_DIR="$test_webroot"
 
-  local test_config_dir="/tmp/test-cubiveil-${test_id}"
-  mkdir -p "$test_config_dir"
-  DECOY_CONFIG="${test_config_dir}/decoy.json"
+  decoy_build_webroot --variant cloud_storage --lang ru || true
 
-  # Создаём тестовый конфиг
-  cat >"$DECOY_CONFIG" <<EOF
-{
-  "template": "portal",
-  "site_name": "Test Site",
-  "accent_color": "#4a90d9",
-  "copyright_year": "2025",
-  "server_token": "nginx",
-  "content_types": ["jpg"],
-  "rotation": {
-    "enabled": false,
-    "interval_hours": 3,
-    "files_per_cycle": 1,
-    "last_rotated_at": null
-  },
-  "behavior": {
-    "time_windows": ["morning", "day", "evening"],
-    "min_delay_min": 5,
-    "max_delay_min": 40,
-    "session_files": 3,
-    "speed_kbps_min": 200,
-    "speed_kbps_max": 1000
-  }
-}
-EOF
-
-  # Создаём шаблон (минимум файлов для теста)
-  local templates_dir="${PROJECT_ROOT}/lib/modules/decoy-site/templates"
-  mkdir -p "$templates_dir"
-  if [[ ! -f "${templates_dir}/_shared/index.html" ]]; then
-    echo '<html><body><h1>{{SITE_NAME}}</h1></body></html>' >"${templates_dir}/_shared/index.html"
-  fi
-
-  # Вызываем decoy_build_webroot
-  decoy_build_webroot || true
-
-  # Проверяем что inner страницы созданы
-  if [[ -f "${test_webroot}/files/index.html" ]] || [[ -f "${test_webroot}/404.html" ]]; then
-    pass "decoy_build_webroot: вызывает _generate_inner_pages"
+  if [[ -f "${test_webroot}/index.html" && -f "${test_webroot}/nginx.conf" ]]; then
+    pass "decoy_build_webroot: создал index.html и nginx.conf"
     ((TESTS_PASSED++)) || true
   else
-    fail "decoy_build_webroot: не вызывает _generate_inner_pages"
+    fail "decoy_build_webroot: не созданы базовые файлы веб-режима"
+    ((TESTS_FAILED++)) || true
   fi
 
-  rm -rf "$test_webroot" "$test_config_dir"
+  rm -rf "$test_webroot"
 }
 
 # ── Основная функция ─────────────────────────────────────────────────────
@@ -293,16 +222,16 @@ main() {
   echo ""
 
   # ── Запуск тестов ─────────────────────────────────────────────────────
-  test_generate_inner_pages_exists
+  test_decoy_build_webroot_function_exists
   echo ""
 
-  test_generate_inner_pages_creates_files
+  test_decoy_build_webroot_generates_files
   echo ""
 
-  test_generate_inner_pages_html_content
+  test_decoy_build_webroot_html_content
   echo ""
 
-  test_decoy_build_webroot_calls_inner_pages
+  test_decoy_build_webroot_has_output
   echo ""
 
   # ── Итоги ─────────────────────────────────────────────────────────────

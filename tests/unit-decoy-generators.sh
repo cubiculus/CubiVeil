@@ -21,72 +21,50 @@ log_success() { :; }
 log_warn() { :; }
 log_error() { :; }
 
-# ── Тесты для content.sh ────────────────────────────────────
+# ── Тесты для variants.sh ────────────────────────────────────
 
-CONTENT_FILE="${GENERATORS_DIR}/content.sh"
+VARIANTS_FILE="${GENERATORS_DIR}/variants.sh"
 
-test_content_file_exists() {
-  info "Проверка content.sh..."
-  if [[ -f "$CONTENT_FILE" ]]; then
-    pass "content.sh: файл существует"
+test_variants_file_exists() {
+  info "Проверка variants.sh..."
+  if [[ -f "$VARIANTS_FILE" ]]; then
+    pass "variants.sh: файл существует"
     ((TESTS_PASSED++)) || true
   else
-    fail "content.sh: файл не найден"
+    fail "variants.sh: файл не найден"
     ((TESTS_FAILED++)) || true
   fi
 }
 
-test_content_syntax() {
-  info "Проверка синтаксиса content.sh..."
-  if bash -n "$CONTENT_FILE" 2>/dev/null; then
-    pass "content.sh: синтаксис корректен"
+test_variants_syntax() {
+  info "Проверка синтаксиса variants.sh..."
+  if bash -n "$VARIANTS_FILE" 2>/dev/null; then
+    pass "variants.sh: синтаксис корректен"
     ((TESTS_PASSED++)) || true
   else
-    fail "content.sh: синтаксическая ошибка"
+    fail "variants.sh: синтаксическая ошибка"
     ((TESTS_FAILED++)) || true
   fi
 }
 
-test_content_functions() {
-  info "Проверка функций content.sh..."
-  if [[ -f "$CONTENT_FILE" ]] && [[ -s "$CONTENT_FILE" ]]; then
-    pass "content.sh: функции определены"
+test_variants_has_ids() {
+  info "Проверка VARIANT_IDS variants.sh..."
+  if grep -q '^VARIANT_IDS=' "$VARIANTS_FILE" 2>/dev/null; then
+    pass "variants.sh: VARIANT_IDS определён"
     ((TESTS_PASSED++)) || true
   else
-    fail "content.sh: файл пуст"
+    fail "variants.sh: VARIANT_IDS не найден"
     ((TESTS_FAILED++)) || true
   fi
 }
 
-test_content_has_folder_categories() {
-  info "Проверка категорий папок content.sh..."
-  if [[ -f "$CONTENT_FILE" ]] && [[ -s "$CONTENT_FILE" ]]; then
-    pass "content.sh: категории папок определены"
+test_variants_has_get_variant() {
+  info "Проверка функции get_variant variants.sh..."
+  if grep -q '^get_variant()' "$VARIANTS_FILE" 2>/dev/null; then
+    pass "variants.sh: get_variant функция найдена"
     ((TESTS_PASSED++)) || true
   else
-    fail "content.sh: файл пуст"
-    ((TESTS_FAILED++)) || true
-  fi
-}
-
-test_content_has_file_extensions() {
-  info "Проверка расширений файлов content.sh..."
-  if [[ -f "$CONTENT_FILE" ]] && [[ -s "$CONTENT_FILE" ]]; then
-    pass "content.sh: расширения файлов определены"
-    ((TESTS_PASSED++)) || true
-  else
-    fail "content.sh: файл пуст"
-    ((TESTS_FAILED++)) || true
-  fi
-}
-
-test_content_supports_ru_en() {
-  info "Проверка поддержки RU/EN content.sh..."
-  if [[ -f "$CONTENT_FILE" ]] && [[ -s "$CONTENT_FILE" ]]; then
-    pass "content.sh: поддерживает RU и EN"
-    ((TESTS_PASSED++)) || true
-  else
-    fail "content.sh: файл пуст"
+    fail "variants.sh: get_variant функция не найдена"
     ((TESTS_FAILED++)) || true
   fi
 }
@@ -343,7 +321,7 @@ test_mikrotik_uses_jq() {
 test_generators_strict_mode() {
   info "Проверка strict mode в генераторах..."
   local count=0
-  for file in "$CONTENT_FILE" "$NAMES_FILE" "$COLORS_FILE" "$STATS_FILE"; do
+  for file in "$VARIANTS_FILE" "$NAMES_FILE" "$COLORS_FILE" "$STATS_FILE"; do
     if [[ -f "$file" ]] && grep -q 'set -euo pipefail' "$file" 2>/dev/null; then
       ((count++)) || true
     fi
@@ -360,7 +338,7 @@ test_generators_strict_mode() {
 test_generators_have_shebang() {
   info "Проверка shebang в генераторах..."
   local count=0
-  for file in "$CONTENT_FILE" "$NAMES_FILE" "$COLORS_FILE" "$STATS_FILE"; do
+  for file in "$VARIANTS_FILE" "$NAMES_FILE" "$COLORS_FILE" "$STATS_FILE"; do
     if [[ -f "$file" ]]; then
       local shebang
       shebang=$(head -1 "$file" 2>/dev/null || echo "")
@@ -386,13 +364,11 @@ main() {
   echo -e "${CYAN}═══════════════════════════════════════════════════════════${PLAIN}"
   echo ""
 
-  # Content tests
-  test_content_file_exists
-  test_content_syntax
-  test_content_functions
-  test_content_has_folder_categories
-  test_content_has_file_extensions
-  test_content_supports_ru_en
+  # Variants tests
+  test_variants_file_exists
+  test_variants_syntax
+  test_variants_has_ids
+  test_variants_has_get_variant
 
   # Names tests
   test_names_file_exists
