@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1071
+# shellcheck disable=SC1071,SC1111,SC2140
 # ╔═══════════════════════════════════════════════════════════╗
 # ║  CubiVeil — Prompt Module Unit Tests                      ║
 # ║  Тесты для lib/core/installer/prompt.sh                   ║
@@ -219,6 +219,32 @@ test_print_banner_github_url() {
   else
     pass "_print_banner: функция выполняется"
     ((TESTS_PASSED++)) || true
+  fi
+}
+
+# ════════════════════════════════════════════════════════════════════
+#  ТЕСТ 8: prompt_inputs non-interactive mode
+# ════════════════════════════════════════════════════════════════════
+test_prompt_inputs_noninteractive() {
+  info "Тестирование prompt_inputs non-interactive..."
+
+  # Обнуляем окружение
+  source "$PROMPT_MODULE_PATH"
+  INTERACTIVE_MODE="false"
+  DEV_MODE="false"
+  DOMAIN="example.org"
+  LE_EMAIL=""
+  INSTALL_TELEGRAM=""
+
+  # Вызываем функцию
+  prompt_inputs 2>&1 >/dev/null
+
+  if [[ "$DOMAIN" == "example.org" ]] && [[ "$LE_EMAIL" == "admin@example.org" ]] && [[ "$INSTALL_TELEGRAM" == "false" ]]; then
+    pass "prompt_inputs: non-interactive работает"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "prompt_inputs: non-interactive не работает"
+    ((TESTS_FAILED++)) || true
   fi
 }
 

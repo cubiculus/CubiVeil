@@ -47,6 +47,47 @@ prompt_inputs() {
   _step_label="$(get_str MSG_PRE_INSTALL_SETUP)"
   step "$_step_label"
 
+  # ── NON-INTERACTIVE MODE ─────────────────────────────────
+  if [[ "$INTERACTIVE_MODE" == "false" ]]; then
+    # Пользователь может указать опции в CLI. В этом режиме prompt_inputs не интерактивен.
+    if [[ "$DEV_MODE" == "true" ]]; then
+      [[ -z "$DOMAIN" ]] && DOMAIN="$DEV_DOMAIN"
+      LE_EMAIL="admin@${DOMAIN}"
+      echo ""
+      echo -e "\033[0;33m  [DEV mode] Self-signed SSL, no domain required\033[0m"
+      echo ""
+      info "$(get_str INFO_DEV_MODE)"
+      warn "$(get_str MSG_BROWSERS_SECURITY_WARNING)"
+      warn "$(get_str MSG_DO_NOT_USE_PRODUCTION)"
+      echo ""
+      ok "Domain:  $DOMAIN"
+      ok "Email:   $LE_EMAIL"
+      echo ""
+      return 0
+    fi
+
+    if [[ -z "$DOMAIN" ]]; then
+      err "Error: DOMAIN is required in non-interactive mode"
+      exit 1
+    fi
+
+    if [[ -z "$LE_EMAIL" ]]; then
+      LE_EMAIL="admin@${DOMAIN}"
+    fi
+
+    echo ""
+    ok "Domain:  $DOMAIN"
+    ok "Email:   $LE_EMAIL"
+    echo ""
+
+    # Если пользователь явно не указал TELEGRAM, выключаем
+    if [[ -z "$INSTALL_TELEGRAM" ]]; then
+      INSTALL_TELEGRAM="false"
+    fi
+
+    return 0
+  fi
+
   # ── DEV MODE ──────────────────────────────────────────────
   # DEV mode: skip interactive prompts, use self-signed SSL
   if [[ "$DEV_MODE" == "true" ]]; then

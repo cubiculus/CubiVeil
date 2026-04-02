@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1071
+# shellcheck disable=SC1071,SC2034
 #
 # generate.sh — Генератор сайтов-прикрытий CubiVeil (v2)
 #

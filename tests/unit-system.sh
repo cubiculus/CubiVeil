@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1071
+# shellcheck disable=SC1071,SC1111,SC2140,SC2178
 # ╔═══════════════════════════════════════════════════════════╗
 # ║  CubiVeil — System Module Unit Tests                      ║
 # ║  Тесты для lib/modules/system/install.sh                  ║
@@ -87,8 +87,11 @@ cat() {
     if [[ -n "$file" ]]; then
       touch "$file" 2>/dev/null || true
     fi
+  elif [[ -n "$*" ]]; then
+    # Вывод содержимого файла (mock)
+    return 0
   else
-    # Вывод содержимого
+    # Чтение из stdin (mock)
     return 0
   fi
 }

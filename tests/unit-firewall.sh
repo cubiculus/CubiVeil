@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1071
+# shellcheck disable=SC1071,SC1111,SC2140,SC2178
 # +===========================================================+
 # |  CubiVeil -- Firewall Module Unit Tests                    |
 # |  Тесты для lib/modules/firewall/install.sh                |

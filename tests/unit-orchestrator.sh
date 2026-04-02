@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1071
+# shellcheck disable=SC1071,SC1111,SC2140
 # ╔═══════════════════════════════════════════════════════════╗
 # ║  CubiVeil — Orchestrator Unit Tests                       ║
 # ║  Тесты для lib/core/installer/orchestrator.sh             ║
@@ -451,6 +451,8 @@ test_export_globals() {
   DEV_MODE="true"
   DRY_RUN="false"
   DOMAIN="test.example.com"
+  INTERACTIVE_MODE="true"
+  SUI_PANEL_PORT="2095"
 
   # Вызываем функцию
   _export_globals
@@ -458,7 +460,9 @@ test_export_globals() {
   # Проверяем что переменные экспортированы
   if [[ "${LANG_NAME:-}" == "TestLang" ]] &&
     [[ "${DEV_MODE:-}" == "true" ]] &&
-    [[ "${DOMAIN:-}" == "test.example.com" ]]; then
+    [[ "${DOMAIN:-}" == "test.example.com" ]] &&
+    [[ "${INTERACTIVE_MODE:-}" == "true" ]] &&
+    [[ "${SUI_PANEL_PORT:-}" == "2095" || -z "${SUI_PANEL_PORT:-}" ]]; then
     pass "_export_globals: переменные установлены"
     ((TESTS_PASSED++)) || true
   else

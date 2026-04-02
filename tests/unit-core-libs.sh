@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1071
+# shellcheck disable=SC1071,SC1111,SC2140
 # ╔═══════════════════════════════════════════════════════════╗
 # ║  CubiVeil — Core Libraries Unit Tests                     ║
 # ║  Тесты для log.sh, validation.sh, security.sh             ║

@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1071
+# shellcheck disable=SC1071,SC1111,SC2140
 # ════════════════════════════════════════════════════════════╗
 #          CubiVeil Unit Tests - setup-telegram.sh
 #          Тестирование скрипта установки Telegram бота

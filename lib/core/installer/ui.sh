@@ -124,6 +124,29 @@ _print_finish() {
 
   echo -e "${GREEN}╚══════════════════════════════════════════════════════════════════════════╝${PLAIN}"
 
+  # Вывод данных S-UI панели если файл существует
+  if [[ -f "/etc/cubiveil/s-ui.credentials" ]]; then
+    echo ""
+    echo -e "${GREEN}╔══════════════════════════════════════════════════════════╗${PLAIN}"
+    echo "  S-UI Panel Credentials"
+    echo -e "${GREEN}╠══════════════════════════════════════════════════════════╣${PLAIN}"
+    # shellcheck disable=SC1091
+    source /etc/cubiveil/s-ui.credentials 2>/dev/null || true
+    if [[ -z "$SERVER_IP" ]]; then
+      SERVER_IP=$(hostname -I | awk '{print $1}')
+    fi
+    local _sui_url="http://${SERVER_IP:-0.0.0.0}:${SUI_PANEL_PORT:-2095}${SUI_PATH:-/app/}"
+    echo -e "${GREEN}  Panel URL:  ${PLAIN}${_sui_url}"
+    echo -e "${GREEN}  Port:       ${PLAIN}${SUI_PANEL_PORT:-2095}"
+    echo -e "${GREEN}  Sub Port:   ${PLAIN}${SUI_SUB_PORT:-2096}"
+    echo -e "${GREEN}  Path:       ${PLAIN}${SUI_PATH:-/app/}"
+    echo -e "${GREEN}  Sub Path:   ${PLAIN}${SUI_SUB_PATH:-/sub/}"
+    echo -e "${GREEN}  Username:   ${PLAIN}${SUI_ADMIN_USER:-CubiVeil}"
+    echo -e "${GREEN}  Password:   ${YELLOW}${SUI_ADMIN_PASSWORD:-N/A}${PLAIN}"
+    echo -e "${GREEN}╚══════════════════════════════════════════════════════════╝${PLAIN}"
+    echo ""
+  fi
+
   # Вывод данных админа если файл существует
   if [[ -f "/etc/cubiveil/admin.credentials" ]]; then
     echo ""

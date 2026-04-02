@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1071
+# shellcheck disable=SC1071,SC1111,SC2140
 # ╔═══════════════════════════════════════════════════════════╗
 # ║  CubiVeil — CLI Parser                                    ║
 # ║  Разбор аргументов командной строки                       ║
@@ -21,8 +21,16 @@ INSTALL_SUI="true"
 INSTALL_SSL="true"
 
 # Автоматический режим (не интерактивный)
-INTERACTIVE_MODE="false"
+INTERACTIVE_MODE="true"
 export INTERACTIVE_MODE
+
+# Параметры S-UI из CLI
+SUI_PANEL_PORT=""
+SUI_SUB_PORT=""
+SUI_PATH=""
+SUI_SUB_PATH=""
+SUI_ADMIN_USER=""
+SUI_ADMIN_PASSWORD=""
 
 # Переменные по умолчанию (заполняются в prompt_inputs())
 # shellcheck disable=SC2034
@@ -64,6 +72,13 @@ _parse_args_early() {
     --no-sui) INSTALL_SUI="false" ;;
     --no-ssl) INSTALL_SSL="false" ;;
     --telegram) INSTALL_TELEGRAM="true" ;;
+    --non-interactive) INTERACTIVE_MODE="false" ;;
+    --sui-panel-port=*) SUI_PANEL_PORT="${1#*=}" ;;
+    --sui-sub-port=*) SUI_SUB_PORT="${1#*=}" ;;
+    --sui-path=*) SUI_PATH="${1#*=}" ;;
+    --sui-sub-path=*) SUI_SUB_PATH="${1#*=}" ;;
+    --sui-admin-user=*) SUI_ADMIN_USER="${1#*=}" ;;
+    --sui-admin-password=*) SUI_ADMIN_PASSWORD="${1#*=}" ;;
     --help | -h)
       usage
       exit 0

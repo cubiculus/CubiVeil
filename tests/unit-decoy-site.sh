@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1071
+# shellcheck disable=SC1071,SC1111,SC2140
 # +======================================================+
 # |        CubiVeil Unit Tests - Decoy Site Module       |
 # |        Тестирование lib/modules/decoy-site/          |

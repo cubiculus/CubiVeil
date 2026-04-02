@@ -40,6 +40,13 @@ Options:
   --no-sui              Skip s-ui panel installation
   --no-ssl              Skip SSL certificate installation
   --telegram            Install Telegram bot (will prompt for config)
+  --non-interactive     Run in non-interactive mode (no prompts)
+  --sui-panel-port=PORT Set s-ui panel port (default 2095)
+  --sui-sub-port=PORT  Set s-ui subscription port (default 2096)
+  --sui-path=PATH      Set s-ui panel path (default /app/)
+  --sui-sub-path=PATH  Set s-ui subscription path (default /sub/)
+  --sui-admin-user=USER    Set s-ui admin username (auto if missing)
+  --sui-admin-password=PWD Set s-ui admin password (auto if missing)
   --help, -h            Show this help
 
 Examples:

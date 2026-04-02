@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1071
+# shellcheck disable=SC1071,SC1111,SC2140
 # ╔═══════════════════════════════════════════════════════════╗
 # ║  CubiVeil — Decoy-site Generators Unit Tests              ║
 # ║  Тесты для lib/modules/decoy-site/generators/*.sh         ║

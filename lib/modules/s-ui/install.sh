@@ -32,11 +32,26 @@ SUI_CONFIG_FILE="${SUI_DB_DIR}/s-ui.db"
 SUI_SERVICE="/etc/systemd/system/s-ui.service"
 SINGBOX_SERVICE="/etc/systemd/system/sing-box.service"
 
-# Порты по умолчанию (из s-ui документации)
-SUI_PANEL_PORT="${SUI_PANEL_PORT:-2095}"
-SUI_SUB_PORT="${SUI_SUB_PORT:-2096}"
+# Порты по умолчанию (генерируются случайно в диапазоне 20000-50000, если не переданы)
+SUI_PANEL_PORT="${SUI_PANEL_PORT:-}"
+SUI_SUB_PORT="${SUI_SUB_PORT:-}"
 SUI_PATH="${SUI_PATH:-/app/}"
 SUI_SUB_PATH="${SUI_SUB_PATH:-/sub/}"
+# admin defaults
+SUI_ADMIN_USER="${SUI_ADMIN_USER:-CubiVeil}"
+SUI_ADMIN_PASSWORD="${SUI_ADMIN_PASSWORD:-}"
+
+sui_random_port() {
+  local p
+  while true; do
+    p=$((RANDOM % 30001 + 20000))
+    # простой check: порт должен быть >20000 и <=50000
+    if [[ $p -ge 20000 && $p -le 50000 ]]; then
+      echo "$p"
+      return
+    fi
+  done
+}
 
 # ── Функции установки / Installation Functions ──────────────
 
@@ -99,10 +114,11 @@ module_install() {
   # Dry-run mode: skip actual installation
   if [[ "${DRY_RUN:-false}" == "true" ]]; then
     log_info "[DRY-RUN] Would install S-UI panel"
-    log_info "[DRY-RUN] Panel port: ${SUI_PANEL_PORT}"
-    log_info "[DRY-RUN] Subscription port: ${SUI_SUB_PORT}"
-    log_info "[DRY-RUN] Panel path: ${SUI_PATH}"
-    log_info "[DRY-RUN] Subscription path: ${SUI_SUB_PATH}"
+    log_info "[DRY-RUN] Admin user: ${SUI_ADMIN_USER:-CubiVeil}"
+    log_info "[DRY-RUN] Panel port: ${SUI_PANEL_PORT:-auto-generated 20000-50000}"
+    log_info "[DRY-RUN] Subscription port: ${SUI_SUB_PORT:-auto-generated 20000-50000}"
+    log_info "[DRY-RUN] Panel path: ${SUI_PATH:-/app/}"
+    log_info "[DRY-RUN] Subscription path: ${SUI_SUB_PATH:-/sub/}"
     return 0
   fi
 
@@ -126,9 +142,28 @@ module_configure() {
     return 0
   fi
 
+  # Генерируем порты если не переданы явно
+  if [[ -z "${SUI_PANEL_PORT:-}" ]]; then
+    SUI_PANEL_PORT=$(sui_random_port)
+    log_info "Generated S-UI panel port: ${SUI_PANEL_PORT}"
+  fi
+  if [[ -z "${SUI_SUB_PORT:-}" ]]; then
+    SUI_SUB_PORT=$(sui_random_port)
+    log_info "Generated S-UI subscription port: ${SUI_SUB_PORT}"
+  fi
+
   # Создаём директорию базы данных если не существует
   mkdir -p "${SUI_DB_DIR}"
   chmod 755 "${SUI_DB_DIR}"
+
+  # По умолчанию admin-user = "CubiVeil" если не задан (уже установлено выше, но проверяем ещё раз)
+  [[ -z "${SUI_ADMIN_USER:-}" ]] && SUI_ADMIN_USER="CubiVeil"
+
+  # Генерируем пароль если не передан
+  if [[ -z "${SUI_ADMIN_PASSWORD:-}" ]]; then
+    SUI_ADMIN_PASSWORD=$(head -c 12 /dev/urandom | base64 | tr -d '=+/][' | cut -c1-12)
+    log_info "Generated S-UI admin password"
+  fi
 
   # Проверяем наличие сервисных файлов
   if [[ -f "${SUI_SERVICE}" ]]; then
@@ -150,10 +185,44 @@ SUI_PANEL_PORT=${SUI_PANEL_PORT}
 SUI_SUB_PORT=${SUI_SUB_PORT}
 SUI_PATH=${SUI_PATH}
 SUI_SUB_PATH=${SUI_SUB_PATH}
+SUI_ADMIN_USER=${SUI_ADMIN_USER}
+SUI_ADMIN_PASSWORD=${SUI_ADMIN_PASSWORD}
 SUI_INSTALL_DIR=${SUI_INSTALL_DIR}
 SUI_DB_DIR=${SUI_DB_DIR}
 EOF
   chmod 600 /etc/cubiveil/s-ui.credentials
+
+  # Автоматическая конфигурация S-UI через CLI
+  if [[ -x "/usr/local/s-ui/sui" ]]; then
+    local sui_cmd="/usr/local/s-ui/sui"
+    local sui_args=()
+
+    if [[ -n "${SUI_PANEL_PORT:-}" ]]; then
+      sui_args+=("-port" "${SUI_PANEL_PORT}")
+    fi
+    if [[ -n "${SUI_PATH:-}" ]]; then
+      sui_args+=("-path" "${SUI_PATH}")
+    fi
+    if [[ -n "${SUI_SUB_PORT:-}" ]]; then
+      sui_args+=("-subPort" "${SUI_SUB_PORT}")
+    fi
+    if [[ -n "${SUI_SUB_PATH:-}" ]]; then
+      sui_args+=("-subPath" "${SUI_SUB_PATH}")
+    fi
+
+    if [[ ${#sui_args[@]} -gt 0 ]]; then
+      log_info "Applying S-UI settings: ${sui_args[*]}"
+      "$sui_cmd" setting "${sui_args[@]}" || log_warn "Failed to apply S-UI settings"
+    fi
+
+    # Всегда устанавливаем admin credentials если оба параметра есть
+    if [[ -n "${SUI_ADMIN_USER:-}" && -n "${SUI_ADMIN_PASSWORD:-}" ]]; then
+      log_info "Setting S-UI admin credentials (user: ${SUI_ADMIN_USER})"
+      "$sui_cmd" admin -username "${SUI_ADMIN_USER}" -password "${SUI_ADMIN_PASSWORD}" || log_warn "Failed to set S-UI admin credentials"
+    fi
+  else
+    log_warn "/usr/local/s-ui/sui command not found; skipping automatic S-UI CLI config"
+  fi
 
   log_success "S-UI credentials saved to /etc/cubiveil/s-ui.credentials"
 }

@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1071
+# shellcheck disable=SC1071,SC1111,SC2140
 # ╔═══════════════════════════════════════════════════════════╗
 # ║  CubiVeil — Traffic-shaping Persist Module Unit Tests     ║
 # ║  Тесты для lib/modules/traffic-shaping/persist.sh         ║

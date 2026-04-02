@@ -107,6 +107,32 @@ sudo bash install.sh --dry-run
 sudo bash install.sh --dev --dry-run
 ```
 
+**Неинтерактивная установка S-UI:**
+
+Для полностью автоматической установки без ручного ввода используйте параметр `--non-interactive`:
+
+```bash
+# Полностью автоматическая установка (все значения генерируются автоматически)
+sudo bash install.sh --non-interactive --dev
+
+# С кастомными параметрами S-UI
+sudo bash install.sh --non-interactive --dev \
+  --sui-panel-port=8080 \
+  --sui-sub-port=8081 \
+  --sui-admin-user=myadmin \
+  --sui-admin-password=mysecretpass
+
+# Production установка с доменом
+sudo bash install.sh --non-interactive --domain=example.com \
+  --sui-admin-user=admin
+```
+
+**Автоматическая генерация параметров S-UI:**
+- **Порты:** если не указаны, генерируются случайные в диапазоне 20000-50000
+- **Admin-user:** по умолчанию "CubiVeil"
+- **Admin-password:** если не указан, генерируется случайный пароль (12 символов)
+- **Пути:** `/app/` и `/sub/` (стандартные)
+
 **С опциями:**
 
 ```bash
@@ -146,9 +172,18 @@ sudo bash install.sh --debug 2>&1 | tee install_debug.log
 | `--dry-run` | Симуляция установки без изменений в системе |
 | `--debug`, `-v` | Режим отладки: подробный вывод + DEBUG логи |
 | `--domain=NAME` | Установить домен (по умолчанию в dev: dev.cubiveil.local) |
+| `--non-interactive` | Неинтерактивный режим (без prompts) |
 | `--no-decoy` | Пропустить установку сайта-прикрытия |
 | `--no-traffic-shaping` | Пропустить модуль Traffic Shaping |
+| `--no-sui` | Пропустить установку s-ui панели |
+| `--no-ssl` | Пропустить установку SSL сертификатов |
 | `--telegram` | Установить Telegram-бот |
+| `--sui-panel-port=<PORT>` | Порт панели S-UI (по умолчанию: случайный 20000-50000) |
+| `--sui-sub-port=<PORT>` | Порт подписки S-UI (по умолчанию: случайный 20000-50000) |
+| `--sui-path=<PATH>` | Путь доступа к панели (по умолчанию: /app/) |
+| `--sui-sub-path=<PATH>` | Путь к подписке (по умолчанию: /sub/) |
+| `--sui-admin-user=<USER>` | Пользователь админа S-UI (по умолчанию: CubiVeil) |
+| `--sui-admin-password=<PASS>` | Пароль админа S-UI (по умолчанию: случайный) |
 | `--help`, `-h` | Показать справку |
 
 ## 📦 Компоненты
@@ -231,6 +266,41 @@ source /root/.bashrc
 - `cv backup create` — создать бэкап
 - `cv profiles list` — список профилей
 - `cv diagnose` — диагностика
+
+## 🎛️ Доступ к S-UI Панели
+
+После успешной установки вы получите информацию для доступа к панели:
+
+```
+╔═══════════════════════════════════════╗
+  S-UI Panel Credentials
+╠═══════════════════════════════════════╣
+  Panel URL:  http://SERVER_IP:PORT/app/
+  Port:       PORT (случайный или кастомный)
+  Sub Port:   SUB_PORT (случайный или кастомный)
+  User Path:  /app/
+  Sub Path:   /sub/
+  Username:   CubiVeil или ваше имя
+  Password:   генерируется или ваш пароль
+╚═══════════════════════════════════════╝
+```
+
+**Все параметры сохраняются в** `/etc/cubiveil/s-ui.credentials`
+
+**Примеры доступа:**
+- Панель управления: `http://203.0.113.1:2095/app/`
+- Генератор подписок: `http://203.0.113.1:2096/sub/`
+
+**Создание пользователей:**
+
+Вы можете создавать пользователей с разными протоколами:
+- Trojan (TCP + TLS)
+- Shadowsocks (с различными шифрами)
+- VLESS (XTLS, Reality)
+- VMess (Websocket)
+- Hysteria2
+
+В панели доступна генерация QR-кодов и ссылок подписок для удобства.
 
 ## 🤖 Telegram-бот
 

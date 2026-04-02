@@ -24,6 +24,8 @@ WARNINGS=()
 _export_globals() {
   export LANG_NAME DEV_MODE DRY_RUN DEBUG_MODE DOMAIN LE_EMAIL SERVER_IP
   export INSTALL_SCRIPT_DIR CUBIVEIL_LOG_LEVEL
+  export INTERACTIVE_MODE
+  export SUI_PANEL_PORT SUI_SUB_PORT SUI_PATH SUI_SUB_PATH SUI_ADMIN_USER SUI_ADMIN_PASSWORD
 }
 
 # Шаг в обёртке для показа прогресса [x/N]
@@ -190,7 +192,12 @@ _install_sui_panel() {
   log_info "s-ui install log: $_sui_log"
 
   # Запускаем скрипт в фоновом режиме
-  bash "$_sui_script" >"$_sui_log" 2>&1 &
+  if [[ "${INTERACTIVE_MODE:-true}" == "false" ]]; then
+    log_info "Non-interactive mode: skip s-ui interactive config prompts"
+    printf 'n\n' | bash "$_sui_script" >"$_sui_log" 2>&1 &
+  else
+    bash "$_sui_script" >"$_sui_log" 2>&1 &
+  fi
   local _sui_bg_pid=$!
 
   # Ждём завершения фонового процесса или пока сервис станет активным

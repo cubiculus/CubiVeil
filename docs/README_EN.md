@@ -122,6 +122,32 @@ sudo bash install.sh --dry-run
 sudo bash install.sh --dev --dry-run
 ```
 
+**Non-interactive S-UI Installation:**
+
+For fully automated installation without manual input, use the `--non-interactive` parameter:
+
+```bash
+# Fully automated installation (all values auto-generated)
+sudo bash install.sh --non-interactive --dev
+
+# With custom S-UI parameters
+sudo bash install.sh --non-interactive --dev \
+  --sui-panel-port=8080 \
+  --sui-sub-port=8081 \
+  --sui-admin-user=myadmin \
+  --sui-admin-password=mysecretpass
+
+# Production installation with domain
+sudo bash install.sh --non-interactive --domain=example.com \
+  --sui-admin-user=admin
+```
+
+**Automatic S-UI Parameter Generation:**
+- **Ports:** if not specified, random ports are generated in range 20000-50000
+- **Admin-user:** default is "CubiVeil"
+- **Admin-password:** if not specified, random password is generated (12 characters)
+- **Paths:** `/app/` and `/sub/` (standard)
+
 **With options:**
 
 ```bash
@@ -161,9 +187,18 @@ sudo bash install.sh --debug 2>&1 | tee install_debug.log
 | `--dry-run` | Simulate installation without system changes |
 | `--debug`, `-v` | Debug mode: verbose output + DEBUG logs |
 | `--domain=NAME` | Set domain (default in dev: dev.cubiveil.local) |
+| `--non-interactive` | Non-interactive mode (no prompts) |
 | `--no-decoy` | Skip decoy-site installation |
 | `--no-traffic-shaping` | Skip Traffic Shaping module |
+| `--no-sui` | Skip s-ui panel installation |
+| `--no-ssl` | Skip SSL certificate installation |
 | `--telegram` | Install Telegram bot |
+| `--sui-panel-port=<PORT>` | S-UI panel port (default: random 20000-50000) |
+| `--sui-sub-port=<PORT>` | S-UI subscription port (default: random 20000-50000) |
+| `--sui-path=<PATH>` | Panel access path (default: /app/) |
+| `--sui-sub-path=<PATH>` | Subscription path (default: /sub/) |
+| `--sui-admin-user=<USER>` | S-UI admin username (default: CubiVeil) |
+| `--sui-admin-password=<PASS>` | S-UI admin password (default: random) |
 | `--help`, `-h` | Show help |
 
 ## 📦 Components
@@ -208,6 +243,41 @@ After installation, available commands:
 - `cv monitor` — monitoring
 - `cv backup create` — create backup
 - `cv diagnose` — diagnostics
+
+## 🎛️ S-UI Panel Access
+
+After successful installation, you will receive credentials to access the panel:
+
+```
+╔═══════════════════════════════════════╗
+  S-UI Panel Credentials
+╠═══════════════════════════════════════╣
+  Panel URL:  http://SERVER_IP:PORT/app/
+  Port:       PORT (random or custom)
+  Sub Port:   SUB_PORT (random or custom)
+  User Path:  /app/
+  Sub Path:   /sub/
+  Username:   CubiVeil or your username
+  Password:   generated or your password
+╚═══════════════════════════════════════╝
+```
+
+**All parameters are saved in** `/etc/cubiveil/s-ui.credentials`
+
+**Access Examples:**
+- Management panel: `http://203.0.113.1:2095/app/`
+- Subscription generator: `http://203.0.113.1:2096/sub/`
+
+**Creating Users:**
+
+You can create users with different protocols:
+- Trojan (TCP + TLS)
+- Shadowsocks (various ciphers)
+- VLESS (XTLS, Reality)
+- VMess (Websocket)
+- Hysteria2
+
+The panel provides QR code generation and subscription links for easy sharing.
 
 ## 🤖 Telegram Bot
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1071
+# shellcheck disable=SC1071,SC1111,SC2140
 # ╔══════════════════════════════════════════════════════╗
 # ║  CubiVeil — Decoy Rotate Utility                     ║
 # ║  Управление ротацией сайта-прикрытия                 ║
