@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # CubiVeil — Decoy Site: ротация файлов
 # В прототипе таймер создаётся, но rotation.enabled = false
 # Для включения: изменить поле в decoy.json и запустить module_enable()

@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # ╔═══════════════════════════════════════════════════════════╗
 # ║          CubiVeil — Core Logging Functions                ║
 # ║          github.com/cubiculus/cubiveil                    ║

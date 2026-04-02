@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # ╔══════════════════════════════════════════════════════╗
 # ║  CubiVeil — Traffic Shaping Module (tc/netem)        ║
 # ║  Уникальный "почерк" сервера — фиксируется при       ║

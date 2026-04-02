@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 set -euo pipefail
 # ╔═══════════════════════════════════════════════════════════╗
 # ║          CubiVeil — Manifest                              ║

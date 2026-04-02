@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # ╔═══════════════════════════════════════════════════════════╗
 # ║  CubiVeil — SSL Module Unit Tests                         ║
 # ║  Тесты для lib/modules/ssl/install.sh                     ║

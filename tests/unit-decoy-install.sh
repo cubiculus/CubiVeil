@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # ╔═══════════════════════════════════════════════════════════╗
 # ║  CubiVeil — Decoy-site Install Module Unit Tests          ║
 # ║  Тесты для lib/modules/decoy-site/install.sh              ║

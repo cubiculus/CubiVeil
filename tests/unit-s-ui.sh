@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # ╔═══════════════════════════════════════════════════════════╗
 # ║  CubiVeil — S-UI Module Unit Tests                        ║
 # ║  Тесты для lib/modules/s-ui/install.sh                    ║

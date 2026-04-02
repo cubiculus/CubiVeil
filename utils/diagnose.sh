@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # ╔═══════════════════════════════════════════════════════════╗
 # ║          CubiVeil — Diagnose Utility                      ║
 # ║          github.com/cubiculus/cubiveil                    ║

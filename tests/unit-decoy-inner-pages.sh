@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # ════════════════════════════════════════════════════════════════════════
 #        CubiVeil Unit Tests - Decoy Inner Pages
 #        Тестирование _generate_inner_pages()

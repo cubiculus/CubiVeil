@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # ╔═══════════════════════════════════════════════════════════╗
 # ║  CubiVeil — Traffic-shaping Uninstall Module Unit Tests   ║
 # ║  Тесты для lib/modules/traffic-shaping/uninstall.sh       ║

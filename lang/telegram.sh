@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # shellcheck disable=SC2034
 # ╔═══════════════════════════════════════════════════════════╗
 # ║         CubiVeil — Telegram Bot Localization              ║

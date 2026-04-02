@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # ╔═══════════════════════════════════════════════════════════╗
 # ║          CubiVeil — SSL Module                            ║
 # ║          github.com/cubiculus/cubiveil                    ║

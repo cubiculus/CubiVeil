@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # ╔═══════════════════════════════════════════════════════════╗
 # ║  CubiVeil — Prompt Module Unit Tests                      ║
 # ║  Тесты для lib/core/installer/prompt.sh                   ║

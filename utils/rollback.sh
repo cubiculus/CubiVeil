@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # ╔═══════════════════════════════════════════════════════════╗
 # ║          CubiVeil — Rollback Utility                      ║
 # ║          github.com/cubiculus/cubiveil                    ║

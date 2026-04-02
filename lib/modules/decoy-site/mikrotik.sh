@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # ╔══════════════════════════════════════════════════════╗
 # ║  CubiVeil — Decoy Site: MikroTik Script              ║
 # ║  Генерация скрипта для MikroTik RouterOS             ║

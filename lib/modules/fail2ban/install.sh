@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # ╔═══════════════════════════════════════════════════════════╗
 # ║          CubiVeil — Fail2ban Module                       ║
 # ║          github.com/cubiculus/cubiveil                    ║

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1071
 # ══════════════════════════════════════════════════════════════
 #  CubiVeil — Decoy Site Variants
 #  Все типы сайтов-прикрытий в одном месте.

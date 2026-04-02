@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # ╔═══════════════════════════════════════════════════════════╗
 # ║          CubiVeil — Import Config Utility                 ║
 # ║          github.com/cubiculus/cubiveil                    ║

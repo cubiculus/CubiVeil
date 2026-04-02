@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # Генератор цветовых схем для V2
 set -euo pipefail
 

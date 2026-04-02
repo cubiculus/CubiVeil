@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # Генератор статистики для V2
 
 SEED=$(date +%s)

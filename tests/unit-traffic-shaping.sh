@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1071
 # в-"в-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв-ђв--
 # в-'        CubiVeil Unit Tests - Traffic Shaping Module     в-'
 # в-'        РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ lib/modules/traffic-shaping/         в-'
@@ -132,7 +133,7 @@ cat() {
   done
 
   # Р-СЃР»Рё heredoc/redirect РІ С„Р°Р№Р»
-  if $is_heredoc && [[ -n "$redirect_file" ]]; then
+  if [[ "$is_heredoc" == "true" ]] && [[ -n "$redirect_file" ]]; then
     # Р§РёС‚Р°РµРј stdin Рё РїРёС€РµРј РІ С„Р°Р№Р»
     local content
     content=$(command cat)
@@ -193,15 +194,12 @@ export TS_APPLY_SCRIPT="/tmp/cubiveil-tc-apply-test.sh"
 test_files_exist() {
   info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ С„Р°Р№Р»РѕРІ РјРѕРґСѓР»СЏ..."
 
-  local all_found=true
   local file
   for file in "$MODULE_PATH" "$PERSIST_PATH" "$UNINSTALL_PATH"; do
     if [[ -f "$file" ]]; then
       pass "$(basename "$file"): С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚"
     else
       fail "$(basename "$file"): С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ"
-      # shellcheck disable=SC2034
-      all_found=false
     fi
   done
 }
