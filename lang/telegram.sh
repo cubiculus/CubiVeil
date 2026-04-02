@@ -6,24 +6,27 @@
 # ║                   EN / RU strings                         ║
 # ╚═══════════════════════════════════════════════════════════╝
 
+# Guard check - не подключать повторно
+if [[ -n "${_CUBIVEIL_LANG_TG_LOADED:-}" ]]; then
+  return 0
+fi
+_CUBIVEIL_LANG_TG_LOADED=1
+
 set -euo pipefail
 
 # ── Окружение скрипта / Script environment ───────────────────
 TG_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# ── Подключение fallback функций ─────────────────────────────
-if [[ -f "${TG_SCRIPT_DIR}/lib/fallback.sh" ]]; then
-  source "${TG_SCRIPT_DIR}/lib/fallback.sh"
+# ── Подключение общих функций вывода ─────────────────────────
+# ПРИМЕЧАНИЕ: output.sh и i18n.sh уже должны быть загружены через init.sh
+# Это подключение для обратной совместимости при прямом вызове
+if [[ -f "${TG_SCRIPT_DIR}/lib/output.sh" ]]; then
+  source "${TG_SCRIPT_DIR}/lib/output.sh"
 fi
 
 # ── Подключение унифицированного модуля локализации ──────────
 if [[ -f "${TG_SCRIPT_DIR}/lib/i18n.sh" ]]; then
   source "${TG_SCRIPT_DIR}/lib/i18n.sh"
-fi
-
-# ── Подключение общих функций вывода ─────────────────────────
-if [[ -f "${TG_SCRIPT_DIR}/lib/output.sh" ]]; then
-  source "${TG_SCRIPT_DIR}/lib/output.sh"
 fi
 
 # ══════════════════════════════════════════════════════════════

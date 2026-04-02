@@ -14,14 +14,15 @@ set -euo pipefail
 # ── Подключение модулей ──────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Guard check - не подключать повторно
+if [[ -n "${_CUBIVEIL_COMMON_LOADED:-}" ]]; then
+  return 0
+fi
+_CUBIVEIL_COMMON_LOADED=1
+
 # Подключаем output.sh если ещё не подключён
 if [[ -f "${SCRIPT_DIR}/output.sh" ]]; then
   source "${SCRIPT_DIR}/output.sh"
-fi
-
-# Подключаем security.sh если ещё не подключён
-if [[ -f "${SCRIPT_DIR}/security.sh" ]]; then
-  source "${SCRIPT_DIR}/security.sh"
 fi
 
 # ── Проверки окружения / Environment checks ──────────────────

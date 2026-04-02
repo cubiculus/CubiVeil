@@ -7,12 +7,22 @@
 
 set -euo pipefail
 
-# ── Подключение унифицированных функций вывода ───────────────
+# ── Подключение библиотек через централизованный загрузчик ──
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/lib/output.sh" || {
-  echo "❌ Не удалось загрузить lib/output.sh" >&2
-  exit 1
-}
+
+# Используем init.sh для правильного порядка загрузки
+if [[ -f "${SCRIPT_DIR}/lib/init.sh" ]]; then
+  source "${SCRIPT_DIR}/lib/init.sh" || {
+    echo "❌ Не удалось загрузить lib/init.sh" >&2
+    exit 1
+  }
+else
+  # Fallback для обратной совместимости
+  source "${SCRIPT_DIR}/lib/output.sh" || {
+    echo "❌ Не удалось загрузить lib/output.sh" >&2
+    exit 1
+  }
+fi
 
 # ── Переменные ───────────────────────────────────────────────────
 TESTS_DIR="$SCRIPT_DIR/tests"
@@ -52,6 +62,7 @@ run_unit_tests() {
   print_section "Unit Tests (без root)"
 
   local unit_tests=(
+    "test-guards.sh:Guard-переменные"
     "modular-structure.sh:Модульная структура"
     "test-install-modes.sh:install.sh режимы"
     "unit-utils.sh:lib/utils.sh"

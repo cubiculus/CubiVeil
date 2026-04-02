@@ -8,21 +8,30 @@
 # ║  Основной файл локализации для install.sh и утилит        ║
 # ╚═══════════════════════════════════════════════════════════╝
 
+# Guard check - не подключать повторно
+if [[ -n "${_CUBIVEIL_LANG_LOADED:-}" ]]; then
+  return 0
+fi
+_CUBIVEIL_LANG_LOADED=1
+
 set -euo pipefail
 
 # ── Язык по умолчанию / Default language ─────────────────────
 # Раскомментируй нужную строку / Uncomment the line you need:
 # LANG_NAME="English"
-LANG_NAME="Русский"
 
-# ── Подключение fallback функций ─────────────────────────────
-LANG_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${LANG_SCRIPT_DIR}/.." && pwd)"
-if [[ -f "${PROJECT_ROOT}/lib/fallback.sh" ]]; then
-  source "${PROJECT_ROOT}/lib/fallback.sh"
+# Устанавливаем язык только если ещё не определён (защита от сброса)
+if [[ -z "${LANG_NAME:-}" ]]; then
+  LANG_NAME="Русский"
 fi
 
+# ── Определение директории скрипта ───────────────────────────
+LANG_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${LANG_SCRIPT_DIR}/.." && pwd)"
+
 # ── Подключение унифицированного модуля локализации ───────
+# ПРИМЕЧАНИЕ: i18n.sh уже должен быть загружен через init.sh
+# Это подключение для обратной совместимости при прямом вызове
 if [[ -f "${PROJECT_ROOT}/lib/i18n.sh" ]]; then
   source "${PROJECT_ROOT}/lib/i18n.sh"
 fi

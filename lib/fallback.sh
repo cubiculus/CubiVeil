@@ -6,6 +6,12 @@ set -euo pipefail
 # ║          Базовые функции и цвета при отсутствии lang.sh   ║
 # ╚═══════════════════════════════════════════════════════════╝
 
+# Guard check - не подключать повторно
+if [[ -n "${_CUBIVEIL_FALLBACK_LOADED:-}" ]]; then
+  return 0
+fi
+_CUBIVEIL_FALLBACK_LOADED=1
+
 # ── Подключение унифицированных функций вывода ───────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ -f "${SCRIPT_DIR}/output.sh" ]]; then

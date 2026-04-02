@@ -6,6 +6,12 @@ set -euo pipefail
 # ║          github.com/cubiculus/cubiveil                   ║
 # ╚═══════════════════════════════════════════════════════════╝
 
+# Guard check - не подключать повторно
+if [[ -n "${_CUBIVEIL_UTILS_LOADED:-}" ]]; then
+  return 0
+fi
+_CUBIVEIL_UTILS_LOADED=1
+
 # ── Определение директории скрипта ──────────────────────────────
 UTILS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 

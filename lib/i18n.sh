@@ -6,6 +6,12 @@ set -euo pipefail
 # ║          github.com/cubiculus/cubiveil                    ║
 # ╚═══════════════════════════════════════════════════════════╝
 
+# Guard check - не подключать повторно
+if [[ -n "${_CUBIVEIL_I18N_LOADED:-}" ]]; then
+  return 0
+fi
+_CUBIVEIL_I18N_LOADED=1
+
 # ── Базовый модуль локализации ───────────────────────────────
 # Этот файл предоставляет унифицированный API для локализации
 # Функции вывода (step_title, step, ok, warn, err, info) импортируются из output.sh

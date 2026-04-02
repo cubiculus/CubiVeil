@@ -6,10 +6,16 @@ set -euo pipefail
 # ║          Модуль безопасности                               ║
 # ╚═══════════════════════════════════════════════════════════╝
 
-# ── Подключение fallback функций ─────────────────────────────
+# Guard check - не подключать повторно
+if [[ -n "${_CUBIVEIL_SECURITY_LOADED:-}" ]]; then
+  return 0
+fi
+_CUBIVEIL_SECURITY_LOADED=1
+
+# ── Подключение output.sh ────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [[ -f "${SCRIPT_DIR}/fallback.sh" ]]; then
-  source "${SCRIPT_DIR}/fallback.sh"
+if [[ -f "${SCRIPT_DIR}/output.sh" ]]; then
+  source "${SCRIPT_DIR}/output.sh"
 fi
 
 # ── Безопасная загрузка с проверкой GPG ──────────────────────

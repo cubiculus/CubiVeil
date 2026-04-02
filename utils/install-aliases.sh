@@ -9,24 +9,29 @@
 
 set -euo pipefail
 
-# ── Подключение локализации ───────────────────────────────────
+# ── Подключение библиотек через централизованный загрузчик ──
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "${SCRIPT_DIR}")"
 
-# Подключаем i18n модуль для единых функций локализации
-if [[ -f "${PROJECT_DIR}/lib/i18n.sh" ]]; then
-  source "${PROJECT_DIR}/lib/i18n.sh"
-elif [[ -f "${PROJECT_DIR}/lang/main.sh" ]]; then
-  source "${PROJECT_DIR}/lang/main.sh"
+# Используем init.sh для правильного порядка загрузки
+if [[ -f "${PROJECT_DIR}/lib/init.sh" ]]; then
+  source "${PROJECT_DIR}/lib/init.sh" || {
+    echo "❌ Не удалось загрузить lib/init.sh" >&2
+    exit 1
+  }
 else
-  source "${PROJECT_DIR}/lib/fallback.sh"
+  # Fallback для обратной совместимости
+  source "${PROJECT_DIR}/lib/fallback.sh" 2>/dev/null || true
+  source "${PROJECT_DIR}/lib/output.sh" || {
+    echo "❌ Не удалось загрузить lib/output.sh" >&2
+    exit 1
+  }
 fi
 
-# ── Подключение унифицированных функций вывода ───────────────
-source "${PROJECT_DIR}/lib/output.sh" || {
-  echo "❌ Не удалось загрузить lib/output.sh" >&2
-  exit 1
-}
+# Загрузка локализации (после init.sh)
+if [[ -f "${PROJECT_DIR}/lang/main.sh" ]]; then
+  source "${PROJECT_DIR}/lang/main.sh"
+fi
 
 # ── Константы ─────────────────────────────────────────────────
 ALIASES_FILE="/etc/bash_aliases.d/cubiveil"

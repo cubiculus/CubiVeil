@@ -7,19 +7,29 @@
 
 set -euo pipefail
 
-# ── Подключение зависимостей ────────────────────────────────
+# ── Подключение библиотек через централизованный загрузчик ──
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# Подключаем локализацию и утилиты
+# Используем init.sh для правильного порядка загрузки
+if [[ -f "${PROJECT_ROOT}/lib/init.sh" ]]; then
+  source "${PROJECT_ROOT}/lib/init.sh" || {
+    echo "❌ Не удалось загрузить lib/init.sh" >&2
+    exit 1
+  }
+else
+  # Fallback для обратной совместимости
+  if [[ -f "${PROJECT_ROOT}/lib/utils.sh" ]]; then
+    source "${PROJECT_ROOT}/lib/utils.sh"
+  fi
+  if [[ -f "${PROJECT_ROOT}/lib/core/log.sh" ]]; then
+    source "${PROJECT_ROOT}/lib/core/log.sh"
+  fi
+fi
+
+# Загрузка локализации (после init.sh)
 if [[ -f "${PROJECT_ROOT}/lang/main.sh" ]]; then
   source "${PROJECT_ROOT}/lang/main.sh"
-fi
-if [[ -f "${PROJECT_ROOT}/lib/utils.sh" ]]; then
-  source "${PROJECT_ROOT}/lib/utils.sh"
-fi
-if [[ -f "${PROJECT_ROOT}/lib/core/log.sh" ]]; then
-  source "${PROJECT_ROOT}/lib/core/log.sh"
 fi
 
 # ── Константы ───────────────────────────────────────────────

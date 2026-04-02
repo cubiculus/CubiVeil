@@ -9,17 +9,24 @@
 
 set -euo pipefail
 
+# ── Подключение зависимостей через init.sh ──────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 MODULE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-if [[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/core/system.sh"
-fi
-if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/core/log.sh"
-fi
-if [[ -f "${SCRIPT_DIR}/lib/utils.sh" ]]; then
-  source "${SCRIPT_DIR}/lib/utils.sh"
+# Используем централизованный загрузчик для правильного порядка
+if [[ -f "${SCRIPT_DIR}/lib/init.sh" ]]; then
+  source "${SCRIPT_DIR}/lib/init.sh"
+else
+  # Fallback для обратной совместимости
+  if [[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]]; then
+    source "${SCRIPT_DIR}/lib/core/system.sh"
+  fi
+  if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
+    source "${SCRIPT_DIR}/lib/core/log.sh"
+  fi
+  if [[ -f "${SCRIPT_DIR}/lib/utils.sh" ]]; then
+    source "${SCRIPT_DIR}/lib/utils.sh"
+  fi
 fi
 
 source "${MODULE_DIR}/generate.sh"

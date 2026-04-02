@@ -78,23 +78,32 @@ if [[ "$DRY_RUN" != "true" && $EUID -ne 0 ]]; then
 fi
 
 # ── Загрузка библиотек ──────────────────────────────────────
-if [[ -f "${INSTALL_SCRIPT_DIR}/lang/main.sh" ]]; then
-  source "${INSTALL_SCRIPT_DIR}/lang/main.sh"
+# Используем централизованный загрузчик для правильного порядка
+if [[ -f "${INSTALL_SCRIPT_DIR}/lib/init.sh" ]]; then
+  source "${INSTALL_SCRIPT_DIR}/lib/init.sh" || {
+    echo "[✗] Cannot load lib/init.sh"
+    exit 1
+  }
 else
+  # Fallback для обратной совместимости
+  source "${INSTALL_SCRIPT_DIR}/lib/output.sh" || {
+    echo "[✗] Cannot load lib/output.sh"
+    exit 1
+  }
+  source "${INSTALL_SCRIPT_DIR}/lib/validation.sh" || { err "Cannot load lib/validation.sh"; }
+  source "${INSTALL_SCRIPT_DIR}/lib/i18n.sh" || { err "Cannot load lib/i18n.sh"; }
+  source "${INSTALL_SCRIPT_DIR}/lib/security.sh" || { err "Cannot load lib/security.sh"; }
+  source "${INSTALL_SCRIPT_DIR}/lib/common.sh" || { err "Cannot load lib/common.sh"; }
   source "${INSTALL_SCRIPT_DIR}/lib/fallback.sh" 2>/dev/null || true
+  source "${INSTALL_SCRIPT_DIR}/lib/utils.sh" || { err "Cannot load lib/utils.sh"; }
+  source "${INSTALL_SCRIPT_DIR}/lib/core/log.sh" || { err "Cannot load lib/core/log.sh"; }
+  source "${INSTALL_SCRIPT_DIR}/lib/core/system.sh" || { err "Cannot load lib/core/system.sh"; }
 fi
 
-source "${INSTALL_SCRIPT_DIR}/lib/output.sh" || {
-  echo "[✗] Cannot load lib/output.sh"
-  exit 1
-}
-source "${INSTALL_SCRIPT_DIR}/lib/common.sh" || { err "Cannot load lib/common.sh"; }
-source "${INSTALL_SCRIPT_DIR}/lib/core/log.sh" || { err "Cannot load lib/core/log.sh"; }
-source "${INSTALL_SCRIPT_DIR}/lib/core/system.sh" || { err "Cannot load lib/core/system.sh"; }
-source "${INSTALL_SCRIPT_DIR}/lib/utils.sh" || { err "Cannot load lib/utils.sh"; }
-source "${INSTALL_SCRIPT_DIR}/lib/validation.sh" || { err "Cannot load lib/validation.sh"; }
-source "${INSTALL_SCRIPT_DIR}/lib/security.sh" || { err "Cannot load lib/security.sh"; }
-source "${INSTALL_SCRIPT_DIR}/lib/i18n.sh" || { err "Cannot load lib/i18n.sh"; }
+# Загрузка локализации (после init.sh чтобы i18n уже был загружен)
+if [[ -f "${INSTALL_SCRIPT_DIR}/lang/main.sh" ]]; then
+  source "${INSTALL_SCRIPT_DIR}/lang/main.sh"
+fi
 
 # ── Применение аргументов ───────────────────────────────────
 parse_args "$@"
