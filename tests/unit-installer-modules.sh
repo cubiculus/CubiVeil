@@ -146,7 +146,8 @@ test_bootstrap_setup_remote_install_fallback() {
   INSTALL_SCRIPT_DIR=""
 
   # Убираем доступные инструменты, чтобы ensure_file ушёл в fallback
-  PATH="/nonexistent"
+  MOCK_PATH="/nonexistent"
+  export PATH="$MOCK_PATH"
 
   # Убираем get_str, как было бы при отсутствии i18n
   local get_str_def
