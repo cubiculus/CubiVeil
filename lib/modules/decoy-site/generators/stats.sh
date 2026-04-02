@@ -12,7 +12,7 @@ while [[ $# -gt 0 ]]; do
     shift 2
     ;;
   --users | --files | --storage | --json)
-    shift $([[ "$1" == --* ]] && echo 2 || echo 1)
+    shift "$([[ "$1" == --* ]] && echo 2 || echo 1)"
     ;;
   *)
     shift
