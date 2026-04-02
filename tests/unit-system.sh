@@ -79,6 +79,7 @@ mkdir() {
 }
 
 # Mock для cat
+# shellcheck disable=SC2120
 cat() {
   if [[ "$*" == *">"* ]]; then
     # Перенаправление - создаём файл

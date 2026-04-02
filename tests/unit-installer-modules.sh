@@ -43,6 +43,7 @@ get_str() {
   local ru_key="${key}_RU"
 
   # Для тестов возвращаем английский вариант по умолчанию
+  # shellcheck disable=SC2154
   if [[ "$LANG_NAME" == "Русский" ]]; then
     # Возвращаем русскую строку если есть в MSG_*
     local ru_val="${!ru_key:-}"

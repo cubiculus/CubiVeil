@@ -49,7 +49,8 @@ jq() {
 # Mock системных команд
 chmod() { return 0; }
 chown() { return 0; }
-sed() { echo "<html><body>Test Content</body></html>"; }
+# Use real sed for template rendering instead of mocking static content.
+sed() { command sed "$@"; }
 find() {
   if [[ "$*" == *"-printf"* ]]; then
     echo "file1.jpg"
@@ -164,22 +165,19 @@ test_decoy_build_webroot_html_content() {
 
   # Проверяем содержимое /index.html
   if [[ -f "${test_webroot}/index.html" ]]; then
-    local content
-    content=$(cat "${test_webroot}/index.html")
-
-    if echo "$content" | grep -q "Облачное хранилище"; then
-      pass "decoy_build_webroot: index.html содержит заголовок Облачное хранилище"
+    if grep -qF "<title>" "${test_webroot}/index.html"; then
+      pass "decoy_build_webroot: index.html содержит тег <title>"
       ((TESTS_PASSED++)) || true
     else
-      fail "decoy_build_webroot: index.html не содержит заголовок Облачное хранилище"
+      fail "decoy_build_webroot: index.html не содержит тег <title>"
       ((TESTS_FAILED++)) || true
     fi
 
-    if echo "$content" | grep -q "Войти"; then
-      pass "decoy_build_webroot: index.html содержит кнопку входа"
+    if grep -qF "<a href=\"login.html\"" "${test_webroot}/index.html"; then
+      pass "decoy_build_webroot: index.html содержит ссылку на login.html"
       ((TESTS_PASSED++)) || true
     else
-      fail "decoy_build_webroot: index.html не содержит кнопку входа"
+      fail "decoy_build_webroot: index.html не содержит ссылку на login.html"
       ((TESTS_FAILED++)) || true
     fi
   else
