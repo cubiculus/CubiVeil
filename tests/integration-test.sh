@@ -291,7 +291,7 @@ test_validation_available() {
 }
 
 # РўРµС‚: Security.sh РґРѕСЃС‚СѓРїРµРЅ
- test_security_available() {
+test_security_available() {
   local test_name="Security.sh availability"
 
   if [[ -f "${SCRIPT_DIR}/lib/security.sh" ]]; then
@@ -302,7 +302,7 @@ test_validation_available() {
 }
 
 # РўРµС‚: bootstrap setup_remote_install + ensure_file fallback
- test_bootstrap_setup_remote_install_fallback() {
+test_bootstrap_setup_remote_install_fallback() {
   local test_name="Bootstrap curl installer fallback"
 
   if [[ ! -f "${SCRIPT_DIR}/lib/core/installer/bootstrap.sh" ]]; then
@@ -316,7 +316,7 @@ test_validation_available() {
   local saved_install_dir="${INSTALL_SCRIPT_DIR:-}"
   local get_str_def=""
 
-  INSTALL_SCRIPT_DIR=""       # Состояние curl installer
+  INSTALL_SCRIPT_DIR="" # Состояние curl installer
 
   # Отключаем wget/curl через перехват CLI-вызыва "command -v"
   command() {

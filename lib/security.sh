@@ -73,7 +73,10 @@ encrypt_to_file() {
 
   # Шифрование с использованием пароля (age -p для symmetric encryption)
   # Пароль передаётся через stdin, затем данные
-  if ! (echo "$password"; echo "$data") | age -p -o "$dest_file" 2>/dev/null; then
+  if ! (
+    echo "$password"
+    echo "$data"
+  ) | age -p -o "$dest_file" 2>/dev/null; then
     warn "Failed to encrypt data"
     return 1
   fi

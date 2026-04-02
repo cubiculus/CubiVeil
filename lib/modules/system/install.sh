@@ -322,7 +322,7 @@ system_check_ip_neighborhood() {
   # Извлекаем /24 диапазон (например 1.2.3.x из 1.2.3.100)
   local subnet_base
   subnet_base=$(echo "$server_ip" | cut -d. -f1-3)
-  
+
   # Получаем последний октет
   local last_octet
   last_octet=$(echo "$server_ip" | cut -d. -f4)
@@ -345,7 +345,7 @@ system_check_ip_neighborhood() {
 
     # Пытаемся проверить через abuseipdb API (требует ключ, который обычно недоступен)
     # Вместо этого используем локальную эвристику через grep и whois если доступны
-    
+
     # Если у нас нет интернета или API не доступен, пропускаем
     if ! command -v curl >/dev/null 2>&1; then
       ((api_failed++))
@@ -371,7 +371,7 @@ system_check_ip_neighborhood() {
     if [[ $neighbor_octet -lt 1 || $neighbor_octet -gt 254 ]]; then
       continue
     fi
-    
+
     local neighbor_ip="${subnet_base}.${neighbor_octet}"
     check_single_ip "$neighbor_ip" 2>/dev/null || true
   done
@@ -404,9 +404,9 @@ system_check_ip_neighborhood() {
     log_warn "$status_msg"
     log_warn "$(get_str WARN_SUBNET_LIKELY_BLOCKED)"
     log_info "$(get_str WARN_SUBNET_RECOMMEND)"
-    
+
     # Вопрос пользователю о продолжении
-    if [[ -t 0 ]]; then  # Если это интерактивный терминал
+    if [[ -t 0 ]]; then # Если это интерактивный терминал
       local continue_anyway
       read -p "$(get_str WARN_CONTINUE_ANYWAY) " continue_anyway || continue_anyway="n"
       if [[ ! "$continue_anyway" =~ ^[yY] ]]; then

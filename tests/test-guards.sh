@@ -13,7 +13,7 @@ echo ""
 # Тест 1: Проверка что guard работает
 echo "Тест 1: output.sh guard..."
 source "${LIB_DIR}/output.sh"
-source "${LIB_DIR}/output.sh"  # Должен вернуться сразу
+source "${LIB_DIR}/output.sh" # Должен вернуться сразу
 echo "✓ Test 1 PASSED: output.sh guard works"
 echo ""
 
@@ -32,7 +32,7 @@ echo ""
 
 # Тест 3: Проверка что повторная загрузка не ломает ничего
 echo "Тест 3: init.sh guard..."
-if source "${LIB_DIR}/init.sh"; then  # Должен вернуться сразу
+if source "${LIB_DIR}/init.sh"; then # Должен вернуться сразу
   echo "✓ Test 3 PASSED: init.sh guard works"
 else
   echo "✗ Test 3 FAILED: init.sh guard failed"
@@ -67,9 +67,9 @@ echo ""
 echo "Тест 6: Проверка циклических зависимостей..."
 # ПРИМЕЧАНИЕ: Не делаем unset readonly переменных
 # Просто проверяем что загрузка работает в любом порядке
-if source "${LIB_DIR}/common.sh" && \
-   source "${LIB_DIR}/security.sh" && \
-   source "${LIB_DIR}/utils.sh"; then
+if source "${LIB_DIR}/common.sh" &&
+  source "${LIB_DIR}/security.sh" &&
+  source "${LIB_DIR}/utils.sh"; then
   echo "✓ Test 6 PASSED: No circular dependencies"
 else
   echo "✗ Test 6 FAILED: Circular dependency detected"

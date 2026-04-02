@@ -303,7 +303,7 @@ _generate_css() {
 
   # Генерируем CSS с цветовой схемой и сохраняем в style.css
   bash "${GENERATORS_DIR}/colors.sh" --theme "$theme" --css --output "$output_dir"
-  
+
   # Переименуем colors.css в style.css и добавим остальные стили
   [[ -f "${output_dir}/colors.css" ]] && mv "${output_dir}/colors.css" "${output_dir}/style.css"
 

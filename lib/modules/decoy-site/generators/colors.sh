@@ -75,7 +75,7 @@ css)
   primary="${primary##*=}"
   secondary="${secondary##*=}"
   accent="${accent##*=}"
-  
+
   # Конвертируем hex в RGB для использования с rgba()
   # Функция для конвертации hex в RGB
   hex_to_rgb() {
@@ -85,11 +85,11 @@ css)
     # Конвертируем hex в decimal
     printf "%d %d %d" 0x"${hex:0:2}" 0x"${hex:2:2}" 0x"${hex:4:2}"
   }
-  
+
   # Получаем RGB значения
-  read -r prr prg prb <<< "$(hex_to_rgb "$primary")"
-  read -r scr scg scb <<< "$(hex_to_rgb "$secondary")"
-  
+  read -r prr prg prb <<<"$(hex_to_rgb "$primary")"
+  read -r scr scg scb <<<"$(hex_to_rgb "$secondary")"
+
   # Генерируем CSS с полученными цветами
   cat >"${OUTPUT_DIR}/colors.css" <<EOF
 :root {

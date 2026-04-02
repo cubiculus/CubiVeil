@@ -15,7 +15,7 @@ set -euo pipefail
 
 # ── Глобальные переменные ───────────────────────────────────
 CURRENT_STEP=0
-TOTAL_STEPS=0  # Вычисляется позже в _calculate_total_steps()
+TOTAL_STEPS=0 # Вычисляется позже в _calculate_total_steps()
 
 # Массив предупреждений
 WARNINGS=()
@@ -25,7 +25,7 @@ WARNINGS=()
 # Вычисление TOTAL_STEPS после parse_args
 # Вызывается после обработки аргументов командной строки
 _calculate_total_steps() {
-  TOTAL_STEPS=5  # base steps: system, firewall, fail2ban, ssl, sui
+  TOTAL_STEPS=5 # base steps: system, firewall, fail2ban, ssl, sui
   [[ "${INSTALL_DECOY:-true}" == "true" ]] && ((TOTAL_STEPS++)) || true
   [[ "${INSTALL_TRAFFIC_SHAPING:-true}" == "true" ]] && ((TOTAL_STEPS++)) || true
   [[ "${INSTALL_TELEGRAM:-}" == "true" ]] && ((TOTAL_STEPS++)) || true
