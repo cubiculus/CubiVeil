@@ -69,12 +69,35 @@ json)
   echo "}"
   ;;
 css)
-  # Генерируем простой CSS
-  cat >"${OUTPUT_DIR}/colors.css" <<'EOF'
+  # Парсим палитру
+  IFS=',' read -r primary secondary accent <<<"$PALETTE"
+  # Выделяем значения цветов
+  primary="${primary##*=}"
+  secondary="${secondary##*=}"
+  accent="${accent##*=}"
+  
+  # Конвертируем hex в RGB для использования с rgba()
+  # Функция для конвертации hex в RGB
+  hex_to_rgb() {
+    local hex="$1"
+    # Удаляем # если есть
+    hex="${hex#\#}"
+    # Конвертируем hex в decimal
+    printf "%d %d %d" 0x"${hex:0:2}" 0x"${hex:2:2}" 0x"${hex:4:2}"
+  }
+  
+  # Получаем RGB значения
+  read -r prr prg prb <<< "$(hex_to_rgb "$primary")"
+  read -r scr scg scb <<< "$(hex_to_rgb "$secondary")"
+  
+  # Генерируем CSS с полученными цветами
+  cat >"${OUTPUT_DIR}/colors.css" <<EOF
 :root {
-  --color-primary: #0052cc;
-  --color-secondary: #0079bf;
-  --color-accent: #2684ff;
+  --color-primary: #${primary};
+  --color-primary-rgb: ${prr},${prg},${prb};
+  --color-secondary: #${secondary};
+  --color-secondary-rgb: ${scr},${scg},${scb};
+  --color-accent: #${accent};
   --color-bg: #ffffff;
   --color-text: #333333;
   --color-border: #e0e0e0;

@@ -134,6 +134,12 @@ svc_enable() {
   systemctl enable "${service}" >/dev/null 2>&1
 }
 
+# Отключение сервиса
+svc_disable() {
+  local service="$1"
+  systemctl disable "${service}" >/dev/null 2>&1
+}
+
 # Запуск сервиса
 svc_start() {
   local service="$1"

@@ -46,15 +46,17 @@ secure_download() {
   return 0
 }
 
-# ── Безопасное шифрование через pipe ─────────────────────────
+# ── Безопасное шифрование через pipe (симметричное) ──────────────
 # Параметры:
 #   $1 - Данные для шифрования
-#   $2 - Публичный ключ
+#   $2 - Пароль/ключ (используется как passphrase для age -p)
 #   $3 - Путь назначения
 # Возвращает 0 если успешно, 1 если ошибка
+# ПРИМЕЧАНИЕ: используется симметричное шифрование age с пароля (age -p)
+# вместо асимметричного (age -r) для упрощения управления ключами
 encrypt_to_file() {
   local data="$1"
-  local public_key="$2"
+  local password="$2"
   local dest_file="$3"
 
   # Проверка наличия age
@@ -63,8 +65,9 @@ encrypt_to_file() {
     return 1
   fi
 
-  # Шифрование через pipe без временного файла
-  if ! echo "$data" | age -r "$public_key" -o "$dest_file" 2>/dev/null; then
+  # Шифрование с использованием пароля (age -p для symmetric encryption)
+  # Пароль передаётся через stdin, затем данные
+  if ! (echo "$password"; echo "$data") | age -p -o "$dest_file" 2>/dev/null; then
     warn "Failed to encrypt data"
     return 1
   fi
@@ -130,7 +133,7 @@ verify_sha256() {
 # ── Генерация безопасного случайного ключа ───────────────────
 # Параметры:
 #   $1 - Длина ключа в байтах (по умолчанию 32)
-# Выводит base64 закодированный ключ
+# Выводит base64 закодированный ключ для symmetric encryption паролем
 generate_secure_key() {
   local length="${1:-32}"
 

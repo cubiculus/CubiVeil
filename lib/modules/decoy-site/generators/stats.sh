@@ -26,6 +26,8 @@ SEED_NUM=$(echo "$SEED" | tr -cd '0-9' | cut -c1-9)
 [[ ${#SEED_NUM} -lt 9 ]] && SEED_NUM=$(date +%s | cut -c1-9)
 # Убеждаемся что это десятичное число
 SEED_NUM=$((10#${SEED_NUM}))
+# Генерируем SEED_MOD для вариативности статистики
+SEED_MOD=$((SEED_NUM % 997))
 
 users_total=$((SEED_NUM % 500 + 150))
 files_total=$((SEED_NUM % 2000 + 500))

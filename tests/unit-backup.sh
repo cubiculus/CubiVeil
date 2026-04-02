@@ -380,22 +380,33 @@ test_backup_create_archive() {
   BACKUP_DIR="$test_backup_dir"
   BACKUP_ARCHIVE_DIR="$test_archive_dir"
 
-  # РЎРѕР·РґР°С'Рј С‚РµСЃС‚РѕРІС‹Рµ С„Р°Р№Р»С‹
-  echo "test" >"${test_backup_dir}/s-ui-db.sqlite3"
-  echo "test" >"${test_backup_dir}/marzban.env"
+  # РЎРѕР·РґР°С'Рј С‚РµСЃС‚РѕРІС‹Рµ С„Р°Р№Р»С‹ (должны совпадать с backup_create_archive)
+  echo "test" >"${test_backup_dir}/s-ui.db"
+  echo "test" >"${test_backup_dir}/s-ui.db.sha256"
+  echo "test" >"${test_backup_dir}/s-ui.credentials"
+  echo "test" >"${test_backup_dir}/s-ui.credentials.sha256"
+  mkdir -p "${test_backup_dir}/singbox-config"
+  echo "conf" >"${test_backup_dir}/singbox-config/config.yaml"
+  echo "test" >"${test_backup_dir}/singbox-config.sha256"
+  mkdir -p "${test_backup_dir}/ssl-certs"
+  echo "cert" >"${test_backup_dir}/ssl-certs/cert.pem"
+  echo "test" >"${test_backup_dir}/credentials.age"
+  echo "test" >"${test_backup_dir}/credentials.key"
+  echo "test" >"${test_backup_dir}/system-info.txt"
+  echo "test" >"${test_backup_dir}/system-info.txt.sha256"
 
   backup_create_archive "test-backup"
 
-  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ Р°СЂС...РёРІ СЃРѕР·РґР°РЅ
-  local archive_count
-  archive_count=$(find "$test_archive_dir" -name "*.tar.gz" 2>/dev/null | wc -l)
+  # Проверяем, что архив создан и содержит ожидаемые файлы
+  local archive_file
+  archive_file=$(find "$test_archive_dir" -name "test-backup-*.tar.gz" -print -quit 2>/dev/null)
 
-  if [[ $archive_count -gt 0 ]]; then
-    pass "backup_create_archive: Р°СЂС...РёРІ СЃРѕР·РґР°РЅ"
+  if [[ -n "$archive_file" ]] && tar -tzf "$archive_file" | grep -q "s-ui.db"; then
+    pass "backup_create_archive: архив создан и включает обязательные файлы"
     ((TESTS_PASSED++)) || true
   else
-    pass "backup_create_archive: Р°СЂС...РёРІ РјРѕР¶РµС‚ РЅРµ СЃРѕР·РґР°С‚СЊСЃСЏ РІ С‚РµСЃС‚Рµ"
-    ((TESTS_PASSED++)) || true
+    fail "backup_create_archive: архив не содержит ожидаемые файлы или не создан"
+    ((TESTS_FAILED++)) || true
   fi
 
   rm -rf "$test_backup_dir" "$test_archive_dir"

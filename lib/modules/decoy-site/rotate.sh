@@ -15,6 +15,9 @@ fi
 if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
   source "${SCRIPT_DIR}/lib/core/log.sh"
 fi
+if [[ -f "${SCRIPT_DIR}/lib/utils.sh" ]]; then
+  source "${SCRIPT_DIR}/lib/utils.sh"
+fi
 
 # ── Константы / Constants ───────────────────────────────────
 # Пути по умолчанию могут быть переопределены через переменные окружения

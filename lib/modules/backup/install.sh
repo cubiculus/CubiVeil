@@ -360,17 +360,19 @@ backup_create_archive() {
 
   local archive_file="${BACKUP_ARCHIVE_DIR}/${backup_name}-${timestamp}.tar.gz"
 
-  # Создаём архив
-  tar -czf "$archive_file" -C "$BACKUP_DIR" \
-    sing-box-template.json \
-    sing-box-template.json.sha256 \
-    singbox-config.json \
-    singbox-config.json.sha256 \
+  # Создаём архив (опциональные файлы могут отсутствовать)
+  tar -czf "$archive_file" -C "$BACKUP_DIR" --ignore-failed-read \
+    s-ui.db \
+    s-ui.db.sha256 \
+    s-ui.credentials \
+    s-ui.credentials.sha256 \
+    singbox-config/ \
+    singbox-config.sha256 \
     ssl-certs/ \
     credentials.age \
     credentials.key \
     system-info.txt \
-    system-info.txt.sha256 2>/dev/null || true
+    system-info.txt.sha256
 
   # Проверяем размер архива
   if [[ -f "$archive_file" ]]; then

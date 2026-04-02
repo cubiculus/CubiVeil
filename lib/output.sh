@@ -25,6 +25,11 @@ readonly BLUE='\033[0;34m'
 readonly CYAN='\033[0;36m'
 readonly PLAIN='\033[0m'
 
+# ── Глобальные переменные / Global variables ────────────────
+# Массив для сбора предупреждений (инициализируется с защитой от set -u)
+# Если уже определён (например, в log.sh) — сохраняем существующие значения
+WARNINGS=("${WARNINGS[@]+"${WARNINGS[@]}"}")
+
 # ── Константы иконок / Icon constants ────────────────────────
 readonly ICON_INFO="ℹ️ "
 readonly ICON_SUCCESS="✅ "

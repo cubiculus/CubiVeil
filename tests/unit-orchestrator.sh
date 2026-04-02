@@ -523,6 +523,9 @@ test_total_steps_value() {
   # shellcheck source=lib/core/installer/orchestrator.sh
   source "$ORCHESTRATOR_PATH"
 
+  # Вызываем функцию вычисления шагов (эмулируем после parse_args)
+  _calculate_total_steps
+
   # TOTAL_STEPS должен быть между 5 и 15
   if [[ $TOTAL_STEPS -ge 5 && $TOTAL_STEPS -le 15 ]]; then
     pass "TOTAL_STEPS: разумное значение ($TOTAL_STEPS)"

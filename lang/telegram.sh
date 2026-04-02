@@ -172,6 +172,9 @@ FINAL_LOGS_RU="Логи"
 FINAL_COMMANDS_SECTION="COMMANDS"
 FINAL_COMMANDS_SECTION_RU="КОМАНДЫ"
 
+FINAL_PROFILES_SECTION="PROFILES MANAGEMENT"
+FINAL_PROFILES_SECTION_RU="УПРАВЛЕНИЕ ПРОФИЛЯМИ"
+
 FINAL_NAVIGATION="Use menu buttons for navigation!"
 FINAL_NAVIGATION_RU="Используйте кнопки в меню для навигации!"
 

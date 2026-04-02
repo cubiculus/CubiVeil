@@ -42,15 +42,9 @@ SUI_ADMIN_USER="${SUI_ADMIN_USER:-CubiVeil}"
 SUI_ADMIN_PASSWORD="${SUI_ADMIN_PASSWORD:-}"
 
 sui_random_port() {
-  local p
-  while true; do
-    p=$((RANDOM % 30001 + 20000))
-    # простой check: порт должен быть >20000 и <=50000
-    if [[ $p -ge 20000 && $p -le 50000 ]]; then
-      echo "$p"
-      return
-    fi
-  done
+  # Генерация порта в диапазоне 20000..50000
+  # RANDOM % 30001 даёт 0..30000, + 20000 = 20000..50000
+  echo $((RANDOM % 30001 + 20000))
 }
 
 # ── Функции установки / Installation Functions ──────────────

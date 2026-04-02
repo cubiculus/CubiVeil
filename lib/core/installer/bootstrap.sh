@@ -37,8 +37,13 @@ ensure_file() {
       [[ -s "$target_path" ]] && return 0
     rm -f "$target_path"
   fi
+
   local _msg_failed
-  _msg_failed="$(get_str MSG_FAILED_DOWNLOAD | sed "s/{FILE}/$file/g")"
+  if declare -f get_str >/dev/null 2>&1; then
+    _msg_failed="$(get_str MSG_FAILED_DOWNLOAD | sed "s/{FILE}/$file/g")"
+  else
+    _msg_failed="[Failed to download: $file]"
+  fi
   echo -e "\033[0;31m[✗]\033[0m $_msg_failed"
   return 1
 }
@@ -111,8 +116,15 @@ setup_remote_install() {
 handle_setup_error() {
   local _msg_failed_prepare
   local _msg_clone_run
-  _msg_failed_prepare="$(get_str MSG_FAILED_PREPARE)"
-  _msg_clone_run="$(get_str MSG_CLONE_AND_RUN)"
+
+  if declare -f get_str >/dev/null 2>&1; then
+    _msg_failed_prepare="$(get_str MSG_FAILED_PREPARE)"
+    _msg_clone_run="$(get_str MSG_CLONE_AND_RUN)"
+  else
+    _msg_failed_prepare="[Failed to prepare installation]"
+    _msg_clone_run="Please clone repository manually and run install.sh"
+  fi
+
   echo -e "\033[0;31m[✗]\033[0m $_msg_failed_prepare"
   echo ""
   echo "$_msg_clone_run"

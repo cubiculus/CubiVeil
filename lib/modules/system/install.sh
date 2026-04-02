@@ -317,7 +317,106 @@ system_check_ip_neighborhood() {
   fi
 
   log_info "Server IP: $server_ip"
-  log_success "IP neighborhood check passed"
+  log_info "$(get_str INFO_CHECKING_NEIGHBORS)"
+
+  # Извлекаем /24 диапазон (например 1.2.3.x из 1.2.3.100)
+  local subnet_base
+  subnet_base=$(echo "$server_ip" | cut -d. -f1-3)
+  
+  # Получаем последний октет
+  local last_octet
+  last_octet=$(echo "$server_ip" | cut -d. -f4)
+
+  # Проверяем соседних IP в диапазоне /24
+  # Проверяем несколько соседних адресов (+1, +2, +3, -1, -2, -3)
+  local vpn_count=0
+  local checked_count=0
+  local api_failed=0
+
+  # Функция для проверки одного IP через abuseipdb
+  check_single_ip() {
+    local ip="$1"
+    # Пропускаем сам наш сервер
+    if [[ "$ip" == "$server_ip" ]]; then
+      return 0
+    fi
+
+    ((checked_count++))
+
+    # Пытаемся проверить через abuseipdb API (требует ключ, который обычно недоступен)
+    # Вместо этого используем локальную эвристику через grep и whois если доступны
+    
+    # Если у нас нет интернета или API не доступен, пропускаем
+    if ! command -v curl >/dev/null 2>&1; then
+      ((api_failed++))
+      return 0
+    fi
+
+    # Простая проверка: пытаемся получить информацию об IP через публичный сервис
+    # Используем простой способ через reverse DNS/WHOIS информацию
+    local whois_info
+    if whois_info=$(whois "$ip" 2>/dev/null | grep -i "OrgId\|Organization" | head -1); then
+      # Проверяем есть ли признаки VPN/hosting провайдера в названии
+      if echo "$whois_info" | grep -qi "VPN\|Hosting\|Provider\|AS\|Cloud\|Datacenter\|AWS\|Azure\|GCP\|Linode\|DigitalOcean\|Vultr\|OVH"; then
+        ((vpn_count++))
+        log_debug "Found VPN/hosting marker for $ip: $whois_info"
+      fi
+    fi
+  }
+
+  # Проверяем соседних IP
+  for offset in -3 -2 -1 1 2 3; do
+    local neighbor_octet=$((last_octet + offset))
+    # Пропускаем невалидные октеты
+    if [[ $neighbor_octet -lt 1 || $neighbor_octet -gt 254 ]]; then
+      continue
+    fi
+    
+    local neighbor_ip="${subnet_base}.${neighbor_octet}"
+    check_single_ip "$neighbor_ip" 2>/dev/null || true
+  done
+
+  # Выводим результаты
+  if [[ $api_failed -gt 2 ]]; then
+    # Если API не доступен - просто говорим OK
+    log_warn "Could not verify all neighbor IPs (network/API limit)"
+    log_success "IP neighborhood check passed (verification limited)"
+    return 0
+  fi
+
+  if [[ $checked_count -eq 0 ]]; then
+    log_warn "Could not check any neighbor IPs"
+    log_success "IP neighborhood check passed"
+    return 0
+  fi
+
+  # Формируем вывод результатов
+  local status_msg
+  if [[ $vpn_count -eq 0 ]]; then
+    status_msg=$(get_str OK_SUBNET_CLEAN | sed "s/\[CHECKED\]/$checked_count/g")
+    log_success "$status_msg"
+  elif [[ $vpn_count -le 2 ]]; then
+    status_msg=$(get_str WARN_SUBNET_MODERATE | sed "s/\[VPN_COUNT\]/$vpn_count/g; s/\[CHECKED\]/$checked_count/g")
+    log_warn "$status_msg"
+    log_info "$(get_str WARN_SUBNET_ADVICE)"
+  else
+    status_msg=$(get_str WARN_SUBNET_HIGH | sed "s/\[VPN_COUNT\]/$vpn_count/g; s/\[CHECKED\]/$checked_count/g")
+    log_warn "$status_msg"
+    log_warn "$(get_str WARN_SUBNET_LIKELY_BLOCKED)"
+    log_info "$(get_str WARN_SUBNET_RECOMMEND)"
+    
+    # Вопрос пользователю о продолжении
+    if [[ -t 0 ]]; then  # Если это интерактивный терминал
+      local continue_anyway
+      read -p "$(get_str WARN_CONTINUE_ANYWAY) " continue_anyway || continue_anyway="n"
+      if [[ ! "$continue_anyway" =~ ^[yY] ]]; then
+        log_error "$(get_str ERR_USER_ABORTED)"
+        return 1
+      fi
+    fi
+  fi
+
+  return 0
 }
 
 # Установка базовых зависимостей

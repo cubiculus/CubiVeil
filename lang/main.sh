@@ -972,8 +972,8 @@ MSG_SINGBOX_VERSION_FAILED_RU="Не удалось получить версию
 MSG_SINGBOX_LATEST="Sing-box latest: \${SB_TAG} (\${_arch})"
 MSG_SINGBOX_LATEST_RU="Sing-box последняя: \${SB_TAG} (\${_arch})"
 
-MSG_SINGBOX_SHA_FAILED="Could not fetch SHA256 checksum, will skip verification"
-MSG_SINGBOX_SHA_FAILED_RU="Не удалось получить SHA256 checksum, пропускаю проверку"
+MSG_SINGBOX_SHA_FETCH_FAILED="Could not fetch SHA256 checksum, will skip verification"
+MSG_SINGBOX_SHA_FETCH_FAILED_RU="Не удалось получить SHA256 checksum, пропускаю проверку"
 
 MSG_SINGBOX_DOWNLOADING="Downloading Sing-box \${sb_tag}"
 MSG_SINGBOX_DOWNLOADING_RU="Загружаю Sing-box \${sb_tag}"

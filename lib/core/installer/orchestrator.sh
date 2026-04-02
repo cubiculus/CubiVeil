@@ -9,16 +9,21 @@ set -euo pipefail
 
 # ── Глобальные переменные ───────────────────────────────────
 CURRENT_STEP=0
-# Динамический подсчёт шагов: base (5) + опциональные
-TOTAL_STEPS=5
-[[ "${INSTALL_DECOY:-true}" == "true" ]] && ((TOTAL_STEPS++))
-[[ "${INSTALL_TRAFFIC_SHAPING:-true}" == "true" ]] && ((TOTAL_STEPS++))
-[[ "${INSTALL_TELEGRAM:-}" == "true" ]] && ((TOTAL_STEPS++))
+TOTAL_STEPS=0  # Вычисляется позже в _calculate_total_steps()
 
 # Массив предупреждений
 WARNINGS=()
 
 # ── Функции ─────────────────────────────────────────────────
+
+# Вычисление TOTAL_STEPS после parse_args
+# Вызывается после обработки аргументов командной строки
+_calculate_total_steps() {
+  TOTAL_STEPS=5  # base steps: system, firewall, fail2ban, ssl, sui
+  [[ "${INSTALL_DECOY:-true}" == "true" ]] && ((TOTAL_STEPS++)) || true
+  [[ "${INSTALL_TRAFFIC_SHAPING:-true}" == "true" ]] && ((TOTAL_STEPS++)) || true
+  [[ "${INSTALL_TELEGRAM:-}" == "true" ]] && ((TOTAL_STEPS++)) || true
+}
 
 # Экспортируем глобальные переменные, нужные модулям
 _export_globals() {
@@ -268,7 +273,7 @@ _install_sui_panel() {
 _step_decoy() {
   [[ "$INSTALL_DECOY" != "true" ]] && return 0
   local _label
-  _label="$(get_str MSG_STEP_7_8_DECOY)"
+  _label="$(get_str MSG_STEP_6_8_DECOY)"
   step_module "$_label"
   run_module "decoy-site"
 }
@@ -276,7 +281,7 @@ _step_decoy() {
 _step_traffic_shaping() {
   [[ "$INSTALL_TRAFFIC_SHAPING" != "true" ]] && return 0
   local _label
-  _label="$(get_str MSG_STEP_8_8_TRAFFIC)"
+  _label="$(get_str MSG_STEP_7_8_TRAFFIC)"
   step_module "$_label"
   run_module "traffic-shaping"
 }
@@ -284,7 +289,7 @@ _step_traffic_shaping() {
 _step_telegram() {
   [[ "$INSTALL_TELEGRAM" != "true" ]] && return 0
   local _label
-  _label="$(get_str MSG_STEP_9_9_TELEGRAM)"
+  _label="$(get_str MSG_STEP_8_8_TELEGRAM)"
   step_module "$_label"
   # Запускаем setup-telegram.sh
   local _setup_script="${INSTALL_SCRIPT_DIR}/setup-telegram.sh"

@@ -57,22 +57,22 @@ test_result() {
   local result="$2"
   local message="${3:-}"
 
-  ((TESTS_TOTAL++))
+  TESTS_TOTAL=$((TESTS_TOTAL + 1))
 
   case "$result" in
   pass)
-    ((TESTS_PASSED++)) || true
+    TESTS_PASSED=$((TESTS_PASSED + 1))
     echo "[PASS] $test_name" | tee -a "$TEST_LOG_FILE"
     ;;
   fail)
-    ((TESTS_FAILED++)) || true
+    TESTS_FAILED=$((TESTS_FAILED + 1))
     echo "[FAIL] $test_name" | tee -a "$TEST_LOG_FILE"
     if [[ -n "$message" ]]; then
       echo "       $message" | tee -a "$TEST_LOG_FILE"
     fi
     ;;
   skip)
-    ((TESTS_SKIPPED++))
+    TESTS_SKIPPED=$((TESTS_SKIPPED + 1))
     echo "[SKIP] $test_name: $message" | tee -a "$TEST_LOG_FILE"
     ;;
   esac
@@ -290,8 +290,8 @@ test_validation_available() {
   fi
 }
 
-# РўРµСЃС‚: Security.sh РґРѕСЃС‚СѓРїРµРЅ
-test_security_available() {
+# РўРµС‚: Security.sh РґРѕСЃС‚СѓРїРµРЅ
+ test_security_available() {
   local test_name="Security.sh availability"
 
   if [[ -f "${SCRIPT_DIR}/lib/security.sh" ]]; then
@@ -299,6 +299,60 @@ test_security_available() {
   else
     test_result "$test_name" "fail" "Security.sh not found"
   fi
+}
+
+# РўРµС‚: bootstrap setup_remote_install + ensure_file fallback
+ test_bootstrap_setup_remote_install_fallback() {
+  local test_name="Bootstrap curl installer fallback"
+
+  if [[ ! -f "${SCRIPT_DIR}/lib/core/installer/bootstrap.sh" ]]; then
+    test_result "$test_name" "fail" "bootstrap.sh not found"
+    return
+  fi
+
+  # Загружаем bootstrap, чтобы доступны функции
+  source "${SCRIPT_DIR}/lib/core/installer/bootstrap.sh"
+
+  local saved_install_dir="${INSTALL_SCRIPT_DIR:-}"
+  local get_str_def=""
+
+  INSTALL_SCRIPT_DIR=""       # Состояние curl installer
+
+  # Отключаем wget/curl через перехват CLI-вызыва "command -v"
+  command() {
+    if [[ "$1" == "-v" && ("$2" == "wget" || "$2" == "curl") ]]; then
+      return 1
+    fi
+    builtin command "$@"
+  }
+
+  if declare -f get_str >/dev/null 2>&1; then
+    get_str_def="$(declare -f get_str)"
+    unset -f get_str
+  fi
+
+  # Проверяем fallback поведение
+  if setup_remote_install; then
+    test_result "$test_name" "fail" "setup_remote_install должен завершаться ошибкой при отсутствии wget/curl"
+  else
+    test_result "$test_name" "pass"
+  fi
+
+  # Проверка ensure_file fallback без get_str
+  mkdir -p /tmp/cubiveil-test-integration || true
+  if ensure_file "nonexistent-file.txt" "/tmp/cubiveil-test-integration"; then
+    test_result "$test_name" "fail" "ensure_file должен вернуть ошибку для несуществующего URL"
+  else
+    test_result "$test_name" "pass"
+  fi
+
+  # Восстановление окружения
+  INSTALL_SCRIPT_DIR="$saved_install_dir"
+  if [[ -n "$get_str_def" ]]; then
+    eval "$get_str_def"
+  fi
+  unset -f command
+
 }
 
 # в”Ђв”Ђ Р—Р°РїСѓСЃРє РІСЃРµС… С‚РµСЃС‚РѕРІ / Run All Tests в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
@@ -339,6 +393,9 @@ test_run_all() {
   test_utils_available
   test_validation_available
   test_security_available
+
+  # Bootstrap curl installer fallback
+  test_bootstrap_setup_remote_install_fallback
 
   echo ""
   echo "в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ"
@@ -415,3 +472,8 @@ module_test_one() {
 
   test_report
 }
+
+# Автоматический запуск модуля, если скрипт вызван напрямую.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  module_test_all
+fi

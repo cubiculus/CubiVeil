@@ -134,6 +134,43 @@ test_bootstrap_is_curl_install() {
 }
 
 # ════════════════════════════════════════════════════════════
+#  ТЕСТ 3.1: bootstrap.sh — setup_remote_install + ensure_file fallback
+# ════════════════════════════════════════════════════════════
+test_bootstrap_setup_remote_install_fallback() {
+  info "Тестирование setup_remote_install (curl mode) и ensure_file fallback..."
+
+  local saved_install_dir="$INSTALL_SCRIPT_DIR"
+  local saved_path="$PATH"
+
+  # curl installer mode
+  INSTALL_SCRIPT_DIR=""
+
+  # Убираем доступные инструменты, чтобы ensure_file ушёл в fallback
+  PATH="/nonexistent"
+
+  # Убираем get_str, как было бы при отсутствии i18n
+  local get_str_def
+  if declare -f get_str >/dev/null 2>&1; then
+    get_str_def="$(declare -f get_str)"
+    unset -f get_str
+  fi
+
+  if setup_remote_install; then
+    fail "setup_remote_install: не ожидается успешное завершение при отсутствии wget/curl"
+  else
+    pass "setup_remote_install: fallback с отсутствующим get_str обработан корректно"
+  fi
+
+  # Восстановление окружения
+  PATH="$saved_path"
+  INSTALL_SCRIPT_DIR="$saved_install_dir"
+  if [[ -n "$get_str_def" ]]; then
+    eval "$get_str_def"
+  fi
+}
+
+
+# ════════════════════════════════════════════════════════════
 #  ТЕСТ 3: cli.sh — загрузка модуля
 # ════════════════════════════════════════════════════════════
 test_cli_load() {
@@ -527,6 +564,7 @@ main() {
 
   test_bootstrap_load
   test_bootstrap_is_curl_install
+  test_bootstrap_setup_remote_install_fallback
   test_cli_load
   test_cli_parse_args
   test_orchestrator_load

@@ -298,10 +298,84 @@ PYEOF
 # ── Генерация CSS ────────────────────────────────────────────
 _generate_css() {
   local output_dir="$1"
-  local colors_json="$2"
+  local theme="$2"
   local layout="$3"
 
-  bash "${GENERATORS_DIR}/colors.sh" --css --output "$output_dir" "$colors_json"
+  # Генерируем CSS с цветовой схемой и сохраняем в style.css
+  bash "${GENERATORS_DIR}/colors.sh" --theme "$theme" --css --output "$output_dir"
+  
+  # Переименуем colors.css в style.css и добавим остальные стили
+  [[ -f "${output_dir}/colors.css" ]] && mv "${output_dir}/colors.css" "${output_dir}/style.css"
+
+  # Добавляем базовые стили
+  cat >>"${output_dir}/style.css" <<'BASE_CSS'
+
+/* ── Базовые стили ──────────────────────────────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; color: var(--color-text); background: var(--color-bg); line-height: 1.5; }
+
+/* Header */
+.header { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid var(--color-border); background: white; }
+.logo { display: flex; align-items: center; gap: 12px; font-size: 1.25rem; font-weight: 700; color: var(--color-primary); text-decoration: none; }
+.logo-icon { font-size: 1.5rem; }
+.nav { display: flex; gap: 32px; list-style: none; }
+.nav a { text-decoration: none; color: var(--color-text); font-size: .95rem; transition: color .2s; }
+.nav a:hover { color: var(--color-primary); }
+.header-actions { display: flex; gap: 12px; }
+
+/* Main & Sections */
+.main { flex: 1; }
+.hero { text-align: center; padding: 80px 32px; background: linear-gradient(135deg, var(--color-bg) 0%, rgba(var(--color-primary-rgb), .05) 100%); }
+.hero-icon { font-size: 5rem; display: block; margin-bottom: 24px; }
+.hero h1 { font-size: 3rem; margin-bottom: 12px; color: var(--color-text); }
+.hero-tagline { font-size: 1.25rem; color: var(--color-secondary); margin-bottom: 48px; }
+.stats-strip { display: flex; justify-content: center; gap: 48px; margin-bottom: 48px; flex-wrap: wrap; }
+.stat-item { text-align: center; }
+.stat-value { display: block; font-size: 2rem; font-weight: 700; color: var(--color-primary); }
+.stat-label { display: block; font-size: .875rem; color: var(--color-secondary); text-transform: uppercase; letter-spacing: .05em; margin-top: 4px; }
+.hero-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+/* Features */
+.features { padding: 80px 32px; }
+.feature-block { margin-bottom: 48px; }
+.feature-block h3 { font-size: 1.5rem; margin-bottom: 12px; color: var(--color-text); }
+.feature-block p { color: var(--color-secondary); line-height: 1.6; }
+
+/* Content Preview */
+.content-preview { padding: 80px 32px; background: rgba(var(--color-primary-rgb), .02); }
+.content-preview-inner { max-width: 1200px; margin: 0 auto; }
+
+/* Footer */
+.footer { background: var(--color-text); color: white; padding: 48px 32px; margin-top: 80px; }
+.footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 32px; }
+.footer-logo { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.footer-links { display: flex; gap: 24px; list-style: none; }
+.footer-links a { color: white; text-decoration: none; transition: opacity .2s; }
+.footer-links a:hover { opacity: .8; }
+
+/* Buttons */
+.btn { display: inline-block; padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; text-decoration: none; cursor: pointer; transition: all .2s; }
+.btn-primary { background: var(--color-primary); color: white; }
+.btn-primary:hover { opacity: .9; }
+.btn-outline { border: 2px solid var(--color-primary); color: var(--color-primary); background: transparent; }
+.btn-outline:hover { background: rgba(var(--color-primary-rgb), .1); }
+.btn-ghost { border: none; color: var(--color-primary); background: transparent; }
+.btn-ghost:hover { background: rgba(var(--color-primary-rgb), .1); }
+.btn-sm { padding: 8px 16px; font-size: .875rem; }
+.btn-lg { padding: 16px 32px; font-size: 1.125rem; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header { flex-direction: column; gap: 16px; padding: 12px 16px; }
+  .nav { gap: 16px; }
+  .hero { padding: 40px 16px; }
+  .hero h1 { font-size: 2rem; }
+  .hero-icon { font-size: 3rem; }
+  .stats-strip { gap: 24px; }
+  .footer-inner { flex-direction: column; text-align: center; }
+}
+BASE_CSS
 
   # Добавляем layout-специфичные стили к style.css
   local layout_css=""
@@ -515,7 +589,7 @@ print(f\"STAT_DAILY_DOWNLOAD='{download_mb} MB'\"     )
   fi
 
   # 14. CSS с layout-вариантом
-  _generate_css "$OUTPUT_DIR" "$colors_json" "${V_LAYOUT}"
+  _generate_css "$OUTPUT_DIR" "$theme" "${V_LAYOUT}"
 
   # 15. config.js для JS-кода
   echo "$stats_json" | python3 -c "

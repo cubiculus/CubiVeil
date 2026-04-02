@@ -613,18 +613,23 @@ test_sui_default_ports() {
 
   local issues=0
 
-  if [[ "${SUI_PANEL_PORT:-}" != "2095" ]]; then
-    fail "SUI_PANEL_PORT: некорректное значение (${SUI_PANEL_PORT:-})"
+  # Переменные должны быть определены (значения генерируются в module_configure)
+  if [[ -z "${SUI_PANEL_PORT+x}" ]]; then
+    fail "SUI_PANEL_PORT: переменная не определена"
     ((issues++)) || true
+  else
+    pass "SUI_PANEL_PORT: переменная определена (${SUI_PANEL_PORT:-пусто})"
   fi
 
-  if [[ "${SUI_SUB_PORT:-}" != "2096" ]]; then
-    fail "SUI_SUB_PORT: некорректное значение (${SUI_SUB_PORT:-})"
+  if [[ -z "${SUI_SUB_PORT+x}" ]]; then
+    fail "SUI_SUB_PORT: переменная не определена"
     ((issues++)) || true
+  else
+    pass "SUI_SUB_PORT: переменная определена (${SUI_SUB_PORT:-пусто})"
   fi
 
   if [[ $issues -eq 0 ]]; then
-    pass "s-ui/install.sh: порты по умолчанию корректны (2095, 2096)"
+    pass "s-ui/install.sh: порты по умолчанию корректны"
     ((TESTS_PASSED++)) || true
   else
     fail "s-ui/install.sh: порты по умолчанию некорректны"
@@ -673,23 +678,23 @@ test_sui_exports() {
   # shellcheck source=lib/modules/s-ui/install.sh
   source "$SUI_MODULE_PATH"
 
-  # Проверяем что переменные экспортированы
+  # Проверяем что переменные определены (значения могут быть пустыми до module_configure)
   local exported_count=0
 
   # shellcheck disable=SC2031
-  if [[ -n "${SUI_INSTALL_DIR:-}" ]]; then
+  if [[ -n "${SUI_INSTALL_DIR+x}" ]]; then
     ((exported_count++)) || true
   fi
 
-  if [[ -n "${SUI_DB_DIR:-}" ]]; then
+  if [[ -n "${SUI_DB_DIR+x}" ]]; then
     ((exported_count++)) || true
   fi
 
-  if [[ -n "${SUI_PANEL_PORT:-}" ]]; then
+  if [[ -n "${SUI_PANEL_PORT+x}" ]]; then
     ((exported_count++)) || true
   fi
 
-  if [[ -n "${SUI_SUB_PORT:-}" ]]; then
+  if [[ -n "${SUI_SUB_PORT+x}" ]]; then
     ((exported_count++)) || true
   fi
 

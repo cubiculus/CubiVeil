@@ -99,6 +99,9 @@ source "${INSTALL_SCRIPT_DIR}/lib/i18n.sh" || { err "Cannot load lib/i18n.sh"; }
 # ── Применение аргументов ───────────────────────────────────
 parse_args "$@"
 
+# Вычисляем количество шагов после обработки аргументов
+_calculate_total_steps
+
 # В dev-режиме устанавливаем домен по умолчанию
 [[ "$DEV_MODE" == "true" && -z "$DOMAIN" ]] && DOMAIN="$DEV_DOMAIN"
 
