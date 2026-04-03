@@ -2,7 +2,7 @@
 # shellcheck disable=SC1071
 # ╔═══════════════════════════════════════════════════════════╗
 # ║                        CubiVeil                           ║
-# ║               github.com/cubiculus/cubiveil              ║
+# ║               github.com/cubiculus/cubiveil               ║
 # ║                                                           ║
 # ║                    s-ui Unified Installer                 ║
 # ╚═══════════════════════════════════════════════════════════╝

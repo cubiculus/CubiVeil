@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC1071,SC1111,SC2140,SC2034
+# shellcheck disable=SC1071,SC1111,SC2140,SC2034,SC1090
 # ╔═══════════════════════════════════════════════════════════╗
 # ║  CubiVeil — S-UI Profiles Module Unit Tests               ║
 # ║  Тесты для lib/modules/s-ui-profiles/install.sh           ║
@@ -18,21 +18,21 @@ source "${PROJECT_ROOT}/lib/test-utils.sh"
 PROFILES_MODULE_PATH="${PROJECT_ROOT}/lib/modules/s-ui-profiles/install.sh"
 
 # ── Mock функций зависимостей ───────────────────────────────
-log_info()    { :; }
+log_info() { :; }
 log_success() { :; }
-log_warn()    { :; }
-log_error()   { :; }
-log_step()    { :; }
-log_init()    { :; }
-get_str()     { echo "${1:-}"; }
-warning()     { :; }
-success()     { :; }
-info()        { :; }
-err()         { echo "ERROR: $1" >&2; }
+log_warn() { :; }
+log_error() { :; }
+log_step() { :; }
+log_init() { :; }
+get_str() { echo "${1:-}"; }
+warning() { :; }
+success() { :; }
+info() { :; }
+err() { echo "ERROR: $1" >&2; }
 
 # Mock lib/utils.sh функций
 get_server_ip() { echo "1.2.3.4"; }
-open_port()     { return 0; }
+open_port() { return 0; }
 
 # ── Глобальные переменные для тестов ────────────────────────
 DRY_RUN="false"
@@ -626,7 +626,7 @@ test_module_enable_checks_profiles_file() {
   info "Проверка что module_enable проверяет файл профилей..."
 
   if grep -q 'PROFILES_FILE' "$PROFILES_MODULE_PATH" &&
-     grep -q 'module_enable' "$PROFILES_MODULE_PATH"; then
+    grep -q 'module_enable' "$PROFILES_MODULE_PATH"; then
     pass "module_enable: проверяет файл профилей"
     ((TESTS_PASSED++)) || true
   else
@@ -642,7 +642,7 @@ test_module_remove_cleans_credentials() {
   info "Проверка что module_remove чистит credentials..."
 
   if grep -q 'VLESS_REALITY_PRIVATE_KEY' "$PROFILES_MODULE_PATH" &&
-     grep -q 'sed.*VLESS_REALITY_PRIVATE_KEY.*d' "$PROFILES_MODULE_PATH"; then
+    grep -q 'sed.*VLESS_REALITY_PRIVATE_KEY.*d' "$PROFILES_MODULE_PATH"; then
     pass "module_remove: удаляет ключи Reality из credentials"
     ((TESTS_PASSED++)) || true
   else
