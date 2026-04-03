@@ -179,25 +179,49 @@ class TestAlertStateManagerLocking(unittest.TestCase):
         shutil.rmtree(self.test_dir)
 
     @patch('alert_state.fcntl.flock')
-    @patch('alert_state.fcntl.LOCK_SH', 1)
-    @patch('alert_state.fcntl.LOCK_UN', 8)
-    def test_load_acquires_shared_lock(self, mock_lock_un, mock_lock_sh, mock_flock):
+    def test_load_acquires_shared_lock(self, mock_flock):
         """Test that load acquires shared lock"""
-        self.manager.save({"cpu": True})
-        state = self.manager.load()
+        import alert_state
+        # Set lock constants for this test
+        original_sh = getattr(alert_state.fcntl, 'LOCK_SH', None)
+        original_un = getattr(alert_state.fcntl, 'LOCK_UN', None)
+        alert_state.fcntl.LOCK_SH = 1
+        alert_state.fcntl.LOCK_UN = 8
 
-        # Should have been called twice: LOCK_SH and LOCK_UN
-        self.assertGreaterEqual(mock_flock.call_count, 2)
+        try:
+            self.manager.save({"cpu": True})
+            state = self.manager.load()
+
+            # Should have been called twice: LOCK_SH and LOCK_UN
+            self.assertGreaterEqual(mock_flock.call_count, 2)
+        finally:
+            # Restore originals
+            if original_sh is not None:
+                alert_state.fcntl.LOCK_SH = original_sh
+            if original_un is not None:
+                alert_state.fcntl.LOCK_UN = original_un
 
     @patch('alert_state.fcntl.flock')
-    @patch('alert_state.fcntl.LOCK_EX', 2)
-    @patch('alert_state.fcntl.LOCK_UN', 8)
-    def test_save_acquires_exclusive_lock(self, mock_lock_un, mock_lock_ex, mock_flock):
+    def test_save_acquires_exclusive_lock(self, mock_flock):
         """Test that save acquires exclusive lock"""
-        self.manager.save({"cpu": True})
+        import alert_state
+        # Set lock constants for this test
+        original_ex = getattr(alert_state.fcntl, 'LOCK_EX', None)
+        original_un = getattr(alert_state.fcntl, 'LOCK_UN', None)
+        alert_state.fcntl.LOCK_EX = 2
+        alert_state.fcntl.LOCK_UN = 8
 
-        # Should have been called with LOCK_EX and LOCK_UN
-        self.assertGreaterEqual(mock_flock.call_count, 2)
+        try:
+            self.manager.save({"cpu": True})
+
+            # Should have been called with LOCK_EX and LOCK_UN
+            self.assertGreaterEqual(mock_flock.call_count, 2)
+        finally:
+            # Restore originals
+            if original_ex is not None:
+                alert_state.fcntl.LOCK_EX = original_ex
+            if original_un is not None:
+                alert_state.fcntl.LOCK_UN = original_un
 
     def test_concurrent_save_load(self):
         """Test concurrent save and load operations"""

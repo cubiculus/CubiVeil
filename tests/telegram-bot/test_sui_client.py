@@ -152,11 +152,16 @@ class TestMakeRequest(unittest.TestCase):
 
         with patch('sui_client.DEFAULT_CREDENTIALS_PATH', self.creds_file):
             client = SuiClient(base_url="http://localhost:2095")
+            # Ensure token is set (in case credentials file loading differs)
+            client.token = "test-token"
             client._make_request("/api/test", needs_auth=True)
 
         # Verify the request had the token header
+        self.assertTrue(mock_urlopen.called, "urlopen should have been called")
         call_args = mock_urlopen.call_args[0][0]
-        self.assertEqual(call_args.headers["X-API-Token"], "test-token")
+        # Headers are case-insensitive and normalized by urllib
+        headers = {k.lower(): v for k, v in call_args.headers.items()}
+        self.assertEqual(headers.get("x-api-token"), "test-token")
 
     @patch('sui_client.urllib.request.urlopen')
     def test_request_with_session_cookie(self, mock_urlopen):

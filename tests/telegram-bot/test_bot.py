@@ -321,8 +321,9 @@ class TestSendDailyReport(unittest.TestCase):
         bot_instance = CubiVeilBot()
         bot_instance.send_daily_report()
 
-        # Verify report message was sent
-        self.assertEqual(mock_telegram.send.call_count, 2)  # Report + backup
+        # Verify report message was sent (report via send, backup via send_file)
+        self.assertEqual(mock_telegram.send.call_count, 1)
+        self.assertEqual(mock_telegram.send_file.call_count, 1)
         call_args = mock_telegram.send.call_args_list[0][0][0]
         self.assertIn("Daily Report", call_args)
 
@@ -990,18 +991,21 @@ class TestPoll(unittest.TestCase):
         mock_telegram.validate_token.return_value = (True, "OK")
         mock_client.return_value = mock_telegram
 
+        from bot import CubiVeilBot
+        bot_instance = CubiVeilBot()
+
         # Mock _get_updates to raise exception after first call to break loop
         def mock_get_updates(offset):
             raise KeyboardInterrupt("Stop polling")
-
-        from bot import CubiVeilBot
-        bot_instance = CubiVeilBot()
         bot_instance._get_updates = mock_get_updates
+
+        # Mock check_health_and_heal to prevent extra send calls
+        bot_instance.check_health_and_heal = MagicMock()
 
         with self.assertRaises(KeyboardInterrupt):
             bot_instance.poll()
 
-        # Startup message should be sent
+        # Startup message should be sent once
         mock_telegram.send.assert_called_once()
 
 
