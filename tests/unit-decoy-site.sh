@@ -263,11 +263,10 @@ test_decoy_generate_profile() {
   cat "$DECOY_CONFIG" >&2
 
   # Проверка полей
-  local template site_name accent_color max_files_mb
+  local template site_name language
   template=$(jq -r '.template' "$DECOY_CONFIG")
   site_name=$(jq -r '.site_name' "$DECOY_CONFIG")
-  accent_color=$(jq -r '.accent_color' "$DECOY_CONFIG")
-  max_files_mb=$(jq -r '.max_total_files_mb' "$DECOY_CONFIG")
+  language=$(jq -r '.language' "$DECOY_CONFIG")
 
   if [[ -n "$template" && "$template" != "null" ]]; then
     pass "decoy_generate_profile: template = ${template}"
@@ -281,41 +280,53 @@ test_decoy_generate_profile() {
     fail "decoy_generate_profile: site_name не задан"
   fi
 
-  if [[ -n "$accent_color" && "$accent_color" =~ ^#[0-9a-fA-F]{6}$ ]]; then
-    pass "decoy_generate_profile: accent_color = ${accent_color}"
+  if [[ -n "$language" && "$language" != "null" ]]; then
+    pass "decoy_generate_profile: language = ${language}"
   else
-    fail "decoy_generate_profile: accent_color не задан"
+    fail "decoy_generate_profile: language не задан"
   fi
 
   # Проверка max_total_files_mb
+  local max_files_mb
+  max_files_mb=$(jq -r '.max_total_files_mb' "$DECOY_CONFIG")
   if [[ "$max_files_mb" == "5000" ]]; then
     pass "decoy_generate_profile: max_total_files_mb = 5000"
   else
     fail "decoy_generate_profile: max_total_files_mb = ${max_files_mb:-не задан}"
   fi
 
-  # Проверка rotation.types
+  # Проверка rotation.enabled (путь: rotation.enabled, НЕ rotation.types.*.enabled)
+  local rotation_enabled
+  rotation_enabled=$(jq -r '.rotation.enabled' "$DECOY_CONFIG")
+
+  if [[ "$rotation_enabled" == "true" ]]; then
+    pass "decoy_generate_profile: rotation.enabled = true"
+  else
+    fail "decoy_generate_profile: rotation.enabled = ${rotation_enabled:-не задан}"
+  fi
+
+  # Проверка types (путь: types.jpg.enabled, НЕ rotation.types.jpg.enabled)
   local jpg_enabled pdf_enabled mp4_enabled
-  jpg_enabled=$(jq -r '.rotation.types.jpg.enabled' "$DECOY_CONFIG")
-  pdf_enabled=$(jq -r '.rotation.types.pdf.enabled' "$DECOY_CONFIG")
-  mp4_enabled=$(jq -r '.rotation.types.mp4.enabled' "$DECOY_CONFIG")
+  jpg_enabled=$(jq -r '.types.jpg.enabled' "$DECOY_CONFIG")
+  pdf_enabled=$(jq -r '.types.pdf.enabled' "$DECOY_CONFIG")
+  mp4_enabled=$(jq -r '.types.mp4.enabled' "$DECOY_CONFIG")
 
   if [[ "$jpg_enabled" == "true" ]]; then
-    pass "decoy_generate_profile: rotation.types.jpg.enabled = true"
+    pass "decoy_generate_profile: types.jpg.enabled = true"
   else
-    fail "decoy_generate_profile: rotation.types.jpg.enabled = ${jpg_enabled:-не задан}"
+    fail "decoy_generate_profile: types.jpg.enabled = ${jpg_enabled:-не задан}"
   fi
 
   if [[ "$pdf_enabled" == "true" ]]; then
-    pass "decoy_generate_profile: rotation.types.pdf.enabled = true"
+    pass "decoy_generate_profile: types.pdf.enabled = true"
   else
-    fail "decoy_generate_profile: rotation.types.pdf.enabled = ${pdf_enabled:-не задан}"
+    fail "decoy_generate_profile: types.pdf.enabled = ${pdf_enabled:-не задан}"
   fi
 
   if [[ "$mp4_enabled" == "true" ]]; then
-    pass "decoy_generate_profile: rotation.types.mp4.enabled = true"
+    pass "decoy_generate_profile: types.mp4.enabled = true"
   else
-    fail "decoy_generate_profile: rotation.types.mp4.enabled = ${mp4_enabled:-не задан}"
+    fail "decoy_generate_profile: types.mp4.enabled = ${mp4_enabled:-не задан}"
   fi
 
   # Очистка
