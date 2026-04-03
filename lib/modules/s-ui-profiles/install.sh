@@ -10,6 +10,12 @@
 # ║  • Shadowsocks 2022  — широкая совместимость              ║
 # ╚═══════════════════════════════════════════════════════════╝
 
+# Guard: защита от повторной загрузки
+if [[ -n "${_PROFILES_MODULE_LOADED:-}" ]]; then
+  return 0 2>/dev/null || exit 0
+fi
+readonly _PROFILES_MODULE_LOADED=1
+
 # ── Подключение зависимостей ────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 MODULE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -48,7 +54,7 @@ DB_SCHEMA_TYPE=""
 # ── Утилиты ─────────────────────────────────────────────────
 
 _profiles_info() { log_info "$*"; }
-_profiles_ok()  { log_success "$*"; }
+_profiles_ok() { log_success "$*"; }
 _profiles_warn() { log_warn "$*"; }
 _profiles_err() { log_error "$*"; }
 
@@ -120,12 +126,12 @@ _profiles_get_server_ip() {
 
 _profiles_gen_uuid() {
   if [[ -n "$SINGBOX_BIN" ]]; then
-    "$SINGBOX_BIN" generate uuid 2>/dev/null \
-      || cat /proc/sys/kernel/random/uuid 2>/dev/null \
-      || openssl rand -hex 16 | sed 's/.\{8\}/&-/;s/.\{13\}/&-/;s/.\{18\}/&-/;s/.\{23\}/&-/'
+    "$SINGBOX_BIN" generate uuid 2>/dev/null ||
+      cat /proc/sys/kernel/random/uuid 2>/dev/null ||
+      openssl rand -hex 16 | sed 's/.\{8\}/&-/;s/.\{13\}/&-/;s/.\{18\}/&-/;s/.\{23\}/&-/'
   else
-    cat /proc/sys/kernel/random/uuid 2>/dev/null \
-      || openssl rand -hex 16
+    cat /proc/sys/kernel/random/uuid 2>/dev/null ||
+      openssl rand -hex 16
   fi
 }
 
@@ -298,17 +304,17 @@ _profiles_sqlite_insert_inbound() {
   local safe_tag="${tag//\'/\'\'}"
 
   case "$DB_SCHEMA_TYPE" in
-    config_blob)
-      sqlite3 "$SUI_DB" <<SQL 2>/dev/null
+  config_blob)
+    sqlite3 "$SUI_DB" <<SQL 2>/dev/null
 INSERT OR IGNORE INTO inbounds
     (user_id, up, down, total, remark, enable, expiry_time, config, listen, port, protocol, tag)
 VALUES
     ($user_id, 0, 0, 0, '${safe_remark}', 1, 0,
      '${safe_config}', '0.0.0.0', $port, '${protocol}', '${safe_tag}');
 SQL
-      ;;
-    columns)
-      sqlite3 "$SUI_DB" <<SQL 2>/dev/null
+    ;;
+  columns)
+    sqlite3 "$SUI_DB" <<SQL 2>/dev/null
 INSERT OR IGNORE INTO inbounds
     (user_id, up, down, total, remark, enable, expiry_time,
      listen, port, protocol, settings, stream_settings, tag, sniffing)
@@ -318,11 +324,11 @@ VALUES
      '${safe_settings}', '${safe_stream}',
      '${safe_tag}', '{"enabled":false}');
 SQL
-      ;;
-    *)
-      log_warn "Cannot insert: unknown DB schema for table 'inbounds'"
-      return 1
-      ;;
+    ;;
+  *)
+    log_warn "Cannot insert: unknown DB schema for table 'inbounds'"
+    return 1
+    ;;
   esac
 
   local rc=$?
@@ -343,12 +349,12 @@ _profiles_open_port() {
     # Fallback если ufw не настроен
     if command -v ufw &>/dev/null; then
       case "$proto" in
-        tcp)  ufw allow "${port}/tcp" >/dev/null 2>&1 || true ;;
-        udp)  ufw allow "${port}/udp" >/dev/null 2>&1 || true ;;
-        both)
-          ufw allow "${port}/tcp" >/dev/null 2>&1 || true
-          ufw allow "${port}/udp" >/dev/null 2>&1 || true
-          ;;
+      tcp) ufw allow "${port}/tcp" >/dev/null 2>&1 || true ;;
+      udp) ufw allow "${port}/udp" >/dev/null 2>&1 || true ;;
+      both)
+        ufw allow "${port}/tcp" >/dev/null 2>&1 || true
+        ufw allow "${port}/udp" >/dev/null 2>&1 || true
+        ;;
       esac
     fi
   }
@@ -418,7 +424,8 @@ _profiles_create_vless_reality() {
   fi
 
   local singbox_json
-  singbox_json=$(cat <<JSON
+  singbox_json=$(
+    cat <<JSON
 {
   "type": "vless",
   "tag": "${tag}",
@@ -446,10 +453,11 @@ _profiles_create_vless_reality() {
   }
 }
 JSON
-)
+  )
 
   local settings_json
-  settings_json=$(cat <<JSON
+  settings_json=$(
+    cat <<JSON
 {
   "clients": [
     {
@@ -464,10 +472,11 @@ JSON
   "decryption": "none"
 }
 JSON
-)
+  )
 
   local stream_json
-  stream_json=$(cat <<JSON
+  stream_json=$(
+    cat <<JSON
 {
   "network": "tcp",
   "security": "reality",
@@ -480,7 +489,7 @@ JSON
   }
 }
 JSON
-)
+  )
 
   if ! _profiles_create_inbound \
     "VLESS+Reality" "$port" "vless" \
@@ -512,10 +521,10 @@ JSON
     echo ""
     echo "  Link:"
     echo "  $link"
-  } >> "$PROFILES_FILE"
+  } >>"$PROFILES_FILE"
 
-  echo "VLESS_REALITY_PRIVATE_KEY=${REALITY_PRIVATE_KEY}" >> "$PROFILES_CREDS"
-  echo "VLESS_REALITY_PUBLIC_KEY=${REALITY_PUBLIC_KEY}"   >> "$PROFILES_CREDS"
+  echo "VLESS_REALITY_PRIVATE_KEY=${REALITY_PRIVATE_KEY}" >>"$PROFILES_CREDS"
+  echo "VLESS_REALITY_PUBLIC_KEY=${REALITY_PUBLIC_KEY}" >>"$PROFILES_CREDS"
 
   return 0
 }
@@ -554,18 +563,20 @@ _profiles_create_hysteria2() {
 
   local tls_block=""
   if [[ "$tls_mode" == "file" ]]; then
-    tls_block=$(cat <<JSON
+    tls_block=$(
+      cat <<JSON
   "tls": {
     "enabled": true,
     "certificate_path": "${cert_path}",
     "key_path": "${key_path}"
   },
 JSON
-)
+    )
   fi
 
   local singbox_json
-  singbox_json=$(cat <<JSON
+  singbox_json=$(
+    cat <<JSON
 {
   "type": "hysteria2",
   "tag": "${tag}",
@@ -583,10 +594,11 @@ JSON
   "masquerade": "https://${REALITY_SNI}"
 }
 JSON
-)
+  )
 
   local settings_json
-  settings_json=$(cat <<JSON
+  settings_json=$(
+    cat <<JSON
 {
   "clients": [
     {
@@ -598,7 +610,7 @@ JSON
   "down_mbps": 100
 }
 JSON
-)
+  )
 
   if ! _profiles_create_inbound \
     "Hysteria2" "$port" "hysteria2" \
@@ -630,7 +642,7 @@ JSON
     echo ""
     echo "  Link:"
     echo "  $link"
-  } >> "$PROFILES_FILE"
+  } >>"$PROFILES_FILE"
 
   return 0
 }
@@ -649,7 +661,8 @@ _profiles_create_shadowsocks2022() {
   server_key=$(openssl rand -base64 32 | tr -d '\n')
 
   local singbox_json
-  singbox_json=$(cat <<JSON
+  singbox_json=$(
+    cat <<JSON
 {
   "type": "shadowsocks",
   "tag": "${tag}",
@@ -662,10 +675,11 @@ _profiles_create_shadowsocks2022() {
   }
 }
 JSON
-)
+  )
 
   local settings_json
-  settings_json=$(cat <<JSON
+  settings_json=$(
+    cat <<JSON
 {
   "method": "${method}",
   "password": "${server_key}",
@@ -677,7 +691,7 @@ JSON
   ]
 }
 JSON
-)
+  )
 
   if ! _profiles_create_inbound \
     "Shadowsocks-2022" "$port" "shadowsocks" \
@@ -705,7 +719,7 @@ JSON
     echo ""
     echo "  Link:"
     echo "  $link"
-  } >> "$PROFILES_FILE"
+  } >>"$PROFILES_FILE"
 
   return 0
 }
@@ -752,7 +766,7 @@ _profiles_init_file() {
     echo "  • Clash Meta         (all protocols)"
     echo "  • Hiddify            (all protocols)"
     echo "  • Streisand          (all protocols)"
-  } > "$PROFILES_FILE"
+  } >"$PROFILES_FILE"
   chmod 600 "$PROFILES_FILE"
 }
 
