@@ -36,6 +36,7 @@
 - 🛠 Набор утилит для обслуживания
 - 🎭 Сайт-прикрытие с генерацией трафика (decoy-site)
 - 🌐 Traffic shaping для уникального "почерка" сервера
+- 🔑 Автоматическое создание профилей подключений (VLESS+Reality, Hysteria2, Shadowsocks 2022)
 
 ## ⚡ Быстрый старт
 
@@ -175,6 +176,7 @@ sudo bash install.sh --debug 2>&1 | tee install_debug.log
 | `--non-interactive` | Неинтерактивный режим (без prompts) |
 | `--no-decoy` | Пропустить установку сайта-прикрытия |
 | `--no-traffic-shaping` | Пропустить модуль Traffic Shaping |
+| `--no-profiles` | Пропустить создание профилей подключений |
 | `--no-sui` | Пропустить установку s-ui панели |
 | `--no-ssl` | Пропустить установку SSL сертификатов |
 | `--telegram` | Установить Telegram-бот |
@@ -199,6 +201,7 @@ sudo bash install.sh --debug 2>&1 | tee install_debug.log
 | **Let's Encrypt** | SSL-сертификаты |
 | **Decoy Site** | Сайт-прикрытие с генерацией реалистичного трафика |
 | **Traffic Shaping** | Управление сетевыми параметрами для уникального "почерка" |
+| **S-UI Profiles** | Автоматическое создание профилей (VLESS+Reality, Hysteria2, Shadowsocks 2022) |
 
 ### 🎭 Сайт-прикрытие (Decoy Site)
 
@@ -235,6 +238,28 @@ sudo bash install.sh --debug 2>&1 | tee install_debug.log
   "max_total_files_mb": 5000
 }
 ```
+
+### 🔑 Профили подключений
+
+Модуль автоматически создаёт профили подключений в панели S-UI:
+
+| Протокол | Описание |
+|----------|----------|
+| **VLESS + Reality** | TLS-трафик с маскировкой под целевой домен (SNI), ключи Reality |
+| **Hysteria2** | Высокопроизводительный UDP-протокол |
+| **Shadowsocks 2022** | Современное шифрование (2022-blake3-aes-256-gcm), широкая совместимость |
+
+**Файл профилей:** `/etc/cubiveil/profiles.txt`
+
+**Поддерживаемые клиенты:**
+- v2rayN / v2rayNG
+- NekoBox / NekoRay
+- Clash Meta
+- Hiddify
+- Streisand
+
+**Управление:** профили создаются автоматически при установке.
+Для пропуска создания используйте флаг `--no-profiles`.
 
 ### Утилиты
 
@@ -426,6 +451,7 @@ cubiveil/
 │   │   ├── fail2ban/         # Fail2ban
 │   │   ├── firewall/         # UFW firewall
 │   │   ├── s-ui/             # S-UI панель
+│   │   ├── s-ui-profiles/    # Профили подключений
 │   │   ├── monitoring/       # Мониторинг ресурсов
 │   │   ├── rollback/         # Откат версий
 │   │   ├── ssl/              # SSL сертификаты (Let's Encrypt)

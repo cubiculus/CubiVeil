@@ -44,6 +44,7 @@ The project provides:
 - 🛠 Utility suite for maintenance
 - 🎭 Decoy site with realistic traffic generation
 - 🌐 Traffic shaping for unique server "fingerprint"
+- 🔑 Automatic connection profiles creation (VLESS+Reality, Hysteria2, Shadowsocks 2022)
 
 ## ⚡ Quick Start
 
@@ -190,6 +191,7 @@ sudo bash install.sh --debug 2>&1 | tee install_debug.log
 | `--non-interactive` | Non-interactive mode (no prompts) |
 | `--no-decoy` | Skip decoy-site installation |
 | `--no-traffic-shaping` | Skip Traffic Shaping module |
+| `--no-profiles` | Skip connection profiles creation |
 | `--no-sui` | Skip s-ui panel installation |
 | `--no-ssl` | Skip SSL certificate installation |
 | `--telegram` | Install Telegram bot |
@@ -213,6 +215,29 @@ sudo bash install.sh --debug 2>&1 | tee install_debug.log
 | **Let's Encrypt** | SSL certificates (via s-ui ACME) |
 | **Decoy Site** | Decoy website with realistic traffic generation |
 | **Traffic Shaping** | Network parameter control for unique "fingerprint" |
+| **S-UI Profiles** | Auto-created connection profiles (VLESS+Reality, Hysteria2, Shadowsocks 2022) |
+
+### 🔑 Connection Profiles
+
+The module automatically creates connection profiles in the S-UI panel:
+
+| Protocol | Description |
+|----------|-------------|
+| **VLESS + Reality** | TLS traffic with target domain masking (SNI), Reality keys |
+| **Hysteria2** | High-performance UDP protocol |
+| **Shadowsocks 2022** | Modern encryption (2022-blake3-aes-256-gcm), broad compatibility |
+
+**Profiles file:** `/etc/cubiveil/profiles.txt`
+
+**Supported clients:**
+- v2rayN / v2rayNG
+- NekoBox / NekoRay
+- Clash Meta
+- Hiddify
+- Streisand
+
+**Management:** Profiles are created automatically during installation.
+To skip creation, use the `--no-profiles` flag.
 
 ### Utilities
 
@@ -224,6 +249,7 @@ All utilities are located in `utils/` directory:
 | `monitor.sh` | Server resource monitoring |
 | `backup.sh` | Create and restore backups |
 | `diagnose.sh` | Problem diagnostics |
+| `manage-profiles.sh` | User profile management |
 | `export-config.sh` | Configuration export for migration |
 | `update.sh` | Update CubiVeil |
 | `rollback.sh` | Rollback to previous version |
@@ -404,6 +430,7 @@ cubiveil/
 │   │   ├── ssl/              # SSL certificates (Let's Encrypt)
 │   │   ├── system/           # System module
 │   │   ├── s-ui/             # s-ui panel module
+│   │   ├── s-ui-profiles/    # Connection profiles module
 │   │   └── traffic-shaping/  # Traffic shaping
 │   ├── common.sh         # Common functions
 │   ├── fallback.sh       # Fallback functions
