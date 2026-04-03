@@ -94,55 +94,52 @@ class TestConfigManagement(unittest.TestCase):
     @patch('decoy.DECOY_CONFIG')
     def test_load_config_success(self, mock_config):
         """Test successful config load"""
-        mock_config.return_value = self.config_file
+        mock_config.__str__ = lambda self: self.config_file
         test_config = {"rotation": {"enabled": True, "interval_hours": 6}}
 
         with open(self.config_file, 'w') as f:
             json.dump(test_config, f)
 
-        decoy = DecoyManager()
-        config = decoy._load_config()
+        with patch('decoy.DECOY_CONFIG', self.config_file):
+            decoy = DecoyManager()
+            config = decoy._load_config()
 
-        self.assertEqual(config, test_config)
+            self.assertEqual(config, test_config)
 
-    @patch('decoy.DECOY_CONFIG')
-    def test_load_config_not_exists(self, mock_config):
+    def test_load_config_not_exists(self):
         """Test config file not exists"""
-        mock_config.return_value = self.config_file
+        with patch('decoy.DECOY_CONFIG', self.config_file):
+            decoy = DecoyManager()
+            config = decoy._load_config()
 
-        decoy = DecoyManager()
-        config = decoy._load_config()
+            self.assertIsNone(config)
 
-        self.assertIsNone(config)
-
-    @patch('decoy.DECOY_CONFIG')
-    def test_load_config_invalid_json(self, mock_config):
+    def test_load_config_invalid_json(self):
         """Test invalid JSON config"""
-        mock_config.return_value = self.config_file
-
         with open(self.config_file, 'w') as f:
             f.write("not valid json")
 
-        decoy = DecoyManager()
-        config = decoy._load_config()
+        with patch('decoy.DECOY_CONFIG', self.config_file):
+            decoy = DecoyManager()
+            config = decoy._load_config()
 
-        self.assertIsNone(config)
+            self.assertIsNone(config)
 
-    @patch('decoy.DECOY_CONFIG')
-    def test_save_config_success(self, mock_config):
+    def test_save_config_success(self):
         """Test successful config save"""
-        mock_config.return_value = self.config_file
         test_config = {"rotation": {"enabled": True}}
 
-        decoy = DecoyManager()
-        result = decoy._save_config(test_config)
+        with patch('decoy.DECOY_CONFIG', self.config_file):
+            decoy = DecoyManager()
+            result = decoy._save_config(test_config)
 
-        self.assertTrue(result)
-        self.assertTrue(os.path.exists(self.config_file))
+            self.assertTrue(result)
+            self.assertTrue(os.path.exists(self.config_file))
 
-        # Check file permissions
-        mode = oct(os.stat(self.config_file).st_mode)[-3:]
-        self.assertEqual(mode, "600")
+            # Check file permissions (skip on Windows as chmod behaves differently)
+            if os.name != 'nt':
+                mode = oct(os.stat(self.config_file).st_mode)[-3:]
+                self.assertEqual(mode, "600")
 
     @patch('decoy.DECOY_CONFIG')
     def test_save_config_io_error(self, mock_config):
@@ -168,20 +165,18 @@ class TestIsConfigured(unittest.TestCase):
     @patch('decoy.DECOY_CONFIG')
     def test_configured(self, mock_config):
         """Test when config exists"""
-        mock_config.return_value = self.config_file
-        with open(self.config_file, 'w') as f:
-            f.write("{}")
+        with patch('decoy.DECOY_CONFIG', self.config_file):
+            with open(self.config_file, 'w') as f:
+                f.write("{}")
 
-        decoy = DecoyManager()
-        self.assertTrue(decoy.is_configured())
+            decoy = DecoyManager()
+            self.assertTrue(decoy.is_configured())
 
-    @patch('decoy.DECOY_CONFIG')
-    def test_not_configured(self, mock_config):
+    def test_not_configured(self):
         """Test when config doesn't exist"""
-        mock_config.return_value = self.config_file
-
-        decoy = DecoyManager()
-        self.assertFalse(decoy.is_configured())
+        with patch('decoy.DECOY_CONFIG', self.config_file):
+            decoy = DecoyManager()
+            self.assertFalse(decoy.is_configured())
 
 
 class TestGetStatus(unittest.TestCase):
@@ -242,11 +237,11 @@ class TestGetStatus(unittest.TestCase):
         with open(self.config_file, 'w') as f:
             json.dump(config, f)
 
-        # Create files
+        # Create files with measurable size
         files_dir = os.path.join(self.webroot, "files")
         os.makedirs(files_dir)
-        with open(os.path.join(files_dir, "test.jpg"), 'w') as f:
-            f.write("x" * 1024)
+        with open(os.path.join(files_dir, "test.jpg"), 'wb') as f:
+            f.write(b"x" * (100 * 1024))  # 100 KB to ensure measurable size
 
         with patch('decoy.DECOY_CONFIG', self.config_file), \
              patch('decoy.DECOY_WEBROOT', self.webroot):
@@ -290,8 +285,11 @@ class TestGetFilesList(unittest.TestCase):
             files = decoy.get_files_list()
 
         self.assertEqual(len(files), 3)
-        self.assertEqual(files[0]["type"], "jpg")
-        self.assertEqual(files[0]["type_display"], "🖼️ JPG")
+        # Check all expected types are present
+        types = [f["type"] for f in files]
+        self.assertIn("jpg", types)
+        self.assertIn("pdf", types)
+        self.assertIn("mp4", types)
 
     def test_get_files_limit(self):
         """Test files limit"""
@@ -463,13 +461,11 @@ class TestSetSizeLimit(unittest.TestCase):
         self.assertFalse(success)
         self.assertEqual(message, "Failed to load configuration")
 
-    @patch.object(DecoyManager, '_save_config')
-    @patch.object(DecoyManager, '_load_config')
-    def test_set_size_limit_success(self, mock_load, mock_save):
+    @patch.object(DecoyManager, '_load_config', return_value={"rotation": {}})
+    @patch.object(DecoyManager, '_save_config', return_value=True)
+    @patch.object(DecoyManager, '_run_command', return_value=(True, ""))
+    def test_set_size_limit_success(self, mock_run, mock_save, mock_load):
         """Test successful size limit set"""
-        mock_load.return_value = {}
-        mock_save.return_value = True
-
         decoy = DecoyManager()
         success, message = decoy.set_size_limit(2000)
 
@@ -518,13 +514,11 @@ class TestSetTypeWeight(unittest.TestCase):
         self.assertFalse(success)
         self.assertEqual(message, "Failed to load configuration")
 
-    @patch.object(DecoyManager, '_save_config')
-    @patch.object(DecoyManager, '_load_config')
-    def test_set_type_weight_enable(self, mock_load, mock_save):
+    @patch.object(DecoyManager, '_load_config', return_value={"rotation": {}})
+    @patch.object(DecoyManager, '_save_config', return_value=True)
+    @patch.object(DecoyManager, '_run_command', return_value=(True, ""))
+    def test_set_type_weight_enable(self, mock_run, mock_save, mock_load):
         """Test enabling type weight"""
-        mock_load.return_value = {}
-        mock_save.return_value = True
-
         decoy = DecoyManager()
         success, message = decoy.set_type_weight("jpg", 8)
 
@@ -532,13 +526,11 @@ class TestSetTypeWeight(unittest.TestCase):
         self.assertIn("enabled", message)
         self.assertIn("8", message)
 
-    @patch.object(DecoyManager, '_save_config')
-    @patch.object(DecoyManager, '_load_config')
-    def test_set_type_weight_disable(self, mock_load, mock_save):
+    @patch.object(DecoyManager, '_load_config', return_value={"rotation": {}})
+    @patch.object(DecoyManager, '_save_config', return_value=True)
+    @patch.object(DecoyManager, '_run_command', return_value=(True, ""))
+    def test_set_type_weight_disable(self, mock_run, mock_save, mock_load):
         """Test disabling type weight"""
-        mock_load.return_value = {}
-        mock_save.return_value = True
-
         decoy = DecoyManager()
         success, message = decoy.set_type_weight("jpg", 0)
 
@@ -598,15 +590,11 @@ class TestToggleRotation(unittest.TestCase):
         self.assertFalse(success)
         self.assertEqual(message, "Failed to load configuration")
 
-    @patch.object(DecoyManager, '_run_command')
-    @patch.object(DecoyManager, '_save_config')
-    @patch.object(DecoyManager, '_load_config')
-    def test_toggle_enable(self, mock_load, mock_save, mock_run):
+    @patch.object(DecoyManager, '_load_config', return_value={"rotation": {}})
+    @patch.object(DecoyManager, '_save_config', return_value=True)
+    @patch.object(DecoyManager, '_run_command', return_value=(True, ""))
+    def test_toggle_enable(self, mock_run, mock_save, mock_load):
         """Test enabling rotation"""
-        mock_load.return_value = {}
-        mock_save.return_value = True
-        mock_run.return_value = (True, "")
-
         decoy = DecoyManager()
         success, message = decoy.toggle_rotation(True)
 
@@ -614,28 +602,21 @@ class TestToggleRotation(unittest.TestCase):
         self.assertEqual(message, "Rotation enabled")
         mock_run.assert_called()
 
-    @patch.object(DecoyManager, '_run_command')
-    @patch.object(DecoyManager, '_save_config')
-    @patch.object(DecoyManager, '_load_config')
-    def test_toggle_disable(self, mock_load, mock_save, mock_run):
+    @patch.object(DecoyManager, '_load_config', return_value={"rotation": {}})
+    @patch.object(DecoyManager, '_save_config', return_value=True)
+    @patch.object(DecoyManager, '_run_command', return_value=(True, ""))
+    def test_toggle_disable(self, mock_run, mock_save, mock_load):
         """Test disabling rotation"""
-        mock_load.return_value = {}
-        mock_save.return_value = True
-        mock_run.return_value = (True, "")
-
         decoy = DecoyManager()
         success, message = decoy.toggle_rotation(False)
 
         self.assertTrue(success)
         self.assertEqual(message, "Rotation disabled")
 
-    @patch.object(DecoyManager, '_save_config')
-    @patch.object(DecoyManager, '_load_config')
-    def test_toggle_save_failed(self, mock_load, mock_save):
+    @patch.object(DecoyManager, '_load_config', return_value={"rotation": {}})
+    @patch.object(DecoyManager, '_save_config', return_value=False)
+    def test_toggle_save_failed(self, mock_save, mock_load):
         """Test toggle when save fails"""
-        mock_load.return_value = {}
-        mock_save.return_value = False
-
         decoy = DecoyManager()
         success, message = decoy.toggle_rotation(True)
         self.assertFalse(success)

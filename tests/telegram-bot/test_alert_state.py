@@ -14,6 +14,10 @@ import json
 # Add parent directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'telegram-bot'))
 
+# Mock fcntl on Windows (not available)
+if sys.platform == 'win32':
+    sys.modules['fcntl'] = MagicMock()
+
 from alert_state import AlertStateManager, AlertStateError
 
 
@@ -175,7 +179,9 @@ class TestAlertStateManagerLocking(unittest.TestCase):
         shutil.rmtree(self.test_dir)
 
     @patch('alert_state.fcntl.flock')
-    def test_load_acquires_shared_lock(self, mock_flock):
+    @patch('alert_state.fcntl.LOCK_SH', 1)
+    @patch('alert_state.fcntl.LOCK_UN', 8)
+    def test_load_acquires_shared_lock(self, mock_lock_un, mock_lock_sh, mock_flock):
         """Test that load acquires shared lock"""
         self.manager.save({"cpu": True})
         state = self.manager.load()
@@ -184,7 +190,9 @@ class TestAlertStateManagerLocking(unittest.TestCase):
         self.assertGreaterEqual(mock_flock.call_count, 2)
 
     @patch('alert_state.fcntl.flock')
-    def test_save_acquires_exclusive_lock(self, mock_flock):
+    @patch('alert_state.fcntl.LOCK_EX', 2)
+    @patch('alert_state.fcntl.LOCK_UN', 8)
+    def test_save_acquires_exclusive_lock(self, mock_lock_un, mock_lock_ex, mock_flock):
         """Test that save acquires exclusive lock"""
         self.manager.save({"cpu": True})
 

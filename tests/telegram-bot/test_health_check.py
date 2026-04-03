@@ -11,6 +11,7 @@ import tempfile
 import shutil
 import subprocess
 import json
+import sqlite3
 
 # Add parent directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'telegram-bot'))
@@ -52,24 +53,21 @@ class TestGetHealthCheckPort(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.test_dir)
 
-    @patch('health_check.SUI_ENV_FILE')
-    def test_get_port_from_env(self, mock_env_file):
+    def test_get_port_from_env(self):
         """Test getting port from environment file"""
-        mock_env_file.return_value = self.env_file
         with open(self.env_file, 'w') as f:
             f.write("SUI_PANEL_PORT=3095\n")
 
         checker = HealthChecker.__new__(HealthChecker)
-        port = checker._get_health_check_port()
+        with patch('health_check.SUI_ENV_FILE', self.env_file):
+            port = checker._get_health_check_port()
         self.assertEqual(port, 3095)
 
-    @patch('health_check.SUI_ENV_FILE')
-    def test_get_port_default_fallback(self, mock_env_file):
+    def test_get_port_default_fallback(self):
         """Test default port when env file missing"""
-        mock_env_file.return_value = "/nonexistent/file"
-
         checker = HealthChecker.__new__(HealthChecker)
-        port = checker._get_health_check_port()
+        with patch('health_check.SUI_ENV_FILE', "/nonexistent/file"):
+            port = checker._get_health_check_port()
         self.assertEqual(port, DEFAULT_HEALTH_CHECK_PORT)
 
 
@@ -148,22 +146,8 @@ class TestCheckProfileStatus(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.test_dir)
 
-    @patch('health_check.SUI_DB_FILE')
-    def test_profile_not_found_db_missing(self, mock_db_file):
-        """Test profile check when DB is missing"""
-        mock_db_file.return_value = "/nonexistent/db.sqlite"
-
-        result = self.checker.check_profile_status("testuser")
-
-        self.assertEqual(result["status"], "unknown")
-        self.assertEqual(result["error"], "Database not found")
-
-    @patch('health_check.SUI_DB_FILE')
-    def test_profile_active(self, mock_db_file):
-        """Test active profile"""
-        mock_db_file.return_value = self.db_file
-
-        import sqlite3
+    def _create_db(self, users=None):
+        """Helper to create test database"""
         conn = sqlite3.connect(self.db_file)
         cur = conn.cursor()
         cur.execute("""
@@ -176,85 +160,67 @@ class TestCheckProfileStatus(unittest.TestCase):
                 expiry_time INTEGER
             )
         """)
-        cur.execute(
-            "INSERT INTO clients VALUES (?, ?, ?, ?, ?, ?)",
-            ("testuser", 1, 1000, 2000, 10000, 1234567890)
-        )
+        if users:
+            for user in users:
+                cur.execute(
+                    "INSERT INTO clients VALUES (?, ?, ?, ?, ?, ?)",
+                    user
+                )
         conn.commit()
         conn.close()
 
-        result = self.checker.check_profile_status("testuser")
+    def test_profile_not_found_db_missing(self):
+        """Test profile check when DB is missing"""
+        with patch('health_check.SUI_DB_FILE', "/nonexistent/db.sqlite"):
+            with patch('os.path.exists', return_value=False):
+                result = self.checker.check_profile_status("testuser")
+
+        self.assertEqual(result["status"], "unknown")
+        self.assertEqual(result["error"], "Database not found")
+
+    def test_profile_active(self):
+        """Test active profile"""
+        self._create_db(users=[("testuser", 1, 1000, 2000, 10000, 1234567890)])
+
+        with patch('health_check.SUI_DB_FILE', self.db_file):
+            with patch('os.path.exists', return_value=True):
+                result = self.checker.check_profile_status("testuser")
 
         self.assertEqual(result["status"], "active")
         self.assertEqual(result["used_traffic"], 3000)
         self.assertEqual(result["data_limit"], 10000)
         self.assertEqual(result["expiry"], 1234567890)
 
-    @patch('health_check.SUI_DB_FILE')
-    def test_profile_disabled(self, mock_db_file):
+    def test_profile_disabled(self):
         """Test disabled profile"""
-        mock_db_file.return_value = self.db_file
+        self._create_db(users=[("testuser", 0, 0, 0, 5000, 1234567890)])
 
-        import sqlite3
-        conn = sqlite3.connect(self.db_file)
-        cur = conn.cursor()
-        cur.execute("""
-            CREATE TABLE clients (
-                email TEXT,
-                enable INTEGER,
-                up INTEGER,
-                down INTEGER,
-                total INTEGER,
-                expiry_time INTEGER
-            )
-        """)
-        cur.execute(
-            "INSERT INTO clients VALUES (?, ?, ?, ?, ?, ?)",
-            ("testuser", 0, 0, 0, 5000, 1234567890)
-        )
-        conn.commit()
-        conn.close()
-
-        result = self.checker.check_profile_status("testuser")
+        with patch('health_check.SUI_DB_FILE', self.db_file):
+            with patch('os.path.exists', return_value=True):
+                result = self.checker.check_profile_status("testuser")
 
         self.assertEqual(result["status"], "disabled")
 
-    @patch('health_check.SUI_DB_FILE')
-    def test_profile_user_not_found(self, mock_db_file):
+    def test_profile_user_not_found(self):
         """Test user not found in DB"""
-        mock_db_file.return_value = self.db_file
+        self._create_db()
 
-        import sqlite3
-        conn = sqlite3.connect(self.db_file)
-        cur = conn.cursor()
-        cur.execute("""
-            CREATE TABLE clients (
-                email TEXT,
-                enable INTEGER,
-                up INTEGER,
-                down INTEGER,
-                total INTEGER,
-                expiry_time INTEGER
-            )
-        """)
-        conn.commit()
-        conn.close()
-
-        result = self.checker.check_profile_status("nonexistent")
+        with patch('health_check.SUI_DB_FILE', self.db_file):
+            with patch('os.path.exists', return_value=True):
+                result = self.checker.check_profile_status("nonexistent")
 
         self.assertEqual(result["error"], "User not found")
 
-    @patch('health_check.SUI_DB_FILE')
-    def test_profile_db_error(self, mock_db_file):
+    def test_profile_db_error(self):
         """Test database error"""
-        mock_db_file.return_value = self.db_file
+        with patch('health_check.SUI_DB_FILE', self.db_file):
+            with patch('os.path.exists', return_value=True):
+                with patch('sqlite3.connect') as mock_connect:
+                    mock_connect.side_effect = sqlite3.Error("DB error")
 
-        with patch('sqlite3.connect') as mock_connect:
-            mock_connect.side_effect = sqlite3.Error("DB error")
+                    result = self.checker.check_profile_status("testuser")
 
-            result = self.checker.check_profile_status("testuser")
-
-            self.assertIn("Database error", result["error"])
+                    self.assertIn("Database error", result["error"])
 
 
 class TestCheckAllProfiles(unittest.TestCase):
@@ -268,12 +234,8 @@ class TestCheckAllProfiles(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.test_dir)
 
-    @patch('health_check.SUI_DB_FILE')
-    def test_all_profiles_empty_db(self, mock_db_file):
-        """Test empty database"""
-        mock_db_file.return_value = self.db_file
-
-        import sqlite3
+    def _create_db(self, users=None):
+        """Helper to create test database"""
         conn = sqlite3.connect(self.db_file)
         cur = conn.cursor()
         cur.execute("""
@@ -286,42 +248,34 @@ class TestCheckAllProfiles(unittest.TestCase):
                 expiry_time INTEGER
             )
         """)
+        if users:
+            for user in users:
+                cur.execute(
+                    "INSERT INTO clients VALUES (?, ?, ?, ?, ?, ?)",
+                    user
+                )
         conn.commit()
         conn.close()
 
-        profiles = self.checker.check_all_profiles()
+    def test_all_profiles_empty_db(self):
+        """Test empty database"""
+        self._create_db()
+
+        with patch('health_check.SUI_DB_FILE', self.db_file):
+            with patch('os.path.exists', return_value=True):
+                profiles = self.checker.check_all_profiles()
         self.assertEqual(len(profiles), 0)
 
-    @patch('health_check.SUI_DB_FILE')
-    def test_all_profiles_multiple(self, mock_db_file):
+    def test_all_profiles_multiple(self):
         """Test multiple profiles"""
-        mock_db_file.return_value = self.db_file
+        self._create_db(users=[
+            ("user1", 1, 100, 200, 1000, 1234567890),
+            ("user2", 0, 0, 0, 500, 1234567891),
+        ])
 
-        import sqlite3
-        conn = sqlite3.connect(self.db_file)
-        cur = conn.cursor()
-        cur.execute("""
-            CREATE TABLE clients (
-                email TEXT,
-                enable INTEGER,
-                up INTEGER,
-                down INTEGER,
-                total INTEGER,
-                expiry_time INTEGER
-            )
-        """)
-        cur.execute(
-            "INSERT INTO clients VALUES (?, ?, ?, ?, ?, ?)",
-            ("user1", 1, 100, 200, 1000, 1234567890)
-        )
-        cur.execute(
-            "INSERT INTO clients VALUES (?, ?, ?, ?, ?, ?)",
-            ("user2", 0, 0, 0, 500, 1234567891)
-        )
-        conn.commit()
-        conn.close()
-
-        profiles = self.checker.check_all_profiles()
+        with patch('health_check.SUI_DB_FILE', self.db_file):
+            with patch('os.path.exists', return_value=True):
+                profiles = self.checker.check_all_profiles()
 
         self.assertEqual(len(profiles), 2)
         self.assertEqual(profiles[0]["username"], "user1")
@@ -329,12 +283,10 @@ class TestCheckAllProfiles(unittest.TestCase):
         self.assertEqual(profiles[1]["username"], "user2")
         self.assertEqual(profiles[1]["status"], "disabled")
 
-    @patch('health_check.SUI_DB_FILE')
-    def test_all_profiles_db_missing(self, mock_db_file):
+    def test_all_profiles_db_missing(self):
         """Test missing DB"""
-        mock_db_file.return_value = "/nonexistent/db.sqlite"
-
-        profiles = self.checker.check_all_profiles()
+        with patch('health_check.SUI_DB_FILE', "/nonexistent/db.sqlite"):
+            profiles = self.checker.check_all_profiles()
         self.assertEqual(profiles, [])
 
 
