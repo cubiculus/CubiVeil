@@ -34,6 +34,7 @@ svc_exists() { return 0; }
 
 # Mock для получения IP
 get_server_ip() { echo "1.2.3.4"; }
+get_external_ip() { echo "1.2.3.4"; }
 
 # Mock для проверки SSL
 verify_ssl_cert() { return 0; }

@@ -140,14 +140,14 @@ test_bootstrap_setup_remote_install_fallback() {
   info "Тестирование setup_remote_install (curl mode) и ensure_file fallback..."
 
   local saved_install_dir="$INSTALL_SCRIPT_DIR"
-  local saved_path="$PATH"
 
   # curl installer mode
   INSTALL_SCRIPT_DIR=""
 
-  # Убираем доступные инструменты, чтобы ensure_file ушёл в fallback
-  MOCK_PATH="/nonexistent"
-  export PATH="$MOCK_PATH"
+  # Mock wget and curl to fail — this tests the fallback path
+  # without breaking other commands like mktemp, mkdir, sed, dirname
+  wget() { return 1; }
+  curl() { return 1; }
 
   # Убираем get_str, как было бы при отсутствии i18n
   local get_str_def
@@ -163,11 +163,13 @@ test_bootstrap_setup_remote_install_fallback() {
   fi
 
   # Восстановление окружения
-  PATH="$saved_path"
   INSTALL_SCRIPT_DIR="$saved_install_dir"
   if [[ -n "$get_str_def" ]]; then
     eval "$get_str_def"
   fi
+  # Снять моки wget/curl
+  unset -f wget 2>/dev/null || true
+  unset -f curl 2>/dev/null || true
 }
 
 # ════════════════════════════════════════════════════════════

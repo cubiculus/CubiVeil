@@ -242,11 +242,23 @@ test_rollback_select_backup_mock() {
 
   echo "test" >"${test_archive_dir}/test-backup.tar.gz"
 
-  # Mock для read
+  # rollback_list_backups declares BACKUP_MAP locally with `declare -A`,
+  # so it is NOT visible to rollback_select_backup. We declare it globally
+  # and mock rollback_list_backups to avoid the local shadowing.
+
+  declare -Ag BACKUP_MAP
+
+  BACKUP_MAP[1]="${test_archive_dir}/test-backup.tar.gz"
+
+  # Mock rollback_list_backups to skip the real one (which uses local BACKUP_MAP)
+
+  rollback_list_backups() { return 0; }
+
+  # Mock для read — auto-select first backup
 
   read() {
 
-    selection="1" # Возвращаем первый вариант
+    selection="1"
 
     return 0
 

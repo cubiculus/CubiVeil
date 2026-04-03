@@ -293,9 +293,13 @@ test_prompt_inputs_exists() {
 test_prompt_inputs_dev_mode() {
   info "Тестирование prompt_inputs (DEV режим)..."
 
-  # Сохраняем оригинальное значение
+  # Сохраняем оригинальные значения
   local original_dev_mode="$DEV_MODE"
   local original_domain="$DOMAIN"
+  local original_interactive="${INTERACTIVE_MODE:-true}"
+
+  # Set variables directly to skip interactive prompts in CI
+  INTERACTIVE_MODE="true"
   DEV_MODE="true"
   DOMAIN=""
 
@@ -310,6 +314,7 @@ test_prompt_inputs_dev_mode() {
   # Восстанавливаем
   DEV_MODE="$original_dev_mode"
   DOMAIN="$original_domain"
+  INTERACTIVE_MODE="$original_interactive"
 
   if [[ "$output" == *"DEV"* ]] || [[ "$output" == *"dev"* ]] || [[ -n "$output" ]]; then
     pass "prompt_inputs: DEV режим работает"
@@ -326,9 +331,13 @@ test_prompt_inputs_dev_mode() {
 test_prompt_inputs_sets_dev_domain() {
   info "Тестирование prompt_inputs (установка DEV_DOMAIN)..."
 
-  # Сохраняем оригинальное значение
+  # Сохраняем оригинальные значения
   local original_dev_mode="$DEV_MODE"
   local original_domain="$DOMAIN"
+  local original_interactive="${INTERACTIVE_MODE:-true}"
+
+  # Set variables directly to skip interactive prompts in CI
+  INTERACTIVE_MODE="true"
   DEV_MODE="true"
   DOMAIN=""
 
@@ -351,6 +360,7 @@ test_prompt_inputs_sets_dev_domain() {
   # Восстанавливаем
   DEV_MODE="$original_dev_mode"
   DOMAIN="$original_domain"
+  INTERACTIVE_MODE="$original_interactive"
 }
 
 # ════════════════════════════════════════════════════════════
@@ -359,10 +369,14 @@ test_prompt_inputs_sets_dev_domain() {
 test_prompt_inputs_sets_le_email() {
   info "Тестирование prompt_inputs (установка LE_EMAIL)..."
 
-  # Сохраняем оригинальное значение
+  # Сохраняем оригинальные значения
   local original_dev_mode="$DEV_MODE"
   local original_domain="$DOMAIN"
   local original_le_email="$LE_EMAIL"
+  local original_interactive="${INTERACTIVE_MODE:-true}"
+
+  # Set variables directly to skip interactive prompts in CI
+  INTERACTIVE_MODE="true"
   DEV_MODE="true"
   DOMAIN=""
   LE_EMAIL=""
@@ -387,6 +401,7 @@ test_prompt_inputs_sets_le_email() {
   DEV_MODE="$original_dev_mode"
   DOMAIN="$original_domain"
   LE_EMAIL="$original_le_email"
+  INTERACTIVE_MODE="$original_interactive"
 }
 
 # ════════════════════════════════════════════════════════════
@@ -395,8 +410,12 @@ test_prompt_inputs_sets_le_email() {
 test_prompt_inputs_security_warning() {
   info "Тестирование prompt_inputs (предупреждение о безопасности)..."
 
-  # Сохраняем оригинальное значение
+  # Сохраняем оригинальные значения
   local original_dev_mode="$DEV_MODE"
+  local original_interactive="${INTERACTIVE_MODE:-true}"
+
+  # Set variables directly to skip interactive prompts in CI
+  INTERACTIVE_MODE="true"
   DEV_MODE="true"
 
   # Загружаем модуль
@@ -409,6 +428,7 @@ test_prompt_inputs_security_warning() {
 
   # Восстанавливаем
   DEV_MODE="$original_dev_mode"
+  INTERACTIVE_MODE="$original_interactive"
 
   if [[ "$output" == *"security"* ]] || [[ "$output" == *"warning"* ]] || [[ -n "$output" ]]; then
     pass "prompt_inputs: выводит предупреждение о безопасности"
