@@ -27,6 +27,7 @@ WARNINGS=()
 _calculate_total_steps() {
   TOTAL_STEPS=5 # base steps: system, firewall, fail2ban, ssl, sui
   [[ "${INSTALL_DECOY:-true}" == "true" ]] && ((TOTAL_STEPS++)) || true
+  [[ "${INSTALL_PROFILES:-true}" == "true" ]] && ((TOTAL_STEPS++)) || true
   [[ "${INSTALL_TRAFFIC_SHAPING:-true}" == "true" ]] && ((TOTAL_STEPS++)) || true
   [[ "${INSTALL_TELEGRAM:-}" == "true" ]] && ((TOTAL_STEPS++)) || true
 }
@@ -168,6 +169,15 @@ _step_sui() {
   # Устанавливаем s-ui через официальный скрипт
   _install_sui_panel
   run_module "s-ui"
+}
+
+_step_create_profiles() {
+  [[ "$INSTALL_PROFILES" != "true" ]] && return 0
+  [[ "$INSTALL_SUI" != "true" ]] && return 0
+  local _label
+  _label="$(get_str MSG_STEP_PROFILES)"
+  step_module "$_label"
+  run_module "s-ui-profiles"
 }
 
 # Установка s-ui панели через официальный скрипт
@@ -321,6 +331,7 @@ step_firewall() { _step_firewall; }
 step_fail2ban() { _step_fail2ban; }
 step_ssl() { _step_ssl; }
 step_install_sui() { _step_sui; }
+step_create_profiles() { _step_create_profiles; }
 step_decoy_site() { _step_decoy; }
 step_traffic_shaping() { _step_traffic_shaping; }
 step_telegram() { _step_telegram; }

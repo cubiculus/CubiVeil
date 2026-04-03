@@ -1,35 +1,32 @@
 #!/bin/bash
 # shellcheck disable=SC1071,SC1111
 
-# ║в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ╗
-
-# в•‘        CubiVeil Unit Tests - Rollback Module              в•‘
-
-# в•‘        РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ lib/modules/rollback/install.sh       в•‘
-
-# ╚в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ╝
+# ═══════════════════════════════════════════════════════════╗
+# ║        CubiVeil Unit Tests - Rollback Module              ║
+# ║        Тестирование lib/modules/rollback/install.sh       ║
+# ╚══════════════════════════════════════════════════════════╝
 
 set -euo pipefail
 
-# в”Ђв”Ђ РџРѕРґРєР»СЋС‡РµРЅРёРµ С‚РµСЃС‚РѕРІС‹С… СѓС‚РёР»РёС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Подключение тестовых утилит ─────────────────────────────────────────────────
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 source "${SCRIPT_DIR}/lib/test-utils.sh"
 
-# в”Ђв”Ђ Р—Р°РіСЂСѓР·РєР° С‚РµСЃС‚РёСЂСѓРµРјРѕРіРѕ РјРѕРґСѓР»СЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Загрузка тестируемого модуля ────────────────────────────────────────────────
 
 MODULE_PATH="${SCRIPT_DIR}/lib/modules/rollback/install.sh"
 
 if [[ ! -f "$MODULE_PATH" ]]; then
 
-  echo "РћС€РёР±РєР°: Rollback module РЅРµ РЅР°Р№РґРµРЅ: $MODULE_PATH"
+  echo "Ошибка: Rollback module не найден: $MODULE_PATH"
 
   exit 1
 
 fi
 
-# в”Ђв”Ђ Mock Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Mock зависимостей ──────────────────────────────────────────────────────────
 
 log_step() { echo "[LOG_STEP] $1: $2" >&2; }
 
@@ -43,7 +40,7 @@ log_info() { echo "[INFO] $1" >&2; }
 
 log_error() { echo "[ERROR] $1" >&2; }
 
-# Mock core С„СѓРЅРєС†РёР№
+# Mock core функций
 
 dir_ensure() { mkdir -p "$1" 2>/dev/null || true; }
 
@@ -65,7 +62,7 @@ svc_start() {
 
 }
 
-# Mock РґР»СЏ РїСЂРѕРІРµСЂРєРё SHA256
+# Mock для проверки SHA256
 
 verify_sha256() {
 
@@ -77,17 +74,17 @@ verify_sha256() {
 
   local expected="$2"
 
-  # Р”Р»СЏ С‚РµСЃС‚РѕРІ РІСЃРµРіРґР° РІРѕР·РІСЂР°С‰Р°РµРј true
+  # Для тестов всегда возвращаем true
 
   return 0
 
 }
 
-# Mock РґР»СЏ РїСЂРѕРІРµСЂРєРё SSL
+# Mock для проверки SSL
 
 verify_ssl_cert() { return 0; }
 
-# Mock РґР»СЏ openssl
+# Mock для openssl
 
 openssl() {
 
@@ -103,57 +100,57 @@ openssl() {
 
 }
 
-# в”Ђв”Ђ Р—Р°РіСЂСѓР·РєР° РјРѕРґСѓР»СЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Загрузка модуля ─────────────────────────────────────────────────────────────
 
 # shellcheck source=lib/modules/rollback/install.sh
 
 source "$MODULE_PATH"
 
-# в”Ђв”Ђ РўРµСЃС‚: С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: файл существует ───────────────────────────────────────────────────────
 
 test_file_exists() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ С„Р°Р№Р»Р° РјРѕРґСѓР»СЏ..."
+  info "Тестирование наличия файла модуля..."
 
   if [[ -f "$MODULE_PATH" ]]; then
 
-    pass "Rollback module: С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚"
+    pass "Rollback module: файл существует"
 
     ((TESTS_PASSED++)) || true
 
   else
 
-    fail "Rollback module: С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ"
+    fail "Rollback module: файл не найден"
 
   fi
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: СЃРёРЅС‚Р°РєСЃРёСЃ СЃРєСЂРёРїС‚Р° в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: синтаксис скрипта ─────────────────────────────────────────────────────
 
 test_syntax() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СЃРёРЅС‚Р°РєСЃРёСЃР°..."
+  info "Тестирование синтаксиса..."
 
   if bash -n "$MODULE_PATH" 2>/dev/null; then
 
-    pass "Rollback module: СЃРёРЅС‚Р°РєСЃРёСЃ РєРѕСЂСЂРµРєС‚РµРЅ"
+    pass "Rollback module: синтаксис корректен"
 
     ((TESTS_PASSED++)) || true
 
   else
 
-    fail "Rollback module: СЃРёРЅС‚Р°РєСЃРёС‡РµСЃРєР°СЏ РѕС€РёР±РєР°"
+    fail "Rollback module: синтаксическая ошибка"
 
   fi
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: shebang в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: shebang ───────────────────────────────────────────────────────────────
 
 test_shebang() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ shebang..."
+  info "Тестирование shebang..."
 
   local shebang
 
@@ -161,23 +158,23 @@ test_shebang() {
 
   if [[ "$shebang" == "#!/bin/bash" ]]; then
 
-    pass "Rollback module: РєРѕСЂСЂРµРєС‚РЅС‹Р№ shebang"
+    pass "Rollback module: корректный shebang"
 
     ((TESTS_PASSED++)) || true
 
   else
 
-    fail "Rollback module: РЅРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ shebang: $shebang"
+    fail "Rollback module: некорректный shebang: $shebang"
 
   fi
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: rollback_init в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: rollback_init ────────────────────────────────────────────────────────
 
 test_rollback_init() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_init..."
+  info "Тестирование rollback_init..."
 
   local test_backup_dir="/tmp/test-rollback-$$"
 
@@ -187,7 +184,7 @@ test_rollback_init() {
 
   rollback_init
 
-  pass "rollback_init: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "rollback_init: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
@@ -195,11 +192,11 @@ test_rollback_init() {
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: rollback_list_backups в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: rollback_list_backups ────────────────────────────────────────────────
 
 test_rollback_list_backups() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_list_backups..."
+  info "Тестирование rollback_list_backups..."
 
   local test_backup_dir="/tmp/test-rollback-$$"
 
@@ -211,13 +208,13 @@ test_rollback_list_backups() {
 
   BACKUP_ARCHIVE_DIR="$test_archive_dir"
 
-  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ Р±СЌРєР°Рї
+  # Создаём тестовый бэкап
 
   echo "test" >"${test_archive_dir}/test-backup.tar.gz"
 
   rollback_list_backups || true
 
-  pass "rollback_list_backups: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "rollback_list_backups: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
@@ -225,11 +222,11 @@ test_rollback_list_backups() {
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: rollback_select_backup в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: rollback_select_backup ───────────────────────────────────────────────
 
 test_rollback_select_backup_mock() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_select_backup (mock)..."
+  info "Тестирование rollback_select_backup (mock)..."
 
   local test_backup_dir="/tmp/test-rollback-$$"
 
@@ -241,25 +238,25 @@ test_rollback_select_backup_mock() {
 
   BACKUP_ARCHIVE_DIR="$test_archive_dir"
 
-  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ Р±СЌРєР°Рї
+  # Создаём тестовый бэкап
 
   echo "test" >"${test_archive_dir}/test-backup.tar.gz"
 
-  # Mock РґР»СЏ read
+  # Mock для read
 
   read() {
 
-    selection="1" # Р’РѕР·РІСЂР°С‰Р°РµРј РїРµСЂРІС‹Р№ РІР°СЂРёР°РЅС‚
+    selection="1" # Возвращаем первый вариант
 
     return 0
 
   }
 
-  # Р¤СѓРЅРєС†РёСЏ РјРѕР¶РµС‚ РІС‹Р№С‚Рё РёР·-Р·Р° exit 0, РїРѕСЌС‚РѕРјСѓ Р»РѕРІРёРј
+  # Функция может выйти из-за exit 0, поэтому ловим
 
   rollback_select_backup 2>/dev/null || true
 
-  pass "rollback_select_backup: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "rollback_select_backup: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
@@ -267,11 +264,11 @@ test_rollback_select_backup_mock() {
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: rollback_extract_backup в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: rollback_extract_backup ─────────────────────────────────────────────
 
 test_rollback_extract_backup() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_extract_backup..."
+  info "Тестирование rollback_extract_backup..."
 
   local test_backup_dir="/tmp/test-rollback-$$"
 
@@ -287,7 +284,7 @@ test_rollback_extract_backup() {
 
   ROLLBACK_TEMP_DIR="$test_temp_dir"
 
-  # Mock РґР»СЏ tar (РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РѕРїСЂРµРґРµР»С‘РЅ РґРѕ РІС‹Р·РѕРІР° tar)
+  # Mock для tar (должен быть определён до вызова tar)
 
   tar() {
 
@@ -305,7 +302,7 @@ test_rollback_extract_backup() {
 
   }
 
-  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ Р°СЂС…РёРІ
+  # Создаём тестовый архив
 
   local test_file="${test_temp_dir}/test.txt"
 
@@ -315,7 +312,7 @@ test_rollback_extract_backup() {
 
   rollback_extract_backup "${test_archive_dir}/test.tar.gz"
 
-  pass "rollback_extract_backup: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "rollback_extract_backup: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
@@ -323,11 +320,11 @@ test_rollback_extract_backup() {
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: rollback_verify_integrity в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: rollback_verify_integrity ────────────────────────────────────────────
 
 test_rollback_verify_integrity() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_verify_integrity..."
+  info "Тестирование rollback_verify_integrity..."
 
   local test_backup_dir="/tmp/test-rollback-$$"
 
@@ -337,7 +334,7 @@ test_rollback_verify_integrity() {
 
   ROLLBACK_TEMP_DIR="$test_temp_dir"
 
-  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Рµ С„Р°Р№Р»С‹ СЃ hash
+  # Создаём тестовые файлы с hash
 
   echo "test db" >"${test_temp_dir}/singbox-db.sqlite3"
 
@@ -345,7 +342,7 @@ test_rollback_verify_integrity() {
 
   rollback_verify_integrity
 
-  pass "rollback_verify_integrity: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "rollback_verify_integrity: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
@@ -353,25 +350,25 @@ test_rollback_verify_integrity() {
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: rollback_stop_services в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: rollback_stop_services ───────────────────────────────────────────────
 
 test_rollback_stop_services() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_stop_services..."
+  info "Тестирование rollback_stop_services..."
 
   rollback_stop_services
 
-  pass "rollback_stop_services: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "rollback_stop_services: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: rollback_singbox_db в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: rollback_singbox_db ──────────────────────────────────────────────────
 
 test_rollback_singbox_db() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_singbox_db..."
+  info "Тестирование rollback_singbox_db..."
 
   local test_backup_dir="/tmp/test-rollback-$$"
 
@@ -387,7 +384,7 @@ test_rollback_singbox_db() {
 
   SINGBOX_DIR="$test_singbox_dir"
 
-  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІСѓСЋ Р‘Р”
+  # Создаём тестовую БД
 
   echo "test db" >"${test_temp_dir}/singbox-db.sqlite3"
 
@@ -395,7 +392,7 @@ test_rollback_singbox_db() {
 
   rollback_singbox_db || true
 
-  pass "rollback_singbox_db: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "rollback_singbox_db: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
@@ -403,11 +400,11 @@ test_rollback_singbox_db() {
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: rollback_singbox_config в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: rollback_singbox_config ─────────────────────────────────────────────
 
 test_rollback_singbox_config() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_singbox_config..."
+  info "Тестирование rollback_singbox_config..."
 
   local test_backup_dir="/tmp/test-rollback-$$"
 
@@ -423,7 +420,7 @@ test_rollback_singbox_config() {
 
   SINGBOX_TEMPLATE="${test_temp_dir}/sing-box-template.json"
 
-  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Рµ С„Р°Р№Р»С‹
+  # Создаём тестовые файлы
 
   echo "TEST=1" >"${test_temp_dir}/singbox.env"
 
@@ -435,7 +432,7 @@ test_rollback_singbox_config() {
 
   rollback_singbox_config || true
 
-  pass "rollback_singbox_config: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "rollback_singbox_config: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
@@ -443,11 +440,11 @@ test_rollback_singbox_config() {
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: rollback_singbox_config в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: rollback_singbox_config ─────────────────────────────────────────────
 
 test_rollback_singbox_config() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_singbox_config..."
+  info "Тестирование rollback_singbox_config..."
 
   local test_backup_dir="/tmp/test-rollback-$$"
 
@@ -457,7 +454,7 @@ test_rollback_singbox_config() {
 
   ROLLBACK_TEMP_DIR="$test_temp_dir"
 
-  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІСѓСЋ РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ
+  # Создаём тестовую конфигурацию
 
   echo "{}" >"${test_temp_dir}/singbox-config.json"
 
@@ -465,7 +462,7 @@ test_rollback_singbox_config() {
 
   rollback_singbox_config || true
 
-  pass "rollback_singbox_config: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "rollback_singbox_config: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
@@ -473,11 +470,11 @@ test_rollback_singbox_config() {
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: rollback_ssl_certs в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: rollback_ssl_certs ───────────────────────────────────────────────────
 
 test_rollback_ssl_certs() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_ssl_certs..."
+  info "Тестирование rollback_ssl_certs..."
 
   local test_backup_dir="/tmp/test-rollback-$$"
 
@@ -493,7 +490,7 @@ test_rollback_ssl_certs() {
 
   SSL_CERT_DIR="$test_ssl_dir"
 
-  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Рµ СЃРµСЂС‚РёС„РёРєР°С‚С‹
+  # Создаём тестовые сертификаты
 
   mkdir -p "${test_temp_dir}/ssl-certs"
 
@@ -501,7 +498,7 @@ test_rollback_ssl_certs() {
 
   rollback_ssl_certs || true
 
-  pass "rollback_ssl_certs: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "rollback_ssl_certs: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
@@ -509,11 +506,11 @@ test_rollback_ssl_certs() {
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: rollback_keys в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: rollback_keys ────────────────────────────────────────────────────────
 
 test_rollback_keys() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_keys..."
+  info "Тестирование rollback_keys..."
 
   local test_backup_dir="/tmp/test-rollback-$$"
 
@@ -533,7 +530,7 @@ test_rollback_keys() {
 
   CREDENTIALS_KEY="${test_singbox_dir}/credentials.key"
 
-  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Рµ РєР»СЋС‡Рё
+  # Создаём тестовые ключи
 
   echo "test credentials" >"${test_temp_dir}/credentials.age"
 
@@ -541,7 +538,7 @@ test_rollback_keys() {
 
   rollback_keys
 
-  pass "rollback_keys: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "rollback_keys: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
@@ -549,25 +546,25 @@ test_rollback_keys() {
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: rollback_start_services в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: rollback_start_services ──────────────────────────────────────────────
 
 test_rollback_start_services() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_start_services..."
+  info "Тестирование rollback_start_services..."
 
   rollback_start_services
 
-  pass "rollback_start_services: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "rollback_start_services: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: rollback_full в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: rollback_full ────────────────────────────────────────────────────────
 
 test_rollback_full_mock() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_full (mock)..."
+  info "Тестирование rollback_full (mock)..."
 
   local test_backup_dir="/tmp/test-rollback-$$"
 
@@ -583,11 +580,11 @@ test_rollback_full_mock() {
 
   ROLLBACK_TEMP_DIR="$test_temp_dir"
 
-  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ Р±СЌРєР°Рї
+  # Создаём тестовый бэкап
 
   echo "test" >"${test_archive_dir}/test.tar.gz"
 
-  # Mock РґР»СЏ select
+  # Mock для select
 
   rollback_select_backup() {
 
@@ -615,7 +612,7 @@ test_rollback_full_mock() {
 
   rollback_full || true
 
-  pass "rollback_full: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "rollback_full: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
@@ -623,11 +620,11 @@ test_rollback_full_mock() {
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: rollback_latest в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: rollback_latest ─────────────────────────────────────────────────────
 
 test_rollback_latest_mock() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ rollback_latest (mock)..."
+  info "Тестирование rollback_latest (mock)..."
 
   local test_backup_dir="/tmp/test-rollback-$$"
 
@@ -643,7 +640,7 @@ test_rollback_latest_mock() {
 
   ROLLBACK_TEMP_DIR="$test_temp_dir"
 
-  # РЎРѕР·РґР°С‘Рј С‚РµСЃС‚РѕРІС‹Р№ Р±СЌРєР°Рї
+  # Создаём тестовый бэкап
 
   echo "test" >"${test_archive_dir}/test.tar.gz"
 
@@ -663,7 +660,7 @@ test_rollback_latest_mock() {
 
   rollback_latest || true
 
-  pass "rollback_latest: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "rollback_latest: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
@@ -671,59 +668,59 @@ test_rollback_latest_mock() {
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: module_install в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: module_install ───────────────────────────────────────────────────────
 
 test_module_install() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_install..."
+  info "Тестирование module_install..."
 
   module_install
 
-  pass "module_install: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "module_install: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: module_rollback в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: module_rollback ─────────────────────────────────────────────────────
 
 test_module_rollback() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_rollback..."
+  info "Тестирование module_rollback..."
 
-  # Mock РґР»СЏ РёР·Р±РµР¶Р°РЅРёСЏ РёРЅС‚РµСЂР°РєС‚РёРІРЅРѕСЃС‚Рё
+  # Mock для избежания интерактивности
 
   rollback_full() { return 0; }
 
   module_rollback
 
-  pass "module_rollback: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "module_rollback: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: module_rollback_latest в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: module_rollback_latest ──────────────────────────────────────────────
 
 test_module_rollback_latest() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_rollback_latest..."
+  info "Тестирование module_rollback_latest..."
 
   rollback_latest() { return 0; }
 
   module_rollback_latest
 
-  pass "module_rollback_latest: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "module_rollback_latest: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: module_list в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: module_list ──────────────────────────────────────────────────────────
 
 test_module_list() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_list..."
+  info "Тестирование module_list..."
 
   local test_archive_dir="/tmp/test-archive-$$"
 
@@ -733,7 +730,7 @@ test_module_list() {
 
   module_list
 
-  pass "module_list: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "module_list: вызвана без ошибок"
 
   ((TESTS_PASSED++)) || true
 
@@ -741,11 +738,11 @@ test_module_list() {
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: РЅР°Р»РёС‡РёРµ РІСЃРµС… РѕСЃРЅРѕРІРЅС‹С… С„СѓРЅРєС†РёР№ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: наличие всех основных функций ────────────────────────────────────────
 
 test_all_functions_exist() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ РІСЃРµС… РѕСЃРЅРѕРІРЅС‹С… С„СѓРЅРєС†РёР№..."
+  info "Тестирование наличия всех основных функций..."
 
   local required_functions=(
 
@@ -801,49 +798,49 @@ test_all_functions_exist() {
 
   if [[ $found -eq ${#required_functions[@]} ]]; then
 
-    pass "Р’СЃРµ С„СѓРЅРєС†РёРё СЃСѓС‰РµСЃС‚РІСѓСЋС‚ ($found/${#required_functions[@]})"
+    pass "Все функции существуют ($found/${#required_functions[@]})"
 
     ((TESTS_PASSED++)) || true
 
   else
 
-    fail "РќРµ РІСЃРµ С„СѓРЅРєС†РёРё РЅР°Р№РґРµРЅС‹ ($found/${#required_functions[@]})"
+    fail "Не все функции найдены ($found/${#required_functions[@]})"
 
   fi
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: конфигурационные переменные ──────────────────────────────────────────
 
 test_config_variables() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅС‹С… РїРµСЂРµРјРµРЅРЅС‹С…..."
+  info "Тестирование конфигурационных переменных..."
 
   if [[ -n "$BACKUP_DIR" ]] && [[ -n "$BACKUP_ARCHIVE_DIR" ]] && [[ -n "$ROLLBACK_TEMP_DIR" ]]; then
 
-    pass "РљРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ СѓСЃС‚Р°РЅРѕРІР»РµРЅС‹"
+    pass "Конфигурационные переменные установлены"
 
     ((TESTS_PASSED++)) || true
 
   else
 
-    fail "РљРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ РЅРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅС‹"
+    fail "Конфигурационные переменные не установлены"
 
   fi
 
 }
 
-# в”Ђв”Ђ РўРµСЃС‚: verify_sha256 integration в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тест: verify_sha256 integration ────────────────────────────────────────────
 
 test_verify_sha256_integration() {
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РёРЅС‚РµРіСЂР°С†РёРё verify_sha256..."
+  info "Тестирование интеграции verify_sha256..."
 
   local test_file="/tmp/test-verify-$$"
 
   echo "test content" >"$test_file"
 
-  # РџРѕР»СѓС‡Р°РµРј СЂРµР°Р»СЊРЅС‹Р№ hash
+  # Получаем реальный hash
 
   local expected_hash
 
@@ -851,17 +848,17 @@ test_verify_sha256_integration() {
 
   expected_hash=$(sha256sum "$test_file" | awk '{print $1}')
 
-  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ verify_sha256 СЃСѓС‰РµСЃС‚РІСѓРµС‚
+  # Проверяем что verify_sha256 существует
 
   if declare -f verify_sha256 &>/dev/null; then
 
-    pass "verify_sha256 С„СѓРЅРєС†РёСЏ РґРѕСЃС‚СѓРїРЅР°"
+    pass "verify_sha256 функция доступна"
 
     ((TESTS_PASSED++)) || true
 
   else
 
-    fail "verify_sha256 С„СѓРЅРєС†РёСЏ РЅРµ РЅР°Р№РґРµРЅР°"
+    fail "verify_sha256 функция не найдена"
 
   fi
 
@@ -869,25 +866,25 @@ test_verify_sha256_integration() {
 
 }
 
-# в”Ђв”Ђ РћСЃРЅРѕРІРЅР°СЏ С„СѓРЅРєС†РёСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Основная функция ────────────────────────────────────────────────────────────
 
 main() {
 
   echo ""
 
-  echo -e "${YELLOW}в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ╗${PLAIN}"
+  echo -e "${YELLOW}╔══════════════════════════════════════════════════════════╗${PLAIN}"
 
-  echo -e "${YELLOW}в•‘        CubiVeil Unit Tests - Rollback Module         в•‘${PLAIN}"
+  echo -e "${YELLOW}║        CubiVeil Unit Tests - Rollback Module         ║${PLAIN}"
 
-  echo -e "${YELLOW}╚в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ╝${PLAIN}"
-
-  echo ""
-
-  info "РўРµСЃС‚РёСЂСѓРµРјС‹Р№ РјРѕРґСѓР»СЊ: $MODULE_PATH"
+  echo -e "${YELLOW}╚══════════════════════════════════════════════════════════╝${PLAIN}"
 
   echo ""
 
-  # в”Ђв”Ђ Р—Р°РїСѓСЃРє С‚РµСЃС‚РѕРІ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+  info "Тестируемый модуль: $MODULE_PATH"
+
+  echo ""
+
+  # ── Запуск тестов ────────────────────────────────────────────────────────────
 
   test_file_exists
 
@@ -983,33 +980,35 @@ main() {
 
   echo ""
 
-  # в”Ђв”Ђ РС‚РѕРіРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+  # ── Итоги ────────────────────────────────────────────────────────────────────
 
   echo ""
 
-  echo -e "${YELLOW}в”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓ${PLAIN}"
+  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
 
-  echo -e "${GREEN}РџСЂРѕР№РґРµРЅРѕ: $TESTS_PASSED${PLAIN}"
+  echo -e "${GREEN}Пройдено: $TESTS_PASSED${PLAIN}"
 
   if [[ $TESTS_FAILED -gt 0 ]]; then
 
-    echo -e "${RED}РџСЂРѕРІР°Р»РµРЅРѕ:  $TESTS_FAILED${PLAIN}"
+    echo -e "${RED}Провалено:  $TESTS_FAILED${PLAIN}"
 
   fi
 
-  echo -e "${YELLOW}в”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓв”Ѓ${PLAIN}"
+  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
+
+  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
 
   echo ""
 
   if [[ $TESTS_FAILED -gt 0 ]]; then
 
-    echo -e "${RED}вќЊ РўРµСЃС‚С‹ РїСЂРѕРІР°Р»РµРЅС‹${PLAIN}"
+    echo -e "${RED}║ Тесты провалены${PLAIN}"
 
     exit 1
 
   else
 
-    echo -e "${GREEN}вњ… Р’СЃРµ С‚РµСЃС‚С‹ РїСЂРѕР№РґРµРЅС‹${PLAIN}"
+    echo -e "${GREEN}✓ Все тесты пройдены${PLAIN}"
 
     exit 0
 

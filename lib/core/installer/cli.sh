@@ -25,6 +25,7 @@ INSTALL_TRAFFIC_SHAPING="true"
 INSTALL_TELEGRAM=""
 INSTALL_SUI="true"
 INSTALL_SSL="true"
+INSTALL_PROFILES="true"
 
 # Автоматический режим (не интерактивный)
 INTERACTIVE_MODE="true"
@@ -75,6 +76,7 @@ _parse_args_early() {
     --domain=*) DOMAIN="${1#*=}" ;;
     --no-decoy) INSTALL_DECOY="false" ;;
     --no-traffic-shaping) INSTALL_TRAFFIC_SHAPING="false" ;;
+    --no-profiles) INSTALL_PROFILES="false" ;;
     --no-sui) INSTALL_SUI="false" ;;
     --no-ssl) INSTALL_SSL="false" ;;
     --telegram) INSTALL_TELEGRAM="true" ;;

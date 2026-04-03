@@ -579,6 +579,9 @@ MSG_STEP_4_8_SSL_RU="SSL сертификат"
 MSG_STEP_5_8_SUI="S-UI Panel"
 MSG_STEP_5_8_SUI_RU="Панель S-UI"
 
+MSG_STEP_PROFILES="VPN Profiles"
+MSG_STEP_PROFILES_RU="VPN профили"
+
 MSG_STEP_6_8_DECOY="Decoy site"
 MSG_STEP_6_8_DECOY_RU="Сайт-прикрытие (decoy)"
 

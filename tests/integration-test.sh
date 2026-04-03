@@ -1,16 +1,16 @@
 #!/bin/bash
 # shellcheck disable=SC1071,SC1111
-# ║в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ╗
-# в•‘          CubiVeil вЂ" Test Suite                            в•‘
-# в•‘          github.com/cubiculus/cubiveil                    в•‘
-# в•‘                                                           в•‘
-# в•‘  РљРѕРјРїР»РµРєСЃРЅРѕРµ С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ РІСЃРµС… РјРѕРґСѓР»РµР№                    в•‘
-# ╚в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ╝
+# ╔══════════════════════════════════════════════════════════╗
+# ║          CubiVeil — Test Suite                           ║
+# ║          github.com/cubiculus/cubiveil                   ║
+# ║                                                          ║
+# ║  Комплексное тестирование всех модулей                   ║
+# ╚══════════════════════════════════════════════════════════╝
 
-# в”Ђв”Ђ РџРѕРґРєР»СЋС‡РµРЅРёРµ Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ / Dependencies в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Подключение зависимостей / Dependencies ─────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# РџРѕРґРєР»СЋС‡Р°РµРј core РјРѕРґСѓР»Рё
+# Подключаем core модули
 if [[ -f "${SCRIPT_DIR}/lib/core/system.sh" ]]; then
   source "${SCRIPT_DIR}/lib/core/system.sh"
 fi
@@ -19,39 +19,39 @@ if [[ -f "${SCRIPT_DIR}/lib/core/log.sh" ]]; then
   source "${SCRIPT_DIR}/lib/core/log.sh"
 fi
 
-# РџРѕРґРєР»СЋС‡Р°РµРј manifest
+# Подключаем manifest
 if [[ -f "${SCRIPT_DIR}/lib/manifest.sh" ]]; then
   source "${SCRIPT_DIR}/lib/manifest.sh"
 fi
 
-# в”Ђв”Ђ РљРѕРЅС„РёРіСѓСЂР°С†РёСЏ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ / Test Configuration в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Конфигурация тестирования / Test Configuration ──────────────────────────
 
 TEST_RESULTS_DIR="/tmp/cubiveil-test-results"
 TEST_LOG_FILE="${TEST_RESULTS_DIR}/test.log"
 
-# РЎС‡С‘С‚С‡РёРєРё С‚РµСЃС‚РѕРІ
+# Счётчики тестов
 TESTS_TOTAL=0
 TESTS_PASSED=0
 TESTS_FAILED=0
 TESTS_SKIPPED=0
 
-# в”Ђв”Ђ РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ / Initialization в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Инициализация / Initialization ──────────────────────────────────────────
 
-# РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ С‚РµСЃС‚РѕРІРѕР№ СЃСЂРµРґС‹
+# Инициализация тестовой среды
 test_init() {
   log_step "test_init" "Initializing test environment"
 
   dir_ensure "$TEST_RESULTS_DIR"
 
-  # РћС‡РёС‰Р°РµРј Р»РѕРі-С„Р°Р№Р»
+  # Очищаем лог-файл
   echo "" >"$TEST_LOG_FILE"
 
   log_debug "Test environment initialized"
 }
 
-# в”Ђв”Ђ РЈС‚РёР»РёС‚С‹ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ / Test Utilities в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Утилиты тестирования / Test Utilities ───────────────────────────────────
 
-# Р’С‹РІРѕРґ СЂРµР·СѓР»СЊС‚Р°С‚Р° С‚РµСЃС‚Р°
+# Вывод результата теста
 test_result() {
   local test_name="$1"
   local result="$2"
@@ -78,9 +78,9 @@ test_result() {
   esac
 }
 
-# в”Ђв”Ђ РўРµСЃС‚С‹ Core РјРѕРґСѓР»РµР№ / Core Module Tests в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тесты Core модулей / Core Module Tests ──────────────────────────────────
 
-# РўРµСЃС‚: Core РјРѕРґСѓР»Рё РґРѕСЃС‚СѓРїРЅС‹
+# Тест: Core модули доступны
 test_core_modules_available() {
   local test_name="Core modules availability"
 
@@ -92,7 +92,7 @@ test_core_modules_available() {
   fi
 }
 
-# РўРµСЃС‚: РџСЂРѕРІРµСЂРєР° pkg_check
+# Тест: Проверка pkg_check
 test_pkg_check() {
   local test_name="pkg_check function"
 
@@ -103,11 +103,11 @@ test_pkg_check() {
   fi
 }
 
-# РўРµСЃС‚: РџСЂРѕРІРµСЂРєР° svc_active
+# Тест: Проверка svc_active
 test_svc_active() {
   local test_name="svc_active function"
 
-  # РџСЂРѕРІРµСЂСЏРµРј РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ СЃРµСЂРІРёСЃ
+  # Проверяем несуществующий сервис
   if ! svc_active "nonexistent-service-12345"; then
     test_result "$test_name" "pass"
   else
@@ -115,9 +115,9 @@ test_svc_active() {
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚С‹ Manifest / Manifest Tests в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тесты Manifest / Manifest Tests ─────────────────────────────────────────
 
-# РўРµСЃС‚: Manifest Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ
+# Тест: Manifest загружается
 test_manifest_loads() {
   local test_name="Manifest loading"
 
@@ -128,7 +128,7 @@ test_manifest_loads() {
   fi
 }
 
-# РўРµСЃС‚: РџСЂРѕРІРµСЂРєР° РїРѕСЂСЏРґРєР° РјРѕРґСѓР»РµР№
+# Тест: Проверка порядка модулей
 test_manifest_order() {
   local test_name="Manifest order validation"
 
@@ -142,9 +142,9 @@ test_manifest_order() {
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚С‹ РјРѕРґСѓР»РµР№ / Module Tests в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тесты модулей / Module Tests ────────────────────────────────────────────
 
-# РўРµСЃС‚: Firewall РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
+# Тест: Firewall модуль доступен
 test_firewall_module() {
   local test_name="Firewall module availability"
 
@@ -157,7 +157,7 @@ test_firewall_module() {
   fi
 }
 
-# РўРµСЃС‚: Fail2ban РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
+# Тест: Fail2ban модуль доступен
 test_fail2ban_module() {
   local test_name="Fail2ban module availability"
 
@@ -170,7 +170,7 @@ test_fail2ban_module() {
   fi
 }
 
-# РўРµСЃС‚: SSL РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
+# Тест: SSL модуль доступен
 test_ssl_module() {
   local test_name="SSL module availability"
 
@@ -183,7 +183,7 @@ test_ssl_module() {
   fi
 }
 
-# РўРµСЃС‚: Singbox РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
+# Тест: Singbox модуль доступен
 test_singbox_module() {
   local test_name="Singbox module availability"
 
@@ -196,7 +196,7 @@ test_singbox_module() {
   fi
 }
 
-# РўРµСЃС‚: System РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
+# Тест: System модуль доступен
 test_system_module() {
   local test_name="System module availability"
 
@@ -209,7 +209,7 @@ test_system_module() {
   fi
 }
 
-# РўРµСЃС‚: Backup РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
+# Тест: Backup модуль доступен
 test_backup_module() {
   local test_name="Backup module availability"
 
@@ -222,7 +222,7 @@ test_backup_module() {
   fi
 }
 
-# РўРµСЃС‚: Rollback РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
+# Тест: Rollback модуль доступен
 test_rollback_module() {
   local test_name="Rollback module availability"
 
@@ -235,7 +235,7 @@ test_rollback_module() {
   fi
 }
 
-# РўРµСЃС‚: Monitoring РјРѕРґСѓР»СЊ РґРѕСЃС‚СѓРїРµРЅ
+# Тест: Monitoring модуль доступен
 test_monitoring_module() {
   local test_name="Monitoring module availability"
 
@@ -248,9 +248,9 @@ test_monitoring_module() {
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚С‹ Step С„СѓРЅРєС†РёР№ / Step Functions Tests в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тесты Step функций / Step Functions Tests ───────────────────────────────
 
-# РўРµСЃС‚: Step С„Р°Р№Р»С‹ РґРѕСЃС‚СѓРїРЅС‹
+# Тест: Step файлы доступны
 test_step_files_available() {
   local test_name="Step files availability"
 
@@ -266,9 +266,9 @@ test_step_files_available() {
   fi
 }
 
-# в”Ђв”Ђ РўРµСЃС‚С‹ СѓС‚РёР»РёС‚ / Utility Tests в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Тесты утилит / Utility Tests ────────────────────────────────────────────
 
-# РўРµСЃС‚: Utils.sh РґРѕСЃС‚СѓРїРµРЅ
+# Тест: Utils.sh доступен
 test_utils_available() {
   local test_name="Utils.sh availability"
 
@@ -279,7 +279,7 @@ test_utils_available() {
   fi
 }
 
-# РўРµСЃС‚: Validation.sh РґРѕСЃС‚СѓРїРµРЅ
+# Тест: Validation.sh доступен
 test_validation_available() {
   local test_name="Validation.sh availability"
 
@@ -290,7 +290,7 @@ test_validation_available() {
   fi
 }
 
-# РўРµС‚: Security.sh РґРѕСЃС‚СѓРїРµРЅ
+# Тест: Security.sh доступен
 test_security_available() {
   local test_name="Security.sh availability"
 
@@ -301,7 +301,7 @@ test_security_available() {
   fi
 }
 
-# РўРµС‚: bootstrap setup_remote_install + ensure_file fallback
+# Тест: bootstrap setup_remote_install + ensure_file fallback
 test_bootstrap_setup_remote_install_fallback() {
   local test_name="Bootstrap curl installer fallback"
 
@@ -355,19 +355,19 @@ test_bootstrap_setup_remote_install_fallback() {
 
 }
 
-# в”Ђв”Ђ Р—Р°РїСѓСЃРє РІСЃРµС… С‚РµСЃС‚РѕРІ / Run All Tests в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Запуск всех тестов / Run All Tests ──────────────────────────────────────
 
-# Р—Р°РїСѓСЃРє РІСЃРµС… С‚РµСЃС‚РѕРІ
+# Запуск всех тестов
 test_run_all() {
   log_step "test_run_all" "Running all tests"
 
   echo ""
-  echo "в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ"
+  echo "════════════════════════════════════════════════════════"
   echo "  CubiVeil Test Suite"
-  echo "в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ"
+  echo "════════════════════════════════════════════════════════"
   echo ""
 
-  # Core РјРѕРґСѓР»Рё
+  # Core модули
   test_core_modules_available
   test_pkg_check
   test_svc_active
@@ -376,7 +376,7 @@ test_run_all() {
   test_manifest_loads
   test_manifest_order
 
-  # РњРѕРґСѓР»Рё
+  # Модули
   test_firewall_module
   test_fail2ban_module
   test_ssl_module
@@ -386,10 +386,10 @@ test_run_all() {
   test_rollback_module
   test_monitoring_module
 
-  # Step С„СѓРЅРєС†РёРё
+  # Step функции
   test_step_files_available
 
-  # РЈС‚РёР»РёС‚С‹
+  # Утилиты
   test_utils_available
   test_validation_available
   test_security_available
@@ -398,15 +398,15 @@ test_run_all() {
   test_bootstrap_setup_remote_install_fallback
 
   echo ""
-  echo "в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ"
+  echo "════════════════════════════════════════════════════════"
   echo ""
 }
 
-# РћС‚С‡С‘С‚ Рѕ С‚РµСЃС‚Р°С…
+# Отчёт о тестах
 test_report() {
-  echo "в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ"
+  echo "════════════════════════════════════════════════════════"
   echo "  Test Results"
-  echo "в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ"
+  echo "════════════════════════════════════════════════════════"
   echo ""
   echo "  Total:   $TESTS_TOTAL"
   echo "  Passed:  $TESTS_PASSED"
@@ -415,11 +415,11 @@ test_report() {
   echo ""
 
   if [[ $TESTS_FAILED -eq 0 ]]; then
-    echo "  Status: вњ“ ALL TESTS PASSED"
+    echo "  Status: ✓ ALL TESTS PASSED"
     echo ""
     return 0
   else
-    echo "  Status: вњ— SOME TESTS FAILED"
+    echo "  Status: ✗ SOME TESTS FAILED"
     echo ""
     echo "  Log file: $TEST_LOG_FILE"
     echo ""
@@ -427,7 +427,7 @@ test_report() {
   fi
 }
 
-# Р‘С‹СЃС‚СЂС‹Р№ С‚РµСЃС‚ (С‚РѕР»СЊРєРѕ РєСЂРёС‚РёС‡РЅС‹Рµ)
+# Быстрый тест (только критичные)
 test_run_quick() {
   log_step "test_run_quick" "Running quick tests"
 
@@ -436,29 +436,29 @@ test_run_quick() {
   test_system_module
 }
 
-# в”Ђв”Ђ РњРѕРґСѓР»СЊРЅС‹Р№ РёРЅС‚РµСЂС„РµР№СЃ / Module Interface в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# ── Модульный интерфейс / Module Interface ──────────────────────────────────
 
-# РЎС‚Р°РЅРґР°СЂС‚РЅС‹Р№ РёРЅС‚РµСЂС„РµР№СЃ РјРѕРґСѓР»СЏ
+# Стандартный интерфейс модуля
 module_install() { :; }
 module_configure() { :; }
 module_enable() { :; }
 module_disable() { :; }
 
-# Р—Р°РїСѓСЃРє РІСЃРµС… С‚РµСЃС‚РѕРІ
+# Запуск всех тестов
 module_test_all() {
   test_init
   test_run_all
   test_report
 }
 
-# Р—Р°РїСѓСЃРє Р±С‹СЃС‚СЂС‹С… С‚РµСЃС‚РѕРІ
+# Запуск быстрых тестов
 module_test_quick() {
   test_init
   test_run_quick
   test_report
 }
 
-# Р—Р°РїСѓСЃРє С‚РѕР»СЊРєРѕ РѕРїСЂРµРґРµР»С‘РЅРЅРѕРіРѕ С‚РµСЃС‚Р°
+# Запуск только определённого теста
 module_test_one() {
   local test_func="$1"
 

@@ -1,25 +1,25 @@
 #!/bin/bash
 # shellcheck disable=SC1071,SC1111,SC2140
-# ╔═════════════════════════════════════════════════════════════
-# ╓        CubiVeil Unit Tests - Backup Module                ╓
-# ╓        РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ lib/modules/backup/install.sh         ╓
-# ╚═══════════════════════════════════════════════════════════╝
+# ╔══════════════════════════════════════════════════════════════╗
+# ║        CubiVeil Unit Tests - Backup Module                 ║
+# ║        Тестирование lib/modules/backup/install.sh          ║
+# ╚══════════════════════════════════════════════════════════════╝
 
 set -euo pipefail
 
-# ── РџРѕРґРєР»СЋС‡РµРЅРёРµ С‚РµСЃС‚РѕРІС‹С... СѓС‚РёР»РёС‚ ───────────────────────────────
+# ── Подключение тестовых утилит ───────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${SCRIPT_DIR}/lib/test-utils.sh"
 
-# ── Р-Р°РіСЂСѓР·РєР° С‚РµСЃС‚РёСЂСѓРµРјРѕРіРѕ РјРѕРґСѓР»СЏ ───────────────────────────────
+# ── Загрузка тестируемого модуля ──────────────────────────────
 MODULE_PATH="${SCRIPT_DIR}/lib/modules/backup/install.sh"
 
 if [[ ! -f "$MODULE_PATH" ]]; then
-  echo "РћС€РёР±РєР°: Backup module РЅРµ РЅР°Р№РґРµРЅ: $MODULE_PATH"
+  echo "Ошибка: Backup module не найден: $MODULE_PATH"
   exit 1
 fi
 
-# ── Mock Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№ ─────────────────────────────────────────
+# ── Mock зависимостей ────────────────────────────────────────
 log_step() { echo "[LOG_STEP] $1: $2" >&2; }
 log_debug() { echo "[DEBUG] $1" >&2; }
 log_success() { echo "[SUCCESS] $1" >&2; }
@@ -27,7 +27,7 @@ log_warn() { echo "[WARN] $1" >&2; }
 log_info() { echo "[INFO] $1" >&2; }
 log_error() { echo "[ERROR] $1" >&2; }
 
-# Mock core С„СѓРЅРєС†РёР№
+# Mock core функций
 dir_ensure() { mkdir -p "$1" 2>/dev/null || true; }
 
 svc_active() { return 1; }
@@ -40,13 +40,13 @@ svc_start() {
   return 0
 }
 
-# Mock РґР»СЏ РіРµРЅРµСЂР°С†РёРё РєР»СЋС‡РµР№
+# Mock для генерации ключей
 generate_secure_key() {
   local length="${1:-32}"
   head -c "$length" /dev/urandom 2>/dev/null | base64 | tr -dc 'a-zA-Z0-9' | head -c "$length"
 }
 
-# Mock РґР»СЏ С€РёС„СЂРѕРІР°РЅРёСЏ
+# Mock для шифрования
 encrypt_to_file() {
   local content="$1"
   local key="$2"
@@ -55,90 +55,90 @@ encrypt_to_file() {
   return 0
 }
 
-# Mock РґР»СЏ РїСЂРѕРІРµСЂРєРё SSL
+# Mock для проверки SSL
 verify_ssl_cert() { return 0; }
 
-# Mock РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ IP
+# Mock для получения IP
 get_server_ip() { echo "1.2.3.4"; }
 
-# Mock РєРѕРјР°РЅРґ
+# Mock команд
 command() {
   local cmd="$1"
   shift
   case "$cmd" in
   -v)
     if [[ "$1" == "age" ]]; then
-      return 1 # age РЅРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РІ С‚РµСЃС‚Р°С...
+      return 1 # age не установлен по умолчанию в тестах
     fi
     ;;
   esac
   return 0
 }
 
-# ── Р-Р°РіСЂСѓР·РєР° РјРѕРґСѓР»СЏ ───────────────────────────────────────────
+# ── Загрузка модуля ──────────────────────────────────────────
 # shellcheck source=lib/modules/backup/install.sh
 source "$MODULE_PATH"
 
-# ── РўРµСЃС‚: С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚ ───────────────────────────────────────
+# ── Тест: файл существует ────────────────────────────────────
 test_file_exists() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ С„Р°Р№Р»Р° РјРѕРґСѓР»СЏ..."
+  info "Тестирование наличия файла модуля..."
 
   if [[ -f "$MODULE_PATH" ]]; then
-    pass "Backup module: С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚"
+    pass "Backup module: файл существует"
     ((TESTS_PASSED++)) || true
   else
-    fail "Backup module: С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ"
+    fail "Backup module: файл не найден"
   fi
 }
 
-# ── РўРµСЃС‚: СЃРёРЅС‚Р°РєСЃРёСЃ СЃРєСЂРёРїС‚Р° ───────────────────────────────────
+# ── Тест: синтаксис скрипта ──────────────────────────────────
 test_syntax() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СЃРёРЅС‚Р°РєСЃРёСЃР°..."
+  info "Тестирование синтаксиса..."
 
   if bash -n "$MODULE_PATH" 2>/dev/null; then
-    pass "Backup module: СЃРёРЅС‚Р°РєСЃРёСЃ РєРѕСЂСЂРµРєС‚РµРЅ"
+    pass "Backup module: синтаксис корректен"
     ((TESTS_PASSED++)) || true
   else
-    fail "Backup module: СЃРёРЅС‚Р°РєСЃРёС‡РµСЃРєР°СЏ РѕС€РёР±РєР°"
+    fail "Backup module: синтаксическая ошибка"
   fi
 }
 
-# ── РўРµСЃС‚: shebang ──────────────────────────────────────────────
+# ── Тест: shebang ────────────────────────────────────────────
 test_shebang() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ shebang..."
+  info "Тестирование shebang..."
 
   local shebang
   shebang=$(head -1 "$MODULE_PATH")
 
   if [[ "$shebang" == "#!/bin/bash" ]]; then
-    pass "Backup module: РєРѕСЂСЂРµРєС‚РЅС‹Р№ shebang"
+    pass "Backup module: корректный shebang"
     ((TESTS_PASSED++)) || true
   else
-    fail "Backup module: РЅРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ shebang: $shebang"
+    fail "Backup module: некорректный shebang: $shebang"
   fi
 }
 
-# ── РўРµСЃС‚: backup_init ──────────────────────────────────────────
+# ── Тест: backup_init ────────────────────────────────────────
 test_backup_init() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_init..."
+  info "Тестирование backup_init..."
 
   backup_init
 
-  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ РґРёСЂРµРєС‚РѕСЂРёРё СЃРѕР·РґР°РЅС‹
+  # Проверяем что директории созданы
   if [[ -d "$BACKUP_DIR" ]] || true; then
-    pass "backup_init: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+    pass "backup_init: вызвана без ошибок"
     ((TESTS_PASSED++)) || true
   else
-    pass "backup_init: РІС‹Р·РІР°РЅР° (РґРёСЂРµРєС‚РѕСЂРёРё РјРѕРіСѓС‚ РЅРµ СЃРѕР·РґР°С‚СЊСЃСЏ РІ С‚РµСЃС‚Рµ)"
+    pass "backup_init: вызвана (директории могут не создаться в тесте)"
     ((TESTS_PASSED++)) || true
   fi
 }
 
-# ── РўРµСЃС‚: backup_generate_encryption_key ───────────────────────
+# ── Тест: backup_generate_encryption_key ─────────────────────
 test_backup_generate_encryption_key() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_generate_encryption_key..."
+  info "Тестирование backup_generate_encryption_key..."
 
-  # РЎРѕР·РґР°С'Рј С‚РµСЃС‚РѕРІСѓСЋ РґРёСЂРµРєС‚РѕСЂРёСЋ
+  # Создаём тестовую директорию
   local test_backup_dir="/tmp/test-backup-$$"
   mkdir -p "$test_backup_dir"
   BACKUP_DIR="$test_backup_dir"
@@ -147,72 +147,72 @@ test_backup_generate_encryption_key() {
   key=$(backup_generate_encryption_key)
 
   if [[ -n "$key" ]] && [[ ${#key} -ge 32 ]]; then
-    pass "backup_generate_encryption_key: РєР»СЋС‡ СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅ (${#key} СЃРёРјРІРѕР»РѕРІ)"
+    pass "backup_generate_encryption_key: ключ сгенерирован (${#key} символов)"
     ((TESTS_PASSED++)) || true
   else
-    fail "backup_generate_encryption_key: РєР»СЋС‡ РЅРµ СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅ"
+    fail "backup_generate_encryption_key: ключ не сгенерирован"
   fi
 
-  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ С„Р°Р№Р» РєР»СЋС‡Р° СЃРѕР·РґР°РЅ
+  # Проверяем что файл ключа создан
   if [[ -f "${test_backup_dir}/backup-key.txt" ]]; then
-    pass "backup_generate_encryption_key: С„Р°Р№Р» РєР»СЋС‡Р° СЃРѕР·РґР°РЅ"
+    pass "backup_generate_encryption_key: файл ключа создан"
     ((TESTS_PASSED++)) || true
   else
-    fail "backup_generate_encryption_key: С„Р°Р№Р» РєР»СЋС‡Р° РЅРµ СЃРѕР·РґР°РЅ"
+    fail "backup_generate_encryption_key: файл ключа не создан"
   fi
 
   rm -rf "$test_backup_dir"
 }
 
-# ── РўРµСЃС‚: backup_get_encryption_key ────────────────────────────
+# ── Тест: backup_get_encryption_key ──────────────────────────
 test_backup_get_encryption_key() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_get_encryption_key..."
+  info "Тестирование backup_get_encryption_key..."
 
   local test_backup_dir="/tmp/test-backup-$$"
   mkdir -p "$test_backup_dir"
   BACKUP_DIR="$test_backup_dir"
 
-  # РЎРЅР°С‡Р°Р»Р° РіРµРЅРµСЂРёСЂСѓРµРј РєР»СЋС‡
+  # Сначала генерируем ключ
   backup_generate_encryption_key >/dev/null
 
-  # Р-Р°С‚РµРј РїРѕР»СѓС‡Р°РµРј РµРіРѕ
+  # Затем получаем его
   local key
   key=$(backup_get_encryption_key)
 
   if [[ -n "$key" ]]; then
-    pass "backup_get_encryption_key: РєР»СЋС‡ РїРѕР»СѓС‡РµРЅ"
+    pass "backup_get_encryption_key: ключ получен"
     ((TESTS_PASSED++)) || true
   else
-    fail "backup_get_encryption_key: РєР»СЋС‡ РЅРµ РїРѕР»СѓС‡РµРЅ"
+    fail "backup_get_encryption_key: ключ не получен"
   fi
 
   rm -rf "$test_backup_dir"
 }
 
-# ── РўРµСЃС‚: backup_check_environment ─────────────────────────────
+# ── Тест: backup_check_environment ───────────────────────────
 test_backup_check_environment() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_check_environment..."
+  info "Тестирование backup_check_environment..."
 
-  # Р¤СѓРЅРєС†РёСЏ РІРµСЂРЅС'С‚ РѕС€РёР±РєРё С‚.Рє. РѕРєСЂСѓР¶РµРЅРёРµ С‚РµСЃС‚РѕРІРѕРµ
+  # Функция вернёт ошибки т.к. окружение тестовое
   backup_check_environment || true
 
-  pass "backup_check_environment: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "backup_check_environment: вызвана без ошибок"
   ((TESTS_PASSED++)) || true
 }
 
-# ── РўРµСЃС‚: backup_stop_services ─────────────────────────────────
+# ── Тест: backup_stop_services ───────────────────────────────
 test_backup_stop_services() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_stop_services..."
+  info "Тестирование backup_stop_services..."
 
   backup_stop_services
 
-  pass "backup_stop_services: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "backup_stop_services: вызвана без ошибок"
   ((TESTS_PASSED++)) || true
 }
 
-# ── РўРµСЃС‚: backup_sui_db ────────────────────────────────────
+# ── Тест: backup_sui_db ──────────────────────────────────────
 test_backup_sui_db() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_sui_db..."
+  info "Тестирование backup_sui_db..."
 
   local test_backup_dir="/tmp/test-backup-$$"
   local test_marzban_dir="/tmp/test-marzban-$$"
@@ -221,17 +221,17 @@ test_backup_sui_db() {
   BACKUP_DIR="$test_backup_dir"
   S_UI_DIR="$test_marzban_dir"
 
-  # РЎРѕР·РґР°С'Рј С‚РµСЃС‚РѕРІСѓСЋ Р'Р"
+  # Создаём тестовую БД
   echo "test db content" >"${S_UI_DIR}/db.sqlite3"
 
-  # Mock РґР»СЏ sha256sum
+  # Mock для sha256sum
   sha256sum() {
     echo "abc123def456  $1"
   }
 
   backup_sui_db || true
 
-  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ Р±СЌРєР°Рї СЃРѕР·РґР°РЅ
+  # Проверяем что бэкап создан
   if [[ -f "${test_backup_dir}/s-ui-db.sqlite3" ]]; then
     pass "backup_sui_db: бэкап создан"
     ((TESTS_PASSED++)) || true
@@ -243,9 +243,9 @@ test_backup_sui_db() {
   rm -rf "$test_backup_dir" "$test_marzban_dir"
 }
 
-# ── РўРµСЃС‚: backup_sui_config ────────────────────────────────
+# ── Тест: backup_sui_config ──────────────────────────────────
 test_backup_sui_config() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_sui_config..."
+  info "Тестирование backup_sui_config..."
 
   local test_backup_dir="/tmp/test-backup-$$"
   mkdir -p "$test_backup_dir"
@@ -253,23 +253,22 @@ test_backup_sui_config() {
   BACKUP_DIR="$test_backup_dir"
   MARZBAN_ENV="/tmp/test-marzban-env-$$"
 
-  # РЎРѕР·РґР°С'Рј С‚РµСЃС‚РѕРІС‹Р№ .env
+  # Создаём тестовый .env
   echo "TEST_VAR=test" >"$MARZBAN_ENV"
 
   sha256sum() { echo "abc123  $1"; }
 
   backup_sui_config
 
-  pass "backup_sui_config: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "backup_sui_config: вызвана без ошибок"
   ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir" "$MARZBAN_ENV"
 }
 
-# ── РўРµСЃС‚: backup_singbox_config ────────────────────────────────
-# ── РўРµСЃС‚: backup_ssl_certs ─────────────────────────────────────
+# ── Тест: backup_ssl_certs ───────────────────────────────────
 test_backup_ssl_certs() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_ssl_certs..."
+  info "Тестирование backup_ssl_certs..."
 
   local test_backup_dir="/tmp/test-backup-$$"
   local test_ssl_dir="/tmp/test-ssl-$$"
@@ -278,20 +277,20 @@ test_backup_ssl_certs() {
   BACKUP_DIR="$test_backup_dir"
   SSL_CERT_DIR="$test_ssl_dir"
 
-  # РЎРѕР·РґР°С'Рј С‚РµСЃС‚РѕРІС‹Р№ СЃРµСЂС‚РёС„РёРєР°С‚
+  # Создаём тестовый сертификат
   echo "test cert" >"${test_ssl_dir}/fullchain.pem"
 
   backup_ssl_certs || true
 
-  pass "backup_ssl_certs: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "backup_ssl_certs: вызвана без ошибок"
   ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir" "$test_ssl_dir"
 }
 
-# ── РўРµСЃС‚: backup_keys ──────────────────────────────────────────
+# ── Тест: backup_keys ────────────────────────────────────────
 test_backup_keys() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_keys..."
+  info "Тестирование backup_keys..."
 
   local test_backup_dir="/tmp/test-backup-$$"
   mkdir -p "$test_backup_dir"
@@ -305,29 +304,29 @@ test_backup_keys() {
 
   backup_keys
 
-  pass "backup_keys: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "backup_keys: вызвана без ошибок"
   ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir" "$CREDENTIALS_FILE" "$CREDENTIALS_KEY"
 }
 
-# ── РўРµСЃС‚: backup_encrypt_archive ───────────────────────────────
+# ── Тест: backup_encrypt_archive ─────────────────────────────
 test_backup_encrypt_archive() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_encrypt_archive..."
+  info "Тестирование backup_encrypt_archive..."
 
   local test_backup_dir="/tmp/test-backup-$$"
   mkdir -p "$test_backup_dir"
 
   BACKUP_DIR="$test_backup_dir"
 
-  # РЎРѕР·РґР°С'Рј С‚РµСЃС‚РѕРІС‹Р№ Р°СЂС...РёРІ
+  # Создаём тестовый архив
   local test_archive="${test_backup_dir}/test.tar.gz"
   echo "test archive" >"$test_archive"
 
-  # РЎРѕР·РґР°С'Рј РєР»СЋС‡
+  # Создаём ключ
   echo "test-key-123" >"${test_backup_dir}/backup-key.txt"
 
-  # Mock РґР»СЏ age
+  # Mock для age
   age() {
     echo "[MOCK] age: $*" >&2
     return 0
@@ -335,43 +334,43 @@ test_backup_encrypt_archive() {
 
   backup_encrypt_archive "$test_archive" || true
 
-  pass "backup_encrypt_archive: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "backup_encrypt_archive: вызвана без ошибок"
   ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir"
 }
 
-# ── РўРµСЃС‚: backup_system_info ───────────────────────────────────
+# ── Тест: backup_system_info ─────────────────────────────────
 test_backup_system_info() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_system_info..."
+  info "Тестирование backup_system_info..."
 
   local test_backup_dir="/tmp/test-backup-$$"
   mkdir -p "$test_backup_dir"
 
   BACKUP_DIR="$test_backup_dir"
 
-  # Mock РґР»СЏ hostname
+  # Mock для hostname
   hostname() { echo "test-host"; }
 
   sha256sum() { echo "abc123  $1"; }
 
   backup_system_info
 
-  # РџСЂРѕРІРµСЂСЏРµРј С‡С‚Рѕ С„Р°Р№Р» СЃРѕР·РґР°РЅ
+  # Проверяем что файл создан
   if [[ -f "${test_backup_dir}/system-info.txt" ]]; then
-    pass "backup_system_info: С„Р°Р№Р» СЃРѕР·РґР°РЅ"
+    pass "backup_system_info: файл создан"
     ((TESTS_PASSED++)) || true
   else
-    pass "backup_system_info: С„Р°Р№Р» РјРѕР¶РµС‚ РЅРµ СЃРѕР·РґР°С‚СЊСЃСЏ РІ С‚РµСЃС‚Рµ"
+    pass "backup_system_info: файл может не создаться в тесте"
     ((TESTS_PASSED++)) || true
   fi
 
   rm -rf "$test_backup_dir"
 }
 
-# ── РўРµСЃС‚: backup_create_archive ────────────────────────────────
+# ── Тест: backup_create_archive ──────────────────────────────
 test_backup_create_archive() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_create_archive..."
+  info "Тестирование backup_create_archive..."
 
   local test_backup_dir="/tmp/test-backup-$$"
   local test_archive_dir="/tmp/test-archive-$$"
@@ -380,7 +379,7 @@ test_backup_create_archive() {
   BACKUP_DIR="$test_backup_dir"
   BACKUP_ARCHIVE_DIR="$test_archive_dir"
 
-  # РЎРѕР·РґР°С'Рј С‚РµСЃС‚РѕРІС‹Рµ С„Р°Р№Р»С‹ (должны совпадать с backup_create_archive)
+  # Создаём тестовые файлы (должны совпадать с backup_create_archive)
   echo "test" >"${test_backup_dir}/s-ui.db"
   echo "test" >"${test_backup_dir}/s-ui.db.sha256"
   echo "test" >"${test_backup_dir}/s-ui.credentials"
@@ -412,19 +411,19 @@ test_backup_create_archive() {
   rm -rf "$test_backup_dir" "$test_archive_dir"
 }
 
-# ── РўРµСЃС‚: backup_start_services ────────────────────────────────
+# ── Тест: backup_start_services ──────────────────────────────
 test_backup_start_services() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_start_services..."
+  info "Тестирование backup_start_services..."
 
   backup_start_services
 
-  pass "backup_start_services: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "backup_start_services: вызвана без ошибок"
   ((TESTS_PASSED++)) || true
 }
 
-# ── РўРµСЃС‚: backup_cleanup_old ───────────────────────────────────
+# ── Тест: backup_cleanup_old ─────────────────────────────────
 test_backup_cleanup_old() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_cleanup_old..."
+  info "Тестирование backup_cleanup_old..."
 
   local test_archive_dir="/tmp/test-archive-$$"
   mkdir -p "$test_archive_dir"
@@ -433,15 +432,15 @@ test_backup_cleanup_old() {
 
   backup_cleanup_old
 
-  pass "backup_cleanup_old: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "backup_cleanup_old: вызвана без ошибок"
   ((TESTS_PASSED++)) || true
 
   rm -rf "$test_archive_dir"
 }
 
-# ── РўРµСЃС‚: backup_full ──────────────────────────────────────────
+# ── Тест: backup_full ────────────────────────────────────────
 test_backup_full() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ backup_full..."
+  info "Тестирование backup_full..."
 
   local test_backup_dir="/tmp/test-backup-$$"
   local test_archive_dir="/tmp/test-archive-$$"
@@ -452,7 +451,7 @@ test_backup_full() {
   BACKUP_ARCHIVE_DIR="$test_archive_dir"
   S_UI_DIR="$test_marzban_dir"
 
-  # РЎРѕР·РґР°С'Рј С‚РµСЃС‚РѕРІСѓСЋ Р'Р"
+  # Создаём тестовую БД
   echo "test db" >"${S_UI_DIR}/db.sqlite3"
 
   sha256sum() { echo "abc123  $1"; }
@@ -460,25 +459,25 @@ test_backup_full() {
 
   backup_full || true
 
-  pass "backup_full: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "backup_full: вызвана без ошибок"
   ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir" "$test_archive_dir" "$test_marzban_dir"
 }
 
-# ── РўРµСЃС‚: module_install ───────────────────────────────────────
+# ── Тест: module_install ─────────────────────────────────────
 test_module_install() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_install..."
+  info "Тестирование module_install..."
 
   module_install
 
-  pass "module_install: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "module_install: вызвана без ошибок"
   ((TESTS_PASSED++)) || true
 }
 
-# ── РўРµСЃС‚: module_backup ────────────────────────────────────────
+# ── Тест: module_backup ──────────────────────────────────────
 test_module_backup() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_backup..."
+  info "Тестирование module_backup..."
 
   local test_backup_dir="/tmp/test-backup-$$"
   mkdir -p "$test_backup_dir"
@@ -489,15 +488,15 @@ test_module_backup() {
 
   module_backup || true
 
-  pass "module_backup: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "module_backup: вызвана без ошибок"
   ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir"
 }
 
-# ── РўРµСЃС‚: module_quick_backup ──────────────────────────────────
+# ── Тест: module_quick_backup ────────────────────────────────
 test_module_quick_backup() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_quick_backup..."
+  info "Тестирование module_quick_backup..."
 
   local test_backup_dir="/tmp/test-backup-$$"
   local test_archive_dir="/tmp/test-archive-$$"
@@ -510,15 +509,15 @@ test_module_quick_backup() {
 
   module_quick_backup
 
-  pass "module_quick_backup: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "module_quick_backup: вызвана без ошибок"
   ((TESTS_PASSED++)) || true
 
   rm -rf "$test_backup_dir" "$test_archive_dir"
 }
 
-# ── РўРµСЃС‚: module_list ──────────────────────────────────────────
+# ── Тест: module_list ────────────────────────────────────────
 test_module_list() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_list..."
+  info "Тестирование module_list..."
 
   local test_archive_dir="/tmp/test-archive-$$"
   mkdir -p "$test_archive_dir"
@@ -527,15 +526,15 @@ test_module_list() {
 
   module_list
 
-  pass "module_list: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "module_list: вызвана без ошибок"
   ((TESTS_PASSED++)) || true
 
   rm -rf "$test_archive_dir"
 }
 
-# ── РўРµСЃС‚: module_cleanup ───────────────────────────────────────
+# ── Тест: module_cleanup ─────────────────────────────────────
 test_module_cleanup() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ module_cleanup..."
+  info "Тестирование module_cleanup..."
 
   local test_archive_dir="/tmp/test-archive-$$"
   mkdir -p "$test_archive_dir"
@@ -544,15 +543,15 @@ test_module_cleanup() {
 
   module_cleanup
 
-  pass "module_cleanup: РІС‹Р·РІР°РЅР° Р±РµР· РѕС€РёР±РѕРє"
+  pass "module_cleanup: вызвана без ошибок"
   ((TESTS_PASSED++)) || true
 
   rm -rf "$test_archive_dir"
 }
 
-# ── РўРµСЃС‚: РЅР°Р»РёС‡РёРµ РІСЃРµС... РѕСЃРЅРѕРІРЅС‹С... С„СѓРЅРєС†РёР№ ────────────────────────
+# ── Тест: наличие всех основных функций ──────────────────────
 test_all_functions_exist() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР°Р»РёС‡РёСЏ РІСЃРµС... РѕСЃРЅРѕРІРЅС‹С... С„СѓРЅРєС†РёР№..."
+  info "Тестирование наличия всех основных функций..."
 
   local required_functions=(
     "backup_init"
@@ -596,30 +595,30 @@ test_all_functions_exist() {
   fi
 }
 
-# ── РўРµСЃС‚: РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ ──────────────────────────
+# ── Тест: конфигурационные переменные ────────────────────────
 test_config_variables() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅС‹С... РїРµСЂРµРјРµРЅРЅС‹С......"
+  info "Тестирование конфигурационных переменных..."
 
   if [[ -n "$BACKUP_DIR" ]] && [[ -n "$BACKUP_RETENTION_DAYS" ]] && [[ -n "$BACKUP_ARCHIVE_DIR" ]]; then
-    pass "РљРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ СѓСЃС‚Р°РЅРѕРІР»РµРЅС‹"
+    pass "Конфигурационные переменные установлены"
     ((TESTS_PASSED++)) || true
   else
-    fail "РљРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ РЅРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅС‹"
+    fail "Конфигурационные переменные не установлены"
   fi
 }
 
-# ── РћСЃРЅРѕРІРЅР°СЏ С„СѓРЅРєС†РёСЏ ─────────────────────────────────────────
+# ── Основная функция ─────────────────────────────────────────
 main() {
   echo ""
   echo -e "${YELLOW}╔════════════════════════════════════════════════════════${PLAIN}"
-  echo -e "${YELLOW}╓        CubiVeil Unit Tests - Backup Module           ╓${PLAIN}"
-  echo -e "${YELLOW}╚══════════════════════════════════════════════════════╝${PLAIN}"
+  echo -e "${YELLOW}║        CubiVeil Unit Tests - Backup Module             ║${PLAIN}"
+  echo -e "${YELLOW}╚════════════════════════════════════════════════════════╝${PLAIN}"
   echo ""
 
-  info "РўРµСЃС‚РёСЂСѓРµРјС‹Р№ РјРѕРґСѓР»СЊ: $MODULE_PATH"
+  info "Тестируемый модуль: $MODULE_PATH"
   echo ""
 
-  # ── Р-Р°РїСѓСЃРє С‚РµСЃС‚РѕРІ ─────────────────────────────────────────
+  # ── Запуск тестов ─────────────────────────────────────────
   test_file_exists
   echo ""
 
@@ -698,21 +697,21 @@ main() {
   test_config_variables
   echo ""
 
-  # ── РС‚РѕРіРё ───────────────────────────────────────────────
+  # ── Итоги ─────────────────────────────────────────────────
   echo ""
-  echo -e "${YELLOW}в"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓ${PLAIN}"
-  echo -e "${GREEN}РџСЂРѕР№РґРµРЅРѕ: $TESTS_PASSED${PLAIN}"
+  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
+  echo -e "${GREEN}Пройдено: $TESTS_PASSED${PLAIN}"
   if [[ $TESTS_FAILED -gt 0 ]]; then
-    echo -e "${RED}РџСЂРѕРІР°Р»РµРЅРѕ: $TESTS_FAILED${PLAIN}"
+    echo -e "${RED}Провалено: $TESTS_FAILED${PLAIN}"
   fi
-  echo -e "${YELLOW}в"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓв"Ѓ${PLAIN}"
+  echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${PLAIN}"
   echo ""
 
   if [[ $TESTS_FAILED -gt 0 ]]; then
-    echo -e "${RED}вќЊ РўРµСЃС‚С‹ РїСЂРѕРІР°Р»РµРЅС‹${PLAIN}"
+    echo -e "${RED}❌ Тесты провалены${PLAIN}"
     exit 1
   else
-    echo -e "${GREEN}вњ... Р'СЃРµ С‚РµСЃС‚С‹ РїСЂРѕР№РґРµРЅС‹${PLAIN}"
+    echo -e "${GREEN}✅ Все тесты пройдены${PLAIN}"
     exit 0
   fi
 }

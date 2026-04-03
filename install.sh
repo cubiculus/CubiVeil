@@ -37,6 +37,7 @@ Options:
   --domain=NAME         Set domain (default in dev mode: ${DEV_DOMAIN})
   --no-decoy            Skip decoy-site installation
   --no-traffic-shaping  Skip traffic-shaping module
+  --no-profiles         Skip VPN profiles creation
   --no-sui              Skip s-ui panel installation
   --no-ssl              Skip SSL certificate installation
   --telegram            Install Telegram bot (will prompt for config)
@@ -173,6 +174,7 @@ main() {
   step_fail2ban
   step_ssl
   step_install_sui
+  step_create_profiles
   step_decoy_site
   step_traffic_shaping
   step_telegram

@@ -67,6 +67,7 @@ setup_remote_install() {
     "$TEMP_DIR/lib/modules/fail2ban" \
     "$TEMP_DIR/lib/modules/ssl" \
     "$TEMP_DIR/lib/modules/s-ui" \
+    "$TEMP_DIR/lib/modules/s-ui-profiles" \
     "$TEMP_DIR/lib/modules/backup" \
     "$TEMP_DIR/lib/modules/rollback" \
     "$TEMP_DIR/lib/modules/monitoring" \
@@ -85,6 +86,7 @@ setup_remote_install() {
     "lib/modules/fail2ban/install.sh"
     "lib/modules/ssl/install.sh"
     "lib/modules/s-ui/install.sh"
+    "lib/modules/s-ui-profiles/install.sh"
     "lib/modules/backup/install.sh"
     "lib/modules/rollback/install.sh"
     "lib/modules/monitoring/install.sh"

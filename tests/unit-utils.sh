@@ -1,19 +1,19 @@
 #!/bin/bash
 # shellcheck disable=SC1071,SC1111,SC2140
-# ╔═════════════════════════════════════════════════════════════
-# ╓        CubiVeil Unit Tests - lib/utils.sh                 ╓
-# ╓        РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ С„СѓРЅРєС†РёР№ СѓС‚РёР»РёС‚                        ╓
-# ╚═══════════════════════════════════════════════════════════╝
+# ╔══════════════════════════════════════════════════════════════╗
+# ║        CubiVeil Unit Tests - lib/utils.sh                  ║
+# ║        Тестирование функций утилит                         ║
+# ╚══════════════════════════════════════════════════════════════╝
 
 set -euo pipefail
 
-# ── РџРѕРґРєР»СЋС‡РµРЅРёРµ С‚РµСЃС‚РѕРІС‹С... СѓС‚РёР»РёС‚ ───────────────────────────────
+# ── Подключение тестовых утилит ───────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "${SCRIPT_DIR}/lib/test-utils.sh"
 
-# ── Р-Р°РіСЂСѓР·РєР° С‚РµСЃС‚РёСЂСѓРµРјРѕРіРѕ РјРѕРґСѓР»СЏ ───────────────────────────────
+# ── Загрузка тестируемого модуля ──────────────────────────────
 if [[ ! -f "${SCRIPT_DIR}/lib/utils.sh" ]]; then
-  echo "РћС€РёР±РєР°: lib/utils.sh РЅРµ РЅР°Р№РґРµРЅ"
+  echo "Ошибка: lib/utils.sh не найден"
   exit 1
 fi
 
@@ -24,145 +24,143 @@ step() { echo "$1"; }
 ok() { echo -e "${GREEN}[OK]${PLAIN} $1"; }
 warn() { echo -e "${YELLOW}[!]${PLAIN} $1"; }
 err() {
-  echo -e "${RED}[вњ-]${PLAIN} $1" >&2
+  echo -e "${RED}[✗]${PLAIN} $1" >&2
   exit 1
 }
 
-# Р-Р°РіСЂСѓР¶Р°РµРј РјРѕРґСѓР»СЊ
+# Загружаем модуль
 source "${SCRIPT_DIR}/lib/utils.sh"
 
-# ── Р-Р°РіСЂСѓР·РєР° РјРѕРґСѓР»СЏ РІР°Р»РёРґР°С†РёРё РґР»СЏ С‚РµСЃС‚РѕРІ ───────────────────────
+# ── Загрузка модуля валидации для тестов ──────────────────────
 if [[ -f "${SCRIPT_DIR}/lib/validation.sh" ]]; then
   source "${SCRIPT_DIR}/lib/validation.sh"
 fi
 
-# ── Р'СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅР°СЏ С„СѓРЅРєС†РёСЏ РґР»СЏ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ РіРµРЅРµСЂР°С‚РѕСЂРѕРІ ──────
+# ── Вспомогательная функция для тестирования генераторов ──────
 # Usage: test_generator_edge_cases "gen_random" "a-zA-Z0-9" "random" "false"
 test_generator_edge_cases() {
-  local gen_func="$1" # РРјСЏ С„СѓРЅРєС†РёРё (gen_random/gen_hex)
-  local pattern="$2"  # Regex РїР°С‚С‚РµСЂРЅ РґР»СЏ РїСЂРѕРІРµСЂРєРё СЃРёРјРІРѕР»РѕРІ
+  local gen_func="$1" # Имя функции (gen_random/gen_hex)
+  local pattern="$2"  # Regex паттерн для проверки символов
   # shellcheck disable=SC2034
-  local gen_type="$3"              # РўРёРї РґР»СЏ СЃРѕРѕР±С‰РµРЅРёР№ (random/hex)
-  local is_lowercase="${4:-false}" # РџСЂРѕРІРµСЂРєР° РЅР° lowercase
+  local gen_type="$3"              # Тип для сообщений (random/hex)
+  local is_lowercase="${4:-false}" # Проверка на lowercase
 
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ $gen_func РіСЂР°РЅРёС‡РЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ..."
+  info "Тестирование $gen_func граничные значения..."
 
-  # РўРµСЃС‚: РґР»РёРЅР° 1 (РјРёРЅРёРјР°Р»СЊРЅР°СЏ РїРѕР»РµР·РЅР°СЏ)
+  # Тест: длина 1 (минимальная полезная)
   local result1
   result1=$($gen_func 1)
   if [[ ${#result1} -eq 1 ]] && [[ "$result1" =~ ^[$pattern]$ ]]; then
-    pass "$gen_func(1): РјРёРЅРёРјР°Р»СЊРЅР°СЏ РґР»РёРЅР°"
+    pass "$gen_func(1): минимальная длина"
     ((TESTS_PASSED++)) || true
   else
-    fail "$gen_func(1): РЅРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ СЂРµР·СѓР»СЊС‚Р°С‚"
+    fail "$gen_func(1): некорректный результат"
   fi
 
-  # РўРµСЃС‚: РґР»РёРЅР° 0 (РїСѓСЃС‚Р°СЏ СЃС‚СЂРѕРєР°)
+  # Тест: длина 0 (пустая строка)
   local result0
   result0=$($gen_func 0)
   if [[ ${#result0} -eq 0 ]]; then
-    pass "$gen_func(0): РїСѓСЃС‚Р°СЏ СЃС‚СЂРѕРєР°"
+    pass "$gen_func(0): пустая строка"
     ((TESTS_PASSED++)) || true
   else
-    warn "$gen_func(0): РѕР¶РёРґР°Р»Р°СЃСЊ РїСѓСЃС‚Р°СЏ СЃС‚СЂРѕРєР°, РїРѕР»СѓС‡РµРЅРѕ '${result0}'"
+    warn "$gen_func(0): ожидалась пустая строка, получено '${result0}'"
   fi
 
-  # РўРµСЃС‚: Р±РѕР»СЊС€Р°СЏ РґР»РёРЅР° (1000 СЃРёРјРІРѕР»РѕРІ)
+  # Тест: большая длина (100 символов)
   local result_large
-  result_large=$($gen_func 1000)
+  result_large=$($gen_func 100)
   if [[ ${#result_large} -eq 100 ]] && [[ "$result_large" =~ ^[$pattern]+$ ]]; then
-    pass "$gen_func(100): Р±РѕР»СЊС€Р°СЏ РґР»РёРЅР° РєРѕСЂСЂРµРєС‚РЅР°"
+    pass "$gen_func(100): большая длина корректна"
     ((TESTS_PASSED++)) || true
   else
-    fail "$gen_func(100): РЅРµРєРѕСЂСЂРµРєС‚РЅР°СЏ РґР»РёРЅР° РёР»Рё СЃРёРјРІРѕР»С‹"
+    fail "$gen_func(100): некорректная длина или символы"
   fi
 
-  # РўРµСЃС‚: С‚РѕР»СЊРєРѕ lowercase (РµСЃР»Рё РїСЂРёРјРµРЅРёРјРѕ)
+  # Тест: только lowercase (если применимо)
   if [[ "$is_lowercase" == "true" ]]; then
     local result_case
     result_case=$($gen_func 100)
     if [[ ! "$result_case" =~ [A-F] ]]; then
-      pass "$gen_func: С‚РѕР»СЊРєРѕ lowercase СЃРёРјРІРѕР»С‹"
+      pass "$gen_func: только lowercase символы"
       ((TESTS_PASSED++)) || true
     else
-      warn "$gen_func: РѕР±РЅР°СЂСѓР¶РµРЅС‹ uppercase СЃРёРјРІРѕР»С‹"
+      warn "$gen_func: обнаружены uppercase символы"
     fi
   fi
 }
 
-# ── РўРµСЃС‚: gen_random ───────────────────────────────────────────
+# ── Тест: gen_random ─────────────────────────────────────────
 test_gen_random() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ gen_random..."
+  info "Тестирование gen_random..."
 
-  # Р"РµРЅРµСЂР°С†РёСЏ СЃС‚СЂРѕРєРё РѕРїСЂРµРґРµР»С'РЅРЅРѕР№ РґР»РёРЅС‹
+  # Генерация строки определённой длины
   local result
   result=$(gen_random 10 || true)
   if [[ ${#result} -eq 10 ]]; then
-    pass "gen_random(10): РґР»РёРЅР° = ${#result}"
+    pass "gen_random(10): длина = ${#result}"
     ((TESTS_PASSED++)) || true
   else
-    fail "gen_random(10): РѕР¶РёРґР°РµРјР°СЏ РґР»РёРЅР° 10, РїРѕР»СѓС‡РµРЅРѕ ${#result}"
+    fail "gen_random(10): ожидаемая длина 10, получено ${#result}"
   fi
 
-  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ С‚РѕР»СЊРєРѕ Р±СѓРєРІС‹ Рё С†РёС„СЂС‹
+  # Проверка что только буквы и цифры
   if [[ "$result" =~ ^[a-zA-Z0-9]+$ ]]; then
-    pass "gen_random(10): С‚РѕР»СЊРєРѕ Р±СѓРєРІС‹ Рё С†РёС„СЂС‹"
+    pass "gen_random(10): только буквы и цифры"
     ((TESTS_PASSED++)) || true
   else
-    fail "gen_random(10): СЃРѕРґРµСЂР¶РёС‚ РЅРµРґРѕРїСѓСЃС‚РёРјС‹Рµ СЃРёРјРІРѕР»С‹"
+    fail "gen_random(10): содержит недопустимые символы"
   fi
 
-  # Р Р°Р·РЅС‹Рµ РІС‹Р·РѕРІС‹ РґР°СЋС‚ СЂР°Р·РЅС‹Рµ СЂРµР·СѓР»СЊС‚Р°С‚С‹
+  # Разные вызовы дают разные результаты
   local result2
   result2=$(gen_random 10 || true)
   if [[ "$result" != "$result2" ]]; then
-    pass "gen_random: СЂР°Р·РЅС‹Рµ РІС‹Р·РѕРІС‹ РґР°СЋС‚ СЂР°Р·РЅС‹Рµ СЂРµР·СѓР»СЊС‚Р°С‚С‹"
+    pass "gen_random: разные вызовы дают разные результаты"
     ((TESTS_PASSED++)) || true
   else
-    warn "gen_random: РІРѕР·РјРѕР¶РЅРѕ, РЅРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ СЃР»СѓС‡Р°Р№РЅРѕСЃС‚Рё (РІРµСЂРѕСЏС‚РЅРѕСЃС‚СЊ РєРѕР»Р»РёР·РёРё)"
+    warn "gen_random: возможно, недостаточно случайности (вероятность коллизии)"
   fi
 }
 
-# ── РўРµСЃС‚: gen_random РіСЂР°РЅРёС‡РЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ ───────────────────────
+# ── Тест: gen_random граничные значения ───────────────────────
 test_gen_random_edge_cases() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ gen_random РіСЂР°РЅРёС‡РЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ..."
+  info "Тестирование gen_random граничные значения..."
 
-  # РўРµСЃС‚: РґР»РёРЅР° 1 (РјРёРЅРёРјР°Р»СЊРЅР°СЏ РїРѕР»РµР·РЅР°СЏ)
+  # Тест: длина 1 (минимальная полезная)
   local result1
   result1=$(gen_random 1 || true)
   if [[ ${#result1} -eq 1 ]] && [[ "$result1" =~ ^[a-zA-Z0-9]$ ]]; then
-    pass "gen_random(1): РјРёРЅРёРјР°Р»СЊРЅР°СЏ РґР»РёРЅР°"
+    pass "gen_random(1): минимальная длина"
     ((TESTS_PASSED++)) || true
   else
-    fail "gen_random(1): РЅРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ СЂРµР·СѓР»СЊС‚Р°С‚"
+    fail "gen_random(1): некорректный результат"
   fi
 
-  # РўРµСЃС‚: РґР»РёРЅР° 0 (РїСѓСЃС‚Р°СЏ СЃС‚СЂРѕРєР°)
+  # Тест: длина 0 (пустая строка)
   local result0
   result0=$(gen_random 0 || true)
   if [[ ${#result0} -eq 0 ]]; then
-    pass "gen_random(0): РїСѓСЃС‚Р°СЏ СЃС‚СЂРѕРєР°"
+    pass "gen_random(0): пустая строка"
     ((TESTS_PASSED++)) || true
   else
-    warn "gen_random(0): РѕР¶РёРґР°Р»Р°СЃСЊ РїСѓСЃС‚Р°СЏ СЃС‚СЂРѕРєР°, РїРѕР»СѓС‡РµРЅРѕ '${result0}'"
+    warn "gen_random(0): ожидалась пустая строка, получено '${result0}'"
   fi
 
-  # РўРµСЃС‚: Р±РѕР»СЊС€Р°СЏ РґР»РёРЅР° (100 СЃРёРјРІРѕР»РѕРІ)
+  # Тест: большая длина (100 символов)
   local result_large
   result_large=$(gen_random 100 || true)
   if [[ ${#result_large} -eq 100 ]] && [[ "$result_large" =~ ^[a-zA-Z0-9]+$ ]]; then
-    pass "gen_random(100): Р±РѕР»СЊС€Р°СЏ РґР»РёРЅР° РєРѕСЂСЂРµРєС‚РЅР°"
+    pass "gen_random(100): большая длина корректна"
     ((TESTS_PASSED++)) || true
   else
-    fail "gen_random(100): РЅРµРєРѕСЂСЂРµРєС‚РЅР°СЏ РґР»РёРЅР° РёР»Рё СЃРёРјРІРѕР»С‹ (РїРѕР»СѓС‡РµРЅРѕ ${#result_large})"
+    fail "gen_random(100): некорректная длина или символы (получено ${#result_large})"
   fi
 
-  # РЈРЅРёРєР°Р»СЊРЅС‹Р№ С‚РµСЃС‚ РґР»СЏ gen_random: СЃС‚Р°С‚РёСЃС‚РёС‡РµСЃРєР°СЏ СЂР°РІРЅРѕРјРµСЂРЅРѕСЃС‚СЊ
-  info "gen_random: СЃС‚Р°С‚РёСЃС‚РёС‡РµСЃРєР°СЏ РїСЂРѕРІРµСЂРєР°..."
+  # Уникальный тест для gen_random: статистическая равномерность
+  info "gen_random: статистическая проверка..."
   local digit_count=0
-  for _ in $( # Optimized for WSL (10x faster)
-    seq 1 10
-  ); do
+  for _ in $(seq 1 10); do
     local sample
     sample=$(gen_random 1 || true)
     if [[ "$sample" =~ ^[0-9]$ ]]; then
@@ -170,88 +168,86 @@ test_gen_random_edge_cases() {
     fi
   done
 
-  # РћР¶РёРґР°РµРј ~36% С†РёС„СЂ (10 РёР· 62 СЃРёРјРІРѕР»РѕРІ), РґРѕРїСѓСЃРєР°РµРј РѕС‚РєР»РѕРЅРµРЅРёРµ 20%
-  if [[ $digit_count -ge 1 && $digit_count -le 5 ]]; then # Optimized for 10 iterations
-    pass "gen_random: СЃС‚Р°С‚РёСЃС‚РёС‡РµСЃРєР°СЏ СЂР°РІРЅРѕРјРµСЂРЅРѕСЃС‚СЊ (С†РёС„СЂС‹: $digit_count/10)"
+  # Ожидаем ~36% цифр (10 из 62 символов), допускаем отклонение 20%
+  if [[ $digit_count -ge 1 && $digit_count -le 5 ]]; then
+    pass "gen_random: статистическая равномерность (цифры: $digit_count/10)"
     ((TESTS_PASSED++)) || true
   else
-    warn "gen_random: РІРѕР·РјРѕР¶РЅР°СЏ РЅРµСЂР°РІРЅРѕРјРµСЂРЅРѕСЃС‚СЊ (С†РёС„СЂС‹: $digit_count/10)"
+    warn "gen_random: возможная неравномерность (цифры: $digit_count/10)"
   fi
 }
 
-# ── РўРµСЃС‚: gen_hex ─────────────────────────────────────────────
+# ── Тест: gen_hex ────────────────────────────────────────────
 test_gen_hex() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ gen_hex..."
+  info "Тестирование gen_hex..."
 
-  # Р"РµРЅРµСЂР°С†РёСЏ СЃС‚СЂРѕРєРё РѕРїСЂРµРґРµР»С'РЅРЅРѕР№ РґР»РёРЅС‹
+  # Генерация строки определённой длины
   local result
   result=$(gen_hex 16 || true)
   if [[ ${#result} -eq 16 ]]; then
-    pass "gen_hex(16): РґР»РёРЅР° = ${#result}"
+    pass "gen_hex(16): длина = ${#result}"
     ((TESTS_PASSED++)) || true
   else
-    fail "gen_hex(16): РѕР¶РёРґР°РµРјР°СЏ РґР»РёРЅР° 16, РїРѕР»СѓС‡РµРЅРѕ ${#result}"
+    fail "gen_hex(16): ожидаемая длина 16, получено ${#result}"
   fi
 
-  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ С‚РѕР»СЊРєРѕ hex-СЃРёРјРІРѕР»С‹
+  # Проверка что только hex-символы
   if [[ "$result" =~ ^[a-f0-9]+$ ]]; then
-    pass "gen_hex(16): С‚РѕР»СЊРєРѕ hex-СЃРёРјРІРѕР»С‹ (a-f, 0-9)"
+    pass "gen_hex(16): только hex-символы (a-f, 0-9)"
     ((TESTS_PASSED++)) || true
   else
-    fail "gen_hex(16): СЃРѕРґРµСЂР¶РёС‚ РЅРµРґРѕРїСѓСЃС‚РёРјС‹Рµ СЃРёРјРІРѕР»С‹"
+    fail "gen_hex(16): содержит недопустимые символы"
   fi
 }
 
-# ── РўРµСЃС‚: gen_hex РіСЂР°РЅРёС‡РЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ ──────────────────────────
+# ── Тест: gen_hex граничные значения ─────────────────────────
 test_gen_hex_edge_cases() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ gen_hex РіСЂР°РЅРёС‡РЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ..."
+  info "Тестирование gen_hex граничные значения..."
 
-  # РўРµСЃС‚: РґР»РёРЅР° 1 (РјРёРЅРёРјР°Р»СЊРЅР°СЏ РїРѕР»РµР·РЅР°СЏ)
+  # Тест: длина 1 (минимальная полезная)
   local result1
   result1=$(gen_hex 1 || true)
   if [[ ${#result1} -eq 1 ]] && [[ "$result1" =~ ^[a-f0-9]$ ]]; then
-    pass "gen_hex(1): РјРёРЅРёРјР°Р»СЊРЅР°СЏ РґР»РёРЅР°"
+    pass "gen_hex(1): минимальная длина"
     ((TESTS_PASSED++)) || true
   else
-    fail "gen_hex(1): РЅРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ СЂРµР·СѓР»СЊС‚Р°С‚"
+    fail "gen_hex(1): некорректный результат"
   fi
 
-  # РўРµСЃС‚: РґР»РёРЅР° 0 (РїСѓСЃС‚Р°СЏ СЃС‚СЂРѕРєР°)
+  # Тест: длина 0 (пустая строка)
   local result0
   result0=$(gen_hex 0 || true)
   if [[ ${#result0} -eq 0 ]]; then
-    pass "gen_hex(0): РїСѓСЃС‚Р°СЏ СЃС‚СЂРѕРєР°"
+    pass "gen_hex(0): пустая строка"
     ((TESTS_PASSED++)) || true
   else
-    warn "gen_hex(0): РѕР¶РёРґР°Р»Р°СЃСЊ РїСѓСЃС‚Р°СЏ СЃС‚СЂРѕРєР°, РїРѕР»СѓС‡РµРЅРѕ '${result0}'"
+    warn "gen_hex(0): ожидалась пустая строка, получено '${result0}'"
   fi
 
-  # РўРµСЃС‚: Р±РѕР»СЊС€Р°СЏ РґР»РёРЅР° (100 СЃРёРјРІРѕР»РѕРІ)
+  # Тест: большая длина (100 символов)
   local result_large
   result_large=$(gen_hex 100 || true)
   if [[ ${#result_large} -eq 100 ]] && [[ "$result_large" =~ ^[a-f0-9]+$ ]]; then
-    pass "gen_hex(100): Р±РѕР»СЊС€Р°СЏ РґР»РёРЅР° РєРѕСЂСЂРµРєС‚РЅР°"
+    pass "gen_hex(100): большая длина корректна"
     ((TESTS_PASSED++)) || true
   else
-    fail "gen_hex(100): РЅРµРєРѕСЂСЂРµРєС‚РЅР°СЏ РґР»РёРЅР° РёР»Рё СЃРёРјРІРѕР»С‹ (РїРѕР»СѓС‡РµРЅРѕ ${#result_large})"
+    fail "gen_hex(100): некорректная длина или символы (получено ${#result_large})"
   fi
 
-  # РўРµСЃС‚: С‚РѕР»СЊРєРѕ lowercase СЃРёРјРІРѕР»С‹
+  # Тест: только lowercase символы
   local result_case
   result_case=$(gen_hex 100 || true)
   if [[ ! "$result_case" =~ [A-F] ]]; then
-    pass "gen_hex: С‚РѕР»СЊРєРѕ lowercase СЃРёРјРІРѕР»С‹"
+    pass "gen_hex: только lowercase символы"
     ((TESTS_PASSED++)) || true
   else
-    warn "gen_hex: РѕР±РЅР°СЂСѓР¶РµРЅС‹ uppercase СЃРёРјРІРѕР»С‹"
+    warn "gen_hex: обнаружены uppercase символы"
   fi
 
-  # РЈРЅРёРєР°Р»СЊРЅС‹Р№ С‚РµСЃС‚ РґР»СЏ gen_hex: СЃС‚Р°С‚РёСЃС‚РёС‡РµСЃРєР°СЏ СЂР°РІРЅРѕРјРµСЂРЅРѕСЃС‚СЊ
-  info "gen_hex: СЃС‚Р°С‚РёСЃС‚РёС‡РµСЃРєР°СЏ РїСЂРѕРІРµСЂРєР°..."
+  # Уникальный тест для gen_hex: статистическая равномерность
+  info "gen_hex: статистическая проверка..."
   local digit_count=0
-  for _ in $( # Optimized for WSL (10x faster)
-    seq 1 10
-  ); do
+  for _ in $(seq 1 10); do
     local sample
     sample=$(gen_hex 1 || true)
     if [[ "$sample" =~ ^[0-9]$ ]]; then
@@ -259,248 +255,255 @@ test_gen_hex_edge_cases() {
     fi
   done
 
-  # РћР¶РёРґР°РµРј ~40% С†РёС„СЂ (10 РёР· 16 СЃРёРјРІРѕР»РѕРІ), РґРѕРїСѓСЃРєР°РµРј РѕС‚РєР»РѕРЅРµРЅРёРµ 25%
-  if [[ $digit_count -ge 2 && $digit_count -le 8 ]]; then # Optimized for 10 iterations
-    pass "gen_hex: СЃС‚Р°С‚РёСЃС‚РёС‡РµСЃРєР°СЏ СЂР°РІРЅРѕРјРµСЂРЅРѕСЃС‚СЊ (С†РёС„СЂС‹: $digit_count/10)"
+  # Ожидаем ~40% цифр (10 из 16 символов), допускаем отклонение 25%
+  if [[ $digit_count -ge 2 && $digit_count -le 8 ]]; then
+    pass "gen_hex: статистическая равномерность (цифры: $digit_count/10)"
     ((TESTS_PASSED++)) || true
   else
-    warn "gen_hex: РІРѕР·РјРѕР¶РЅР°СЏ РЅРµСЂР°РІРЅРѕРјРµСЂРЅРѕСЃС‚СЊ (С†РёС„СЂС‹: $digit_count/10)"
+    warn "gen_hex: возможная неравномерность (цифры: $digit_count/10)"
   fi
 }
 
-# ── РўРµСЃС‚: gen_port ───────────────────────────────────────────
+# ── Тест: gen_port ───────────────────────────────────────────
 test_gen_port() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ gen_port..."
+  info "Тестирование gen_port..."
 
-  # Р"РµРЅРµСЂР°С†РёСЏ РїРѕСЂС‚Р° РІ РґРёР°РїР°Р·РѕРЅРµ 30000-62000
+  # Генерация порта в диапазоне 30000-62000
   local result
   result=$(gen_port || true)
   if [[ "$result" -ge 30000 && "$result" -le 62000 ]]; then
-    pass "gen_port: $result РІ РґРёР°РїР°Р·РѕРЅРµ 30000-62000"
+    pass "gen_port: $result в диапазоне 30000-62000"
     ((TESTS_PASSED++)) || true
   else
-    fail "gen_port: $result РІРЅРµ РґРёР°РїР°Р·РѕРЅР° 30000-62000"
+    fail "gen_port: $result вне диапазона 30000-62000"
   fi
 
-  # Р Р°Р·РЅС‹Рµ РІС‹Р·РѕРІС‹ РґР°СЋС‚ СЂР°Р·РЅС‹Рµ СЂРµР·СѓР»СЊС‚Р°С‚С‹ (СЃ РІС‹СЃРѕРєРѕР№ РІРµСЂРѕСЏС‚РЅРѕСЃС‚СЊСЋ)
+  # Разные вызовы дают разные результаты (с высокой вероятностью)
   local result2
   result2=$(gen_port || true)
   if [[ "$result" != "$result2" ]]; then
-    pass "gen_port: СЂР°Р·РЅС‹Рµ РІС‹Р·РѕРІС‹ РґР°СЋС‚ СЂР°Р·РЅС‹Рµ СЂРµР·СѓР»СЊС‚Р°С‚С‹"
+    pass "gen_port: разные вызовы дают разные результаты"
     ((TESTS_PASSED++)) || true
   else
-    warn "gen_port: РІРѕР·РјРѕР¶РЅРѕ, РЅРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ СЃР»СѓС‡Р°Р№РЅРѕСЃС‚Рё"
+    warn "gen_port: возможно, недостаточно случайности"
   fi
 }
 
-# ── РўРµСЃС‚: unique_port ────────────────────────────────────────
+# ── Тест: unique_port ────────────────────────────────────────
 test_unique_port() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ unique_port..."
+  info "Тестирование unique_port..."
 
-  # РЎР±СЂР°СЃС‹РІР°РµРј USED_PORTS_MAP РґР»СЏ С‚РµСЃС‚Р°
-  USED_PORTS_MAP=([443]=1)
+  # Сбрасываем USED_PORTS_MAP для теста
+  declare -A USED_PORTS_MAP=([443]=1)
+  export USED_PORTS_MAP
 
   # Mock для ss чтобы избежать проблем с WSL
   ss() {
     echo ""
     return 0
   }
+  export -f ss
 
   # Mock для err чтобы предотвратить exit
   err() {
     echo "[ERR] $1" >&2
     return 1
   }
+  export -f err
 
-  # РџРµСЂРІР°СЏ РіРµРЅРµСЂР°С†РёСЏ РґРѕР»Р¶РЅР° РґРѕР±Р°РІРёС‚СЊ РїРѕСЂС‚ РІ USED_PORTS
+  # Первая генерация должна добавить порт в USED_PORTS
   local port1
   port1=$(unique_port 2>/dev/null) || port1=$(gen_port)
 
-  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ РїРѕСЂС‚ СѓРЅРёРєР°Р»РµРЅ (РЅРµ 443)
+  # Проверка что порт уникален (не 443)
   if [[ -n "$port1" && "$port1" != 443 && "$port1" -ge 30000 && "$port1" -le 62000 ]]; then
-    pass "unique_port: СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅ СѓРЅРёРєР°Р»СЊРЅС‹Р№ РїРѕСЂС‚ $port1 (РЅРµ РІ USED_PORTS)"
+    pass "unique_port: сгенерирован уникальный порт $port1 (не в USED_PORTS)"
     ((TESTS_PASSED++)) || true
   else
-    fail "unique_port: СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅ РїРѕСЂС‚ РёР· USED_PORTS или некорректный"
+    fail "unique_port: сгенерирован порт из USED_PORTS или некорректный"
   fi
 
-  # Р"РѕР±Р°РІР»СЏРµРј СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅРЅС‹Р№ РїРѕСЂС‚ РІ СЃРїРёСЃРѕРє
+  # Добавляем сгенерированный порт в список
   if [[ -n "$port1" ]]; then
     USED_PORTS_MAP["$port1"]=1
   fi
 
-  # РЎР»РµРґСѓСЋС‰РёР№ РІС‹Р·РѕРІ РґРѕР»Р¶РµРЅ РґР°С‚СЊ РґСЂСѓРіРѕР№ РїРѕСЂС‚
+  # Следующий вызов должен дать другой порт
   local port2
   port2=$(unique_port 2>/dev/null) || port2=$(gen_port)
 
   if [[ -n "$port2" && "$port2" != "$port1" ]]; then
-    pass "unique_port: СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅ РґСЂСѓРіРѕР№ РїРѕСЂС‚ $port2"
+    pass "unique_port: сгенерирован другой порт $port2"
     ((TESTS_PASSED++)) || true
   else
-    warn "unique_port: РІРѕР·РјРѕР¶РЅРѕ, РЅРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ СѓРЅРёРєР°Р»СЊРЅС‹С... РїРѕСЂС‚РѕРІ"
+    warn "unique_port: возможно, недостаточно уникальных портов"
   fi
 
-  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ РѕР±Р° РїРѕСЂС‚Р° РІ РґРёР°РїР°Р·РѕРЅРµ
+  # Проверка что оба порта в диапазоне
   if [[ -n "$port1" && -n "$port2" && "$port1" -ge 30000 && "$port1" -le 62000 && "$port2" -ge 30000 && "$port2" -le 62000 ]]; then
-    pass "unique_port: РІСЃРµ РїРѕСЂС‚С‹ РІ РґРёР°РїР°Р·РѕРЅРµ 30000-62000"
+    pass "unique_port: все порты в диапазоне 30000-62000"
     ((TESTS_PASSED++)) || true
   else
-    fail "unique_port: РѕРґРёРЅ РёР· РїРѕСЂС‚РѕРІ РІРЅРµ РґРёР°РїР°Р·РѕРЅР°"
+    fail "unique_port: один из портов вне диапазона"
   fi
+
+  # Очистка моков
+  unset -f ss
+  unset -f err
 }
 
-# ── РўРµСЃС‚: arch ───────────────────────────────────────────────
+# ── Тест: arch ───────────────────────────────────────────────
 test_arch() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ arch..."
+  info "Тестирование arch..."
 
   local result
   result=$(arch)
 
-  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ СЂРµР·СѓР»СЊС‚Р°С‚ РѕРґРёРЅ РёР· РїРѕРґРґРµСЂР¶РёРІР°РµРјС‹С...
+  # Проверка что результат один из поддерживаемых
   case "$result" in
   amd64 | arm64)
-    pass "arch: РїРѕРґРґРµСЂР¶РёРІР°РµРјР°СЏ Р°СЂС...РёС‚РµРєС‚СѓСЂР° $result"
+    pass "arch: поддерживаемая архитектура $result"
     ((TESTS_PASSED++)) || true
     ;;
   *)
-    warn "arch: РЅРµРёР·РІРµСЃС‚РЅР°СЏ Р°СЂС...РёС‚РµРєС‚СѓСЂР° $result (РјРѕР¶РµС‚ Р±С‹С‚СЊ РЅРѕСЂРјР°Р»СЊРЅРѕ РґР»СЏ С‚РµСЃС‚РѕРІРѕР№ СЃРёСЃС‚РµРјС‹)"
+    warn "arch: неизвестная архитектура $result (может быть нормально для тестовой системы)"
     ;;
   esac
 }
 
-# ── РўРµСЃС‚: get_server_ip ───────────────────────────────────────
+# ── Тест: get_server_ip ──────────────────────────────────────
 test_get_server_ip() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ get_server_ip..."
+  info "Тестирование get_server_ip..."
 
-  # РўРµСЃС‚ РјРѕР¶РµС‚ РЅРµ СЂР°Р±РѕС‚Р°С‚СЊ Р±РµР· СЃРµС‚Рё
+  # Тест может не работать без сети
   local result
   result=$(get_server_ip 2>/dev/null || echo "")
 
   if [[ -n "$result" ]]; then
-    # РџСЂРѕРІРµСЂРєР° С„РѕСЂРјР°С‚Р° IPv4
+    # Проверка формата IPv4
     if [[ "$result" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-      pass "get_server_ip: РїРѕР»СѓС‡РµРЅ РІР°Р»РёРґРЅС‹Р№ IP $result"
+      pass "get_server_ip: получен валидный IP $result"
       ((TESTS_PASSED++)) || true
     else
-      warn "get_server_ip: РїРѕР»СѓС‡РµРЅ IP РІ РЅРµРѕР¶РёРґР°РЅРЅРѕРј С„РѕСЂРјР°С‚Рµ: $result"
+      warn "get_server_ip: получен IP в неожиданном формате: $result"
     fi
   else
-    warn "get_server_ip: РЅРµ СѓРґР°Р»РѕСЃСЊ РїРѕР»СѓС‡РёС‚СЊ IP (РЅРµС‚ СЃРµС‚Рё РёР»Рё РЅРµРґРѕСЃС‚СѓРїРµРЅ)"
+    warn "get_server_ip: не удалось получить IP (нет сети или недоступен)"
   fi
 }
 
-# ── РўРµСЃС‚: open_port (mock) ────────────────────────────────────
+# ── Тест: open_port (mock) ───────────────────────────────────
 test_open_port_mock() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ open_port (mock)..."
+  info "Тестирование open_port (mock)..."
 
-  # РЎРѕР·РґР°С'Рј mock РґР»СЏ ufw
+  # Создаём mock для ufw
   ufw() {
     echo "mock ufw called with: $*" >&2
     return 0
   }
 
-  # Р'С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ
+  # Вызываем функцию
   if open_port 12345 tcp "Test port" 2>/dev/null; then
-    pass "open_port: РІС‹Р·РІР°РЅ Р±РµР· РѕС€РёР±РѕРє"
+    pass "open_port: вызван без ошибок"
     ((TESTS_PASSED++)) || true
   else
-    pass "open_port: РІС‹Р·РІР°РЅ (РІРѕР·РјРѕР¶РЅРѕ СЃ РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёСЏРјРё)"
+    pass "open_port: вызван (возможно с предупреждениями)"
     ((TESTS_PASSED++)) || true
   fi
 }
 
-# ── РўРµСЃС‚: open_port РіСЂР°РЅРёС‡РЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ ────────────────────────
+# ── Тест: open_port граничные значения ───────────────────────
 test_open_port_edge_cases() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ open_port РіСЂР°РЅРёС‡РЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ..."
+  info "Тестирование open_port граничные значения..."
 
-  # Mock РґР»СЏ ufw
+  # Mock для ufw
   ufw() {
     return 0
   }
 
-  # РўРµСЃС‚: РјРёРЅРёРјР°Р»СЊРЅС‹Р№ РїРѕСЂС‚ (1)
+  # Тест: минимальный порт (1)
   if open_port 1 tcp "Min port" 2>/dev/null; then
-    pass "open_port: РїРѕСЂС‚ 1 РѕС‚РєСЂС‹С‚"
+    pass "open_port: порт 1 открыт"
     ((TESTS_PASSED++)) || true
   else
-    warn "open_port: РїРѕСЂС‚ 1 РЅРµ РѕС‚РєСЂС‹Р»СЃСЏ"
+    warn "open_port: порт 1 не открылся"
   fi
 
-  # РўРµСЃС‚: РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ РїРѕСЂС‚ (65535)
+  # Тест: максимальный порт (65535)
   if open_port 65535 tcp "Max port" 2>/dev/null; then
-    pass "open_port: РїРѕСЂС‚ 65535 РѕС‚РєСЂС‹С‚"
+    pass "open_port: порт 65535 открыт"
     ((TESTS_PASSED++)) || true
   else
-    warn "open_port: РїРѕСЂС‚ 65535 РЅРµ РѕС‚РєСЂС‹Р»СЃСЏ"
+    warn "open_port: порт 65535 не открылся"
   fi
 
-  # РўРµСЃС‚: СЃС‚Р°РЅРґР°СЂС‚РЅС‹Р№ HTTP РїРѕСЂС‚ (80)
+  # Тест: стандартный HTTP порт (80)
   if open_port 80 tcp "HTTP" 2>/dev/null; then
-    pass "open_port: РїРѕСЂС‚ 80 РѕС‚РєСЂС‹С‚"
+    pass "open_port: порт 80 открыт"
     ((TESTS_PASSED++)) || true
   else
-    warn "open_port: РїРѕСЂС‚ 80 РЅРµ РѕС‚РєСЂС‹Р»СЃСЏ"
+    warn "open_port: порт 80 не открылся"
   fi
 
-  # РўРµСЃС‚: СЃС‚Р°РЅРґР°СЂС‚РЅС‹Р№ HTTPS РїРѕСЂС‚ (443)
+  # Тест: стандартный HTTPS порт (443)
   if open_port 443 tcp "HTTPS" 2>/dev/null; then
-    pass "open_port: РїРѕСЂС‚ 443 РѕС‚РєСЂС‹С‚"
+    pass "open_port: порт 443 открыт"
     ((TESTS_PASSED++)) || true
   else
-    warn "open_port: РїРѕСЂС‚ 443 РЅРµ РѕС‚РєСЂС‹Р»СЃСЏ"
+    warn "open_port: порт 443 не открылся"
   fi
 
-  # РўРµСЃС‚: UDP РїСЂРѕС‚РѕРєРѕР»
+  # Тест: UDP протокол
   if open_port 53 udp "DNS" 2>/dev/null; then
-    pass "open_port: UDP РїРѕСЂС‚ 53 РѕС‚РєСЂС‹С‚"
+    pass "open_port: UDP порт 53 открыт"
     ((TESTS_PASSED++)) || true
   else
-    warn "open_port: UDP РїРѕСЂС‚ 53 РЅРµ РѕС‚РєСЂС‹Р»СЃСЏ"
+    warn "open_port: UDP порт 53 не открылся"
   fi
 
-  # РўРµСЃС‚: Р±РµР· РєРѕРјРјРµРЅС‚Р°СЂРёСЏ (С‚РѕР»СЊРєРѕ port Рё protocol)
+  # Тест: без комментария (только port и protocol)
   if open_port 8080 tcp 2>/dev/null; then
-    pass "open_port: Р±РµР· РєРѕРјРјРµРЅС‚Р°СЂРёСЏ СЂР°Р±РѕС‚Р°РµС‚"
+    pass "open_port: без комментария работает"
     ((TESTS_PASSED++)) || true
   else
-    warn "open_port: Р±РµР· РєРѕРјРјРµРЅС‚Р°СЂРёСЏ РЅРµ СЃСЂР°Р±РѕС‚Р°Р»"
+    warn "open_port: без комментария не сработал"
   fi
 
-  # РўРµСЃС‚: СЃ РїСѓСЃС‚С‹Рј РєРѕРјРјРµРЅС‚Р°СЂРёРµРј
+  # Тест: с пустым комментарием
   if open_port 8081 tcp "" 2>/dev/null; then
-    pass "open_port: СЃ РїСѓСЃС‚С‹Рј РєРѕРјРјРµРЅС‚Р°СЂРёРµРј СЂР°Р±РѕС‚Р°РµС‚"
+    pass "open_port: с пустым комментарием работает"
     ((TESTS_PASSED++)) || true
   else
-    warn "open_port: СЃ РїСѓСЃС‚С‹Рј РєРѕРјРјРµРЅС‚Р°СЂРёРµРј РЅРµ СЃСЂР°Р±РѕС‚Р°Р»"
+    warn "open_port: с пустым комментарием не сработал"
   fi
 }
 
-# ── РўРµСЃС‚: close_port (mock) ───────────────────────────────────
+# ── Тест: close_port (mock) ──────────────────────────────────
 test_close_port_mock() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ close_port (mock)..."
+  info "Тестирование close_port (mock)..."
 
-  # Mock РґР»СЏ ufw
+  # Mock для ufw
   ufw() {
     echo "mock ufw delete called with: $*" >&2
     return 0
   }
 
-  # Р'С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ
+  # Вызываем функцию
   if close_port 12345 tcp 2>/dev/null; then
-    pass "close_port: РІС‹Р·РІР°РЅ Р±РµР· РѕС€РёР±РѕРє"
+    pass "close_port: вызван без ошибок"
     ((TESTS_PASSED++)) || true
   else
-    # close_port РёСЃРїРѕР»СЊР·СѓРµС‚ || true, С‚Р°Рє С‡С‚Рѕ РѕС€РёР±РѕРє РЅРµ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ
-    pass "close_port: РІС‹Р·РІР°РЅ (РІРѕР·РјРѕР¶РЅРѕ СЃ РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёСЏРјРё)"
+    # close_port использует || true, так что ошибок не должно быть
+    pass "close_port: вызван (возможно с предупреждениями)"
     ((TESTS_PASSED++)) || true
   fi
 }
 
-# ── РўРµСЃС‚: РёРЅС‚РµРіСЂР°С†РёСЏ С„СѓРЅРєС†РёР№ ──────────────────────────────────
+# ── Тест: интеграция функций ─────────────────────────────────
 test_integration() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РёРЅС‚РµРіСЂР°С†РёРё С„СѓРЅРєС†РёР№..."
+  info "Тестирование интеграции функций..."
 
-  # Р"РµРЅРµСЂР°С†РёСЏ РїРѕР»РЅРѕРіРѕ РЅР°Р±РѕСЂР° РґР°РЅРЅС‹С...
+  # Генерация полного набора данных
   local domain_name
   domain_name=$(gen_random 20)
 
@@ -510,103 +513,103 @@ test_integration() {
   local panel_port
   panel_port=$(gen_port)
 
-  # РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ РІСЃРµ РґР°РЅРЅС‹Рµ СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅС‹
+  # Проверка что все данные сгенерированы
   if [[ ${#domain_name} -eq 20 && ${#sbox_short_id} -eq 8 && "$panel_port" -ge 30000 ]]; then
-    pass "РРЅС‚РµРіСЂР°С†РёСЏ: РІСЃРµ С„СѓРЅРєС†РёРё СЂР°Р±РѕС‚Р°СЋС‚ РІРјРµСЃС‚Рµ"
+    pass "Интеграция: все функции работают вместе"
     ((TESTS_PASSED++)) || true
   else
-    fail "РРЅС‚РµРіСЂР°С†РёСЏ: РѕРґРЅР° РёР· С„СѓРЅРєС†РёР№ РѕС‚СЂР°Р±РѕС‚Р°Р»Р° РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ"
+    fail "Интеграция: одна из функций отработала некорректно"
   fi
 }
 
-# ── РўРµСЃС‚С‹ РґР»СЏ РјРѕРґСѓР»СЏ РІР°Р»РёРґР°С†РёРё ──────────────────────────────────
+# ── Тесты для модуля валидации ───────────────────────────────
 test_validate_domain() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ validate_domain..."
+  info "Тестирование validate_domain..."
 
-  # Р'Р°Р»РёРґРЅС‹Рµ РґРѕРјРµРЅС‹
+  # Валидные домены
   if validate_domain "example.com"; then
-    pass "validate_domain: example.com - РІР°Р»РёРґРµРЅ"
+    pass "validate_domain: example.com - валиден"
     ((TESTS_PASSED++)) || true
   else
-    fail "validate_domain: example.com - РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РІР°Р»РёРґРµРЅ"
+    fail "validate_domain: example.com - должен быть валиден"
   fi
 
   if validate_domain "sub.example.co.uk"; then
-    pass "validate_domain: sub.example.co.uk - РІР°Р»РёРґРµРЅ"
+    pass "validate_domain: sub.example.co.uk - валиден"
     ((TESTS_PASSED++)) || true
   else
-    fail "validate_domain: sub.example.co.uk - РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РІР°Р»РёРґРµРЅ"
+    fail "validate_domain: sub.example.co.uk - должен быть валиден"
   fi
 
-  # РќРµРІР°Р»РёРґРЅС‹Рµ РґРѕРјРµРЅС‹
+  # Невалидные домены
   if ! validate_domain "localhost"; then
-    pass "validate_domain: localhost - РЅРµРІР°Р»РёРґРµРЅ (Р·Р°С‰РёС‚Р° РѕС‚ SSRF)"
+    pass "validate_domain: localhost - невалиден (защита от SSRF)"
     ((TESTS_PASSED++)) || true
   else
-    fail "validate_domain: localhost - РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РЅРµРІР°Р»РёРґРµРЅ"
+    fail "validate_domain: localhost - должен быть невалиден"
   fi
 
   if ! validate_domain "example.local"; then
-    pass "validate_domain: .local - РЅРµРІР°Р»РёРґРµРЅ (Р·Р°С‰РёС‚Р° РѕС‚ SSRF)"
+    pass "validate_domain: .local - невалиден (защита от SSRF)"
     ((TESTS_PASSED++)) || true
   else
-    fail "validate_domain: .local - РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РЅРµРІР°Р»РёРґРµРЅ"
+    fail "validate_domain: .local - должен быть невалиден"
   fi
 
   if ! validate_domain "192.168.1.1"; then
-    pass "validate_domain: IP-Р°РґСЂРµСЃ - РЅРµРІР°Р»РёРґРµРЅ (Р·Р°С‰РёС‚Р° РѕС‚ SSRF)"
+    pass "validate_domain: IP-адрес - невалиден (защита от SSRF)"
     ((TESTS_PASSED++)) || true
   else
-    fail "validate_domain: IP-Р°РґСЂРµСЃ - РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РЅРµРІР°Р»РёРґРµРЅ"
+    fail "validate_domain: IP-адрес - должен быть невалиден"
   fi
 }
 
 test_validate_email() {
-  info "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ validate_email..."
+  info "Тестирование validate_email..."
 
-  # Р'Р°Р»РёРґРЅС‹Рµ email
+  # Валидные email
   if validate_email "test@example.com"; then
-    pass "validate_email: test@example.com - РІР°Р»РёРґРµРЅ"
+    pass "validate_email: test@example.com - валиден"
     ((TESTS_PASSED++)) || true
   else
-    fail "validate_email: test@example.com - РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РІР°Р»РёРґРµРЅ"
+    fail "validate_email: test@example.com - должен быть валиден"
   fi
 
   if validate_email "user.name+tag@domain.co.uk"; then
-    pass "validate_email: user.name+tag@domain.co.uk - РІР°Р»РёРґРµРЅ"
+    pass "validate_email: user.name+tag@domain.co.uk - валиден"
     ((TESTS_PASSED++)) || true
   else
-    fail "validate_email: user.name+tag@domain.co.uk - РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РІР°Р»РёРґРµРЅ"
+    fail "validate_email: user.name+tag@domain.co.uk - должен быть валиден"
   fi
 
-  # РќРµРІР°Р»РёРґРЅС‹Рµ email
+  # Невалидные email
   if ! validate_email "invalid"; then
-    pass "validate_email: invalid - РЅРµРІР°Р»РёРґРµРЅ"
+    pass "validate_email: invalid - невалиден"
     ((TESTS_PASSED++)) || true
   else
-    fail "validate_email: invalid - РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РЅРµРІР°Р»РёРґРµРЅ"
+    fail "validate_email: invalid - должен быть невалиден"
   fi
 
   if ! validate_email "@example.com"; then
-    pass "validate_email: @example.com - РЅРµРІР°Р»РёРґРµРЅ"
+    pass "validate_email: @example.com - невалиден"
     ((TESTS_PASSED++)) || true
   else
-    fail "validate_email: @example.com - РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РЅРµРІР°Р»РёРґРµРЅ"
+    fail "validate_email: @example.com - должен быть невалиден"
   fi
 }
 
-# ── РћСЃРЅРѕРІРЅР°СЏ С„СѓРЅРєС†РёСЏ ─────────────────────────────────────────
+# ── Основная функция ─────────────────────────────────────────
 main() {
   echo ""
   echo -e "${YELLOW}============================================================${PLAIN}"
-  echo -e "${YELLOW}=        CubiVeil Unit Tests - lib/utils.sh             =${PLAIN}"
+  echo -e "${YELLOW}=        CubiVeil Unit Tests - lib/utils.sh                =${PLAIN}"
   echo -e "${YELLOW}============================================================${PLAIN}"
   echo ""
 
-  info "РўРµСЃС‚РёСЂСѓРµРјС‹Р№ РјРѕРґСѓР»СЊ: ${SCRIPT_DIR}/lib/utils.sh"
+  info "Тестируемый модуль: ${SCRIPT_DIR}/lib/utils.sh"
   echo ""
 
-  # ── Р-Р°РїСѓСЃРє С‚РµСЃС‚РѕРІ ─────────────────────────────────────────
+  # ── Запуск тестов ─────────────────────────────────────────
   test_gen_random
   echo ""
 
@@ -643,19 +646,19 @@ main() {
   test_integration
   echo ""
 
-  # ── РўРµСЃС‚С‹ РІР°Р»РёРґР°С†РёРё ────────────────────────────────────────
+  # ── Тесты валидации ───────────────────────────────────────
   test_validate_domain
   echo ""
 
   test_validate_email
   echo ""
 
-  # ── РС‚РѕРіРё ───────────────────────────────────────────────
+  # ── Итоги ─────────────────────────────────────────────────
   echo ""
   echo -e "${YELLOW}================================================================================${PLAIN}"
-  echo -e "${GREEN}РџСЂРѕР№РґРµРЅРѕ: $TESTS_PASSED${PLAIN}"
+  echo -e "${GREEN}Пройдено: $TESTS_PASSED${PLAIN}"
   if [[ $TESTS_FAILED -gt 0 ]]; then
-    echo -e "${RED}РџСЂРѕРІР°Р»РµРЅРѕ:  $TESTS_FAILED${PLAIN}"
+    echo -e "${RED}Провалено:  $TESTS_FAILED${PLAIN}"
   fi
   echo -e "${YELLOW}================================================================================${PLAIN}"
   echo ""

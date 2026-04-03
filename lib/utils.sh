@@ -32,7 +32,7 @@ gen_random() {
     echo ""
     return 0
   }
-  LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w "$length" | head -n 1 || true
+  LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | head -c "$length"
 }
 
 gen_hex() {
@@ -41,7 +41,7 @@ gen_hex() {
     echo ""
     return 0
   }
-  LC_ALL=C tr -dc 'a-f0-9' </dev/urandom | fold -w "$length" | head -n 1 || true
+  LC_ALL=C tr -dc 'a-f0-9' </dev/urandom | head -c "$length"
 }
 
 gen_port() {

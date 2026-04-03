@@ -74,6 +74,7 @@ run_unit_tests() {
     "unit-ui.sh:UI module"
     "unit-prompt.sh:Prompt module"
     "unit-s-ui.sh:S-UI module"
+    "unit-s-ui-profiles.sh:S-UI Profiles module"
     "unit-firewall.sh:Firewall module"
     "unit-fail2ban.sh:Fail2ban module"
     "unit-ssl.sh:SSL module"
@@ -102,12 +103,17 @@ run_unit_tests() {
     echo -e "${BLUE}Запуск: $test_name${PLAIN}"
 
     if [[ -f "$test_path" ]]; then
-      if bash "$test_path"; then
+      if timeout 120 bash "$test_path"; then
         ((TOTAL_PASSED++)) || true
         echo -e "${GREEN}✓ $test_name пройден${PLAIN}"
       else
+        local exit_code=$?
         ((TOTAL_FAILED++)) || true
-        echo -e "${RED}✗ $test_name провален${PLAIN}"
+        if [[ $exit_code -eq 124 ]]; then
+          echo -e "${RED}✗ $test_name — TIMEOUT (>120s)${PLAIN}"
+        else
+          echo -e "${RED}✗ $test_name провален${PLAIN}"
+        fi
       fi
     else
       echo -e "${YELLOW}⚠ $test_name не найден: $test_path${PLAIN}"
