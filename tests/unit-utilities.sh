@@ -163,20 +163,34 @@ test_update_functions() {
   info "Тестирование функций в update.sh..."
 
   local functions=(
-    "step_update_marzban"
-    "step_update_singbox"
-    "step_update_cubiveil"
-    "run_update"
+    "step_check_environment"
+    "step_check_versions"
+    "step_confirm_update"
+    "step_create_backup"
+    "step_download_update"
+    "step_install_update"
+    "step_update_sui"
+    "step_restart_services"
+    "step_finish"
+    "main"
   )
 
+  local found=0
+  local missing_funcs=()
   for func in "${functions[@]}"; do
-    if grep -q "^[[:space:]]*${func}()" "${PROJECT_DIR}/utils/update.sh" 2>/dev/null; then
-      pass "Функция существует: $func"
-      ((TESTS_PASSED++)) || true
+    if grep -q "${func}()" "${PROJECT_DIR}/utils/update.sh" 2>/dev/null; then
+      ((found++)) || true
     else
-      warn "Функция не найдена: $func"
+      missing_funcs+=("$func")
     fi
   done
+
+  if [[ $found -eq ${#functions[@]} ]]; then
+    pass "update.sh: все функции существуют ($found/${#functions[@]})"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "update.sh: не все функции найдены ($found/${#functions[@]}). Отсутствуют: ${missing_funcs[*]}"
+  fi
 }
 
 # ── Тест: функции в rollback.sh ──────────────────────────────────
@@ -186,18 +200,32 @@ test_rollback_functions() {
   local functions=(
     "step_check_environment"
     "step_select_backup"
-    "step_restore"
-    "run_rollback"
+    "step_validate_backup"
+    "step_confirm_rollback"
+    "step_stop_services"
+    "step_restore_files"
+    "step_restore_config"
+    "step_start_services"
+    "step_finish"
+    "main"
   )
 
+  local found=0
+  local missing_funcs=()
   for func in "${functions[@]}"; do
-    if grep -q "^[[:space:]]*${func}()" "${PROJECT_DIR}/utils/rollback.sh" 2>/dev/null; then
-      pass "Функция существует: $func"
-      ((TESTS_PASSED++)) || true
+    if grep -q "${func}()" "${PROJECT_DIR}/utils/rollback.sh" 2>/dev/null; then
+      ((found++)) || true
     else
-      warn "Функция не найдена: $func"
+      missing_funcs+=("$func")
     fi
   done
+
+  if [[ $found -eq ${#functions[@]} ]]; then
+    pass "rollback.sh: все функции существуют ($found/${#functions[@]})"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "rollback.sh: не все функции найдены ($found/${#functions[@]}). Отсутствуют: ${missing_funcs[*]}"
+  fi
 }
 
 # ── Тест: функции в diagnose.sh ──────────────────────────────────
@@ -205,20 +233,35 @@ test_diagnose_functions() {
   info "Тестирование функций в diagnose.sh..."
 
   local functions=(
-    "check_system"
-    "check_services"
-    "check_network"
-    "run_diagnose"
+    "step_check_environment"
+    "step_check_dns"
+    "step_check_ssl"
+    "step_check_connections"
+    "step_check_services"
+    "step_check_ports"
+    "step_analyze_logs"
+    "step_check_resources"
+    "step_generate_report"
+    "step_recommendations"
+    "main"
   )
 
+  local found=0
+  local missing_funcs=()
   for func in "${functions[@]}"; do
-    if grep -q "^[[:space:]]*${func}()" "${PROJECT_DIR}/utils/diagnose.sh" 2>/dev/null; then
-      pass "Функция существует: $func"
-      ((TESTS_PASSED++)) || true
+    if grep -q "${func}()" "${PROJECT_DIR}/utils/diagnose.sh" 2>/dev/null; then
+      ((found++)) || true
     else
-      warn "Функция не найдена: $func"
+      missing_funcs+=("$func")
     fi
   done
+
+  if [[ $found -eq ${#functions[@]} ]]; then
+    pass "diagnose.sh: все функции существуют ($found/${#functions[@]})"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "diagnose.sh: не все функции найдены ($found/${#functions[@]}). Отсутствуют: ${missing_funcs[*]}"
+  fi
 }
 
 # ── Тест: функции в export-config.sh ─────────────────────────────
@@ -226,18 +269,33 @@ test_export_functions() {
   info "Тестирование функций в export-config.sh..."
 
   local functions=(
-    "export_config"
-    "run_export"
+    "step_check_environment"
+    "step_prepare_export_dir"
+    "step_collect_config"
+    "step_collect_keys"
+    "step_generate_manifest"
+    "step_encrypt_sensitive"
+    "step_create_archive"
+    "step_finish"
+    "main"
   )
 
+  local found=0
+  local missing_funcs=()
   for func in "${functions[@]}"; do
-    if grep -q "^[[:space:]]*${func}()" "${PROJECT_DIR}/utils/export-config.sh" 2>/dev/null; then
-      pass "Функция существует: $func"
-      ((TESTS_PASSED++)) || true
+    if grep -q "${func}()" "${PROJECT_DIR}/utils/export-config.sh" 2>/dev/null; then
+      ((found++)) || true
     else
-      warn "Функция не найдена: $func"
+      missing_funcs+=("$func")
     fi
   done
+
+  if [[ $found -eq ${#functions[@]} ]]; then
+    pass "export-config.sh: все функции существуют ($found/${#functions[@]})"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "export-config.sh: не все функции найдены ($found/${#functions[@]}). Отсутствуют: ${missing_funcs[*]}"
+  fi
 }
 
 # ── Тест: функции в import-config.sh ─────────────────────────────
@@ -245,18 +303,32 @@ test_import_functions() {
   info "Тестирование функций в import-config.sh..."
 
   local functions=(
-    "import_config"
-    "run_import"
+    "check_environment"
+    "import_sui_config"
+    "import_singbox_config"
+    "import_cubiveil_config"
+    "set_permissions"
+    "restart_services"
+    "step_finish"
+    "main"
   )
 
+  local found=0
+  local missing_funcs=()
   for func in "${functions[@]}"; do
-    if grep -q "^[[:space:]]*${func}()" "${PROJECT_DIR}/utils/import-config.sh" 2>/dev/null; then
-      pass "Функция существует: $func"
-      ((TESTS_PASSED++)) || true
+    if grep -q "${func}()" "${PROJECT_DIR}/utils/import-config.sh" 2>/dev/null; then
+      ((found++)) || true
     else
-      warn "Функция не найдена: $func"
+      missing_funcs+=("$func")
     fi
   done
+
+  if [[ $found -eq ${#functions[@]} ]]; then
+    pass "import-config.sh: все функции существуют ($found/${#functions[@]})"
+    ((TESTS_PASSED++)) || true
+  else
+    fail "import-config.sh: не все функции найдены ($found/${#functions[@]}). Отсутствуют: ${missing_funcs[*]}"
+  fi
 }
 
 # ── Тест: install-aliases.sh ─────────────────────────────────────
