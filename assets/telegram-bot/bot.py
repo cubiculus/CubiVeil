@@ -14,7 +14,18 @@ import time
 import subprocess  # nosec B404
 import sqlite3
 import shutil
+import logging
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
+
+
+def _safe_print(text: str) -> None:
+    """Print that silently ignores OSError (e.g. stdout closed in CI)."""
+    try:
+        print(text)
+    except OSError:
+        pass
 
 # Local modules
 from telegram_client import TelegramClient
@@ -79,18 +90,18 @@ class CubiVeilBot:
 
         # Validate required environment variables
         if not self.token or not self.chat_id:
-            print("[bot] ERROR: TG_TOKEN and TG_CHAT_ID must be set in environment variables")
+            _safe_print("[bot] ERROR: TG_TOKEN and TG_CHAT_ID must be set in environment variables")
             exit(1)
 
         # Initialize Telegram client and validate token
         self.telegram = TelegramClient(self.token, self.chat_id)
 
-        print("[bot] Validating Telegram bot token...")
+        _safe_print("[bot] Validating Telegram bot token...")
         is_valid, message = self.telegram.validate_token()
         if not is_valid:
-            print(f"[bot] ERROR: Invalid Telegram token - {message}")
+            _safe_print(f"[bot] ERROR: Invalid Telegram token - {message}")
             exit(1)
-        print(f"[bot] Token validated successfully - {message}")
+        _safe_print(f"[bot] Token validated successfully - {message}")
 
         # Create necessary directories
         os.makedirs(self.backup_dir, exist_ok=True)
@@ -289,7 +300,7 @@ class CubiVeilBot:
                         self._process_callback(callback_query)
 
             except Exception as e:
-                print(f"[bot] poll error: {e}")
+                _safe_print(f"[bot] poll error: {e}")
                 time.sleep(POLL_ERROR_DELAY)
 
 
@@ -306,5 +317,5 @@ if __name__ == "__main__":
     elif cmd == "poll":
         bot.poll()
     else:
-        print(f"Unknown command: {cmd}")
+        _safe_print(f"Unknown command: {cmd}")
         sys.exit(1)

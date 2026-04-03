@@ -14,6 +14,19 @@ import urllib.error
 import http.client
 import json
 import os
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def _safe_print(text: str) -> None:
+    """Print that silently ignores OSError (e.g. stdout closed in CI)."""
+    try:
+        print(text)
+    except OSError:
+        pass
+
+
 import ssl
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -125,7 +138,7 @@ class TelegramClient:
         try:
             self._make_request(url, data)
         except Exception as e:
-            print(f"[bot] Error sending message: {e}")
+            _safe_print(f"[bot] Error sending message: {e}")
 
     def send_file(self, path, caption=""):
         """Send file/document to chat"""
@@ -171,7 +184,7 @@ class TelegramClient:
             )
             conn.getresponse()
         except Exception as e:
-            print(f"[bot] Error sending file: {e}")
+            _safe_print(f"[bot] Error sending file: {e}")
 
     def send_chat_action(self, action=CHAT_ACTION_TYPING):
         """
@@ -188,7 +201,7 @@ class TelegramClient:
         try:
             self._make_request(url, data)
         except Exception as e:
-            print(f"[bot] Error sending chat action: {e}")
+            _safe_print(f"[bot] Error sending chat action: {e}")
 
     def answer_callback(self, callback_query_id, text=None, show_alert=False):
         """
@@ -208,7 +221,7 @@ class TelegramClient:
         try:
             self._make_request(url, data)
         except Exception as e:
-            print(f"[bot] Error answering callback: {e}")
+            _safe_print(f"[bot] Error answering callback: {e}")
 
     def edit_message_text(self, chat_id, message_id, text, parse_mode=CONTENT_TYPE_HTML, reply_markup=None):
         """
@@ -238,7 +251,7 @@ class TelegramClient:
         try:
             self._make_request(url, data)
         except Exception as e:
-            print(f"[bot] Error editing message: {e}")
+            _safe_print(f"[bot] Error editing message: {e}")
 
     def edit_message_reply_markup(self, chat_id, message_id, reply_markup):
         """
@@ -261,4 +274,4 @@ class TelegramClient:
         try:
             self._make_request(url, data)
         except Exception as e:
-            print(f"[bot] Error editing reply markup: {e}")
+            _safe_print(f"[bot] Error editing reply markup: {e}")
