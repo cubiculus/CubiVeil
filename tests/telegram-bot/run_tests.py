@@ -54,6 +54,13 @@ def run_tests():
     except OSError:
         # stdout may be closed in CI environments
         return 0 if result.wasSuccessful() else 1
+    finally:
+        # Flush stdout to avoid OSError during Python shutdown
+        try:
+            sys.stdout.flush()
+            sys.stderr.flush()
+        except OSError:
+            pass
 
 
 if __name__ == "__main__":
