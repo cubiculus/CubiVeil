@@ -141,12 +141,11 @@ class TestConfigManagement(unittest.TestCase):
                 mode = oct(os.stat(self.config_file).st_mode)[-3:]
                 self.assertEqual(mode, "600")
 
-    @patch('decoy.DECOY_CONFIG')
-    def test_save_config_io_error(self, mock_config):
+    def test_save_config_io_error(self):
         """Test config save IO error"""
-        mock_config.return_value = "/nonexistent/path/config.json"
-
-        decoy = DecoyManager()
+        # Create instance without calling __init__ to avoid config loading
+        decoy = DecoyManager.__new__(DecoyManager)
+        decoy.config_path = '/nonexistent/path/config.json'
         result = decoy._save_config({"key": "value"})
 
         self.assertFalse(result)
