@@ -458,7 +458,7 @@ test_all_functions_exist() {
   local found=0
   for func in "${required_functions[@]}"; do
     if declare -f "$func" &>/dev/null; then
-      ((found++))
+      ((found++)) || true
     fi
   done
 

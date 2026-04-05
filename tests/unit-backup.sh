@@ -583,7 +583,7 @@ test_all_functions_exist() {
   local missing_funcs=()
   for func in "${required_functions[@]}"; do
     if declare -f "$func" &>/dev/null; then
-      ((found++))
+      ((found++)) || true
     else
       missing_funcs+=("$func")
     fi

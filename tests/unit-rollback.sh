@@ -811,7 +811,7 @@ test_all_functions_exist() {
 
     if declare -f "$func" &>/dev/null; then
 
-      ((found++))
+      ((found++)) || true
 
     fi
 

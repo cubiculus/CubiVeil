@@ -106,7 +106,7 @@ test_en_strings() {
   local found=0
   for str in "${en_strings[@]}"; do
     if grep -q "^${str}=" "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null; then
-      ((found++))
+      ((found++)) || true
     fi
   done
 
@@ -134,7 +134,7 @@ test_ru_strings() {
   local found=0
   for str in "${ru_strings[@]}"; do
     if grep -q "^${str}=" "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null; then
-      ((found++))
+      ((found++)) || true
     fi
   done
 
@@ -167,7 +167,7 @@ test_step_titles() {
   local found=0
   for str in "${step_strings[@]}"; do
     if grep -q "^${str}=" "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null; then
-      ((found++))
+      ((found++)) || true
     fi
   done
 
@@ -200,7 +200,7 @@ test_step_titles_ru() {
   local found=0
   for str in "${step_strings[@]}"; do
     if grep -q "^${str}=" "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null; then
-      ((found++))
+      ((found++)) || true
     fi
   done
 
@@ -228,7 +228,7 @@ test_telegram_strings() {
   local found=0
   for str in "${tg_strings[@]}"; do
     if grep -q "^${str}" "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null; then
-      ((found++))
+      ((found++)) || true
     fi
   done
 
@@ -256,7 +256,7 @@ test_final_messages() {
   local found=0
   for str in "${final_strings[@]}"; do
     if grep -q "^${str}" "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null; then
-      ((found++))
+      ((found++)) || true
     fi
   done
 
@@ -284,7 +284,7 @@ test_final_messages_ru() {
   local found=0
   for str in "${final_strings[@]}"; do
     if grep -q "^${str}" "${SCRIPT_DIR}/lang/main.sh" 2>/dev/null; then
-      ((found++))
+      ((found++)) || true
     fi
   done
 

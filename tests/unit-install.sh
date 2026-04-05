@@ -157,7 +157,7 @@ test_module_functions_usage() {
   for func in "${required_functions[@]}"; do
     # Проверяем как прямое вхождение, так и с префиксом _
     if grep -qE "(^|[^a-zA-Z0-9_])${func}([^a-zA-Z0-9_]|$)|(^|[^a-zA-Z0-9_])_${func}([^a-zA-Z0-9_]|$)" "${SCRIPT_DIR}/install.sh"; then
-      ((found++))
+      ((found++)) || true
     fi
   done
 
