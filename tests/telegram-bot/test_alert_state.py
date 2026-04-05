@@ -179,51 +179,35 @@ class TestAlertStateManagerLocking(unittest.TestCase):
         shutil.rmtree(self.test_dir)
 
     @unittest.skipIf(sys.platform == 'win32', 'File locking tests are Unix-specific')
-    @patch('alert_state.fcntl.flock')
-    def test_load_acquires_shared_lock(self, mock_flock):
+    @patch('alert_state._lock_file_shared')
+    @patch('alert_state._lock_file_exclusive')
+    @patch('alert_state._unlock_file')
+    def test_load_acquires_shared_lock(self, mock_unlock, mock_lock_ex, mock_lock_sh):
         """Test that load acquires shared lock"""
-        import alert_state
-        # Set lock constants for this test
-        original_sh = getattr(alert_state.fcntl, 'LOCK_SH', None)
-        original_un = getattr(alert_state.fcntl, 'LOCK_UN', None)
-        alert_state.fcntl.LOCK_SH = 1
-        alert_state.fcntl.LOCK_UN = 8
+        # Write state file first (calls _lock_file_exclusive)
+        self.manager.save({"cpu": True})
+        mock_lock_ex.assert_called_once()
 
-        try:
-            self.manager.save({"cpu": True})
-            state = self.manager.load()
+        # Reset mocks for load test
+        mock_unlock.reset_mock()
+        mock_lock_sh.reset_mock()
 
-            # Should have been called twice: LOCK_SH and LOCK_UN
-            self.assertGreaterEqual(mock_flock.call_count, 2)
-        finally:
-            # Restore originals
-            if original_sh is not None:
-                alert_state.fcntl.LOCK_SH = original_sh
-            if original_un is not None:
-                alert_state.fcntl.LOCK_UN = original_un
+        state = self.manager.load()
+
+        # Load should call _lock_file_shared and _unlock_file
+        mock_lock_sh.assert_called_once()
+        mock_unlock.assert_called_once()
 
     @unittest.skipIf(sys.platform == 'win32', 'File locking tests are Unix-specific')
-    @patch('alert_state.fcntl.flock')
-    def test_save_acquires_exclusive_lock(self, mock_flock):
+    @patch('alert_state._lock_file_exclusive')
+    @patch('alert_state._unlock_file')
+    def test_save_acquires_exclusive_lock(self, mock_unlock, mock_lock):
         """Test that save acquires exclusive lock"""
-        import alert_state
-        # Set lock constants for this test
-        original_ex = getattr(alert_state.fcntl, 'LOCK_EX', None)
-        original_un = getattr(alert_state.fcntl, 'LOCK_UN', None)
-        alert_state.fcntl.LOCK_EX = 2
-        alert_state.fcntl.LOCK_UN = 8
+        self.manager.save({"cpu": True})
 
-        try:
-            self.manager.save({"cpu": True})
-
-            # Should have been called with LOCK_EX and LOCK_UN
-            self.assertGreaterEqual(mock_flock.call_count, 2)
-        finally:
-            # Restore originals
-            if original_ex is not None:
-                alert_state.fcntl.LOCK_EX = original_ex
-            if original_un is not None:
-                alert_state.fcntl.LOCK_UN = original_un
+        # Save should call _lock_file_exclusive and _unlock_file
+        mock_lock.assert_called_once()
+        mock_unlock.assert_called_once()
 
     def test_concurrent_save_load(self):
         """Test concurrent save and load operations"""

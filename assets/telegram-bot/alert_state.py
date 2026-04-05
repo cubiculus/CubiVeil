@@ -135,19 +135,28 @@ class AlertStateManager:
                     f.flush()
                     os.fsync(f.fileno())
 
-                # Atomic replace (cross-platform)
+                # Atomic replace with exclusive lock (cross-platform)
                 if sys.platform == 'win32':
-                    # On Windows, os.replace may fail if target file is in use
-                    # Try direct replace, fallback to copy+delete if needed
                     try:
                         os.replace(temp_path, self.state_file)
                     except OSError:
-                        # Fallback for Windows: remove old file first if it exists
                         if os.path.exists(self.state_file):
                             os.remove(self.state_file)
                         os.rename(temp_path, self.state_file)
                 else:
-                    os.replace(temp_path, self.state_file)
+                    # On Linux/Unix, use file locking for concurrent safety
+                    with open(self.state_file, 'a') as lock_file:
+                        try:
+                            _lock_file_exclusive(lock_file.fileno())
+                        except OSError:
+                            pass  # Locking may fail, continue
+                        try:
+                            os.replace(temp_path, self.state_file)
+                        finally:
+                            try:
+                                _unlock_file(lock_file.fileno())
+                            except OSError:
+                                pass
 
                 logger.debug(f"State saved atomically to {self.state_file}")
                 return True
