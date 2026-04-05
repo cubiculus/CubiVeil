@@ -7,12 +7,46 @@ Uses file locking to prevent race conditions between cron and polling
 
 import json
 import os
+import sys
 import tempfile
-import fcntl
 import logging
 from typing import Dict, Any
 
+# Cross-platform file locking
+if sys.platform == 'win32':
+    import msvcrt
+else:
+    import fcntl
+
 logger = logging.getLogger(__name__)
+
+
+def _lock_file_shared(fd):
+    """Acquire shared (read) lock on file descriptor"""
+    if sys.platform == 'win32':
+        msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+    else:
+        fcntl.flock(fd, fcntl.LOCK_SH)
+
+
+def _lock_file_exclusive(fd):
+    """Acquire exclusive (write) lock on file descriptor"""
+    if sys.platform == 'win32':
+        msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+    else:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+
+
+def _unlock_file(fd):
+    """Release lock on file descriptor"""
+    if sys.platform == 'win32':
+        try:
+            msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+        except OSError:
+            # Ignore unlock errors on Windows
+            pass
+    else:
+        fcntl.flock(fd, fcntl.LOCK_UN)
 
 
 class AlertStateError(Exception):
@@ -49,7 +83,11 @@ class AlertStateManager:
 
             with open(self.state_file, 'r') as f:
                 # Acquire shared lock for reading
-                fcntl.flock(f.fileno(), fcntl.LOCK_SH)
+                try:
+                    _lock_file_shared(f.fileno())
+                except OSError:
+                    # Locking may fail on some platforms, continue without lock
+                    pass
                 try:
                     state = json.load(f)
                     if not isinstance(state, dict):
@@ -58,7 +96,10 @@ class AlertStateManager:
                     return state
                 finally:
                     # Release lock
-                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+                    try:
+                        _unlock_file(f.fileno())
+                    except OSError:
+                        pass
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse state file: {e}")
             return {}
@@ -91,17 +132,25 @@ class AlertStateManager:
             try:
                 with os.fdopen(fd, 'w') as f:
                     json.dump(state, f, indent=2)
+                    f.flush()
+                    os.fsync(f.fileno())
 
-                # Acquire exclusive lock before replacing
-                with open(self.state_file, 'a') as lock_file:
-                    fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+                # Atomic replace (cross-platform)
+                if sys.platform == 'win32':
+                    # On Windows, os.replace may fail if target file is in use
+                    # Try direct replace, fallback to copy+delete if needed
                     try:
-                        # Atomic replace
                         os.replace(temp_path, self.state_file)
-                        logger.debug(f"State saved atomically to {self.state_file}")
-                        return True
-                    finally:
-                        fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+                    except OSError:
+                        # Fallback for Windows: remove old file first if it exists
+                        if os.path.exists(self.state_file):
+                            os.remove(self.state_file)
+                        os.rename(temp_path, self.state_file)
+                else:
+                    os.replace(temp_path, self.state_file)
+
+                logger.debug(f"State saved atomically to {self.state_file}")
+                return True
             except Exception:
                 # Clean up temp file on error
                 if os.path.exists(temp_path):

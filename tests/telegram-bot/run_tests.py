@@ -30,26 +30,30 @@ def run_tests():
     runner = unittest.TextTestRunner(
         verbosity=2,
         failfast=False,
-        buffer=True
+        buffer=False  # Disabled to avoid stdout corruption in CI
     )
 
     result = runner.run(suite)
 
-    # Print summary
-    print("\n" + "=" * 70)
-    print("TEST SUMMARY")
-    print("=" * 70)
-    print(f"Tests run: {result.testsRun}")
-    print(f"Failures: {len(result.failures)}")
-    print(f"Errors: {len(result.errors)}")
-    print(f"Skipped: {len(result.skipped)}")
+    # Print summary (handle CI stdout closure gracefully)
+    try:
+        print("\n" + "=" * 70)
+        print("TEST SUMMARY")
+        print("=" * 70)
+        print(f"Tests run: {result.testsRun}")
+        print(f"Failures: {len(result.failures)}")
+        print(f"Errors: {len(result.errors)}")
+        print(f"Skipped: {len(result.skipped)}")
 
-    if result.wasSuccessful():
-        print("\n✅ All tests passed!")
-        return 0
-    else:
-        print("\n❌ Some tests failed!")
-        return 1
+        if result.wasSuccessful():
+            print("\n✅ All tests passed!")
+            return 0
+        else:
+            print("\n❌ Some tests failed!")
+            return 1
+    except OSError:
+        # stdout may be closed in CI environments
+        return 0 if result.wasSuccessful() else 1
 
 
 if __name__ == "__main__":

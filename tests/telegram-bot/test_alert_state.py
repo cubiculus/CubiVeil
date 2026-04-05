@@ -178,6 +178,7 @@ class TestAlertStateManagerLocking(unittest.TestCase):
         """Clean up test fixtures"""
         shutil.rmtree(self.test_dir)
 
+    @unittest.skipIf(sys.platform == 'win32', 'File locking tests are Unix-specific')
     @patch('alert_state.fcntl.flock')
     def test_load_acquires_shared_lock(self, mock_flock):
         """Test that load acquires shared lock"""
@@ -201,6 +202,7 @@ class TestAlertStateManagerLocking(unittest.TestCase):
             if original_un is not None:
                 alert_state.fcntl.LOCK_UN = original_un
 
+    @unittest.skipIf(sys.platform == 'win32', 'File locking tests are Unix-specific')
     @patch('alert_state.fcntl.flock')
     def test_save_acquires_exclusive_lock(self, mock_flock):
         """Test that save acquires exclusive lock"""
