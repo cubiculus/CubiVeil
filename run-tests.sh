@@ -103,18 +103,19 @@ run_unit_tests() {
     echo -e "${BLUE}Запуск: $test_name${PLAIN}"
 
     if [[ -f "$test_path" ]]; then
+      local exit_code=0
       if timeout 120 bash "$test_path"; then
         TOTAL_PASSED=$((TOTAL_PASSED + 1))
         TESTS_PASSED=$((TESTS_PASSED + 1))
         echo -e "${GREEN}✓ $test_name пройден${PLAIN}"
       else
-        local exit_code=$?
+        exit_code=$?
         TOTAL_FAILED=$((TOTAL_FAILED + 1))
         TESTS_FAILED=$((TESTS_FAILED + 1))
         if [[ $exit_code -eq 124 ]]; then
           echo -e "${RED}✗ $test_name — TIMEOUT (>120s)${PLAIN}"
         else
-          echo -e "${RED}✗ $test_name провален${PLAIN}"
+          echo -e "${RED}✗ $test_name провален (exit code: $exit_code)${PLAIN}"
         fi
       fi
     else

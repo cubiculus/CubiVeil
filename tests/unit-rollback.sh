@@ -471,7 +471,9 @@ test_rollback_singbox_config() {
 
   local test_temp_dir="${test_backup_dir}/temp"
 
-  mkdir -p "$test_temp_dir" "/tmp/test-sing-box-$$"
+  local fake_singbox_dir="/tmp/test-sing-box-$$"
+
+  mkdir -p "$test_temp_dir" "$fake_singbox_dir"
 
   ROLLBACK_TEMP_DIR="$test_temp_dir"
 
@@ -481,9 +483,10 @@ test_rollback_singbox_config() {
 
   echo "abc123" >"${test_temp_dir}/singbox-config.json.sha256"
 
-  # Функция может пытаться писать в /etc/sing-box, что недоступно без root
-  # Mock для dir_ensure и cp
-  dir_ensure() { mkdir -p "$1" 2>/dev/null || true; }
+  # Mock для cp и chmod чтобы избежать записи в /etc/sing-box
+  cp() { command cp "$@" 2>/dev/null || true; }
+  chmod() { command chmod "$@" 2>/dev/null || true; }
+  chown() { command chown "$@" 2>/dev/null || true; }
 
   rollback_singbox_config || true
 
@@ -491,7 +494,7 @@ test_rollback_singbox_config() {
 
   ((TESTS_PASSED++)) || true
 
-  rm -rf "$test_backup_dir" "/tmp/test-sing-box-$$"
+  rm -rf "$test_backup_dir" "$fake_singbox_dir"
 
 }
 
@@ -520,6 +523,9 @@ test_rollback_ssl_certs() {
   mkdir -p "${test_temp_dir}/ssl-certs"
 
   echo "test cert" >"${test_temp_dir}/ssl-certs/fullchain.pem"
+
+  # Mock для chown чтобы избежать ошибки без root
+  chown() { command chown "$@" 2>/dev/null || true; }
 
   rollback_ssl_certs || true
 
