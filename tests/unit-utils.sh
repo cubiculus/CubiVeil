@@ -28,6 +28,22 @@ err() {
   exit 1
 }
 
+# Глобальный mock для ufw (используется в open_port/close_port)
+ufw() {
+  echo "[MOCK] ufw called with: $*" >&2
+  return 0
+}
+
+# Mock для validate_port
+validate_port() {
+  local port="$1"
+  if [[ "$port" -ge 1 && "$port" -le 65535 ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 # Загружаем модуль
 source "${SCRIPT_DIR}/lib/utils.sh"
 
