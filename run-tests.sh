@@ -332,7 +332,7 @@ main() {
 
   # ── Итоги ─────────────────────────────────────────────────
   print_section "Итоги"
-  print_test_summary
+  print_test_summary || true
 
   # Явный выход с успехом если все тесты пройдены
   if [[ ${TOTAL_FAILED:-0} -eq 0 ]]; then
