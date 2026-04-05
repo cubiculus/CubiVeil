@@ -104,11 +104,13 @@ run_unit_tests() {
 
     if [[ -f "$test_path" ]]; then
       if timeout 120 bash "$test_path"; then
-        ((TOTAL_PASSED++)) || true
+        TOTAL_PASSED=$((TOTAL_PASSED + 1))
+        TESTS_PASSED=$((TESTS_PASSED + 1))
         echo -e "${GREEN}✓ $test_name пройден${PLAIN}"
       else
         local exit_code=$?
-        ((TOTAL_FAILED++)) || true
+        TOTAL_FAILED=$((TOTAL_FAILED + 1))
+        TESTS_FAILED=$((TESTS_FAILED + 1))
         if [[ $exit_code -eq 124 ]]; then
           echo -e "${RED}✗ $test_name — TIMEOUT (>120s)${PLAIN}"
         else
@@ -131,10 +133,12 @@ run_unit_via_integration() {
   echo ""
 
   if bash "$TESTS_DIR/integration-test.sh" . unit; then
-    ((TOTAL_PASSED++)) || true
+    TOTAL_PASSED=$((TOTAL_PASSED + 1))
+    TESTS_PASSED=$((TESTS_PASSED + 1))
     echo -e "${GREEN}✓ Unit тесты пройдены${PLAIN}"
   else
-    ((TOTAL_FAILED++)) || true
+    TOTAL_FAILED=$((TOTAL_FAILED + 1))
+    TESTS_FAILED=$((TESTS_FAILED + 1))
     echo -e "${RED}✗ Unit тесты провалены${PLAIN}"
   fi
 }
@@ -153,11 +157,16 @@ run_telegram_bot_tests() {
   echo -e "${BLUE}Запуск Telegram-bot тестов...${PLAIN}"
   echo ""
 
-  if python3 "$bot_tests_dir/run_tests.py"; then
-    ((TOTAL_PASSED++)) || true
+  local bot_exit_code=0
+  python3 "$bot_tests_dir/run_tests.py" || bot_exit_code=$?
+
+  if [[ $bot_exit_code -eq 0 ]]; then
+    TOTAL_PASSED=$((TOTAL_PASSED + 1))
+    TESTS_PASSED=$((TESTS_PASSED + 1))
     echo -e "${GREEN}✓ Telegram-bot тесты пройдены${PLAIN}"
   else
-    ((TOTAL_FAILED++)) || true
+    TOTAL_FAILED=$((TOTAL_FAILED + 1))
+    TESTS_FAILED=$((TESTS_FAILED + 1))
     echo -e "${RED}✗ Telegram-bot тесты провалены${PLAIN}"
   fi
 }
@@ -178,10 +187,12 @@ run_integration_tests() {
   echo ""
 
   if bash "$TESTS_DIR/integration-test.sh"; then
-    ((TOTAL_PASSED++)) || true
+    TOTAL_PASSED=$((TOTAL_PASSED + 1))
+    TESTS_PASSED=$((TESTS_PASSED + 1))
     echo -e "${GREEN}✓ Интеграционные тесты пройдены${PLAIN}"
   else
-    ((TOTAL_FAILED++)) || true
+    TOTAL_FAILED=$((TOTAL_FAILED + 1))
+    TESTS_FAILED=$((TESTS_FAILED + 1))
     echo -e "${RED}✗ Интеграционные тесты провалены${PLAIN}"
   fi
 }
@@ -247,10 +258,12 @@ run_coverage_tests() {
     echo ""
     echo -e "${GREEN}✓ Coverage отчёт создан: tests/coverage/index.html${PLAIN}"
     echo -e "${CYAN}  Откройте в браузере: start coverage/index.html${PLAIN}"
-    ((TOTAL_PASSED++)) || true
+    TOTAL_PASSED=$((TOTAL_PASSED + 1))
+    TESTS_PASSED=$((TESTS_PASSED + 1))
   else
     echo -e "${RED}✗ Не удалось создать coverage отчёт${PLAIN}"
-    ((TOTAL_FAILED++)) || true
+    TOTAL_FAILED=$((TOTAL_FAILED + 1))
+    TESTS_FAILED=$((TESTS_FAILED + 1))
   fi
 
   cd "${PROJECT_DIR}"

@@ -35,6 +35,9 @@ def run_tests():
 
     result = runner.run(suite)
 
+    # Determine exit code before any I/O that might fail
+    success = result.wasSuccessful()
+
     # Print summary (handle CI stdout closure gracefully)
     try:
         print("\n" + "=" * 70)
@@ -45,23 +48,19 @@ def run_tests():
         print(f"Errors: {len(result.errors)}")
         print(f"Skipped: {len(result.skipped)}")
 
-        if result.wasSuccessful():
+        if success:
             print("\n✅ All tests passed!")
-            return 0
         else:
             print("\n❌ Some tests failed!")
-            return 1
     except OSError:
         # stdout may be closed in CI environments
-        return 0 if result.wasSuccessful() else 1
-    finally:
-        # Flush stdout to avoid OSError during Python shutdown
-        try:
-            sys.stdout.flush()
-            sys.stderr.flush()
-        except OSError:
-            pass
+        pass
+
+    return 0 if success else 1
 
 
 if __name__ == "__main__":
-    sys.exit(run_tests())
+    exit_code = run_tests()
+    # Use os._exit() to bypass interpreter shutdown
+    # This prevents OSError from corrupted stdout during cleanup
+    os._exit(exit_code)
